@@ -1,6 +1,6 @@
 # Backend HAAS — travail à trois
 
-Organisation confirmée par l'utilisateur le 1er octobre 2026. Elle remplace les anciennes mentions d'une équipe de deux pour le développement courant. Le mail source et les livrables historiques restent conservés. Le périmètre, les 122 identifiants, les statuts TODO et les portes backend/frontend ne changent pas.
+Organisation confirmée par l'utilisateur le 1er octobre 2026. Elle remplace les anciennes mentions d'une équipe de deux pour le développement courant. Le mail source et les livrables historiques restent conservés. Le périmètre, les 122 identifiants et les portes backend/frontend ne changent pas ; les statuts évoluent avec les preuves dans `tasks.json`.
 
 ## Responsabilités et branches
 
@@ -66,7 +66,7 @@ Livrer la conservation des solutions et leurs vérifications honnêtes, sur des 
 
 ## Fichiers réservés et points communs
 
-Ces chemins sont des conventions à mettre en place au bootstrap, pas du code déjà présent. Un changement de contrat partagé doit être discuté dans la PR avant que les autres branches ne l'utilisent.
+Ces chemins définissent les responsabilités : B01 installe les fichiers du socle, les modules métier viennent ensuite. Consulter le suivi pour distinguer les conventions du code livré. Un changement de contrat partagé doit être discuté dans la PR avant que les autres branches ne l'utilisent.
 
 | Zone | Responsable d'écriture |
 |---|---|
@@ -112,7 +112,7 @@ git fetch origin
 git merge origin/main
 ```
 
-Après B02, exécuter depuis `backend` les commandes réellement configurées : `composer install`, `composer lint`, `composer analyse`, `composer test`, `composer test:integration`, avec une base PostgreSQL de test dédiée et identifiée. Elles ne sont pas disponibles dans le pack documentaire actuel. Mettre dans la PR les commandes exactes, résultats, SHA et contrôles non exécutés.
+Suivre [COMMANDS.md](../COMMANDS.md) après intégration du socle B01 : `composer install`, `composer test`, `composer test:integration`, avec une base PostgreSQL de test dédiée et identifiée. `composer lint` et `composer analyse` seront ajoutées en B02. Mettre dans la PR les commandes exactes, résultats, SHA et contrôles non exécutés.
 
 Ajouter uniquement les fichiers du lot, committer selon `COMMIT_CONVENTION.md`, pousser sa branche et ouvrir une PR vers `main` liée à sa tâche. Garder la tâche de coordination ouverte tant que tous ses lots ne sont pas vérifiés ; utiliser `Refs #numéro` pour une livraison partielle, pas `Closes`.
 

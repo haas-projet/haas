@@ -1,0 +1,27 @@
+openapi: 3.1.0
+info:
+  title: HAAS — Socle API
+  version: 0.1.0
+  description: Contrat B01 de la sonde de démarrage. Contrats métier à implémenter.
+servers:
+  - url: http://localhost:8000
+paths:
+  /up:
+    get:
+      operationId: getHealth
+      summary: Vérifier le démarrage de l'application
+      description: Sonde sans accès SQL ; ne certifie pas la disponibilité des services externes.
+      security: []
+      responses:
+        '200':
+          description: Application démarrée
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [status]
+                properties:
+                  status:
+                    type: string
+                    enum: [ok]

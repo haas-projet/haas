@@ -11,7 +11,7 @@
       "refs": "N05/N06 ; ARB01–ARB06 ; ADR-004 / DEP ; ADR-005 / [M]",
       "phase": "S",
       "execution_order": 1,
-      "status": "TODO"
+      "status": "IN_PROGRESS"
     },
     {
       "id": "S02",
@@ -22,7 +22,7 @@
       "refs": "F01–F12 ; N05 ; ADR-004 / DEP ; ADR-005 / [M]",
       "phase": "S",
       "execution_order": 2,
-      "status": "TODO"
+      "status": "IN_PROGRESS"
     },
     {
       "id": "B01",
@@ -33,7 +33,8 @@
       "refs": "N04/N05",
       "phase": "B",
       "execution_order": 3,
-      "status": "TODO"
+      "status": "IN_REVIEW",
+      "evidence": ["docs/quality/B01_BOOTSTRAP.md"]
     },
     {
       "id": "B02",

@@ -1,6 +1,6 @@
-# Suivi à rapprocher du dépôt réel
+# Suivi du dépôt HAAS
 
-**Statut :** pack de conception actualisé ; aucun lot applicatif exécuté ici. 122 lots proposés, 106 identifiants antérieurs conservés. Ajouts BH01–10/FH01–05/RH01, F18, AC69–90 et UX21–23. Ne pas écraser les statuts ou preuves du dépôt réel.
+**Statut actif :** B01 vérifié localement sur `backend/socle-auth`, IN_REVIEW ; S01/S02 IN_PROGRESS. Les autres lots restent TODO. 122 lots proposés, 106 identifiants antérieurs conservés. Ajouts BH01–10/FH01–05/RH01, F18, AC69–90 et UX21–23. Ne pas écraser les statuts ou preuves existants.
 
 À renseigner après commandes réelles : date / lot / responsable / fichiers / commandes / observé / commit ou raison de non-commit / blocage / prochaine action. Les contrôles documentaires de ce pack ne valident pas BACKEND_GATE, FRONTEND_GATE ou RELEASE_GATE.
 
@@ -36,3 +36,14 @@
 - Contrôles exécutés : présence des 26 fichiers `.gitkeep` vides, empreinte Git de `backend/AGENTS.md` inchangée, `node scripts/validate-pack.mjs` (18/18), `node scripts/check-deployment-docs.mjs` (7/7), `git diff --check` sans erreur. Sélection explicite des nouveaux dossiers et actualisation des empreintes avant commit.
 - Aucun test applicatif, CI, Qodana, installation de dépendance ou accès à une base exécuté. Tous les lots du plan, y compris B01, gardent leur statut antérieur.
 - Prochaine étape : S01/S02 puis B01 sur `backend/socle-auth`. La publication de cette arborescence initiale commune ne remplace pas la revue humaine des futures PR applicatives.
+
+## 2026-10-01 — B01, premier socle applicatif
+
+- Demande : commencer la partie socle/authentification de `ousseynoufayeisidk-sys`. Point de départ : `8aed3a8b9ec6b62348b0ff1584f1b018800f3c56`, base commune propre ; travail limité à `backend/socle-auth`.
+- Livraison : Laravel 13.34.0, dépendances verrouillées pour PHP 8.4 minimum, PostgreSQL explicite, UTC, utilisateur UUID, migrations techniques, sonde `/up`, fichiers de routes par domaine et garde-fou des tests SQL. Aucune fonctionnalité d'authentification annoncée comme terminée.
+- Preuves : [B01_BOOTSTRAP.md](../quality/B01_BOOTSTRAP.md), inventaire des 101 dépendances et licences, [versions](../VERSIONS.md), [commandes](../COMMANDS.md). Suivi individuel dans `participants/ousseynoufayeisidk-sys/`.
+- Vérifications applicatives réelles sous PHP 8.5.10 : 12 tests, 22 assertions ; migrations sur PostgreSQL 17.0 temporaire dédié ; UUID et FK validés ; réponse HTTP `/up` 200 ; 36 fichiers PHP sans erreur de syntaxe ; validation Composer stricte, prérequis et audit réussis. Serveurs temporaires arrêtés ; service PostgreSQL existant non modifié.
+- Suivi documentaire adapté aux statuts réels et aux fichiers livrés par Git, en excluant les dépendances/configurations ignorées. `backend/AGENTS.md` et l'arborescence commune préservés.
+- Contrôles documentaires : `node scripts/validate-pack.mjs` 18/18, `node scripts/check-deployment-docs.mjs` 7/7, `git diff --check` sans erreur. Empreintes actualisées pour les fichiers livrés avant commit.
+- Limites : PHP 8.4 natif, Pint/PHPStan, CI distante, Qodana et services d'hébergement non vérifiés. Composer 2.8.5 émet des dépréciations sous PHP 8.5. S01/S02 restent partiels. Aucun gate ni revue humaine simulé.
+- Commit réel à consulter dans le bilan et la PR. B01 attend une revue avant fusion ; aucun merge vers `main` ou les branches des collègues. Prochain lot : B02 après intégration, puis B03/B04/B05 et authentification B06–B09.

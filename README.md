@@ -14,8 +14,10 @@ F18 « Coup de main » : ouverture volontaire d’un projet, proposition limité
 - .agents/skills : **10 skills** HAAS ciblés.
 - livrables : cahier PDF/HTML et présentation PowerPoint/PDF régénérés.
 
-## Ce que ce ZIP n’est pas
-Ce dossier ne contient pas une application Laravel/React implémentée. Les plans, tests attendus et configurations doivent être réalisés sur le dépôt. Aucun commit, CI applicative, résultat de laboratoire, utilisateur réel ou déploiement n’est attesté par la génération du pack.
+## État du développement
+Le pack documentaire initial est désormais suivi dans Git. La branche `backend/socle-auth` contient le premier socle Laravel/PostgreSQL B01, vérifié localement et en attente de revue. Voir [le backend](backend/README.md), [les commandes](docs/COMMANDS.md) et [les preuves](docs/quality/B01_BOOTSTRAP.md).
+
+L'authentification et les fonctionnalités métier restent à développer. Aucune application React, CI applicative, exécution de laboratoire ou mise en production n'est encore validée. Les plans et critères attendus ne constituent pas des preuves de réalisation.
 
 ## Démarrer sans écraser
 Équipe de trois : voir [la répartition backend, les branches et les règles de fusion](docs/execution/BACKEND_A_TROIS.md).

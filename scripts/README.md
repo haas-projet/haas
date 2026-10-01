@@ -11,3 +11,5 @@ Ces scripts vérifient/génèrent les documents. Ils ne testent pas l’applicat
 Installer ces outils de génération dans un environnement dédié, pas comme dépendances runtime de HAAS. La conversion du PowerPoint en PDF peut être faite dans PowerPoint ou LibreOffice. Aucune police n’est livrée ; les outils utilisent les polices présentes dans l’environnement. Après une régénération, contrôler visuellement les rendus et mettre à jour SHA256SUMS.
 
 La validation documentaire inclut F18, les 122 lots, 90 AC, 23 UX et 10 skills. Les dépendances et la conservation des 106 anciens IDs sont vérifiées ; aucun test applicatif n’est exécuté par ces scripts.
+
+Depuis B01, `validate-pack.mjs` accepte les statuts TODO, IN_PROGRESS, IN_REVIEW, DONE et BLOCKED. IN_REVIEW/DONE exigent un fichier de preuve existant ; cela ne certifie pas son contenu ni une approbation humaine. Dans un dépôt Git, les contrôles de fichiers portent sur les fichiers suivis et nouveaux non ignorés, sans parcourir `vendor/` ou les configurations locales privées. Les exemples `.env.example` et `.env.testing.example` restent autorisés.

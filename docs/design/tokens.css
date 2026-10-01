@@ -1,0 +1,53 @@
+/* Référence à intégrer seulement en phase frontend. Aucune police externe. */
+:root {
+  --haas-ink: #102a2e;
+  --haas-paper: #f5f7f4;
+  --haas-surface: #ffffff;
+  --haas-primary: #087f73;
+  --haas-primary-hover: #06695f;
+  --haas-mint: #bfe8d5;
+  --haas-muted: #506367;
+  --haas-border-strong: #718782;
+  --haas-line: #dce5df;
+  --haas-warning: #8a4b10;
+  --haas-warning-bg: #fff4e5;
+  --haas-danger: #b42318;
+  --haas-danger-bg: #fff1f0;
+  --haas-info: #1d4ed8;
+  --haas-info-bg: #eff6ff;
+  --haas-text: var(--haas-ink);
+  --haas-text-secondary: var(--haas-muted);
+  --haas-link: var(--haas-primary-hover);
+  --haas-page: var(--haas-paper);
+  --haas-panel: var(--haas-surface);
+  --haas-font: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --haas-font-code: ui-monospace, SFMono-Regular, Consolas, monospace;
+  --haas-space-1: 0.25rem;
+  --haas-space-2: 0.5rem;
+  --haas-space-3: 0.75rem;
+  --haas-space-4: 1rem;
+  --haas-space-6: 1.5rem;
+  --haas-space-8: 2rem;
+  --haas-space-12: 3rem;
+  --haas-radius-control: 0.5rem;
+  --haas-radius-card: 0.75rem;
+  --haas-radius-dialog: 1rem;
+  --haas-control-min-height: 2.75rem;
+  --haas-reading-width: 72ch;
+  --haas-content-width: 75rem;
+  --haas-shadow-card: 0 2px 8px rgb(16 42 46 / 0.05);
+}
+
+/* Recettes proposées : ne pas les appliquer sans tester les composants réels. */
+.haas-page { background: var(--haas-page); color: var(--haas-text); }
+.haas-prose { max-width: var(--haas-reading-width); font-size: 1rem; line-height: 1.6; }
+.haas-link { color: var(--haas-link); text-decoration: underline; text-underline-offset: 0.15em; }
+.haas-control { min-height: var(--haas-control-min-height); border: 1px solid var(--haas-border-strong); }
+.haas-button-primary { background: var(--haas-primary); color: var(--haas-surface); }
+.haas-button-primary:hover { background: var(--haas-primary-hover); }
+.haas-focus:focus-visible { outline: 3px solid var(--haas-primary); outline-offset: 3px; }
+/* --haas-line est décoratif : ne pas l'utiliser comme seule limite d'un champ. */
+/* Le texte mint n'est pas posé sur fond blanc ; les badges mint utilisent ink. */
+@media (prefers-reduced-motion: reduce) {
+  .haas-motion { animation: none; transition: none; scroll-behavior: auto; }
+}

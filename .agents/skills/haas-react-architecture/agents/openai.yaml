@@ -1,0 +1,4 @@
+interface:
+  display_name: "React HAAS"
+  short_description: "React HAAS — règles et preuves du projet"
+  default_prompt: "Utilise $haas-react-architecture pour traiter le lot HAAS courant et rapporter les contrôles réellement exécutés."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "HAAS — Coup de main"
+  short_description: "Une première collaboration consentie et traçable"
+  default_prompt: "Implémente le lot Coup de main courant selon ADR-006, avec droits, consentements, tests et petit commit."

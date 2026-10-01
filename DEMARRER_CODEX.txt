@@ -1,0 +1,13 @@
+Travaille sur HAAS à partir de ce pack sans réinitialiser mon dépôt.
+
+Lis AGENTS.md, le début de HAAS_CODEX_MASTER.md, ADR-006-rencontre-par-coup-de-main.md, docs/product/COUPS_DE_MAIN.md et docs/api/COUPS_DE_MAIN_API.md. Inspecte ensuite git status, branche, fichiers et tests existants. Préserve mon travail et mes consignes ; ne copie pas aveuglément les TODO du pack sur mon suivi réel.
+
+Intègre la rencontre par le coup de main : projet volontairement ouvert, proposition concrète limitée, consentements explicites, propriétaire qui accepte/refuse, un seul échange créé ou choisi et progrès issus de contributions réelles. Pas de messagerie privée, invitations d’équipe, matching IA ou accès au dépôt. Une offre acceptée n’est pas un travail terminé. Les demandes classiques restent possibles sans ce parcours ni laboratoire.
+
+Suis docs/execution/tasks.json (122 lots). Conserve les 106 IDs existants, ajoute BH01–10/FH01–05/RH01 et exécute le prochain petit lot backend nécessaire avec ses vrais tests. Controllers/Services/Requests/DTO/Enums/Policies/Resources séparés ; pas de couche redondante. Le backend P0 F01–F18 doit être complet et testé avant une nouvelle UI React ; demande GO_FRONTEND après revue humaine. Si une UI existe, garde-la et corrige les contrats backend manquants avant de continuer.
+
+React : features, guards, un client HTTP et interceptors, API/models/schemas/hooks, cache privé purgé. Utilise les skills HAAS appropriés et UX21–23 ; textes/couleurs lisibles, mobile/clavier, deux consentements non précochés.
+
+Petits commits explicites avec tests et diff relu. Pas de push, merge, achat ou déploiement sans accord. À chaque session, donne les fichiers changés, commandes et résultats réels, commit réel ou raison de non-commit, blocages et prochaine tâche. Ne livre pas seulement un plan : implémente le prochain lot autorisé. Un test non lancé reste NON_EXÉCUTÉ.
+
+Déploiement inchangé : un VPS Systalink pour Laravel/PostgreSQL/runner local restreint ; frontend Vercel ; Qodana Ultimate déclaré. Aucun code tiers librement exécuté, aucun secret publié.

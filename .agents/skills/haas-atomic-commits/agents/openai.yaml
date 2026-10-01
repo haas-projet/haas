@@ -1,0 +1,4 @@
+interface:
+  display_name: "Commits HAAS"
+  short_description: "Commits HAAS — règles et preuves du projet"
+  default_prompt: "Utilise $haas-atomic-commits pour traiter le lot HAAS courant et rapporter les contrôles réellement exécutés."

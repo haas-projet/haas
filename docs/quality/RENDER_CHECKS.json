@@ -1,0 +1,14 @@
+{
+  "scope": "Vérifications documentaires seulement ; aucune recette applicative, déploiement ou revue humaine de code attestés",
+  "timestamp": "2026-10-01T20:58:59.182628+00:00",
+  "pdf_pages": 100,
+  "pptx_slides": 9,
+  "notes_present": true,
+  "text_outside_page": 0,
+  "replacement_glyphs": 0,
+  "slides_test": "Exécuté : Test passed. No overflow detected.",
+  "visual_review": "Montages du cahier complet et des neuf diapositives inspectés ; revue finale des pages affectées 1, 3, 11, 16, 28, 88, 94, 98 et 100 ; diapositive 5 agrandie après correction.",
+  "source_email_unchanged": true,
+  "prior_task_ids_and_statuses_preserved": 106,
+  "application_tests_executed": false
+}

@@ -1,0 +1,80 @@
+{
+  "scope": "Dossier documentaire seulement ; aucun test applicatif",
+  "date": "2026-10-01T20:58:59.218Z",
+  "checks": [
+    {
+      "name": "122 lots uniques ; 106 identifiants antérieurs préservés",
+      "status": "PASS"
+    },
+    {
+      "name": "Ordre continu S2 B72 F40 R8",
+      "status": "PASS"
+    },
+    {
+      "name": "Communauté avant les gates et audits concernés",
+      "status": "PASS"
+    },
+    {
+      "name": "Travail, commit et critères renseignés",
+      "status": "PASS"
+    },
+    {
+      "name": "Brief et plan reprennent exactement les tâches actives",
+      "status": "PASS"
+    },
+    {
+      "name": "AC01–AC90 uniques ; AC47 conditionnel",
+      "status": "PASS"
+    },
+    {
+      "name": "23 familles UX réellement décrites",
+      "status": "PASS"
+    },
+    {
+      "name": "10 skills locaux ; front matter et métadonnées",
+      "status": "PASS"
+    },
+    {
+      "name": "Mail source conservé et modalités distinguées",
+      "status": "PASS"
+    },
+    {
+      "name": "Projets, opt-in, questions et non-obligation du lab",
+      "status": "PASS"
+    },
+    {
+      "name": "61 sections du cahier et références de communauté",
+      "status": "PASS"
+    },
+    {
+      "name": "Livrables et instructions actifs présents",
+      "status": "PASS"
+    },
+    {
+      "name": "JSON lisibles ; aucune police ou secret .env fourni",
+      "status": "PASS"
+    },
+    {
+      "name": "Dépendances explicites sans cycle ni lot futur",
+      "status": "PASS"
+    },
+    {
+      "name": "Coup de main avant audits et gates",
+      "status": "PASS"
+    },
+    {
+      "name": "Contrat F18 et distinctions essentielles présents",
+      "status": "PASS"
+    },
+    {
+      "name": "Ancien cul-de-sac CTA retiré des consignes actives",
+      "status": "PASS"
+    },
+    {
+      "name": "Anciennes sources non réécrites et absence de fausse implementation",
+      "status": "PASS"
+    }
+  ],
+  "passed": 18,
+  "failed": 0
+}

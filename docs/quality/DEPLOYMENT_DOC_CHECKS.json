@@ -1,0 +1,35 @@
+{
+  "scope": "Documentation uniquement, aucun serveur testé",
+  "checks": [
+    {
+      "name": "Cadrage et décision de déploiement actifs",
+      "status": "PASS"
+    },
+    {
+      "name": "Un VPS et un run global dans le modèle",
+      "status": "PASS"
+    },
+    {
+      "name": "Douze sous-lots, quatorze contrôles",
+      "status": "PASS"
+    },
+    {
+      "name": "Origine API absolue et cookies bornés",
+      "status": "PASS"
+    },
+    {
+      "name": "Plans et licences non présumés",
+      "status": "PASS"
+    },
+    {
+      "name": "Sources et approbations documentées",
+      "status": "PASS"
+    },
+    {
+      "name": "Pas de directives anciennes dans tâches actuelles",
+      "status": "PASS"
+    }
+  ],
+  "passed": 7,
+  "failed": 0
+}

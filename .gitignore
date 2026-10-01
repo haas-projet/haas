@@ -1,0 +1,21 @@
+# Configuration locale et secrets
+.env
+.env.*
+*.env
+*.env.*
+!.env.example
+!*.env.example
+*.pem
+*.key
+
+# Dépendances et fichiers générés localement
+node_modules/
+vendor/
+dist/
+coverage/
+*.log
+
+# Fichiers du système et de l'éditeur
+.DS_Store
+Thumbs.db
+.idea/

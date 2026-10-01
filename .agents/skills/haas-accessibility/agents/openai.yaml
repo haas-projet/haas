@@ -1,0 +1,4 @@
+interface:
+  display_name: "Accessibilité HAAS"
+  short_description: "Accessibilité HAAS — règles et preuves du projet"
+  default_prompt: "Utilise $haas-accessibility pour traiter le lot HAAS courant et rapporter les contrôles réellement exécutés."

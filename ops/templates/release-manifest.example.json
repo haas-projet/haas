@@ -1,0 +1,29 @@
+{
+  "status": "EXAMPLE_NO_RELEASE_CREATED",
+  "git_sha": null,
+  "api": {
+    "artifact_sha256": null,
+    "version": null
+  },
+  "frontend": {
+    "artifact_sha256": null,
+    "vercel_deployment_id": null,
+    "api_origin": null
+  },
+  "lab": {
+    "artifact_sha256": null,
+    "approved_registry_digest": null
+  },
+  "migrations": [],
+  "checks": {
+    "backend": null,
+    "frontend": null,
+    "qodana": null,
+    "e2e": null,
+    "restore": null
+  },
+  "approvals": {
+    "reviewer": null,
+    "GO_PRODUCTION": null
+  }
+}

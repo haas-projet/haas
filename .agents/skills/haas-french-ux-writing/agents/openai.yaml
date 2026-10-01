@@ -1,0 +1,4 @@
+interface:
+  display_name: "Textes UX HAAS"
+  short_description: "Textes UX HAAS — règles et preuves du projet"
+  default_prompt: "Utilise $haas-french-ux-writing pour traiter le lot HAAS courant et rapporter les contrôles réellement exécutés."

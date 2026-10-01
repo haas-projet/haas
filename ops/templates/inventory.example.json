@@ -1,0 +1,45 @@
+{
+  "status": "TO_COMPLETE_NOT_PROVISIONED",
+  "decision": "ADR-004",
+  "backend": {
+    "provider": "Systalink/Datacloud",
+    "instance_count": 1,
+    "offer_reference": null,
+    "region": null,
+    "public_ip": null,
+    "hostname_example": "api.haas.example.com",
+    "capacity_candidate": {
+      "vcpu": 2,
+      "ram_gib": 8,
+      "nvme_gb": 100
+    },
+    "actual_checkout_total": null
+  },
+  "frontend": {
+    "provider": "Vercel",
+    "project_id": null,
+    "plan": null,
+    "hostname_example": "app.haas.example.com"
+  },
+  "lab": {
+    "placement": "same_vps_restricted_service",
+    "max_running_global": 1,
+    "unix_user": "haas-lab",
+    "db": "haas_lab",
+    "tested_isolation": false
+  },
+  "backup": {
+    "provider": null,
+    "endpoint": null,
+    "bucket": null,
+    "last_restore_test": null
+  },
+  "qodana": {
+    "edition_declared_by_user": "Ultimate",
+    "project_verified": false
+  },
+  "authorization": {
+    "GO_FRONTEND": false,
+    "GO_PRODUCTION": false
+  }
+}

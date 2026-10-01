@@ -1,0 +1,158 @@
+{
+  "pairs": [
+    {
+      "label": "Texte principal sur paper",
+      "foreground": "ink",
+      "background": "paper",
+      "minimum": 4.5,
+      "usage": "Texte courant"
+    },
+    {
+      "label": "Texte principal sur surface",
+      "foreground": "ink",
+      "background": "surface",
+      "minimum": 4.5,
+      "usage": "Texte courant"
+    },
+    {
+      "label": "Texte principal sur mint",
+      "foreground": "ink",
+      "background": "mint",
+      "minimum": 4.5,
+      "usage": "Texte courant"
+    },
+    {
+      "label": "Texte secondaire sur paper",
+      "foreground": "muted",
+      "background": "paper",
+      "minimum": 4.5,
+      "usage": "Libellés secondaires, jamais opacifiés"
+    },
+    {
+      "label": "Texte secondaire sur surface",
+      "foreground": "muted",
+      "background": "surface",
+      "minimum": 4.5,
+      "usage": "Libellés secondaires, jamais opacifiés"
+    },
+    {
+      "label": "Bouton blanc sur primary",
+      "foreground": "surface",
+      "background": "primary",
+      "minimum": 4.5,
+      "usage": "Bouton principal"
+    },
+    {
+      "label": "Bouton blanc sur primaryHover",
+      "foreground": "surface",
+      "background": "primaryHover",
+      "minimum": 4.5,
+      "usage": "Bouton principal"
+    },
+    {
+      "label": "Lien sur paper",
+      "foreground": "primaryHover",
+      "background": "paper",
+      "minimum": 4.5,
+      "usage": "Lien souligné"
+    },
+    {
+      "label": "Lien sur surface",
+      "foreground": "primaryHover",
+      "background": "surface",
+      "minimum": 4.5,
+      "usage": "Lien souligné"
+    },
+    {
+      "label": "Lien sur mint",
+      "foreground": "primaryHover",
+      "background": "mint",
+      "minimum": 4.5,
+      "usage": "Lien souligné"
+    },
+    {
+      "label": "Bordure fonctionnelle sur paper",
+      "foreground": "borderStrong",
+      "background": "paper",
+      "minimum": 3,
+      "usage": "Champ identifiable"
+    },
+    {
+      "label": "Anneau de focus sur paper",
+      "foreground": "primary",
+      "background": "paper",
+      "minimum": 3,
+      "usage": "Focus séparé du contrôle par offset"
+    },
+    {
+      "label": "Bordure fonctionnelle sur surface",
+      "foreground": "borderStrong",
+      "background": "surface",
+      "minimum": 3,
+      "usage": "Champ identifiable"
+    },
+    {
+      "label": "Anneau de focus sur surface",
+      "foreground": "primary",
+      "background": "surface",
+      "minimum": 3,
+      "usage": "Focus séparé du contrôle par offset"
+    },
+    {
+      "label": "État warning",
+      "foreground": "warning",
+      "background": "warningBg",
+      "minimum": 4.5,
+      "usage": "Message texte et pictogramme"
+    },
+    {
+      "label": "Texte warning sur blanc",
+      "foreground": "warning",
+      "background": "surface",
+      "minimum": 4.5,
+      "usage": "Texte explicatif"
+    },
+    {
+      "label": "État danger",
+      "foreground": "danger",
+      "background": "dangerBg",
+      "minimum": 4.5,
+      "usage": "Message texte et pictogramme"
+    },
+    {
+      "label": "Texte danger sur blanc",
+      "foreground": "danger",
+      "background": "surface",
+      "minimum": 4.5,
+      "usage": "Texte explicatif"
+    },
+    {
+      "label": "État info",
+      "foreground": "info",
+      "background": "infoBg",
+      "minimum": 4.5,
+      "usage": "Message texte et pictogramme"
+    },
+    {
+      "label": "Texte info sur blanc",
+      "foreground": "info",
+      "background": "surface",
+      "minimum": 4.5,
+      "usage": "Texte explicatif"
+    },
+    {
+      "label": "Bouton destruction",
+      "foreground": "surface",
+      "background": "danger",
+      "minimum": 4.5,
+      "usage": "Action destructrice confirmée"
+    },
+    {
+      "label": "Badge positif",
+      "foreground": "ink",
+      "background": "mint",
+      "minimum": 4.5,
+      "usage": "Libellé avec icône, sans certification générale"
+    }
+  ]
+}

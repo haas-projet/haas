@@ -1,0 +1,4 @@
+interface:
+  display_name: "HAAS · Atelier collaboratif"
+  short_description: "Cas, comparaisons et preuves versionnées"
+  default_prompt: "Appliquer le contrat HAAS et tester les deux exécutions, leurs limites et leurs droits."

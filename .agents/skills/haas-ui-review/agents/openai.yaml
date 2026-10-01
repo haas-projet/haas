@@ -1,0 +1,4 @@
+interface:
+  display_name: "Revue UI HAAS"
+  short_description: "Revue UI HAAS — règles et preuves du projet"
+  default_prompt: "Utilise $haas-ui-review pour traiter le lot HAAS courant et rapporter les contrôles réellement exécutés."

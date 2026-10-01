@@ -18,4 +18,6 @@ F18 « Coup de main » : ouverture volontaire d’un projet, proposition limité
 Ce dossier ne contient pas une application Laravel/React implémentée. Les plans, tests attendus et configurations doivent être réalisés sur le dépôt. Aucun commit, CI applicative, résultat de laboratoire, utilisateur réel ou déploiement n’est attesté par la génération du pack.
 
 ## Démarrer sans écraser
+Équipe de trois : voir [la répartition backend, les branches et les règles de fusion](docs/execution/BACKEND_A_TROIS.md).
+
 Lire README_CODEX.md puis DEMARRER_CODEX.txt. Décompresser hors du dépôt ; fusionner après revue. Backend complet et testé → revue + GO_FRONTEND humain → frontend → recette + GO_PRODUCTION humain. Un VPS Systalink + Vercel, PostgreSQL local, runner limité et Qodana Ultimate restent retenus. Aucun achat ou push autorisé par ce ZIP.

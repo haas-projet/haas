@@ -1,6 +1,6 @@
 # HAAS — Instructions permanentes de développement
 
-HAAS est une plateforme d’échange où des développeurs proposent des cas, améliorent une solution et comparent deux implémentations approuvées. Deux personnes construisent un monolithe Laravel et une SPA React/TypeScript. L’objectif est un produit fini et démontrable, pas une promesse de victoire.
+HAAS est une plateforme d’échange où des développeurs proposent des cas, améliorent une solution et comparent deux implémentations approuvées. Trois personnes construisent un monolithe Laravel et une SPA React/TypeScript. L’objectif est un produit fini et démontrable, pas une promesse de victoire.
 
 ## Ordre impératif
 Terminer le backend P0 avant le frontend. Lire HAAS_CODEX_MASTER.md pour le lot courant et docs/execution/PROGRESS.md pour reprendre. Le changement par rapport à l’ancien planning est expliqué dans docs/decisions/ADR-001-backend-first.md. Le recentrage est défini par ADR-002 et docs/product/ATELIER_COLLABORATIF.md.
@@ -10,6 +10,7 @@ Ne pas créer frontend/src ni le composant React B2 avant un BACKEND_GATE valid�
 Avant une modification, inspecter git status et les fichiers utiles au lot. Préserver le travail préexistant ; ne pas écraser un AGENTS.md existant lors de l’installation de ce pack. Ne pas relire tous les documents à chaque correction triviale.
 Une intention cohérente et ses tests par commit. Utiliser les messages Conventionnels du plan, en français. Commits locaux autorisés par la demande d’exécution ; aucun push, merge, déploiement, achat, publication de dépôt ou opération destructive sans autorisation appropriée. Ne jamais inventer une identité Git ni une validation de l’autre développeur.
 Après chaque petit lot : exécuter les contrôles concernés, inspecter le diff, mettre à jour PROGRESS/HANDOFF, puis créer le commit. Conserver la référence réelle du commit dans le bilan de session ; ne pas essayer d’inscrire le SHA d’un commit dans ce même commit.
+Organisation à trois : lire docs/execution/BACKEND_A_TROIS.md. Chaque branche tient son PROGRESS/HANDOFF dans docs/execution/participants/<login>/ ; l’intégrateur consolide les fichiers racine et les statuts à partir de preuves. Un auteur par fichier partagé, petites PR avec revue humaine et prérequis fusionnés ; aucune garantie de fusion sans conflit.
 Pas de git add . aveugle, reset --hard, clean -fd, --force, --no-verify ni suppression du travail d’autrui. Les scripts de test ne ciblent que des bases locales/CI dédiées et identifiées.
 
 ## Frontières

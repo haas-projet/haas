@@ -3,7 +3,7 @@
 **Décision active :** communauté d’abord, atelier distinctif ; F01–F18. Backend Laravel complet avant React ; un VPS Systalink + Vercel. Compléments après mail : ADR-005 et COMMUNAUTE_ET_PROJETS.md. Architecture cible à réaliser, pas code déjà livré.
 
 
-**Équipe :** deux développeurs Laravel / React  
+**Équipe :** trois développeurs Laravel / React
 **Statut :** architecture cible et conventions de réalisation ; ce document n'est pas un dépôt applicatif installé ou testé.  
 **Base :** cahier consolidé, mail [M], ADR-001/002/004/005. Détails atelier dans docs/product/ATELIER_COLLABORATIF.md.  
 **Décision :** monolithe Laravel organisé en couches et domaines fonctionnels, SPA React / TypeScript organisée par fonctionnalité, monorepo privé.
@@ -553,9 +553,9 @@ Les artefacts validés sont identifiés par SHA et empreinte ; une release API c
 
 Le rollback conserve les données ; les sauvegardes sont restaurées une fois hors production. Domaine, panier, forfait Vercel et service de courrier sont des paramètres à confirmer, pas des secrets ou adresses à inventer. Voir ADR-004.
 
-## 18. Travail à deux — séquence active
+## 18. Travail à trois — séquence active
 
-Backend P0 complet, nouveaux cas et comparateur inclus → BACKEND_GATE et GO_FRONTEND humain → frontend → recette. Les deux personnes se partagent API/règles et tests/contrats, puis composants/parcours et intégration/a11y. Le précédent ordre vertical initial est archivé, pas actif.
+Backend P0 complet, nouveaux cas et comparateur inclus → BACKEND_GATE et GO_FRONTEND humain → frontend → recette. Les trois personnes se répartissent les domaines backend, chacun avec ses tests et contrats ; voir docs/execution/BACKEND_A_TROIS.md pour les branches, responsabilités et dépendances. La répartition frontend sera fixée après GO_FRONTEND. Le précédent ordre vertical initial est archivé, pas actif.
 
 Les nouveaux domaines sont VerificationCases, Comparisons et Evidence. Même structure : FormRequests/Data/Controllers/Policies/Queries/Services/Resources. Services : SubmitVerificationCaseService, ReviewVerificationCaseService, StartComparisonService, ExecuteComparisonService, ReconcileComparisonsService. Queries : VerificationSummaryQuery et FindVisibleComparisonQuery. Le calculateur de conclusion est une classe pure testable. Pas de duplication de runner ni de quota dans un deuxième moteur.
 

@@ -2,7 +2,7 @@
 ## Backend complet, puis frontend · petits commits · interface lisible
 
 **Mise à jour :** 1er octobre 2026  
-**Équipe :** deux développeurs Laravel / React  
+**Équipe :** trois développeurs Laravel / React
 **Nom de concours :** HAAS — Help as a Service  
 **Statut :** instructions et plan d’exécution ; aucun code applicatif ni résultat de test applicatif n’est fourni par ce fichier.
 
@@ -75,7 +75,7 @@ Les droits de diffusion, dates contradictoires, budget et accès fournisseur res
 
 P1 non engagé : copie de contexte pour son assistant sans API IA, traduction anglaise complète, suggestions de contributeurs, abonnement à discussion, courriels de notification métier, lecture offline de capsules, assistant IA rédactionnel, deuxième laboratoire serveur. Hors scope : messagerie privée, visioconférence, marché de services, paiements réels, application native, éditeur/terminal distant, exécution de code utilisateur, score artificiel de compétence et import autonome de dépôts.
 
-Les deux développeurs restent actifs dans les deux phases : backend partagé entre API/règles et tests/contrats/exploitation, puis frontend partagé entre composants/parcours et intégration/accessibilité. Un propriétaire d’écriture par fichier sensible et une revue croisée par PR.
+Les trois développeurs se répartissent le backend par domaine selon docs/execution/BACKEND_A_TROIS.md : socle/identité/intégration, communauté/entraide, capsules/laboratoire. Chacun livre ses tests et contrats. Un propriétaire d’écriture par fichier sensible, de petites PR et une revue humaine par une autre personne. La répartition frontend sera fixée après GO_FRONTEND.
 
 ## 04. Séquence d’exécution et portes de validation
 
@@ -327,7 +327,7 @@ Déploiement et achat restent soumis aux autorisations utilisateur. Les backups 
 
 **À réaliser.** Installer les consignes après comparaison avec les fichiers existants, conserver les deux sources du projet, adopter ADR-001 et créer le suivi. Définir branches courtes, propriétaire/relecteur de chaque lot et commandes de travail locales. Ne pas générer encore d’application React. Déploiement retenu : Appliquer ADR-004, qui remplace les deux VPS et la même origine. Répartir les douze sous-lots DEP sans renuméroter le suivi. Alignement mail : Adopter ADR-005 ; intégrer BC01–BC08 et FC01–FC04 sans effacer commits/statuts existants. Coup de main : Intégrer BH01–10, FH01–05 et RH01, sans renuméroter les identifiants existants ni convertir une ancienne revue en GO_FRONTEND.
 
-**Critères de sortie.** Les deux personnes identifient la prochaine tâche, les preuves attendues et le point de passage BACKEND_GATE. Les inconnues juridiques, délais et budget restent explicites. Déploiement retenu : Ordre backend-first inchangé ; revue et autorisations humaines conservées. Alignement mail : 122 lots proposés ; charge réestimée et périmètre communautaire reçu.
+**Critères de sortie.** Les trois personnes identifient la prochaine tâche, les preuves attendues et le point de passage BACKEND_GATE. Les inconnues juridiques, délais et budget restent explicites. Déploiement retenu : Ordre backend-first inchangé ; revue et autorisations humaines conservées. Alignement mail : 122 lots proposés ; charge réestimée et périmètre communautaire reçu.
 
 **Traçabilité.** F01–F12 ; N05 ; ADR-004 / DEP ; ADR-005 / [M]
 
@@ -1067,7 +1067,7 @@ Déploiement et achat restent soumis aux autorisations utilisateur. Les backups 
 
 **Commit proposé :** `docs(gate): consigner la réception technique du backend`
 
-**À réaliser.** Renseigner BACKEND_GATE avec preuves de tous les P0 backend, contrôles locaux/CI, limites et questions externes. Livrer installation, API, tests et liste des endpoints. Demander la revue du second membre et GO_FRONTEND. Atelier : couvrir également F13/F14/F15, les comparaisons réelles et AC33–AC52 ; P1 AC47 seulement si livré. Déploiement retenu : Consigner la conformité de la configuration serveur et les tests locaux/CI du contrat CORS/session ; distinguer la recette de domaines réels reportée à la livraison. Alignement mail : Recevoir F01–F18, API projets/annuaire et questions sans code, avant GO_FRONTEND humain. Coup de main : La porte backend couvre F18 et BH10 : demander une nouvelle revue et un GO_FRONTEND humain ; aucun frontend nouveau avant validation.
+**À réaliser.** Renseigner BACKEND_GATE avec preuves de tous les P0 backend, contrôles locaux/CI, limites et questions externes. Livrer installation, API, tests et liste des endpoints. Demander la revue par un autre membre et GO_FRONTEND. Atelier : couvrir également F13/F14/F15, les comparaisons réelles et AC33–AC52 ; P1 AC47 seulement si livré. Déploiement retenu : Consigner la conformité de la configuration serveur et les tests locaux/CI du contrat CORS/session ; distinguer la recette de domaines réels reportée à la livraison. Alignement mail : Recevoir F01–F18, API projets/annuaire et questions sans code, avant GO_FRONTEND humain. Coup de main : La porte backend couvre F18 et BH10 : demander une nouvelle revue et un GO_FRONTEND humain ; aucun frontend nouveau avant validation.
 
 **Critères de sortie.** Aucune case cochée par hypothèse, aucun placeholder fonctionnel, aucune route P0 seulement mockée. Ne commencer aucun code frontend tant que le point de validation et l’autorisation manquent. Déploiement retenu : Revue humaine et GO_FRONTEND nécessaires ; aucune conformité navigateur réelle déclarée avant son test. Alignement mail : Aucun passage sur l’ancienne réception seule ; preuves BC01–BC08 examinées.
 

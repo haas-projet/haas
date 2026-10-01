@@ -45,7 +45,8 @@
       "refs": "N05/N06",
       "phase": "B",
       "execution_order": 4,
-      "status": "TODO"
+      "status": "IN_REVIEW",
+      "evidence": ["docs/quality/B02_QUALITY.md"]
     },
     {
       "id": "B03",

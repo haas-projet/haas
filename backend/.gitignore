@@ -4,6 +4,8 @@
 !/.env.testing.example
 /vendor/
 /.phpunit.cache/
+/.phpstan.cache/
+/.pint.cache
 /.phpunit.result.cache
 /public/storage
 /public/hot

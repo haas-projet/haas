@@ -1,6 +1,6 @@
-# Commandes backend — B01
+# Commandes backend — B01/B02
 
-Partir de `backend/`. PHP 8.4 minimum avec pdo_pgsql. Les scripts lint/analyse et la CI restent à créer en B02/B03.
+Partir de `backend/`. PHP 8.4 minimum avec pdo_pgsql. B02 fournit les scripts qualité locaux ; la CI distante reste à créer en B03. Composer 2.10.3 a été testé avec PHP 8.5.10. L'ancien Composer 2.8.5 du poste émet des dépréciations sous PHP 8.5 : choisir une version actuelle depuis [le site officiel](https://getcomposer.org/download/). Aucune installation globale n'a été modifiée pendant B02.
 
 Sur le poste de cette session, sélectionner PHP pour le terminal PowerShell seulement (adapter le chemin ailleurs) :
 
@@ -25,7 +25,7 @@ php artisan serve --host=127.0.0.1 --port=8000
 
 ## Tests
 
-`composer test` exécute les tests Unit/Feature sans base. Pour l'intégration, créer un serveur local/CI isolé et une base **jetable dédiée** nommée `haas_*_test`, avec le rôle `haas_test`. Les tests SQL doivent étendre `Tests\PostgresTestCase`, qui vérifie la cible avant `RefreshDatabase` ; ce dernier peut reconstruire les tables de la seule base de test.
+`composer test` exécute les tests Unit/Feature/Architecture sans base. `composer test:architecture` cible uniquement les frontières Data/Services. Pour l'intégration, créer un serveur local/CI isolé et une base **jetable dédiée** nommée `haas_*_test`, avec le rôle `haas_test`. Les tests SQL doivent étendre `Tests\PostgresTestCase`, qui vérifie la cible avant `RefreshDatabase` ; ce dernier peut reconstruire les tables de la seule base de test.
 
 ```powershell
 $env:DB_CONNECTION = 'pgsql'
@@ -43,9 +43,16 @@ Les variables système priment sur `.env.testing` : une cible héritée incorrec
 ## Contrôles complémentaires
 
 ```powershell
+composer lint
+composer analyse
+composer test
 composer validate --strict --no-check-publish
 composer audit --locked
 php artisan route:list --json
 ```
+
+`lint` vérifie le style sans modifier de fichier ; `composer format` applique les corrections Pint puis le diff doit être relu. `analyse` exécute PHPStan/Larastan au niveau 8 sur app, configuration, bootstrap, migrations, routes et tests, avec PHP cible 8.4. Aucune baseline ni exclusion d'erreurs n'est configurée. Le contrôle charge le conteneur Laravel : utiliser la configuration locale de développement, jamais des secrets de production.
+
+Le test d'architecture inspecte les références PHP et les helpers HTTP connus dans `app/Data` et `app/Services`, sans exécuter les sources analysées. Les alias d'import sont résolus. Ce contrôle n'est pas une isolation de sécurité : références dynamiques et dépendances indirectes nécessitent toujours une revue. Résultats et test témoin dans [B02_QUALITY.md](quality/B02_QUALITY.md).
 
 Depuis la racine : `node scripts/validate-pack.mjs`, `node scripts/check-deployment-docs.mjs`, `git diff --check`. Le validateur documentaire contrôle les fichiers livrés par Git et exige une preuve pour les statuts IN_REVIEW/DONE. Ne pas employer `--ignore-platform-reqs`.

@@ -2,7 +2,9 @@
 
 Cette première étape crée les dossiers partagés pour les trois développeurs. Les fichiers `.gitkeep` permettent de conserver les dossiers vides dans Git, afin que chaque clone reçoive la même arborescence.
 
-**État : arborescence uniquement.** Laravel et ses dépendances ne sont pas installés ; aucun endpoint ni migration métier n'est implémenté. `composer install`, `php artisan` et les tests applicatifs ne sont pas encore disponibles. Le lot B01 reste à réaliser.
+**État : B01 réalisé sur `backend/socle-auth`, en attente de revue.** Laravel 13.34.0, PHP 8.4 minimum, PostgreSQL, identifiants utilisateur UUID et fuseau UTC. `/up` vérifie le démarrage sans accès SQL. Les parcours d'inscription et de connexion restent à développer.
+
+Suivre [les commandes d'installation et de test](../docs/COMMANDS.md). Consulter [les versions observées](../docs/VERSIONS.md) et [les preuves B01](../docs/quality/B01_BOOTSTRAP.md) : 12 tests et 22 assertions réussis, dont une intégration PostgreSQL réelle.
 
 ## Arborescence
 
@@ -54,10 +56,10 @@ Créer les sous-dossiers métier au moment de leur utilisation, par exemple `Ser
 | `backend/communaute-entraide` | `LamineGL` | Demandes, projets, annuaire et coups de main |
 | `backend/capsules-laboratoire` | `mdev44-code` | Capsules, cas et laboratoire |
 
-Lire [le plan de travail à trois](../docs/execution/BACKEND_A_TROIS.md) pour les fichiers réservés et dépendances. Les futures routes séparées `routes/api/identity.php`, `community.php` et `capsules-lab.php` seront enregistrées une seule fois dans le socle commun ; ces fichiers ne sont pas encore créés.
+Lire [le plan de travail à trois](../docs/execution/BACKEND_A_TROIS.md) pour les fichiers réservés et dépendances. Les routes séparées `routes/api/identity.php`, `community.php` et `capsules-lab.php` sont enregistrées une seule fois sous `/api/v1`. Ces fichiers sont vides en attendant les lots métier.
 
 ## Prochaine étape
 
-Le responsable du socle termine l'inventaire S01/S02 et initialise Laravel dans un dossier temporaire, puis fusionne les fichiers attendus dans cette arborescence après inspection. Préserver `AGENTS.md`, cette documentation et les contributions des autres branches. Choisir et verrouiller les versions compatibles, configurer PostgreSQL et vérifier le démarrage selon B01.
+Après revue de B01, le responsable du socle poursuit B02 (qualité PHP), B03 (CI), B04 (contrat HTTP), B05 (identité), puis l'authentification. L'inventaire des services externes S01/S02 reste partiel. `AGENTS.md`, la structure commune et le travail des autres branches sont préservés.
 
 Ne pas démarrer des installations Laravel indépendantes sur les autres branches. Après intégration du socle validé, chacun récupère `main` avant de développer les fonctionnalités qui en dépendent. Backend P0 et GO_FRONTEND humain précèdent toute application React.

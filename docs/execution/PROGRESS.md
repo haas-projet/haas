@@ -26,3 +26,13 @@
 - Vérifications exécutées : `node scripts/validate-pack.mjs` (18/18), `node scripts/check-deployment-docs.mjs` (7/7), `git diff --check` (sans erreur). Empreintes actualisées avant le commit. Aucun test applicatif, CI ou Qodana exécuté pour cette organisation.
 - Limites : aucune promesse de fusion automatique, aucune protection de branche activée, aucun lot applicatif déclaré terminé. La revue humaine de chaque PR reste requise par le processus d'équipe.
 - Prochain travail : S01/S02 puis B01–B05 par le responsable du socle ; les autres préparent leurs contrats et relisent, puis synchronisent leur branche avant les lots métier dépendants.
+
+## 2026-10-01 — Arborescence backend commune
+
+- Demande utilisateur : créer d'abord les dossiers de base afin que les trois personnes disposent de la même structure. Périmètre retenu : dossiers versionnés, sans installation Laravel ni fonctionnalité métier.
+- Point de départ : `7805723`, répertoire propre ; `main` et les trois branches distantes portent ce même commit, aucune PR ouverte constatée avant intervention.
+- Livrables : 26 dossiers repères dans `backend/` avec `.gitkeep`, et `backend/README.md` décrivant les couches, les responsabilités et l'initialisation future. `backend/AGENTS.md` conservé sans modification.
+- Inventaire local partiel : PHP CLI 8.3.12 avec pdo_pgsql, Composer 2.8.5, Node 24.19.0, npm 11.2.0 via `npm.cmd`, client PostgreSQL 17.0 et Git 2.45.1.windows.1. Le répertoire Laragon contient aussi une version PHP 8.5.10 ; elle n'a pas été sélectionnée ni testée. Ces observations ne valident pas les versions de l'hébergement ni la connexion à une base.
+- Contrôles exécutés : présence des 26 fichiers `.gitkeep` vides, empreinte Git de `backend/AGENTS.md` inchangée, `node scripts/validate-pack.mjs` (18/18), `node scripts/check-deployment-docs.mjs` (7/7), `git diff --check` sans erreur. Sélection explicite des nouveaux dossiers et actualisation des empreintes avant commit.
+- Aucun test applicatif, CI, Qodana, installation de dépendance ou accès à une base exécuté. Tous les lots du plan, y compris B01, gardent leur statut antérieur.
+- Prochaine étape : S01/S02 puis B01 sur `backend/socle-auth`. La publication de cette arborescence initiale commune ne remplace pas la revue humaine des futures PR applicatives.

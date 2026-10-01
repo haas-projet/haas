@@ -14,6 +14,31 @@ Les 72 lots backend ont chacun un pilote. S01/S02 sont coordonnés par `ousseyno
 
 Les trois tâches regroupent le travail ; elles ne doivent pas devenir trois grosses PR à fusionner en fin de projet. Un lot cohérent avec ses tests par PR, subdivisé si nécessaire. Ne pas commencer le lot suivant sur une branche dont la PR attend une revue. Les branches peuvent être réutilisées après leur synchronisation avec `main` ; si une branche a été supprimée après fusion, en recréer une depuis `origin/main`.
 
+## Démarrage parallèle après B01
+
+La PR #4 est fusionnée dans `main` depuis le 1er octobre 2026, sur demande explicite de l'utilisateur. Cette demande permet de commencer le code indépendant des trois domaines en parallèle dès B01. Les prérequis ci-dessous portent sur la fusion du code dépendant ; ils ne bloquent plus tout démarrage d'un domaine.
+
+| Développeur | Code à commencer sur sa branche | Dépendances à intégrer avant livraison complète |
+|---|---|---|
+| `ousseynoufayeisidk-sys` | B02 : outils qualité, puis B03/B04/B05 et authentification | Aucun autre domaine requis pour B02 |
+| `LamineGL` | Préparation B11 : enums d'état propres aux demandes, DTO, règles indépendantes et tests unitaires ; préparer les migrations et cas PostgreSQL | B05 pour Technology et l'identité ; B06–B09 pour les endpoints authentifiés |
+| `mdev44-code` | Préparation B22 : enums propres aux capsules, DTO de contenu/provenance et tests unitaires ; préparer le contrat de versionnement | B05 pour les référentiels ; B11 pour les références aux demandes ; droits/auth avant endpoints |
+
+Utiliser les fichiers du domaine et le socle existant. Ne pas dupliquer User/Profile/Technology, inventer les tables d'un collègue ou désactiver une clé étrangère pour faire passer un test. Un test unitaire indépendant peut réussir avant les prérequis SQL ; les tests d'intégration dépendants restent explicitement à exécuter. Les PR de préparation peuvent être ouvertes en brouillon, sans déclarer B11/B22 terminés.
+
+Chacun récupère sa branche synchronisée, depuis un répertoire propre :
+
+```powershell
+git fetch origin
+git switch backend/communaute-entraide # Adapter à sa branche ; --track origin/... au premier checkout.
+git pull --ff-only
+cd backend
+composer install # Avec PHP 8.4 minimum sélectionné ; voir docs/COMMANDS.md.
+composer test
+```
+
+Si le clone contient déjà des commits locaux supplémentaires, conserver ce travail et intégrer `origin/main` par un merge normal ; aucune réécriture forcée. Chaque poste configure sa propre base de test.
+
 ## Tâche 1 — socle et authentification
 
 **Responsable :** `ousseynoufayeisidk-sys`. **Branche :** `backend/socle-auth`.
@@ -27,7 +52,7 @@ Livrer le socle Laravel/PostgreSQL reproductible, l'identité et les services pa
 - B29–B32 : notifications dédupliquées, signalements, retrait de contenu, suspension et rôles. Chaque pilote métier fournit les règles de visibilité de son domaine.
 - B39–B44 : coordonner sécurité, contrat complet, recette, exploitation, Qodana selon accès réel, puis BACKEND_GATE. Les trois personnes fournissent leurs preuves et corrigent leurs domaines.
 
-**Première PR :** B01, après l'inventaire nécessaire de S01/S02. Ensuite B02, B03, B04 et B05, par PR cohérentes. B01–B05 doivent être intégrés avant les développements métier dépendants des deux autres branches. La fusion de ce socle n'est pas un BACKEND_GATE.
+**B01 intégré ; prochaine PR :** B02, puis B03, B04 et B05, par PR cohérentes. B01–B05 doivent être intégrés avant la fusion des PR métier qui en dépendent. Leur préparation indépendante peut avancer dès maintenant. La fusion de ce socle n'est pas un BACKEND_GATE.
 
 **Sortie attendue :** installation reproductible ; commandes locales documentées ; résultats de CI réellement observés ; contrats d'identité/audit/idempotence utilisables par les autres. Aucun rôle d'admin ne remplace l'auteur d'une demande. Pas de jeton navigateur dans localStorage.
 
@@ -42,7 +67,7 @@ Livrer les échanges entre développeurs et le parcours consenti qui ouvre une c
 - BC01–BC08 : projets, publication/catalogue, liens projet-demande, visibilité, annuaire volontaire, `ask_question` sans code obligatoire et recette communauté.
 - BH01–BH10 : ouverture volontaire, découverte des occasions, offres privées, consentements, acceptation avec création/rattachement de fil, refus/retrait/expiration, projection publique, contrat et recette transactionnelle.
 
-**Première PR de code :** B11, après intégration de B01–B05. En attendant : préparer les contrats, données fictives et cas négatifs dans les fichiers de ce domaine ; ne pas créer un second squelette Laravel.
+**Première PR de code :** préparer B11 dès maintenant, puis le finaliser et le fusionner après intégration de B01–B05. Commencer les éléments indépendants décrits plus haut, les contrats, données fictives et cas négatifs ; ne pas créer un second squelette Laravel.
 
 **Dépendances à intégrer avant usage :** B06–B09 pour l'identité et les actions authentifiées ; B12–B13 pour audit/rejeu ; B29 pour BH05 ; B32 pour BH07 ; B30 pour BH08. BC07 attend l'enum HelpIntent de BV201, puis BH05 attend BC07. Conserver aussi toutes les dépendances BH présentes dans `tasks.json`.
 
@@ -58,7 +83,7 @@ Livrer la conservation des solutions et leurs vérifications honnêtes, sur des 
 - B33–B38 : registre approuvé, lancement et quotas, B1, worker restreint, rapports réels, reprises après panne et API B2 isolée. Aucun composant React B2 avant GO_FRONTEND.
 - BV201–BV210 : cas documentaires révisés, profils approuvés, comparaison baseline/candidate, deux runs frais, quotas partagés, conclusions mitigées/régressions visibles, fiche de vérification et recette atelier.
 
-**Première PR de code :** B22 après le socle B01–B05 et le schéma B11 référencé. En attendant : préparer le contrat capsules et les scénarios fictifs B1 dans les fichiers de ce domaine. Les écritures utilisant identité/audit/rejeu attendent aussi les contrats B06–B09/B12–B13 ; les parcours issus d'une résolution attendent B18–B19.
+**Première PR de code :** préparer B22 dès maintenant ; sa finalisation et sa fusion attendent le socle B01–B05 et le schéma B11 référencé. Commencer les éléments indépendants décrits plus haut, le contrat capsules et les scénarios fictifs B1 dans les fichiers de ce domaine. Les écritures utilisant identité/audit/rejeu attendent aussi les contrats B06–B09/B12–B13 ; les parcours issus d'une résolution attendent B18–B19.
 
 **Point de coordination :** BV201 pilote aussi l'ajout initial de HelpIntent. Faire relire cette partie par `LamineGL`, convenir d'un seul auteur pour les fichiers HelpRequests concernés et fusionner avant BC07. Ne pas créer deux enums ou validateurs concurrents.
 
@@ -85,7 +110,7 @@ Chaque pilote possède ses tests Feature/Unit/Integration et sa base PostgreSQL 
 
 ## Ordre d'intégration
 
-1. S01/S02, puis petites PR de socle B01–B05 par le responsable 1. Les autres préparent leurs contrats/tests et relisent ce socle.
+1. Compléter S01/S02 ; B01 est intégré. Petites PR B02–B05 par le responsable 1 pendant que les autres codent les parties indépendantes de leurs domaines, préparent leurs contrats/tests et relisent le socle.
 2. Les trois branches récupèrent ce `main`. Le responsable 1 poursuit identité, audit et idempotence ; le responsable 2 livre B11 ; le responsable 3 prépare les capsules, puis B22 dès que ses références existent. Une absence de `depends_on` dans un ancien lot ne prouve pas son indépendance.
 3. Intégrer les services communs avant leurs consommateurs. Fusionner ensuite les lots métier prêts, sans attendre qu'une des trois tâches de coordination soit entièrement terminée. B18–B19 précèdent les parcours de capsule qui en dépendent.
 4. Coordonner BV201 → BC07 → BH05, ainsi que B29/B30/B32 → les lots BH concernés. Les dépendances exactes BH de `tasks.json` restent obligatoires.

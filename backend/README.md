@@ -2,7 +2,7 @@
 
 Cette première étape crée les dossiers partagés pour les trois développeurs. Les fichiers `.gitkeep` permettent de conserver les dossiers vides dans Git, afin que chaque clone reçoive la même arborescence.
 
-**État : B01 réalisé sur `backend/socle-auth`, en attente de revue.** Laravel 13.34.0, PHP 8.4 minimum, PostgreSQL, identifiants utilisateur UUID et fuseau UTC. `/up` vérifie le démarrage sans accès SQL. Les parcours d'inscription et de connexion restent à développer.
+**État : B01 intégré dans `main` par la PR #4.** Laravel 13.34.0, PHP 8.4 minimum, PostgreSQL, identifiants utilisateur UUID et fuseau UTC. `/up` vérifie le démarrage sans accès SQL. Les parcours d'inscription et de connexion restent à développer.
 
 Suivre [les commandes d'installation et de test](../docs/COMMANDS.md). Consulter [les versions observées](../docs/VERSIONS.md) et [les preuves B01](../docs/quality/B01_BOOTSTRAP.md) : 12 tests et 22 assertions réussis, dont une intégration PostgreSQL réelle.
 
@@ -60,6 +60,6 @@ Lire [le plan de travail à trois](../docs/execution/BACKEND_A_TROIS.md) pour le
 
 ## Prochaine étape
 
-Après revue de B01, le responsable du socle poursuit B02 (qualité PHP), B03 (CI), B04 (contrat HTTP), B05 (identité), puis l'authentification. L'inventaire des services externes S01/S02 reste partiel. `AGENTS.md`, la structure commune et le travail des autres branches sont préservés.
+Le responsable du socle poursuit B02 (qualité PHP), B03 (CI), B04 (contrat HTTP), B05 (identité), puis l'authentification. Les deux autres développeurs peuvent coder les parties indépendantes de leur domaine sur cette base ; les PR dépendantes attendent leurs prérequis. Voir le démarrage parallèle dans le plan d'équipe. L'inventaire des services externes S01/S02 reste partiel.
 
 Ne pas démarrer des installations Laravel indépendantes sur les autres branches. Après intégration du socle validé, chacun récupère `main` avant de développer les fonctionnalités qui en dépendent. Backend P0 et GO_FRONTEND humain précèdent toute application React.

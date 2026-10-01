@@ -33,7 +33,7 @@
       "refs": "N04/N05",
       "phase": "B",
       "execution_order": 3,
-      "status": "IN_REVIEW",
+      "status": "DONE",
       "evidence": ["docs/quality/B01_BOOTSTRAP.md"]
     },
     {

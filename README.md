@@ -15,7 +15,7 @@ F18 « Coup de main » : ouverture volontaire d’un projet, proposition limité
 - livrables : cahier PDF/HTML et présentation PowerPoint/PDF régénérés.
 
 ## État du développement
-Le pack documentaire initial est désormais suivi dans Git. La branche `backend/socle-auth` contient le premier socle Laravel/PostgreSQL B01, vérifié localement et en attente de revue. Voir [le backend](backend/README.md), [les commandes](docs/COMMANDS.md) et [les preuves](docs/quality/B01_BOOTSTRAP.md).
+Le socle Laravel/PostgreSQL B01 est intégré dans `main` par la [PR #4](https://github.com/haas-projet/haas/pull/4), fusionnée le 1er octobre 2026 sur demande explicite de l'utilisateur. Les trois développeurs utilisent cette base commune. Voir [le backend](backend/README.md), [les commandes](docs/COMMANDS.md) et [les preuves](docs/quality/B01_BOOTSTRAP.md).
 
 L'authentification et les fonctionnalités métier restent à développer. Aucune application React, CI applicative, exécution de laboratoire ou mise en production n'est encore validée. Les plans et critères attendus ne constituent pas des preuves de réalisation.
 

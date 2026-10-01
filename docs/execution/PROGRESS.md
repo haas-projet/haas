@@ -1,6 +1,6 @@
 # Suivi du dépôt HAAS
 
-**Statut actif :** B01 vérifié localement sur `backend/socle-auth`, IN_REVIEW ; S01/S02 IN_PROGRESS. Les autres lots restent TODO. 122 lots proposés, 106 identifiants antérieurs conservés. Ajouts BH01–10/FH01–05/RH01, F18, AC69–90 et UX21–23. Ne pas écraser les statuts ou preuves existants.
+**Statut actif :** B01 DONE, intégré dans `main` par la PR #4 ; S01/S02 IN_PROGRESS. Les autres lots restent TODO. 122 lots proposés, 106 identifiants antérieurs conservés. Ajouts BH01–10/FH01–05/RH01, F18, AC69–90 et UX21–23. Ne pas écraser les statuts ou preuves existants.
 
 À renseigner après commandes réelles : date / lot / responsable / fichiers / commandes / observé / commit ou raison de non-commit / blocage / prochaine action. Les contrôles documentaires de ce pack ne valident pas BACKEND_GATE, FRONTEND_GATE ou RELEASE_GATE.
 
@@ -47,3 +47,12 @@
 - Contrôles documentaires : `node scripts/validate-pack.mjs` 18/18, `node scripts/check-deployment-docs.mjs` 7/7, `git diff --check` sans erreur. Empreintes actualisées pour les fichiers livrés avant commit.
 - Limites : PHP 8.4 natif, Pint/PHPStan, CI distante, Qodana et services d'hébergement non vérifiés. Composer 2.8.5 émet des dépréciations sous PHP 8.5. S01/S02 restent partiels. Aucun gate ni revue humaine simulé.
 - Commit réel à consulter dans le bilan et la PR. B01 attend une revue avant fusion ; aucun merge vers `main` ou les branches des collègues. Prochain lot : B02 après intégration, puis B03/B04/B05 et authentification B06–B09.
+
+## 2026-10-01 — Fusion du socle et démarrage parallèle
+
+- Autorisation : l'utilisateur demande explicitement de terminer et fusionner la PR #4 pour travailler en parallèle. État initial propre, commit testé inchangé, PR fusionnable, aucune revue GitHub ni CI distante présente. Aucun avis d'un collègue inventé.
+- PR #4 fusionnée à 23:06:57 UTC par commit de merge `462af72b992ed9bc5c77440ac04ec41c87bf2efd`, conservant `1952bff5566fd8e9a46e8745041024a9bef2e679`. Le diff entre ces deux arbres est vide ; les preuves applicatives existantes portent sur le même code.
+- Suivi : B01 DONE, preuve enrichie de la fusion, README et HANDOFF actualisés. Le plan à trois permet désormais le code indépendant des domaines dès B01 et maintient les prérequis avant fusion des parties dépendantes. Aucun lot B02–B05/B11/B22 déclaré réalisé par cette adaptation.
+- Synchronisation prévue par avancement simple des trois branches vers le même socle et ce suivi. Vérifier les références distantes dans le bilan final ; aucune suppression, aucun force-push ni écrasement de contribution.
+- Changements de cette étape uniquement documentaires ; tests applicatifs non relancés sans changement de code. `node scripts/validate-pack.mjs` : 18/18 ; `node scripts/check-deployment-docs.mjs` : 7/7 ; `git diff --check` sans erreur. Empreintes actualisées avant le commit de suivi.
+- Prochain lot du responsable 1 : B02. LamineGL commence les éléments indépendants B11 ; mdev44-code ceux de B22. Les référentiels B05, l'authentification et la CI restent à livrer.

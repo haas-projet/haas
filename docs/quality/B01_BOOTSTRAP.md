@@ -1,6 +1,8 @@
 # B01 — Preuves du socle Laravel / PostgreSQL
 
-Date : 1er octobre 2026. Branche : `backend/socle-auth`. État : vérifié localement, en attente de revue humaine. Le SHA réel du commit contenant ce rapport figure dans la PR et le bilan, sans autoréférence inventée.
+Date : 1er octobre 2026. Code testé : `1952bff5566fd8e9a46e8745041024a9bef2e679`. État : B01 intégré par la [PR #4](https://github.com/haas-projet/haas/pull/4), commit de fusion `462af72b992ed9bc5c77440ac04ec41c87bf2efd`.
+
+Fusion effectuée à 23:06:57 UTC sur demande explicite de l'utilisateur de terminer et fusionner la PR. Aucun avis GitHub d'un autre développeur ni contrôle CI distant présent ; cette autorisation n'est pas présentée comme une revue croisée. Le contenu du commit de fusion est identique au commit testé, vérifié par `git diff 1952bff origin/main` après récupération.
 
 ## Livraison
 

@@ -2,7 +2,7 @@
 
 Inspecter le dépôt, préserver les fichiers/commits/saisies existants, lire ADR-006. Appliquer F18 : projets ouverts, offres consenties, décision propriétaire, fil et projection publique contrôlés. Nouvelle recette avant GO_FRONTEND ; ne pas prendre un ancien gate pour un accord sur ce périmètre. Systalink/Vercel inchangé.
 
-État courant : B01 vérifié localement, en attente de revue sur `backend/socle-auth` ; voir la dernière section et `quality/B01_BOOTSTRAP.md` depuis `docs/`. S01/S02 restent IN_PROGRESS. Retrouver le SHA réel dans la PR et `git log`. Prochain lot : B02 après intégration de B01 ; BH01–BH10 précèdent B39 et le frontend attend GO_FRONTEND humain.
+État courant : B01 DONE, intégré dans `main` par la PR #4 ; voir la dernière section et `quality/B01_BOOTSTRAP.md` depuis `docs/`. S01/S02 restent IN_PROGRESS. Prochain lot : B02 ; code indépendant B11/B22 en parallèle selon `BACKEND_A_TROIS.md`. BH01–BH10 précèdent B39 et le frontend attend GO_FRONTEND humain.
 
 ## Reprise après préparation GitHub — 2026-10-01
 
@@ -39,3 +39,11 @@ Les 12 tests / 22 assertions passent, dont les migrations/UUID/FK sur une base P
 B01 reste IN_REVIEW : préparer la revue humaine de la PR avant sa fusion. Aucun merge vers `main` ni vers les branches des collègues n'est effectué. Après intégration, chacun récupère le socle commun ; le responsable 1 continue B02 (qualité), puis B03 (CI), B04 (HTTP), B05 (identité) et B06–B09 (authentification). Ne pas empiler le prochain lot sur une PR en attente de revue.
 
 S01/S02 restent partiels : hébergement, SMTP, Qodana et CI non vérifiés. La version minimale PHP 8.4 reste à exécuter en B03 ; Composer 2.8.5 émet des dépréciations sous PHP 8.5. Aucun contrôle absent n'est déclaré réussi, aucun BACKEND_GATE ou GO_FRONTEND donné. Les sections précédentes relatent les étapes historiques, pas l'état courant.
+
+## Reprise après fusion autorisée — 2026-10-01
+
+PR #4 fusionnée sur demande explicite de l'utilisateur : `462af72b992ed9bc5c77440ac04ec41c87bf2efd`. Aucune revue d'un autre développeur enregistrée sur GitHub et aucune CI à cette étape. La fusion conserve exactement le contenu applicatif testé en `1952bff`. B01 est DONE ; les mentions IN_REVIEW ci-dessus décrivent l'étape précédente.
+
+Les trois branches doivent récupérer ce socle et le suivi d'intégration par avancement simple, sans écraser un éventuel travail supplémentaire. La publication vérifie les références distantes ; consulter le bilan final pour son commit. Chaque développeur travaille dans son clone et sa branche, avec son environnement et sa base de test.
+
+La demande de travail parallèle permet à LamineGL et mdev44-code de coder dès maintenant leurs parties indépendantes (enums propres au domaine, DTO, règles et tests unitaires), pendant que le responsable du socle livre B02–B05 puis l'authentification. Les migrations/services qui consomment des référentiels ou modèles manquants attendent leurs prérequis avant validation et fusion. Ne pas recréer ces modèles partagés dans chaque branche. Le détail et les commandes sont dans `BACKEND_A_TROIS.md`.

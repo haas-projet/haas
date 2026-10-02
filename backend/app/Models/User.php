@@ -17,6 +17,10 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 
+/**
+ * @property AccountStatus $status
+ * @property Role $role
+ */
 #[Fillable(['handle', 'email', 'password'])]
 #[Hidden(['email', 'password', 'remember_token', 'role', 'status', 'email_verified_at', 'is_demo', 'name'])]
 class User extends Authenticatable implements MustVerifyEmail

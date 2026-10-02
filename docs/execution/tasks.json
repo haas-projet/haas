@@ -81,8 +81,8 @@
       "refs": "AC04 ; F01/F11",
       "phase": "B",
       "execution_order": 7,
-      "status": "IN_REVIEW",
-      "evidence": ["docs/quality/B05_IDENTITY.md"]
+      "status": "DONE",
+      "evidence": ["docs/quality/B05_IDENTITY.md", "docs/quality/MERGE_B05_B06.md"]
     },
     {
       "id": "B06",
@@ -93,8 +93,8 @@
       "refs": "AC01/AC04",
       "phase": "B",
       "execution_order": 8,
-      "status": "IN_REVIEW",
-      "evidence": ["docs/quality/B06_REGISTRATION.md"]
+      "status": "DONE",
+      "evidence": ["docs/quality/B06_REGISTRATION.md", "docs/quality/MERGE_B05_B06.md"]
     },
     {
       "id": "B07",
@@ -105,7 +105,8 @@
       "refs": "AC01/AC02 ; N01 ; ADR-004 / DEP",
       "phase": "B",
       "execution_order": 9,
-      "status": "TODO"
+      "status": "IN_PROGRESS",
+      "evidence": ["docs/quality/B07_SESSIONS.md"]
     },
     {
       "id": "B08",

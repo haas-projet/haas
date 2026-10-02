@@ -7,7 +7,8 @@
     "require": {
         "php": "^8.4",
         "ext-pdo_pgsql": "*",
-        "laravel/framework": "^13.17"
+        "laravel/framework": "^13.17",
+        "laravel/sanctum": "^4.3.3"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

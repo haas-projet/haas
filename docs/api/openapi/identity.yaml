@@ -1,5 +1,92 @@
-# Pilote : ousseynoufayeisidk-sys. B05 : types partagés ; B06 : inscription.
+# Pilote : ousseynoufayeisidk-sys. B05 identité, B06 inscription, B07 sessions.
 paths:
+  /sanctum/csrf-cookie:
+    get:
+      operationId: initializeCsrf
+      summary: Initialiser la session anonyme et le cookie CSRF
+      security: []
+      description: >-
+        Appeler sur l'origine API avec credentials. Deux cookies Secure en production,
+        SameSite=Lax et domaine parent borné ; haas_session est HttpOnly, XSRF-TOKEN est lisible.
+        Aucun jeton bearer émis. Réponse privée no-store ; origine étrangère refusée.
+      responses:
+        '204':
+          description: Cookies initialisés, aucun corps JSON.
+          headers:
+            X-Request-ID:
+              $ref: '../../OPENAPI.yaml#/components/headers/RequestId'
+        '403':
+          $ref: '#/components/responses/SessionError'
+  /login:
+    post:
+      operationId: loginMember
+      summary: Ouvrir une session de membre
+      description: >-
+        Courriel normalisé et mot de passe exact. Rotation de session et du jeton CSRF,
+        sans remember-me. Compte non vérifié admis à la connexion, droits métier distincts.
+        Cinq tentatives par minute pour courriel/IP normalisés et vingt par IP.
+        Bcrypt historique ou identifiants invalides produisent la même erreur 422.
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/XsrfToken'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                  maxLength: 255
+                password:
+                  type: string
+                  minLength: 1
+                  maxLength: 128
+                  writeOnly: true
+      responses:
+        '200':
+          description: Session ouverte ; cookies renouvelés, Cache-Control no-store. Aucun courriel ni rôle dans la réponse.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [data]
+                properties:
+                  data:
+                    $ref: '#/components/schemas/SessionMember'
+        '403':
+          $ref: '#/components/responses/SessionError'
+        '419':
+          $ref: '#/components/responses/SessionError'
+        '422':
+          $ref: '#/components/responses/SessionError'
+        '429':
+          $ref: '#/components/responses/SessionError'
+        '500':
+          $ref: '#/components/responses/SessionError'
+  /logout:
+    post:
+      operationId: logoutMember
+      summary: Invalider la session courante
+      description: Session SQL détruite, session anonyme et jeton CSRF renouvelés ; anciens cookies inutilisables.
+      security:
+        - SessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/XsrfToken'
+      responses:
+        '204':
+          description: Déconnexion effectuée, sans corps ; Cache-Control no-store.
+        '401':
+          $ref: '#/components/responses/SessionError'
+        '403':
+          $ref: '#/components/responses/SessionError'
+        '419':
+          $ref: '#/components/responses/SessionError'
   /register:
     post:
       operationId: registerMember
@@ -42,6 +129,8 @@ paths:
                 properties:
                   data:
                     $ref: '#/components/schemas/RegisteredMember'
+        '403':
+          $ref: '#/components/responses/RegistrationError'
         '419':
           $ref: '#/components/responses/RegistrationError'
         '422':
@@ -53,7 +142,34 @@ paths:
         '503':
           $ref: '#/components/responses/RegistrationError'
 components:
+  securitySchemes:
+    SessionCookie:
+      type: apiKey
+      in: cookie
+      name: haas_session
+      description: Cookie de session chiffré, HttpOnly ; aucun bearer token supporté.
+  parameters:
+    XsrfToken:
+      in: header
+      name: X-XSRF-TOKEN
+      required: true
+      description: Valeur du cookie XSRF-TOKEN après décodage URL, avec cookies de session envoyés.
+      schema:
+        type: string
   responses:
+    SessionError:
+      description: >-
+        Enveloppe B04 ; 401 sans session, 403 origine ou compte interdit, 419 CSRF invalide,
+        422 validation/identifiants, 429 quota, 500 panne. CORS pour les origines autorisées.
+      headers:
+        X-Request-ID:
+          $ref: '../../OPENAPI.yaml#/components/headers/RequestId'
+        Retry-After:
+          $ref: '../../OPENAPI.yaml#/components/headers/RetryAfter'
+      content:
+        application/json:
+          schema:
+            $ref: '../../OPENAPI.yaml#/components/schemas/ApiError'
     RegistrationError:
       description: Erreur du contrat commun ; 422 pour entrée invalide ou doublon, 503 pour conditions indisponibles.
       headers:
@@ -66,6 +182,18 @@ components:
           schema:
             $ref: '../../OPENAPI.yaml#/components/schemas/ApiError'
   schemas:
+    SessionMember:
+      type: object
+      additionalProperties: false
+      required: [id, handle, email_verified]
+      properties:
+        id:
+          type: string
+          format: uuid
+        handle:
+          $ref: '#/components/schemas/Handle'
+        email_verified:
+          type: boolean
     RegisterMemberInput:
       type: object
       additionalProperties: false

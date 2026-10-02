@@ -19,6 +19,16 @@ Revue : 69 paquets MIT, 29 BSD-3-Clause, deux paquets Nette proposant notamment 
 Les dépendances restent installées localement dans `backend/vendor/`, ignoré par Git. `composer audit --locked` ne signale aucun avis de vulnérabilité au moment du contrôle ; ce résultat daté ne dispense pas des contrôles suivants.
 
 
+## Qualité PHP B02 — 1er octobre 2026
+
+Quatre dépendances de développement ajoutées, toutes MIT : Pint 1.32.1, Larastan 3.12.2, PHPStan 2.2.16 et iamcal/sql-parser 0.7. Notices installées lues ; versions, références et distributions dans [B02_DEPENDENCIES.json](quality/B02_DEPENDENCIES.json). Le total passe à 105 paquets. Les 101 versions précédentes sont conservées. PHP-Parser 5.9.0 (BSD-3-Clause), déjà présent, est déclaré directement pour le test d'architecture. Aucun ajout runtime.
+
+Composer 2.10.3 est utilisé comme outil temporaire, sans distribution dans le dépôt ni remplacement global. Les outils distribués en PHAR peuvent embarquer leurs propres composants ; conserver leurs notices avec les outils. Sources de configuration : [Pint](https://laravel.com/docs/13.x/pint), [Larastan](https://github.com/larastan/larastan), [PHPStan](https://phpstan.org/config-reference), [résolution des noms PHP-Parser](https://github.com/nikic/PHP-Parser/blob/master/doc/component/Name_resolution.markdown).
+
+## Outils CI B03 — 1er octobre 2026
+
+Actions checkout v7.0.1, setup-node v7.0.0 et setup-php 2.37.2 : licences MIT vérifiées par leur dépôt officiel, références SHA complètes et définitions d'action inspectées. actionlint 1.7.12 (MIT) utilisé localement depuis une archive dont l'empreinte est vérifiée. L'image officielle PostgreSQL 17 est épinglée par digest pour le service jetable de CI. Références et limites : [B03_CI.md](quality/B03_CI.md). Aucun nouveau paquet Composer, aucun binaire d'outil ni image de conteneur redistribué dans le dépôt. Les notices des outils et composants restent à conserver lors de leur distribution.
+
 ## Documents de présentation
 
 Le PDF et le PowerPoint utilisent le logo déjà fourni dans la conversation. Les formes et schémas du PowerPoint sont éditables ; le logo reste raster. Les polices de mise en page ont servi au rendu et ne sont pas fournies en fichiers séparés dans ce pack. La palette et les noms techniques viennent des documents HAAS. Les droits sur les dépendances futures et la diffusion des kits restent à vérifier séparément.

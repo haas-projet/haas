@@ -1,4 +1,5 @@
 # Décisions à compléter avant livraison
+- B06 : texte des conditions d'utilisation et version publiée à fournir avant ouverture réelle de l'inscription. `REGISTRATION_TERMS_VERSION` reste vide par défaut (503) ; les versions de test ne valent pas validation. Voir `api/REGISTRATION.md`.
 - ARB01 : date limite réelle, sujet complémentaire et modalités de dépôt. Les dates 25/31 octobre du dossier restent non réconciliées.
 - ARB02/03/05 : cession, licences/outils, distribution des kits et droits des contributions externes.
 - ARB04 : Ultimate est déclaré disponible ; reste projet Qodana/token/contributeurs, forfait GitHub et capacité CI.
@@ -8,7 +9,7 @@ Aucune de ces données n’est inventée par Codex. Un compte fournisseur non in
 
 ## B01 — réserves constatées le 1er octobre 2026
 
-- Socle testé sous PHP 8.5.10 et PostgreSQL 17.0, sur une base temporaire dédiée. La version minimale PHP 8.4 reste à exécuter dans la CI B03.
-- Composer 2.8.5 fonctionne mais émet des dépréciations sous PHP 8.5 ; qualifier une version compatible en B02.
-- Les accès/versions de l'hébergement, SMTP, Qodana et CI ne sont pas vérifiés. S01/S02 restent IN_PROGRESS ; cela ne transforme pas les tests locaux B01 en validation de production.
+- Socle testé localement sous PHP 8.5.10 et PostgreSQL 17.0. Réserve PHP minimale levée par B03 : CI réellement réussie sur PHP 8.4.26 et 8.5.11 avec PostgreSQL 17 dédié, voir `quality/B03_CI.md`.
+- B02 qualifie Composer 2.10.3 en copie temporaire sous PHP 8.5.10, sans dépréciation observée. L'installation globale 2.8.5 reste inchangée ; sélectionner une version adaptée sur chaque poste.
+- Les accès/versions de l'hébergement, SMTP et Qodana ne sont pas vérifiés. La CI B03 a été exécutée, sans présumer sa protection obligatoire sur main. S01/S02 restent IN_PROGRESS ; les tests locaux et CI ne sont pas une validation de production.
 - B01 est intégré par la PR #4 sur autorisation explicite de fusion donnée par l'utilisateur ; aucune revue GitHub par un autre développeur n'est attestée. L'authentification n'est pas encore livrée. Les PR métier qui dépendent des référentiels B05 ou de l'authentification attendent leur intégration.

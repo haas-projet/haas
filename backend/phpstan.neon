@@ -1,0 +1,17 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+    - vendor/nesbot/carbon/extension.neon
+
+parameters:
+    level: 8
+    phpVersion: 80400
+    paths:
+        - app
+        - bootstrap/app.php
+        - bootstrap/providers.php
+        - config
+        - database
+        - routes
+        - tests
+    tmpDir: .phpstan.cache
+    reportUnmatchedIgnoredErrors: true

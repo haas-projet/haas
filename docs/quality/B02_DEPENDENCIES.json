@@ -1,0 +1,53 @@
+{
+  "date": "2026-10-01",
+  "scope": "B02 : ajouts aux 101 dependances B01 conservees",
+  "packages": [
+    {
+      "name": "iamcal/sql-parser",
+      "version": "v0.7",
+      "scope": "dev",
+      "licenses": [
+        "MIT"
+      ],
+      "source": "https://github.com/iamcal/SQLParser.git",
+      "reference": "610392f38de49a44dab08dc1659960a29874c4b8",
+      "distribution": "https://api.github.com/repos/iamcal/SQLParser/zipball/610392f38de49a44dab08dc1659960a29874c4b8"
+    },
+    {
+      "name": "larastan/larastan",
+      "version": "v3.12.2",
+      "scope": "dev",
+      "licenses": [
+        "MIT"
+      ],
+      "source": "https://github.com/larastan/larastan.git",
+      "reference": "c328727e6103c1147d1c64cc96b3aedfda26bc20",
+      "distribution": "https://api.github.com/repos/larastan/larastan/zipball/c328727e6103c1147d1c64cc96b3aedfda26bc20"
+    },
+    {
+      "name": "laravel/pint",
+      "version": "v1.32.1",
+      "scope": "dev",
+      "licenses": [
+        "MIT"
+      ],
+      "source": "https://github.com/laravel/pint.git",
+      "reference": "006bd7825eb01daf92959d060b89cd9514fe4253",
+      "distribution": "https://api.github.com/repos/laravel/pint/zipball/006bd7825eb01daf92959d060b89cd9514fe4253"
+    },
+    {
+      "name": "phpstan/phpstan",
+      "version": "2.2.16",
+      "scope": "dev",
+      "licenses": [
+        "MIT"
+      ],
+      "source": "https://api.github.com/repos/phpstan/phpstan/zipball/46a6d9060e5a7763adfcc21ebcb8b504ebdbcb92",
+      "reference": "46a6d9060e5a7763adfcc21ebcb8b504ebdbcb92",
+      "distribution": "https://api.github.com/repos/phpstan/phpstan/zipball/46a6d9060e5a7763adfcc21ebcb8b504ebdbcb92"
+    }
+  ],
+  "totalPackages": 105,
+  "existingDependencyNowDirect": "nikic/php-parser v5.9.0, BSD-3-Clause, deja recense en B01",
+  "decision": "Quatre paquets MIT ; notices lues. Aucun ajout runtime ni mise a jour des paquets existants. Conserver les notices des dependances et composants embarques dans les PHAR."
+}

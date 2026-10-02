@@ -2,7 +2,7 @@
 
 Inspecter le dépôt, préserver les fichiers/commits/saisies existants, lire ADR-006. Appliquer F18 : projets ouverts, offres consenties, décision propriétaire, fil et projection publique contrôlés. Nouvelle recette avant GO_FRONTEND ; ne pas prendre un ancien gate pour un accord sur ce périmètre. Systalink/Vercel inchangé.
 
-État courant : B01 DONE, intégré dans `main` par la PR #4 ; voir la dernière section et `quality/B01_BOOTSTRAP.md` depuis `docs/`. S01/S02 restent IN_PROGRESS. Prochain lot : B02 ; code indépendant B11/B22 en parallèle selon `BACKEND_A_TROIS.md`. BH01–BH10 précèdent B39 et le frontend attend GO_FRONTEND humain.
+État courant : B01–B04 DONE, PR #5/#6/#7 fusionnées sur autorisation explicite ; B05 IN_REVIEW sur `backend/socle-auth-identity` (PR #8, CI verte). Voir `quality/MERGE_B02_B04.md`, `quality/B05_IDENTITY.md` depuis `docs/` et la dernière section. S01/S02 restent IN_PROGRESS. BH01–BH10 précèdent B39 et le frontend attend GO_FRONTEND humain.
 
 ## Reprise après préparation GitHub — 2026-10-01
 
@@ -47,3 +47,47 @@ PR #4 fusionnée sur demande explicite de l'utilisateur : `462af72b992ed9bc5c774
 Les trois branches doivent récupérer ce socle et le suivi d'intégration par avancement simple, sans écraser un éventuel travail supplémentaire. La publication vérifie les références distantes ; consulter le bilan final pour son commit. Chaque développeur travaille dans son clone et sa branche, avec son environnement et sa base de test.
 
 La demande de travail parallèle permet à LamineGL et mdev44-code de coder dès maintenant leurs parties indépendantes (enums propres au domaine, DTO, règles et tests unitaires), pendant que le responsable du socle livre B02–B05 puis l'authentification. Les migrations/services qui consomment des référentiels ou modèles manquants attendent leurs prérequis avant validation et fusion. Ne pas recréer ces modèles partagés dans chaque branche. Le détail et les commandes sont dans `BACKEND_A_TROIS.md`.
+
+## Reprise après B02 — 2026-10-01
+
+B02 est prêt pour revue sur `backend/socle-auth`. Lire [la preuve](../quality/B02_QUALITY.md) et [les commandes](../COMMANDS.md) : Pint, PHPStan/Larastan niveau 8 et architecture sont exécutables ; 23 tests / 33 assertions distincts réussis, dont PostgreSQL réel. Le témoin volontairement incorrect a été retiré et le serveur SQL temporaire arrêté. Aucun fichier `.env` privé livré.
+
+Composer 2.10.3 a été utilisé en copie temporaire vérifiée ; l'ancien Composer global reste inchangé. Les collègues devront récupérer B02 après fusion et lancer composer install pour recevoir les outils verrouillés. Ne pas annoncer la CI avant B03 ; PHP 8.4 natif et Qodana restent non exécutés. Aucun lot d'authentification ni gate validé par cette étape.
+
+Ne pas démarrer B03 sur cette branche tant que sa PR B02 attend la revue, conformément au plan à trois. Après intégration : synchroniser main, créer backend-ci avec PostgreSQL dédié et actions épinglées, puis observer son exécution réelle. Retrouver le SHA et l'URL de PR dans le bilan de session.
+
+## Continuation B03 isolée — 2026-10-01
+
+À la nouvelle demande de continuer, B03 est préparé sur `backend/socle-auth-ci`, dérivée de B02. Le plan précise cette possibilité sans ajouter de changements à la PR en attente. La PR B03 doit cibler temporairement `backend/socle-auth`, puis main après intégration de B02 ; pas de force-push ni fusion inversée des prérequis.
+
+Workflow validé par actionlint, actions et image PostgreSQL épinglées, permissions minimales. La matrice vérifie PHP 8.4/8.5 et termine par le contrôle stable backend-ci. Exécution distante encore à observer ; consulter la preuve B03 et le bilan avant de considérer PHP 8.4 ou la CI validés. Qodana et déploiement restent hors de ce lot.
+
+## Reprise après CI verte — 2026-10-02
+
+Le run GitHub 36944003232 de la PR #6 est réellement réussi sur `fa0ffd6` : PHP 8.4.26 et 8.5.11, 23 tests / 33 assertions par version et PostgreSQL réel. Les logs d'analyse/audit/tests ont été lus. Voir [B03_CI.md](../quality/B03_CI.md). La preuve initiale reste liée à ce SHA ; le bilan et les contrôles de PR donnent le résultat du dernier commit documentaire.
+
+Intégrer B02 (#5) avant B03 (#6), puis recibler #6 sur main et revérifier le dernier commit. Aucune fusion ni approbation humaine inventée. Si le gestionnaire d'identifiants Git Windows bloque, l'authentification GitHub CLI est disponible sans modifier la configuration globale. Prochain lot : B04, contrat HTTP/erreurs, puis B05 identité. Aucun GO_FRONTEND ou déploiement.
+
+## Reprise active B04 — 2026-10-02
+
+Branche `backend/socle-auth-http`, dérivée de B03 `a895269`. Erreurs HTTP, corrélation, pagination et OpenAPI commun livrés ; lire [B04_HTTP.md](../quality/B04_HTTP.md) et [le contrat partagé](../api/HTTP_CONTRACT.md). 62 tests / 575 assertions locaux réussis, PostgreSQL compris ; analyse/lint/audit réussis. Cluster de test arrêté. Symfony YAML ajouté aux outils dev : composer install requis après récupération.
+
+Ouvrir la PR contre `backend/socle-auth-ci`, observer la CI PHP 8.4/8.5 du dernier commit et consigner son run avant de déclarer IN_REVIEW. Garder #5 puis #6 puis B04 dans cet ordre d'intégration, recibler après fusion du prérequis sans force-push. Aucune authentification ni CORS livré par B04 ; prochain lot B05. Les trois pilotes peuvent utiliser les fragments et composants après intégration du socle, selon leurs prérequis.
+
+Mise à jour active : PR #7 ouverte, B04 IN_REVIEW après le run 36946538852 sur `1c4c343` ; PHP 8.4.26 et 8.5.11, chacun 62 tests / 575 assertions avec PostgreSQL. La preuve B04 lie ce run immuable. Le dernier complément documentaire et ses contrôles sont indiqués dans la PR et le bilan. Reprendre B05 sur une branche dérivée distincte si les PR précédentes attendent encore leur intégration.
+
+## Reprise active après fusions — B05
+
+#5/#6/#7 sont fusionnées ; main à 438ff5a et CI post-fusion verte. B05 part directement de ce main, branche backend/socle-auth-identity. Modèles d'identité et référentiel, migration et contrats prêts localement ; 98 tests / 739 assertions réussis, SQL compris, serveur de test arrêté. Lire IDENTITY_DATA.md : utiliser handle, plus name ; les factories sont non vérifiées par défaut. Aucun endpoint d'inscription livré.
+
+Proposer B05 contre main, observer sa CI propre avant IN_REVIEW. Prochain lot B06 : inscription, conditions versionnées et refus HTTP des champs serveur. Le test d'inscription privilégiée de B05 constate encore l'absence de route ; il ne remplace pas les tests du futur FormRequest. Les collègues récupèrent origin/main puis l'intègrent dans leur branche sans force-push. Aucun gate ni déploiement.
+
+Mise à jour active : B05 IN_REVIEW, PR #8 ouverte contre main. Run 36951975464 sur 5913f37 réussi sous PHP 8.4.26 et 8.5.11, chacun 98 tests / 739 assertions avec PostgreSQL. Lire la preuve B05, puis reprendre B06 sur une branche distincte si #8 reste ouverte ; aucune fusion de B05 présumée. Le dernier SHA documentaire et son run sont dans la PR et le bilan.
+
+## Reprise B06 — inscription
+
+Branche backend/socle-auth-registration depuis B05 4de376f. PR #8 encore ouverte ; proposer B06 contre backend/socle-auth-identity et ne pas modifier les branches des collègues. Contrat REGISTRATION.md, preuve B06_REGISTRATION.md. Total local 153 tests / 1218 assertions, SQL et deux processus concurrents compris ; cluster temporaire arrêté.
+
+Observer la CI propre de B06 avant IN_REVIEW. Conditions réelles absentes : REGISTRATION_TERMS_VERSION vide entraîne 503 ; utiliser uniquement des versions fictives en test, aucune approbation juridique présumée. Argon2id obligatoire ; traiter explicitement les anciens hashes bcrypt avant connexion B07. B07 doit livrer cookies Sanctum/CORS/login/logout, B08 les courriels. Aucun GO_FRONTEND ou déploiement.
+
+État actif : B06 IN_REVIEW, PR #9, commit applicatif 4e40f1e. Run 36954111512 vert sur PHP 8.4.26 et 8.5.11, chacun 153 tests / 1218 assertions, PostgreSQL compris. Intégrer #8 avant #9 ; dernier SHA documentaire et sa CI dans la PR. Prochaine continuation : B07 sur une nouvelle branche dérivée si les PR attendent leur intégration.

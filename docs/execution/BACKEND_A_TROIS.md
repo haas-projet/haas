@@ -14,13 +14,17 @@ Les 72 lots backend ont chacun un pilote. S01/S02 sont coordonnés par `ousseyno
 
 Les trois tâches regroupent le travail ; elles ne doivent pas devenir trois grosses PR à fusionner en fin de projet. Un lot cohérent avec ses tests par PR, subdivisé si nécessaire. Ne pas commencer le lot suivant sur une branche dont la PR attend une revue. Les branches peuvent être réutilisées après leur synchronisation avec `main` ; si une branche a été supprimée après fusion, en recréer une depuis `origin/main`.
 
+Si l'utilisateur demande explicitement de continuer pendant une revue, préparer le lot suivant sur une branche dérivée séparée, sans modifier la PR en attente. Cas B03 : `backend/socle-auth-ci` depuis B02, PR ciblant temporairement `backend/socle-auth`. Fusionner les prérequis dans l'ordre, puis recibler vers main et revérifier le dernier commit. Aucune fusion, revue ou validation n'est implicite dans cette préparation.
+
 ## Démarrage parallèle après B01
 
 La PR #4 est fusionnée dans `main` depuis le 1er octobre 2026, sur demande explicite de l'utilisateur. Cette demande permet de commencer le code indépendant des trois domaines en parallèle dès B01. Les prérequis ci-dessous portent sur la fusion du code dépendant ; ils ne bloquent plus tout démarrage d'un domaine.
 
+Le 2 octobre, les PR #5/#6/#7 ont aussi été fusionnées sur demande explicite : B01–B04 sont disponibles dans main (`438ff5a`, CI verte). B05 est préparé séparément ; ne pas supposer ses modèles déjà intégrés tant que sa PR n'est pas fusionnée. Voir [la preuve d'intégration](../quality/MERGE_B02_B04.md).
+
 | Développeur | Code à commencer sur sa branche | Dépendances à intégrer avant livraison complète |
 |---|---|---|
-| `ousseynoufayeisidk-sys` | B02 : outils qualité, puis B03/B04/B05 et authentification | Aucun autre domaine requis pour B02 |
+| `ousseynoufayeisidk-sys` | B05 : identité/référentiels, puis authentification | B01–B04 intégrés ; aucun autre domaine requis pour B05 |
 | `LamineGL` | Préparation B11 : enums d'état propres aux demandes, DTO, règles indépendantes et tests unitaires ; préparer les migrations et cas PostgreSQL | B05 pour Technology et l'identité ; B06–B09 pour les endpoints authentifiés |
 | `mdev44-code` | Préparation B22 : enums propres aux capsules, DTO de contenu/provenance et tests unitaires ; préparer le contrat de versionnement | B05 pour les référentiels ; B11 pour les références aux demandes ; droits/auth avant endpoints |
 
@@ -32,6 +36,7 @@ Chacun récupère sa branche synchronisée, depuis un répertoire propre :
 git fetch origin
 git switch backend/communaute-entraide # Adapter à sa branche ; --track origin/... au premier checkout.
 git pull --ff-only
+git merge origin/main # Récupérer le socle partagé dans sa branche, sans réécriture.
 cd backend
 composer install # Avec PHP 8.4 minimum sélectionné ; voir docs/COMMANDS.md.
 composer test
@@ -52,7 +57,7 @@ Livrer le socle Laravel/PostgreSQL reproductible, l'identité et les services pa
 - B29–B32 : notifications dédupliquées, signalements, retrait de contenu, suspension et rôles. Chaque pilote métier fournit les règles de visibilité de son domaine.
 - B39–B44 : coordonner sécurité, contrat complet, recette, exploitation, Qodana selon accès réel, puis BACKEND_GATE. Les trois personnes fournissent leurs preuves et corrigent leurs domaines.
 
-**B01 intégré ; prochaine PR :** B02, puis B03, B04 et B05, par PR cohérentes. B01–B05 doivent être intégrés avant la fusion des PR métier qui en dépendent. Leur préparation indépendante peut avancer dès maintenant. La fusion de ce socle n'est pas un BACKEND_GATE.
+**B01–B04 intégrés ; prochaine PR :** B05, puis B06–B10 par PR cohérentes. B05 doit être intégré avant la fusion des PR métier qui consomment les modèles d'identité et référentiels. Leur préparation indépendante peut avancer dès maintenant. La fusion de ce socle n'est pas un BACKEND_GATE.
 
 **Sortie attendue :** installation reproductible ; commandes locales documentées ; résultats de CI réellement observés ; contrats d'identité/audit/idempotence utilisables par les autres. Aucun rôle d'admin ne remplace l'auteur d'une demande. Pas de jeton navigateur dans localStorage.
 
@@ -108,6 +113,8 @@ Ces chemins définissent les responsabilités : B01 installe les fichiers du soc
 
 Chaque pilote possède ses tests Feature/Unit/Integration et sa base PostgreSQL locale de test dédiée. Ne jamais partager une base de tests entre les trois postes, ni pointer les scripts sur une base applicative ou de production. Garder `TestCase.php`, les fixtures globales et les seeders d'assemblage sous coordination du responsable 1.
 
+Contrat partagé préparé en B04 : [HTTP_CONTRACT.md](../api/HTTP_CONTRACT.md). Réutiliser PaginatedRequest, PageData et PaginatedResourceCollection ; le renderer reste central. Chaque pilote écrit son fragment OpenAPI, puis le responsable du socle ajoute les références de chemins dans le point d'entrée lors de l'intégration. Les fichiers de fragments vides ne déclarent aucun endpoint disponible.
+
 ## Ordre d'intégration
 
 1. Compléter S01/S02 ; B01 est intégré. Petites PR B02–B05 par le responsable 1 pendant que les autres codent les parties indépendantes de leurs domaines, préparent leurs contrats/tests et relisent le socle.
@@ -137,7 +144,7 @@ git fetch origin
 git merge origin/main
 ```
 
-Suivre [COMMANDS.md](../COMMANDS.md) après intégration du socle B01 : `composer install`, `composer test`, `composer test:integration`, avec une base PostgreSQL de test dédiée et identifiée. `composer lint` et `composer analyse` seront ajoutées en B02. Mettre dans la PR les commandes exactes, résultats, SHA et contrôles non exécutés.
+Suivre [COMMANDS.md](../COMMANDS.md) après intégration du socle B01 : `composer install`, `composer test`, `composer test:integration`, avec une base PostgreSQL de test dédiée et identifiée. B02 ajoute `composer lint`, `composer analyse` et le contrôle d'architecture ; récupérer ce lot après sa revue et sa fusion. Mettre dans la PR les commandes exactes, résultats, SHA et contrôles non exécutés.
 
 Ajouter uniquement les fichiers du lot, committer selon `COMMIT_CONVENTION.md`, pousser sa branche et ouvrir une PR vers `main` liée à sa tâche. Garder la tâche de coordination ouverte tant que tous ses lots ne sont pas vérifiés ; utiliser `Refs #numéro` pour une livraison partielle, pas `Closes`.
 

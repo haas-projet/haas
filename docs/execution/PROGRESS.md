@@ -1,6 +1,6 @@
 # Suivi du dépôt HAAS
 
-**Statut actif :** B01 DONE, intégré dans `main` par la PR #4 ; S01/S02 IN_PROGRESS. Les autres lots restent TODO. 122 lots proposés, 106 identifiants antérieurs conservés. Ajouts BH01–10/FH01–05/RH01, F18, AC69–90 et UX21–23. Ne pas écraser les statuts ou preuves existants.
+**Statut actif :** B01–B04 DONE ; B05 IN_REVIEW (PR #8) ; B06 IN_REVIEW (PR #9), CI PHP 8.4/8.5 verte ; S01/S02 IN_PROGRESS. Les autres lots restent TODO. 122 lots proposés, 106 identifiants antérieurs conservés. Ajouts BH01–10/FH01–05/RH01, F18, AC69–90 et UX21–23. Ne pas écraser les statuts ou preuves existants.
 
 À renseigner après commandes réelles : date / lot / responsable / fichiers / commandes / observé / commit ou raison de non-commit / blocage / prochaine action. Les contrôles documentaires de ce pack ne valident pas BACKEND_GATE, FRONTEND_GATE ou RELEASE_GATE.
 
@@ -56,3 +56,65 @@
 - Synchronisation prévue par avancement simple des trois branches vers le même socle et ce suivi. Vérifier les références distantes dans le bilan final ; aucune suppression, aucun force-push ni écrasement de contribution.
 - Changements de cette étape uniquement documentaires ; tests applicatifs non relancés sans changement de code. `node scripts/validate-pack.mjs` : 18/18 ; `node scripts/check-deployment-docs.mjs` : 7/7 ; `git diff --check` sans erreur. Empreintes actualisées avant le commit de suivi.
 - Prochain lot du responsable 1 : B02. LamineGL commence les éléments indépendants B11 ; mdev44-code ceux de B22. Les référentiels B05, l'authentification et la CI restent à livrer.
+
+## 2026-10-01 — B02, qualité PHP locale
+
+- Demande : continuer la partie socle/authentification attribuée à `ousseynoufayeisidk-sys`. Base propre `1735a69`, aucune PR de cette branche ouverte au démarrage ; contributions des autres domaines préservées.
+- Livraison : Pint, PHPStan/Larastan niveau 8 ciblant PHP 8.4, scripts Composer qualité/tests, contrôle AST des dépendances HTTP de Data/Services et tests négatifs. Aucun ignore général ni baseline. Quatre ajouts dev MIT, aucune version existante mise à jour.
+- Résultats réels : lint et analyse passent ; 22 tests / 28 assertions sans base et 1 test / 5 assertions sur PostgreSQL 17.0 dédié. Le test d'architecture seul passe et est déjà compté dans les 22. Total distinct : 23 tests / 33 assertions. Installation verrouillée, validation Composer, prérequis et audit réussis.
+- Témoin invalide ajouté puis retiré : les trois commandes lint, analyse et test:architecture échouent bien avec code 1. Corrections de diagnostics réels : contrôle de type APP_URL, annotations de tests et imports ordonnés. Serveur SQL temporaire arrêté ; service existant inchangé.
+- Preuves : [B02_QUALITY.md](../quality/B02_QUALITY.md), [B02_DEPENDENCIES.json](../quality/B02_DEPENDENCIES.json), COMMANDS/VERSIONS et suivi individuel actualisés. Composer 2.10.3 temporaire vérifié, installation globale inchangée.
+- Contrôles documentaires : pack 18/18, déploiement 7/7 et `git diff --check` sans erreur. Empreintes actualisées avant commit.
+- Limites : PHP 8.4 natif, CI et Qodana non exécutés. B02 IN_REVIEW ; aucun merge autorisé implicitement par cette continuation, aucun gate ni revue humaine simulé. Commit réel et PR à retrouver dans le bilan.
+- Prochain lot : B03 après revue/intégration de B02, puis B04/B05 et authentification. B11/B22 et leurs prérequis restent sous la responsabilité des autres développeurs.
+
+## 2026-10-01 — Préparation B03 sur branche dérivée
+
+- Demande utilisateur : continuer. B02 est encore en revue dans la PR #5 ; création de `backend/socle-auth-ci` depuis `b665a78` pour préserver sa PR. La préparation B03 cible temporairement la branche B02 et attend ses prérequis avant intégration dans main.
+- Workflow Backend CI : PHP 8.4/8.5, PostgreSQL 17 isolé, installation verrouillée, lint/analyse/tests/audit/documents et résultat global backend-ci. Actions épinglées par SHA, image par digest ; permissions en lecture, aucun secret de production et aucun filtre de chemins sur les PR.
+- Vérifications locales : actionlint 1.7.12 sans diagnostic (ShellCheck/Pyflakes non exécutés), pack 18/18, déploiement 7/7, diff sans erreur. Code applicatif inchangé depuis B02 et ses tests réels ; aucune nouvelle preuve SQL locale inventée.
+- GitHub Actions activé, runners hébergés utilisés ; aucune protection ou option de facturation modifiée. CI distante à observer après publication ; B03 reste IN_PROGRESS à ce stade. Preuves et références : [B03_CI.md](../quality/B03_CI.md).
+- Prochaine action : ouvrir la PR B03 dépendante de B02, observer ses contrôles et corriger tout échec réel avant de la déclarer prête pour revue.
+
+## 2026-10-02 — CI B03 réellement exécutée
+
+- Commit du workflow : `fa0ffd6da6ab9b8ba702d71815833c2d3f1c47ce`. [PR #6](https://github.com/haas-projet/haas/pull/6) vers `backend/socle-auth`, dépendante de la PR #5, restée inchangée. Aucun merge ni protection modifiée.
+- [Run 36944003232](https://github.com/haas-projet/haas/actions/runs/36944003232) terminé avec success : PHP 8.4.26, PHP 8.5.11 et contrôle global backend-ci. Logs lus : 23 tests / 33 assertions par version, PostgreSQL réel, lint/analyse/audit et documentation réussis.
+- B03 passe IN_REVIEW avec preuve réelle. La réserve PHP 8.4 natif est levée pour le socle testé ; Qodana, hébergement et fonctionnalités futures restent non vérifiés. Les 122 lots et leurs dépendances sont préservés.
+- Le complément documentaire relance la CI sur son propre commit ; consulter les contrôles du dernier SHA dans la PR et le bilan. Prochain lot métier : B04 (HTTP/erreurs), puis B05 ; intégrer B02 avant B03 et conserver la revue humaine.
+
+## 2026-10-02 — B04, contrat HTTP commun
+
+- Continuation demandée : branche `backend/socle-auth-http` issue de B03 `a895269`, sans modification des PR #5/#6. Renderer commun, request_id, pagination 20/max50, contrat OpenAPI et fragments par domaine livrés. Voir [B04_HTTP.md](../quality/B04_HTTP.md) et [HTTP_CONTRACT.md](../api/HTTP_CONTRACT.md).
+- Contrôles locaux réussis sous PHP 8.5.10 : lint, analyse, validation Composer/prérequis/audit ; 60 tests / 459 assertions sans base, 2 tests / 116 assertions PostgreSQL réel. Total 62 tests / 575 assertions. Cluster temporaire arrêté, aucune migration sur la base applicative.
+- Ajout dev symfony/yaml v8.0.15, licence MIT vérifiée, aucune mise à jour des dépendances existantes. AC03/AC05 restent partiels : contrats HTTP testés, règles métier et frontend à vérifier ultérieurement.
+- B04 attend l'observation de sa propre CI avant IN_REVIEW. Intégration dans l'ordre B02/B03/B04, sans revue humaine simulée. Prochain lot : B05.
+
+## 2026-10-02 — B04 en revue, CI verte
+
+- PR #7 ouverte contre B03, commit `1c4c343d11d4bf86e65c928a92e82b29758a04de`. Run 36946538852 réellement réussi : PHP 8.4.26, PHP 8.5.11, PostgreSQL 17 et backend-ci. Logs lus ; 62 tests / 575 assertions par version, lint/analyse/audit et documentation réussis.
+- B04 IN_REVIEW, preuve enrichie ; 230 empreintes vérifiées sans différence. Aucun merge ni avis humain. Le complément de preuve relance la CI ; consulter le dernier SHA/run de la PR et du bilan. Prochain lot B05.
+
+## 2026-10-02 — Fusions autorisées et B05
+
+- Demande explicite « fusionner et continuer ». #5, #6, #7 fusionnées dans cet ordre, sans force-push ni revue simulée ; #6/#7 reciblées vers main, synchronisées et retestées avant fusion. Main à `438ff5a866e8141fb55edfe1c09fc2869d95952b`, CI post-fusion verte (36950943010). Preuve et commits : [MERGE_B02_B04.md](../quality/MERGE_B02_B04.md). B02–B04 DONE.
+- Nouvelle branche B05 issue de ce main. Modèles User/Profile/Technology, enums, defaults sûrs, champs privés, migration additive et précontrôle des identités existantes. Contrat : [IDENTITY_DATA.md](../architecture/IDENTITY_DATA.md).
+- Contrôles locaux réussis : 73 tests / 517 assertions sans base, 25 tests / 222 assertions SQL, total 98 / 739 ; lint/analyse/Composer/audit réussis. Migration, contraintes et rollback exécutés uniquement sur PostgreSQL dédié puis serveur arrêté. Preuve : [B05_IDENTITY.md](../quality/B05_IDENTITY.md).
+- B05 attend sa propre CI avant IN_REVIEW ; aucune inscription/connexion disponible ni AC04 intégralement reçu. Prochain lot B06. Les collègues intègrent origin/main dans leur propre branche ; leurs commits et branches sont préservés.
+
+## 2026-10-02 — B05 en revue, CI verte
+
+- PR #8 ouverte contre main, commit applicatif `5913f3753ba65c6a42c26a19066bf726da24464d`. Run 36951975464 réellement réussi, logs lus : PHP 8.4.26 et 8.5.11, 98 tests / 739 assertions par version avec PostgreSQL ; lint/analyse/audit/documentation réussis, backend-ci vert.
+- B05 IN_REVIEW ; 243 empreintes locales vérifiées. Les PR #5/#6/#7 sont fusionnées ; #8 reste ouverte, aucun avis humain simulé. Preuve B05 enrichie ; le dernier commit documentaire et sa CI sont dans la PR et le bilan. Prochain lot B06.
+
+## 2026-10-02 — B06, inscription
+
+Continuation demandée ; branche distincte issue de B05 4de376f, PR #8 conservée ouverte. Inscription atomique membre/profil/conditions versionnées, validation stricte sans champ serveur, secret Argon2id entier, Resource privée et erreurs du contrat B04. Lire docs/api/REGISTRATION.md et docs/quality/B06_REGISTRATION.md.
+
+Tests locaux réels : 118 tests / 922 assertions sans SQL, 35 tests / 296 assertions PostgreSQL ; total 153 / 1218. Deux processus concurrents donnent un seul compte complet ; panne SQL contrôlée annulée sans secrets dans le journal applicatif. Nouveau cluster temporaire dédié arrêté après usage. Aucun nouveau package.
+
+B06 IN_PROGRESS en attente de sa propre CI. Conditions publiées/version réelle à fournir avant ouverture de l'inscription ; par défaut 503. Connexion, cookies SPA/CORS en B07 ; vérification et reset en B08. Aucune fusion, validation humaine ou gate présumée. Commit et run réels à consigner après création.
+
+## 2026-10-02 — B06 en revue
+
+Commit applicatif 4e40f1e7879a6594d2f2869e7fd84b8f9aea3a0c, PR #9 contre backend/socle-auth-identity. Run 36954111512 réussi et logs lus : PHP 8.4.26/8.5.11, chacun 153 tests / 1218 assertions avec PostgreSQL, lint/analyse/audit/documentation verts. B06 IN_REVIEW. Preuve B06_REGISTRATION.md ; aucun merge ou avis humain simulé. Prochain lot B07.

@@ -7,6 +7,10 @@
 - DEP : domaine contrôlé ; offre et panier Datacloud ; région ; remise/taxes ; plan Vercel compatible avec dépôt et auteurs ; SMTP ; sécurité runner ; DNS/TLS/cookies à tester.
 Aucune de ces données n’est inventée par Codex. Un compte fournisseur non inspecté reste NON VÉRIFIÉ ; cela ne remet pas en cause la déclaration de l’utilisateur.
 
+## B10 — raccordement métier des contributions
+
+Profils publics, édition et référentiel technologies développés dans la branche backend/socle-auth-profiles. Les compteurs/liens réels ne peuvent pas encore lire les domaines demandes/résolutions, capsules publiées et fiches d'attribution, absents de ce socle (notamment B19/B25/BV209). `contributions: null` indique cette indisponibilité sans fabriquer zéro ni un score. B10 reste IN_PROGRESS même après tests de cette première partie ; compléter les sources avec leurs pilotes et les contrôles de retrait/visibilité/démonstration avant réception. Voir [PROFILES.md](api/PROFILES.md). B12 peut avancer indépendamment.
+
 ## B01 — réserves constatées le 1er octobre 2026
 
 - Socle testé localement sous PHP 8.5.10 et PostgreSQL 17.0. Réserve PHP minimale levée par B03 : CI réellement réussie sur PHP 8.4.26 et 8.5.11 avec PostgreSQL 17 dédié, voir `quality/B03_CI.md`.

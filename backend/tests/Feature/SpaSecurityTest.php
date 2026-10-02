@@ -83,7 +83,7 @@ final class SpaSecurityTest extends TestCase
     {
         $this->browserRequest('OPTIONS', '/login', headers: ['Access-Control-Request-Method' => 'POST', 'Access-Control-Request-Headers' => 'content-type,x-xsrf-token'])
             ->assertNoContent()->assertHeader('Access-Control-Allow-Origin', 'https://app.haas.example.com')
-            ->assertHeader('Access-Control-Allow-Methods', 'GET, HEAD, POST, OPTIONS');
+            ->assertHeader('Access-Control-Allow-Methods', 'GET, HEAD, POST, PATCH, OPTIONS');
         $this->browserRequest('OPTIONS', '/login', headers: ['Origin' => 'https://preview.vercel.app', 'Access-Control-Request-Method' => 'POST'])
             ->assertHeader('Access-Control-Allow-Origin', 'https://app.haas.example.com');
     }

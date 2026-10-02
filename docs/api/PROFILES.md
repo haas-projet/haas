@@ -37,7 +37,7 @@ Les autres champs, même nulls, sont rejetés : handle, email, rôle, user_id, a
 
 UpdateProfileRequest → UpdateProfileData readonly → UpdateProfileService → OwnProfileResource. Le service verrouille le compte puis le profil, recharge actif/vérifié et réapplique la Policy. Les technologies sont relues sous verrous partagés triés ; la version et le pivot changent dans la même transaction. Deux clients partant de la même version ne peuvent pas mélanger leurs textes et sélections : un seul réussit, l'autre reçoit 409 RESOURCE_CONFLICT, sans mutation. Recharger et décider ; aucun rejeu automatique qui écrase la nouvelle version.
 
-Technologie supprimée/inconnue : 422 sur technology_ids ; invité : 401 ; non vérifié/action interdite : 403 ; CSRF absent : 419 ; champ invalide : 422. Une panne SQL provoque rollback complet, erreur 500 neutre et exception sans bindings ni texte de profil. L'audit partagé sera raccordé avec B12, pas simulé par un journal de requêtes.
+Technologie supprimée/inconnue : 422 sur technology_ids ; invité : 401 ; non vérifié/action interdite : 403 ; CSRF absent : 419 ; champ invalide : 422. Une panne SQL provoque rollback complet, erreur 500 neutre et exception sans bindings ni texte de profil. B12 raccorde l'[audit transactionnel privé](../architecture/AUDIT_ET_REVISIONS.md) : noms des champs changés, version et nombre de technologies uniquement. Une panne d'audit annule aussi le profil et ses pivots. Aucune donnée d'historique n'est ajoutée aux réponses HTTP.
 
 ## Reprise des données existantes
 

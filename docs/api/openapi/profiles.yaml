@@ -57,7 +57,9 @@ paths:
         lock_version obligatoire et au moins un champ modifiable ; champs omis conservés.
         Les technologies fournies remplacent la sélection complète, huit UUID existants distincts maximum.
         Bio vide ou null efface le texte ; country/github_url null effacent ces valeurs.
-        Version, profil et technologies sont modifiés atomiquement sous verrou.
+        Version, profil, technologies et révision d'audit privée sont modifiés atomiquement sous verrou.
+        L'audit conserve seulement les noms des champs changés, la version et le nombre de technologies.
+        Une panne d'audit annule la modification entière ; aucun historique dans la réponse.
         409 si la version a changé ; recharger avant décision, aucun écrasement automatique.
         Aucun champ de rôle, identité, contributions ou annuaire accepté. Aucun fichier ni fetch de lien.
       security:

@@ -2,6 +2,7 @@
 
 namespace App\Services\Identity;
 
+use App\Data\Audit\ProfileRevisionData;
 use App\Data\Identity\UpdateProfileData;
 use App\Exceptions\Identity\ProfileStorageFailed;
 use App\Exceptions\Identity\ProfileUpdateRejected;
@@ -9,12 +10,15 @@ use App\Exceptions\Identity\ProfileVersionConflict;
 use App\Models\Profile;
 use App\Models\Technology;
 use App\Models\User;
+use App\Services\Audit\AuditWriter;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 
 final class UpdateProfileService
 {
+    public function __construct(private readonly AuditWriter $audit) {}
+
     public function update(User $actor, UpdateProfileData $data): User
     {
         try {
@@ -36,11 +40,17 @@ final class UpdateProfileService
                     }
                 }
                 $profile->fill($data->attributes);
+                $changedFields = array_keys($profile->getDirty());
+                $changedFields = array_values(array_intersect($changedFields, ['bio', 'country', 'primary_language', 'github_url']));
                 $profile->lock_version++;
                 $profile->save();
                 if ($data->technologyIds !== null) {
-                    $user->technologies()->sync($data->technologyIds);
+                    $changes = $user->technologies()->sync($data->technologyIds);
+                    if ($changes['attached'] !== [] || $changes['detached'] !== [] || $changes['updated'] !== []) {
+                        $changedFields[] = 'technology_ids';
+                    }
                 }
+                $this->audit->profileUpdated($user, $profile, new ProfileRevisionData($changedFields));
 
                 return $user->setRelation('profile', $profile)->load(['technologies' => fn ($query) => $query->orderBy('slug')->orderBy('technologies.id')]);
             });

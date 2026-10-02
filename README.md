@@ -19,6 +19,8 @@ Le socle Laravel/PostgreSQL B01–B06 est intégré dans `main` : bootstrap, qua
 
 B07 livre [les sessions Sanctum et CORS](docs/api/SESSIONS.md) en revue dans [la PR #10](https://github.com/haas-projet/haas/pull/10). B08 livre [les courriels de compte](docs/api/ACCOUNT_MAIL.md) en revue dans [la PR #11](https://github.com/haas-projet/haas/pull/11), sur la branche permanente `backend/socle-auth` ; CI PHP 8.4/8.5 verte et [preuves](docs/quality/B08_ACCOUNT_MAIL.md). B09 livre le [compte courant et ses capacités](docs/api/CURRENT_ACCOUNT.md) en revue dans [la PR #13](https://github.com/haas-projet/haas/pull/13), avec [preuves locales et CI PHP 8.4/8.5 verte](docs/quality/B09_CURRENT_ACCOUNT.md). B10 livre une première partie des [profils publics, de leur édition et des technologies](docs/api/PROFILES.md) dans [la PR #14 en brouillon](https://github.com/haas-projet/haas/pull/14), avec [CI PHP 8.4/8.5 verte](docs/quality/B10_PROFILES.md) ; les contributions réelles restent à raccorder et le lot reste en cours. Les fonctionnalités métier restent à développer. Les conditions réelles doivent être configurées avant ouverture des inscriptions. Aucune application React, délivrabilité SMTP réelle, exécution de laboratoire ou mise en production n'est encore validée.
 
+B12 ajoute l'[audit transactionnel et les révisions privées](docs/architecture/AUDIT_ET_REVISIONS.md), raccordés à l'édition du profil, avec purge interne des anciennes métadonnées. [Preuves locales](docs/quality/B12_AUDIT.md) : 322 tests / 2912 assertions ; publication et CI à observer avant revue.
+
 ## Démarrer sans écraser
 Équipe de trois : voir [la répartition backend, les branches et les règles de fusion](docs/execution/BACKEND_A_TROIS.md).
 

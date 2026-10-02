@@ -1,6 +1,6 @@
 # Reprise — socle/auth
 
-Branche active : `backend/socle-auth-profiles` (B10), dérivée de B09 `6985eee`, PR #14 en brouillon avec CI verte ; PR #10/#11/#13 encore ouvertes. Laravel 13.34.0, PHP local 8.5.10, PostgreSQL 17.0 ; résolution Composer sur PHP 8.4.0. Lire `docs/COMMANDS.md`, `docs/quality/B10_PROFILES.md` et la dernière entrée ci-dessous ; les entrées précédentes sont historiques.
+Branche active : `backend/socle-auth-audit` (B12), dérivée de B10 `3ab1c02` ; PR #14 en brouillon avec CI verte, PR #10/#11/#13 encore ouvertes. Laravel 13.34.0, PHP local 8.5.10, PostgreSQL 17.0 ; résolution Composer sur PHP 8.4.0. Lire `docs/COMMANDS.md`, `docs/quality/B12_AUDIT.md` et la dernière entrée ci-dessous ; les entrées précédentes sont historiques.
 
 PostgreSQL temporaire arrêté. Les prochains tests SQL exigent une nouvelle base locale/CI dédiée `haas_*_test`, rôle `haas_test`, et une connexion explicite. Ne pas réutiliser automatiquement le port de recette. Aucun secret applicatif enregistré.
 
@@ -51,3 +51,9 @@ B10 reste IN_PROGRESS tant que les contributions réelles ne sont pas raccordée
 PR #14 en brouillon, applicatif c5c1706 ; run 37076878442 réussi, PHP 8.4.26/8.5.11 avec PostgreSQL 17, chacun 294 tests / 2808 assertions. Lire PROFILES.md et B10_PROFILES.md ; consulter les contrôles du dernier SHA documentaire dans la PR. Code local propre et serveur de test arrêté.
 
 B10 reste IN_PROGRESS : contributions réelles à raccorder avec les domaines concernés, aucun compteur fictif. La carte Systalink reste « En cours », même après une éventuelle fusion de cette première partie. Intégrer #10/#11/#13 avant #14, avec reciblage et vérification des contrôles ; préserver les trois branches permanentes. Prochain lot indépendant B12 (audit et révisions), B11 appartient à LamineGL. Aucun GO_FRONTEND ou déploiement.
+
+## Reprise active B12 — audit et révisions
+
+Branche backend/socle-auth-audit depuis 3ab1c02, B12 préparé et testé localement. Lire architecture/AUDIT_ET_REVISIONS.md et quality/B12_AUDIT.md depuis docs : journal privé, métadonnées limitées, droits actuels, purges sans copie ; l'échec d'audit annule le profil et les pivots. Premier adaptateur profil, domaines des collègues préservés. 322 tests / 2912 assertions, contrôles PHP verts ; PostgreSQL temporaire arrêté.
+
+Publier la PR contre backend/socle-auth-profiles et observer sa CI avant IN_REVIEW. Intégrer #10 → #11 → #13 → première livraison #14 avant B12, avec reciblage et revérification ; aucune fusion implicite. B10 reste IN_PROGRESS pour les contributions. B31 complétera le retrait métier et ses autres projections, AC25 global reste à recevoir. Prochain lot B13 (idempotence). Systalink B12 reste En cours jusqu'à fusion ; conserver les trois branches permanentes.

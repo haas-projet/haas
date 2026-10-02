@@ -23,3 +23,9 @@ Corrections pendant vérification : diagnostic de confirmation rattaché au bon 
 Contrôles finaux exécutés : `composer lint` et `composer analyse` réussis (niveau 8, sans baseline) ; `composer validate --strict --no-check-publish` valide ; `composer audit --locked --no-interaction` sans avis de vulnérabilité. `node scripts/validate-pack.mjs` : 18/18 ; `node scripts/check-deployment-docs.mjs` : 7/7 ; `git diff --check` sans erreur. Empreintes des fichiers livrés actualisées.
 
 B06 reste IN_PROGRESS tant que sa CI propre n'est pas observée. Aucun BACKEND_GATE, GO_FRONTEND, Qodana, recette sur domaines réels ou déploiement validé.
+
+## CI observée — B06 IN_REVIEW
+
+Commit applicatif `4e40f1e7879a6594d2f2869e7fd84b8f9aea3a0c`, [PR #9](https://github.com/haas-projet/haas/pull/9), base `backend/socle-auth-identity` (PR #8). [Run 36954111512](https://github.com/haas-projet/haas/actions/runs/36954111512) réussi ; logs lus : PHP 8.4.26 et 8.5.11, chacun 118 tests / 922 assertions et 35 tests / 296 assertions PostgreSQL, soit **153 / 1218**. Lint/analyse, installation verrouillée, audit et documentation réussis ; contrôle global backend-ci vert.
+
+Statut B06 IN_REVIEW, aucune revue humaine ou fusion inventée. Intégrer #8 puis recibler #9 sur main, synchroniser et vérifier les contrôles du dernier commit sans force-push. Prochain lot B07 sur branche distincte si la revue reste ouverte. Le SHA du complément documentaire et sa CI sont donnés dans la PR et le bilan, sans boucle d'auto-référence.

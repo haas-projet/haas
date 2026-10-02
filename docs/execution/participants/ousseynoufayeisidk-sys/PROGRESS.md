@@ -43,3 +43,7 @@ PR #8 ouverte contre main, commit 5913f37. Run 36951975464 réussi et logs lus :
 ## 2026-10-02 — B06 préparé
 
 Branche backend/socle-auth-registration dérivée de B05 4de376f ; PR #8 préservée. Inscription, profil et acceptation versionnée atomiques ; Argon2id et liste blanche stricte. 153 tests / 1218 assertions locaux réussis, dont concurrence de deux processus PostgreSQL et panne SQL réelle. Preuve docs/quality/B06_REGISTRATION.md. IN_PROGRESS en attente de CI ; aucune fusion implicite. Prochain lot B07, sessions et CSRF/CORS.
+
+## 2026-10-02 — B06 en revue
+
+PR #9, commit applicatif 4e40f1e ; run 36954111512 réussi sous PHP 8.4.26/8.5.11, chacun 153 tests / 1218 assertions avec PostgreSQL. B06 IN_REVIEW ; #8 précède #9, aucune fusion présumée. Prochain lot B07.

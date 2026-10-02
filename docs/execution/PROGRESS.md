@@ -1,6 +1,6 @@
 # Suivi du dépôt HAAS
 
-**Statut actif :** B01–B04 DONE ; B05 IN_REVIEW (PR #8) ; B06 IN_PROGRESS sur `backend/socle-auth-registration`, tests locaux réussis ; S01/S02 IN_PROGRESS. Les autres lots restent TODO. 122 lots proposés, 106 identifiants antérieurs conservés. Ajouts BH01–10/FH01–05/RH01, F18, AC69–90 et UX21–23. Ne pas écraser les statuts ou preuves existants.
+**Statut actif :** B01–B04 DONE ; B05 IN_REVIEW (PR #8) ; B06 IN_REVIEW (PR #9), CI PHP 8.4/8.5 verte ; S01/S02 IN_PROGRESS. Les autres lots restent TODO. 122 lots proposés, 106 identifiants antérieurs conservés. Ajouts BH01–10/FH01–05/RH01, F18, AC69–90 et UX21–23. Ne pas écraser les statuts ou preuves existants.
 
 À renseigner après commandes réelles : date / lot / responsable / fichiers / commandes / observé / commit ou raison de non-commit / blocage / prochaine action. Les contrôles documentaires de ce pack ne valident pas BACKEND_GATE, FRONTEND_GATE ou RELEASE_GATE.
 
@@ -114,3 +114,7 @@ Continuation demandée ; branche distincte issue de B05 4de376f, PR #8 conservé
 Tests locaux réels : 118 tests / 922 assertions sans SQL, 35 tests / 296 assertions PostgreSQL ; total 153 / 1218. Deux processus concurrents donnent un seul compte complet ; panne SQL contrôlée annulée sans secrets dans le journal applicatif. Nouveau cluster temporaire dédié arrêté après usage. Aucun nouveau package.
 
 B06 IN_PROGRESS en attente de sa propre CI. Conditions publiées/version réelle à fournir avant ouverture de l'inscription ; par défaut 503. Connexion, cookies SPA/CORS en B07 ; vérification et reset en B08. Aucune fusion, validation humaine ou gate présumée. Commit et run réels à consigner après création.
+
+## 2026-10-02 — B06 en revue
+
+Commit applicatif 4e40f1e7879a6594d2f2869e7fd84b8f9aea3a0c, PR #9 contre backend/socle-auth-identity. Run 36954111512 réussi et logs lus : PHP 8.4.26/8.5.11, chacun 153 tests / 1218 assertions avec PostgreSQL, lint/analyse/audit/documentation verts. B06 IN_REVIEW. Preuve B06_REGISTRATION.md ; aucun merge ou avis humain simulé. Prochain lot B07.

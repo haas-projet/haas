@@ -30,3 +30,11 @@ Assistant utilisé pour consolider les exigences, instructions Codex, cahier et 
 ## Mise à jour documentaire Coup de main
 
 Outil : assistant conversationnel, 1er octobre 2026. Tâche : intégrer la décision F18 au pack, sources Markdown, contrats de conception, tâches, critères, notes et livrables embarqués. Les scripts documentaires/contraste/rendu exécutés sont consignés dans docs/quality. Aucun développement Laravel/React, commit ou test d’usage réel n’est attesté ; relecture de l’équipe requise avant exécution. Aucune nouvelle recherche web ou validation de tarifs dans ce lot documentaire.
+
+## Lot 1 capsules/laboratoire — 2 octobre 2026
+
+| Outil / intervention | Périmètre | Contrôles | Revue humaine de l'équipe |
+|---|---|---|---|
+| Claude Code (Opus 4.7, `claude-opus-4-7`), participant `mdev44-code` sur `backend/capsules-laboratoire` | Enums `App\Enums\Capsules\CapsuleVersionState` (avec `canTransitionTo` et `allowedTargets`), `App\Enums\Lab\LabRunState`, `App\Enums\Comparisons\{ComparisonState,ComparisonOutcome}` et leurs tests unitaires ; mise à jour `docs/execution/participants/mdev44-code/{PROGRESS,HANDOFF}.md` | `composer lint` passed, `composer analyse` niveau 8 `[OK] No errors`, `composer test` 148 tests / 977 assertions OK, `composer test:integration` 35 tests / 296 assertions OK sous PostgreSQL 17, `composer audit --locked` sans alerte, `composer validate --strict --no-check-publish` valide | En attente |
+
+Les transitions `in_review → published` et `published → withdrawn` sont déduites (B25, B31, `docs/product/CAHIER_DES_CHARGES.md:502`, AC15) et signalées « à confirmer par le relecteur » dans le test. Aucun commit poussé, aucune PR ouverte, aucune fusion effectuée.

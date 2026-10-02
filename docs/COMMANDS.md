@@ -1,6 +1,6 @@
-# Commandes backend — B01/B02
+# Commandes backend — B01/B02/B03
 
-Partir de `backend/`. PHP 8.4 minimum avec pdo_pgsql. B02 fournit les scripts qualité locaux ; la CI distante reste à créer en B03. Composer 2.10.3 a été testé avec PHP 8.5.10. L'ancien Composer 2.8.5 du poste émet des dépréciations sous PHP 8.5 : choisir une version actuelle depuis [le site officiel](https://getcomposer.org/download/). Aucune installation globale n'a été modifiée pendant B02.
+Partir de `backend/`. PHP 8.4 minimum avec pdo_pgsql. B02 fournit les scripts qualité locaux ; B03 les exécute sur GitHub Actions avec PHP 8.4/8.5, résultats réels dans [B03_CI.md](quality/B03_CI.md). Composer 2.10.3 a été testé localement et en CI. L'ancien Composer 2.8.5 du poste émet des dépréciations sous PHP 8.5 : choisir une version actuelle depuis [le site officiel](https://getcomposer.org/download/). Aucune installation globale n'a été modifiée pendant B02.
 
 Sur le poste de cette session, sélectionner PHP pour le terminal PowerShell seulement (adapter le chemin ailleurs) :
 
@@ -56,3 +56,7 @@ php artisan route:list --json
 Le test d'architecture inspecte les références PHP et les helpers HTTP connus dans `app/Data` et `app/Services`, sans exécuter les sources analysées. Les alias d'import sont résolus. Ce contrôle n'est pas une isolation de sécurité : références dynamiques et dépendances indirectes nécessitent toujours une revue. Résultats et test témoin dans [B02_QUALITY.md](quality/B02_QUALITY.md).
 
 Depuis la racine : `node scripts/validate-pack.mjs`, `node scripts/check-deployment-docs.mjs`, `git diff --check`. Le validateur documentaire contrôle les fichiers livrés par Git et exige une preuve pour les statuts IN_REVIEW/DONE. Ne pas employer `--ignore-platform-reqs`.
+
+## CI GitHub — B03
+
+Le workflow Backend CI exécute ces contrôles sur chaque PR et chaque push de main, avec PHP 8.4/8.5 et PostgreSQL dédié. Le contrôle final s'appelle `backend-ci`. Consulter l'onglet Checks de la PR ou `gh pr checks NUMERO --repo haas-projet/haas`. Une CI en attente ou absente ne constitue pas une réussite. Pour le run exact : `gh run view RUN_ID --repo haas-projet/haas` ; les logs doivent correspondre au dernier commit proposé.

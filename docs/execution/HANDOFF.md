@@ -2,7 +2,7 @@
 
 Inspecter le dépôt, préserver les fichiers/commits/saisies existants, lire ADR-006. Appliquer F18 : projets ouverts, offres consenties, décision propriétaire, fil et projection publique contrôlés. Nouvelle recette avant GO_FRONTEND ; ne pas prendre un ancien gate pour un accord sur ce périmètre. Systalink/Vercel inchangé.
 
-État courant : B01 DONE, intégré dans `main` par la PR #4 ; B02 IN_REVIEW sur `backend/socle-auth`, preuves dans `quality/B02_QUALITY.md` depuis `docs/`. S01/S02 restent IN_PROGRESS. Prochain lot : B03 après revue/intégration ; code indépendant B11/B22 en parallèle selon `BACKEND_A_TROIS.md`. BH01–BH10 précèdent B39 et le frontend attend GO_FRONTEND humain.
+État courant : B01 DONE ; B02 IN_REVIEW sur `backend/socle-auth` (PR #5) ; B03 IN_REVIEW sur `backend/socle-auth-ci` (PR #6), CI distante réussie. Voir `quality/B03_CI.md` depuis `docs/` et la dernière section. S01/S02 restent IN_PROGRESS. BH01–BH10 précèdent B39 et le frontend attend GO_FRONTEND humain.
 
 ## Reprise après préparation GitHub — 2026-10-01
 
@@ -55,3 +55,15 @@ B02 est prêt pour revue sur `backend/socle-auth`. Lire [la preuve](../quality/B
 Composer 2.10.3 a été utilisé en copie temporaire vérifiée ; l'ancien Composer global reste inchangé. Les collègues devront récupérer B02 après fusion et lancer composer install pour recevoir les outils verrouillés. Ne pas annoncer la CI avant B03 ; PHP 8.4 natif et Qodana restent non exécutés. Aucun lot d'authentification ni gate validé par cette étape.
 
 Ne pas démarrer B03 sur cette branche tant que sa PR B02 attend la revue, conformément au plan à trois. Après intégration : synchroniser main, créer backend-ci avec PostgreSQL dédié et actions épinglées, puis observer son exécution réelle. Retrouver le SHA et l'URL de PR dans le bilan de session.
+
+## Continuation B03 isolée — 2026-10-01
+
+À la nouvelle demande de continuer, B03 est préparé sur `backend/socle-auth-ci`, dérivée de B02. Le plan précise cette possibilité sans ajouter de changements à la PR en attente. La PR B03 doit cibler temporairement `backend/socle-auth`, puis main après intégration de B02 ; pas de force-push ni fusion inversée des prérequis.
+
+Workflow validé par actionlint, actions et image PostgreSQL épinglées, permissions minimales. La matrice vérifie PHP 8.4/8.5 et termine par le contrôle stable backend-ci. Exécution distante encore à observer ; consulter la preuve B03 et le bilan avant de considérer PHP 8.4 ou la CI validés. Qodana et déploiement restent hors de ce lot.
+
+## Reprise après CI verte — 2026-10-02
+
+Le run GitHub 36944003232 de la PR #6 est réellement réussi sur `fa0ffd6` : PHP 8.4.26 et 8.5.11, 23 tests / 33 assertions par version et PostgreSQL réel. Les logs d'analyse/audit/tests ont été lus. Voir [B03_CI.md](../quality/B03_CI.md). La preuve initiale reste liée à ce SHA ; le bilan et les contrôles de PR donnent le résultat du dernier commit documentaire.
+
+Intégrer B02 (#5) avant B03 (#6), puis recibler #6 sur main et revérifier le dernier commit. Aucune fusion ni approbation humaine inventée. Si le gestionnaire d'identifiants Git Windows bloque, l'authentification GitHub CLI est disponible sans modifier la configuration globale. Prochain lot : B04, contrat HTTP/erreurs, puis B05 identité. Aucun GO_FRONTEND ou déploiement.

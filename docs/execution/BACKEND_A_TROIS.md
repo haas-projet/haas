@@ -14,6 +14,8 @@ Les 72 lots backend ont chacun un pilote. S01/S02 sont coordonnés par `ousseyno
 
 Les trois tâches regroupent le travail ; elles ne doivent pas devenir trois grosses PR à fusionner en fin de projet. Un lot cohérent avec ses tests par PR, subdivisé si nécessaire. Ne pas commencer le lot suivant sur une branche dont la PR attend une revue. Les branches peuvent être réutilisées après leur synchronisation avec `main` ; si une branche a été supprimée après fusion, en recréer une depuis `origin/main`.
 
+Si l'utilisateur demande explicitement de continuer pendant une revue, préparer le lot suivant sur une branche dérivée séparée, sans modifier la PR en attente. Cas B03 : `backend/socle-auth-ci` depuis B02, PR ciblant temporairement `backend/socle-auth`. Fusionner les prérequis dans l'ordre, puis recibler vers main et revérifier le dernier commit. Aucune fusion, revue ou validation n'est implicite dans cette préparation.
+
 ## Démarrage parallèle après B01
 
 La PR #4 est fusionnée dans `main` depuis le 1er octobre 2026, sur demande explicite de l'utilisateur. Cette demande permet de commencer le code indépendant des trois domaines en parallèle dès B01. Les prérequis ci-dessous portent sur la fusion du code dépendant ; ils ne bloquent plus tout démarrage d'un domaine.

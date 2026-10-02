@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Middleware\AssignRequestId;
-use App\Http\Middleware\EnsureActiveSession;
+use App\Http\Middleware\EnsureAccountIsActive;
 use App\Http\Middleware\ProtectSpaRequests;
 use App\Http\Middleware\RequireCsrfToken;
 use App\Http\Middleware\RequireVerifiedEmail;
@@ -29,8 +29,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->append(ProtectSpaRequests::class);
         $middleware->statefulApi();
         $middleware->alias(['verified' => RequireVerifiedEmail::class]);
-        $middleware->web(append: [AuthenticateSession::class, EnsureActiveSession::class], replace: [PreventRequestForgery::class => RequireCsrfToken::class]);
-        $middleware->api(append: [EnsureActiveSession::class]);
+        $middleware->web(append: [AuthenticateSession::class, EnsureAccountIsActive::class], replace: [PreventRequestForgery::class => RequireCsrfToken::class]);
+        $middleware->api(append: [EnsureAccountIsActive::class]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

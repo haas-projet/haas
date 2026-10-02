@@ -1,6 +1,6 @@
 # Reprise — socle/auth
 
-Branche active : `backend/socle-auth` (B08), avancée par fast-forward depuis B07 `b9b38db`, PR #10 encore ouverte. Laravel 13.34.0, PHP local 8.5.10, PostgreSQL 17.0 ; résolution Composer sur PHP 8.4.0. Lire `docs/COMMANDS.md`, `docs/quality/B08_ACCOUNT_MAIL.md` et la dernière entrée ci-dessous ; les entrées précédentes sont historiques.
+Branche active : `backend/socle-auth-permissions` (B09), dérivée de B08 `c8c0a30`, PR #10/#11 encore ouvertes. Laravel 13.34.0, PHP local 8.5.10, PostgreSQL 17.0 ; résolution Composer sur PHP 8.4.0. Lire `docs/COMMANDS.md`, `docs/quality/B09_CURRENT_ACCOUNT.md` et la dernière entrée ci-dessous ; les entrées précédentes sont historiques.
 
 PostgreSQL temporaire arrêté. Les prochains tests SQL exigent une nouvelle base locale/CI dédiée `haas_*_test`, rôle `haas_test`, et une connexion explicite. Ne pas réutiliser automatiquement le port de recette. Aucun secret applicatif enregistré.
 
@@ -31,3 +31,9 @@ Reprise active : B05/B06 DONE après fusion autorisée #8/#9. B07 sur backend/so
 Reprise B08 : branche permanente backend/socle-auth, base b9b38db. Courriels/reset prêts localement, 212 tests / 1948 assertions, SQL compris ; serveur temporaire arrêté. Publier la PR dépendante de #10 et observer la CI. Lire ACCOUNT_MAIL.md et B08_ACCOUNT_MAIL.md. Conserver les trois branches de départ ; supprimer uniquement les temporaires fusionnées et sans PR dépendante. Prochain lot B09 ; /me et Policies métier non livrés, SMTP réel non vérifié.
 
 État actif : B08 IN_REVIEW dans #11 ; CI 37015668695 verte sur 3a3d241, PHP 8.4.26/8.5.11 et PostgreSQL, chacun 212 tests / 1948 assertions. Fusion #10 avant reciblage/intégration #11 ; ne pas supprimer la branche permanente. Prochain lot B09, /me et capacités. Lire le dernier SHA documentaire et ses contrôles dans la PR.
+
+## Reprise active B09
+
+B09 préparé depuis B08 c8c0a30 sur backend/socle-auth-permissions. Compte courant et autorisations : CURRENT_ACCOUNT.md, preuve B09_CURRENT_ACCOUNT.md. 244 tests / 2406 assertions locaux, SQL compris ; lint/analyse/Composer/audit verts. Publier la PR contre backend/socle-auth puis observer sa CI avant IN_REVIEW. Intégrer #10 puis #11 avant B09 et recibler vers main à chaque étape, sans réécriture. Conserver les trois branches permanentes ; supprimer la temporaire B09 uniquement après fusion vérifiée.
+
+Prochain lot : B10, profils publics et édition. ACCOUNT_SUPPORT_EMAIL est une adresse publique de recours à configurer avant ouverture réelle ; aucune adresse inventée. Pas de contact effectif, SMTP réel, frontend ou déploiement validé. B32 livrera la révocation globale des sessions. À chaque bilan demandé par l'utilisateur : indiquer la carte Systalink et distinguer « En cours — prêt pour revue » de « Terminé — fusion vérifiée ».

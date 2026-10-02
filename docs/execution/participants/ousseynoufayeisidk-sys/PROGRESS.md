@@ -63,3 +63,9 @@ Branche permanente backend/socle-auth depuis b9b38db pour ne pas multiplier les 
 ## 2026-10-02 — B08 en revue
 
 PR #11 dépendante de #10, applicatif 3a3d241 ; run 37015668695 réussi sur PHP 8.4.26/8.5.11, chacun 212 tests / 1948 assertions SQL comprises. B08 IN_REVIEW, aucun merge ou avis humain présumé. Prochain lot B09. Dernier SHA documentaire et CI dans la PR ; conserver backend/socle-auth après fusion.
+
+## 2026-10-02 — B09 préparé
+
+Continuation de la partie socle demandée, avec bilan Systalink à chaque livraison. Branche temporaire backend/socle-auth-permissions depuis c8c0a30 ; PR #10/#11 préservées. Compte courant privé, capacités et propriété sans bypass admin, suspension et information publique de recours. Contrat CURRENT_ACCOUNT.md et preuve B09_CURRENT_ACCOUNT.md.
+
+244 tests / 2406 assertions locaux réussis : 177 / 1721 sans base et 67 / 685 sur PostgreSQL dédié. Lint/analyse/Composer/audit verts. Aucun package ni migration ajouté. B09 IN_PROGRESS avant sa CI propre ; Systalink « En cours », aucune nouvelle carte terminée avant fusion. Prochain lot B10. Les scénarios métier des collègues et AC03/AC09 complets restent à exécuter.

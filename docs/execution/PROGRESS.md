@@ -1,6 +1,6 @@
 # Suivi du dépôt HAAS
 
-**Statut actif :** B01–B06 DONE ; B07 IN_REVIEW sur `backend/socle-auth-sessions` (PR #10, CI verte) ; B08 IN_REVIEW sur la branche permanente `backend/socle-auth` (PR #11, CI verte) ; S01/S02 IN_PROGRESS. Les autres lots restent TODO. 122 lots proposés, 106 identifiants antérieurs conservés. Ajouts BH01–10/FH01–05/RH01, F18, AC69–90 et UX21–23. Ne pas écraser les statuts ou preuves existants.
+**Statut actif :** B01–B06 DONE ; B07 IN_REVIEW sur `backend/socle-auth-sessions` (PR #10, CI verte) ; B08 IN_REVIEW sur la branche permanente `backend/socle-auth` (PR #11, CI verte) ; B09 IN_PROGRESS sur `backend/socle-auth-permissions` ; S01/S02 IN_PROGRESS. Les autres lots restent TODO. 122 lots proposés, 106 identifiants antérieurs conservés. Ajouts BH01–10/FH01–05/RH01, F18, AC69–90 et UX21–23. Ne pas écraser les statuts ou preuves existants.
 
 À renseigner après commandes réelles : date / lot / responsable / fichiers / commandes / observé / commit ou raison de non-commit / blocage / prochaine action. Les contrôles documentaires de ce pack ne valident pas BACKEND_GATE, FRONTEND_GATE ou RELEASE_GATE.
 
@@ -140,3 +140,9 @@ B08 : vérification signée/expirante, renouvellement limité, reset neutre et �
 ## 2026-10-02 — B08 en revue
 
 PR #11 dépendante de #10, commit applicatif 3a3d24189a13fb5b6131b1e166791f1af21c13f1. Run 37015668695 réussi, logs lus : PHP 8.4.26/8.5.11, chacun 212 tests / 1948 assertions avec PostgreSQL, qualité/audit/documentation verts. B08 IN_REVIEW. Intégrer #10 avant #11, conserver backend/socle-auth. Prochain lot B09 ; dernier SHA documentaire et CI dans la PR. Aucune fusion, revue humaine ou délivrabilité SMTP inventée.
+
+## 2026-10-02 — B09 préparé
+
+Continuation de la partie socle demandée, avec bilan Systalink à chaque livraison. Branche temporaire backend/socle-auth-permissions depuis c8c0a30 ; PR #10/#11 préservées. Compte courant privé, capacités et propriété sans bypass admin, suspension et information publique de recours. Contrat CURRENT_ACCOUNT.md et preuve B09_CURRENT_ACCOUNT.md.
+
+244 tests / 2406 assertions locaux réussis : 177 / 1721 sans base et 67 / 685 sur PostgreSQL dédié. Lint/analyse/Composer/audit verts. Aucun package ni migration ajouté. B09 IN_PROGRESS avant sa CI propre ; Systalink « En cours », aucune nouvelle carte terminée avant fusion. Prochain lot B10. Les scénarios métier des collègues et AC03/AC09 complets restent à exécuter.

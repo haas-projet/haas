@@ -1,5 +1,9 @@
 # Pilote : ousseynoufayeisidk-sys. B05 identité, B06 inscription, B07 sessions.
 paths:
+  /api/v1/me:
+    $ref: './current-account.yaml#/paths/~1api~1v1~1me'
+  /api/v1/account-access:
+    $ref: './current-account.yaml#/paths/~1api~1v1~1account-access'
   /forgot-password:
     $ref: './account-mail.yaml#/paths/~1forgot-password'
   /reset-password:

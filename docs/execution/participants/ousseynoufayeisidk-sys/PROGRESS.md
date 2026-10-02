@@ -69,3 +69,7 @@ PR #11 dépendante de #10, applicatif 3a3d241 ; run 37015668695 réussi sur PHP 
 Continuation de la partie socle demandée, avec bilan Systalink à chaque livraison. Branche temporaire backend/socle-auth-permissions depuis c8c0a30 ; PR #10/#11 préservées. Compte courant privé, capacités et propriété sans bypass admin, suspension et information publique de recours. Contrat CURRENT_ACCOUNT.md et preuve B09_CURRENT_ACCOUNT.md.
 
 244 tests / 2406 assertions locaux réussis : 177 / 1721 sans base et 67 / 685 sur PostgreSQL dédié. Lint/analyse/Composer/audit verts. Aucun package ni migration ajouté. B09 IN_PROGRESS avant sa CI propre ; Systalink « En cours », aucune nouvelle carte terminée avant fusion. Prochain lot B10. Les scénarios métier des collègues et AC03/AC09 complets restent à exécuter.
+
+## 2026-10-02 — B09 en revue
+
+PR #13 contre backend/socle-auth, dépendante de #11/#10. Commit applicatif cb8f7379cd48ca2938774fd7912efcb94ce6a6ad ; CI 37074478785 réussie, journaux lus : PHP 8.4.26/8.5.11 avec PostgreSQL 17, chacun 244 tests / 2406 assertions. Lint/analyse/Composer/audit/documentation et backend-ci verts. B09 IN_REVIEW ; dernier SHA documentaire et sa CI dans la PR. Aucun merge ni avis humain présumé. Prochain lot B10. Systalink : B09 « En cours — prêt pour revue », aucune nouvelle carte « Terminé ».

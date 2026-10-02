@@ -32,7 +32,7 @@ Les premiers essais ont détecté un accès nullable à typer explicitement, une
 
 `node scripts/validate-pack.mjs` : 18/18 ; `node scripts/check-deployment-docs.mjs` : 7/7 ; `git diff --check` : aucune erreur. Serveur PostgreSQL B09 arrêté après les vérifications. Empreintes actualisées avant commit.
 
-B09 IN_PROGRESS avant observation de sa CI propre. Proposer une PR contre backend/socle-auth tant que B08 n'est pas intégré, puis recibler dans l'ordre #10 → #11 → B09. Les résultats distants seront ajoutés après exécution réelle.
+B09 IN_REVIEW : [PR #13](https://github.com/haas-projet/haas/pull/13) contre backend/socle-auth, dépendante de #11/#10. Commit applicatif `cb8f7379cd48ca2938774fd7912efcb94ce6a6ad`. [Run 37074478785](https://github.com/haas-projet/haas/actions/runs/37074478785) réussi, logs lus : PHP 8.4.26 et 8.5.11, chacun 177 tests / 1721 assertions puis 67 tests / 685 assertions PostgreSQL, soit 244 tests / 2406 assertions. Lint, analyse niveau 8, installation verrouillée, validation/prérequis/audit Composer, documentation 18/18 et 7/7 réussis ; backend-ci vert. Aucun avis humain ni merge simulé. Dernier SHA documentaire et contrôles dans la PR et le bilan ; intégrer #10 → #11 → #13, recibler vers main et revérifier.
 
 ## Limites
 

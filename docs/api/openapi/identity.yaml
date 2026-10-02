@@ -1,4 +1,21 @@
-# Pilote : ousseynoufayeisidk-sys. Ajouter uniquement les contrats implémentés.
+# Pilote : ousseynoufayeisidk-sys. B05 : types partagés ; endpoints dans les lots suivants.
 paths: {}
 components:
-  schemas: {}
+  schemas:
+    AccountRole:
+      type: string
+      enum: [member, moderator, admin]
+      description: Attribut serveur privé ; jamais accepté à l'inscription ni exposé dans un profil public.
+    AccountStatus:
+      type: string
+      enum: [active, suspended]
+      description: État administratif privé, distinct de la vérification du courriel.
+    Handle:
+      type: string
+      minLength: 3
+      maxLength: 30
+      description: Pseudonyme Unicode, sans caractères de contrôle ni espaces périphériques ; unicité sur lower(handle) en PostgreSQL.
+    TechnologyId:
+      type: string
+      format: uuid
+      description: Identifiant d'une ligne du référentiel technologies, jamais une enum de langages.

@@ -1,6 +1,6 @@
 # Suivi du dépôt HAAS
 
-**Statut actif :** B01 DONE ; B02/B03/B04 IN_REVIEW ; B04 sur `backend/socle-auth-http`, PR #7, CI PHP 8.4/8.5 verte ; S01/S02 IN_PROGRESS. Les autres lots restent TODO. 122 lots proposés, 106 identifiants antérieurs conservés. Ajouts BH01–10/FH01–05/RH01, F18, AC69–90 et UX21–23. Ne pas écraser les statuts ou preuves existants.
+**Statut actif :** B01–B04 DONE ; B05 IN_REVIEW sur `backend/socle-auth-identity`, PR #8, CI PHP 8.4/8.5 verte ; S01/S02 IN_PROGRESS. Les autres lots restent TODO. 122 lots proposés, 106 identifiants antérieurs conservés. Ajouts BH01–10/FH01–05/RH01, F18, AC69–90 et UX21–23. Ne pas écraser les statuts ou preuves existants.
 
 À renseigner après commandes réelles : date / lot / responsable / fichiers / commandes / observé / commit ou raison de non-commit / blocage / prochaine action. Les contrôles documentaires de ce pack ne valident pas BACKEND_GATE, FRONTEND_GATE ou RELEASE_GATE.
 
@@ -94,3 +94,15 @@
 
 - PR #7 ouverte contre B03, commit `1c4c343d11d4bf86e65c928a92e82b29758a04de`. Run 36946538852 réellement réussi : PHP 8.4.26, PHP 8.5.11, PostgreSQL 17 et backend-ci. Logs lus ; 62 tests / 575 assertions par version, lint/analyse/audit et documentation réussis.
 - B04 IN_REVIEW, preuve enrichie ; 230 empreintes vérifiées sans différence. Aucun merge ni avis humain. Le complément de preuve relance la CI ; consulter le dernier SHA/run de la PR et du bilan. Prochain lot B05.
+
+## 2026-10-02 — Fusions autorisées et B05
+
+- Demande explicite « fusionner et continuer ». #5, #6, #7 fusionnées dans cet ordre, sans force-push ni revue simulée ; #6/#7 reciblées vers main, synchronisées et retestées avant fusion. Main à `438ff5a866e8141fb55edfe1c09fc2869d95952b`, CI post-fusion verte (36950943010). Preuve et commits : [MERGE_B02_B04.md](../quality/MERGE_B02_B04.md). B02–B04 DONE.
+- Nouvelle branche B05 issue de ce main. Modèles User/Profile/Technology, enums, defaults sûrs, champs privés, migration additive et précontrôle des identités existantes. Contrat : [IDENTITY_DATA.md](../architecture/IDENTITY_DATA.md).
+- Contrôles locaux réussis : 73 tests / 517 assertions sans base, 25 tests / 222 assertions SQL, total 98 / 739 ; lint/analyse/Composer/audit réussis. Migration, contraintes et rollback exécutés uniquement sur PostgreSQL dédié puis serveur arrêté. Preuve : [B05_IDENTITY.md](../quality/B05_IDENTITY.md).
+- B05 attend sa propre CI avant IN_REVIEW ; aucune inscription/connexion disponible ni AC04 intégralement reçu. Prochain lot B06. Les collègues intègrent origin/main dans leur propre branche ; leurs commits et branches sont préservés.
+
+## 2026-10-02 — B05 en revue, CI verte
+
+- PR #8 ouverte contre main, commit applicatif `5913f3753ba65c6a42c26a19066bf726da24464d`. Run 36951975464 réellement réussi, logs lus : PHP 8.4.26 et 8.5.11, 98 tests / 739 assertions par version avec PostgreSQL ; lint/analyse/audit/documentation réussis, backend-ci vert.
+- B05 IN_REVIEW ; 243 empreintes locales vérifiées. Les PR #5/#6/#7 sont fusionnées ; #8 reste ouverte, aucun avis humain simulé. Preuve B05 enrichie ; le dernier commit documentaire et sa CI sont dans la PR et le bilan. Prochain lot B06.

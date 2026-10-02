@@ -15,9 +15,9 @@ F18 « Coup de main » : ouverture volontaire d’un projet, proposition limité
 - livrables : cahier PDF/HTML et présentation PowerPoint/PDF régénérés.
 
 ## État du développement
-Le socle Laravel/PostgreSQL B01 est intégré dans `main` par la [PR #4](https://github.com/haas-projet/haas/pull/4), fusionnée le 1er octobre 2026 sur demande explicite de l'utilisateur. Les trois développeurs utilisent cette base commune. Voir [le backend](backend/README.md), [les commandes](docs/COMMANDS.md) et [les preuves](docs/quality/B01_BOOTSTRAP.md).
+Le socle Laravel/PostgreSQL B01–B04 est intégré dans `main` : bootstrap, outils qualité, CI PHP 8.4/8.5 et contrat HTTP partagé. Les PR #5/#6/#7 ont été fusionnées le 2 octobre 2026 sur demande explicite, avec CI post-fusion verte. Voir [la preuve d'intégration](docs/quality/MERGE_B02_B04.md), [le backend](backend/README.md) et [les commandes](docs/COMMANDS.md).
 
-L'authentification et les fonctionnalités métier restent à développer. B03 ajoute une CI réellement réussie sur PHP 8.4/8.5 et PostgreSQL, proposée dans la [PR #6](https://github.com/haas-projet/haas/pull/6), dépendante de B02. Aucune application React, exécution de laboratoire ou mise en production n'est encore validée. Les plans et critères attendus ne constituent pas des preuves de réalisation.
+B05 propose les modèles d'identité et référentiels dans la [PR #8](https://github.com/haas-projet/haas/pull/8), CI verte ; voir [le contrat de données](docs/architecture/IDENTITY_DATA.md) et [les preuves](docs/quality/B05_IDENTITY.md). L'authentification et les fonctionnalités métier restent à développer. Aucune application React, exécution de laboratoire ou mise en production n'est encore validée. Les plans et critères attendus ne constituent pas des preuves de réalisation.
 
 ## Démarrer sans écraser
 Équipe de trois : voir [la répartition backend, les branches et les règles de fusion](docs/execution/BACKEND_A_TROIS.md).

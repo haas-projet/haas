@@ -1,6 +1,6 @@
 # Reprise — socle/auth
 
-Branche de base : `backend/socle-auth` (B02, PR #5). Branche active : `backend/socle-auth-http` (B04), issue de `backend/socle-auth-ci` (B03, PR #6). Laravel 13.34.0, PHP local 8.5.10, PostgreSQL 17.0 ; résolution Composer sur PHP 8.4.0. Lire `docs/COMMANDS.md` et la preuve du lot courant avant toute relance.
+Branche active : `backend/socle-auth-identity` (B05), créée depuis main `438ff5a` après fusion autorisée des PR #5/#6/#7. Laravel 13.34.0, PHP local 8.5.10, PostgreSQL 17.0 ; résolution Composer sur PHP 8.4.0. Lire `docs/COMMANDS.md` et la preuve du lot courant avant toute relance.
 
 PostgreSQL temporaire arrêté. Les prochains tests SQL exigent une nouvelle base locale/CI dédiée `haas_*_test`, rôle `haas_test`, et une connexion explicite. Ne pas réutiliser automatiquement le port de recette. Aucun secret applicatif enregistré.
 
@@ -15,3 +15,7 @@ Mise à jour du 2 octobre 2026 : CI réellement verte dans le run 36944003232 su
 Reprise B04 : rendu d'erreur/corrélation, pagination et contrat OpenAPI prêts localement. Lire `docs/quality/B04_HTTP.md`. 62 tests / 575 assertions locaux réussis, serveur PostgreSQL de test arrêté. Ajouter la PR contre B03 et observer sa propre CI avant IN_REVIEW. Aucune fusion ni signature de collègue simulée. Prochain lot B05, puis authentification B06–B09 ; CORS reste à vérifier dans B07.
 
 État courant : PR #7 ouverte, B04 IN_REVIEW. Run 36946538852 sur `1c4c343` réussi sous PHP 8.4.26/8.5.11 : 62 tests / 575 assertions par version, PostgreSQL compris. Le dernier SHA documentaire et son run sont dans la PR et le bilan. Prochain lot B05 sur branche distincte si nécessaire ; conserver l'ordre d'intégration #5 → #6 → #7.
+
+Mise à jour après autorisation « fusionner et continuer » : les trois PR sont fusionnées, main et sa CI sont verts. B05 préparé depuis ce main : 98 tests / 739 assertions locaux, modèles et contraintes SQL vérifiés ; PostgreSQL temporaire arrêté. Ouvrir la PR B05 contre main et lire sa CI propre. Utiliser handle et les factories non vérifiées par défaut ; les parcours d'inscription commencent en B06. Preuves MERGE_B02_B04.md et B05_IDENTITY.md.
+
+État actif : B05 IN_REVIEW, PR #8 ouverte ; run 36951975464 réussi sur 5913f37 (PHP 8.4.26/8.5.11, 98 tests / 739 assertions par version, SQL inclus). Lire les contrôles du dernier SHA documentaire dans la PR. B06 vient ensuite ; si #8 est encore ouverte, continuer sur une branche dérivée séparée sans modifier sa PR.

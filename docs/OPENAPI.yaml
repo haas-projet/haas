@@ -1,8 +1,8 @@
 openapi: 3.1.0
 info:
   title: HAAS — Socle API
-  version: 0.2.0
-  description: Socle B01/B04. Schémas HTTP communs disponibles ; endpoints métier à implémenter.
+  version: 0.3.0
+  description: Socle B01/B04/B05. Schémas HTTP et types d'identité disponibles ; endpoints métier à implémenter.
 servers:
   - url: http://localhost:8000
 x-haas-domain-fragments:
@@ -67,6 +67,14 @@ components:
         maximum: 50
         default: 20
   schemas:
+    AccountRole:
+      $ref: './api/openapi/identity.yaml#/components/schemas/AccountRole'
+    AccountStatus:
+      $ref: './api/openapi/identity.yaml#/components/schemas/AccountStatus'
+    Handle:
+      $ref: './api/openapi/identity.yaml#/components/schemas/Handle'
+    TechnologyId:
+      $ref: './api/openapi/identity.yaml#/components/schemas/TechnologyId'
     ApiError:
       type: object
       additionalProperties: false

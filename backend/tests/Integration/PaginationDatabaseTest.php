@@ -24,7 +24,7 @@ final class PaginationDatabaseTest extends PostgresTestCase
 
         $first = $this->get('/api/v1/test-sql-pagination')->assertOk()->assertJsonCount(20, 'data')
             ->assertJsonPath('meta', ['current_page' => 1, 'from' => 1, 'last_page' => 2, 'per_page' => 20, 'to' => 20, 'total' => 23])
-            ->assertExactJsonStructure(['data' => ['*' => ['id', 'name']], 'meta' => ['current_page', 'per_page', 'last_page', 'total', 'from', 'to']]);
+            ->assertExactJsonStructure(['data' => ['*' => ['id', 'handle']], 'meta' => ['current_page', 'per_page', 'last_page', 'total', 'from', 'to']]);
         $second = $this->get('/api/v1/test-sql-pagination?page=2')->assertOk()->assertJsonCount(3, 'data')
             ->assertJsonPath('meta.from', 21)->assertJsonPath('meta.to', 23);
         $this->assertSame([], array_intersect(array_column($first->json('data'), 'id'), array_column($second->json('data'), 'id')));

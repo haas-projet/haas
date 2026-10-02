@@ -24,4 +24,4 @@ Reprise active B06 : backend/socle-auth-registration, parent B05 4de376f. Inscri
 
 Mise à jour active : B06 IN_REVIEW dans #9, run 36954111512 réussi sur 4e40f1e ; 153 tests / 1218 assertions pour chacune des versions PHP 8.4.26/8.5.11 avec PostgreSQL. Reprendre B07 après lecture des contrats auth/CORS, sur branche séparée si #8/#9 restent ouvertes. Dernier SHA documentaire et CI dans la PR.
 
-Reprise active : B05/B06 DONE après fusion autorisée #8/#9. B07 sur backend/socle-auth-sessions depuis 075e6eb ; 181 tests / 1522 assertions locaux, serveur PostgreSQL temporaire arrêté. Lire SESSIONS.md et B07_SESSIONS.md, publier contre main et observer la CI. Prochain lot B08 ; /me et Policies en B09. Ni conditions réelles ni GO_FRONTEND présumés.
+Reprise active : B05/B06 DONE après fusion autorisée #8/#9. B07 sur backend/socle-auth-sessions depuis 075e6eb ; 182 tests / 1538 assertions locaux, serveur PostgreSQL temporaire arrêté. Lire SESSIONS.md et B07_SESSIONS.md, publier contre main et observer la CI. Prochain lot B08 ; /me et Policies en B09. Ni conditions réelles ni GO_FRONTEND présumés.

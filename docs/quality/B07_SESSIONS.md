@@ -18,7 +18,7 @@ PHP 8.5.10 explicite, Composer 2.10.3 temporaire vérifié, PostgreSQL 17.0 sur 
 |---|---|
 | composer format puis composer lint | Style appliqué puis contrôle réussi |
 | composer analyse | Niveau 8, aucune erreur, sans baseline/ignore |
-| composer test | 139 tests / 1173 assertions réussis |
+| composer test | 140 tests / 1189 assertions réussis |
 | composer test:integration | 42 tests / 349 assertions réussis sur PostgreSQL |
 | composer validate --strict --no-check-publish | Valide |
 | composer check-platform-reqs | Tous satisfaits |
@@ -26,13 +26,16 @@ PHP 8.5.10 explicite, Composer 2.10.3 temporaire vérifié, PostgreSQL 17.0 sur 
 | node scripts/validate-pack.mjs | 18/18 contrôles documentaires réussis |
 | node scripts/check-deployment-docs.mjs | 7/7 contrôles documentaires réussis |
 | git diff --check | Aucune erreur |
+| actionlint 1.7.12 -shellcheck= -pyflakes= .github/workflows/backend-ci.yml | Workflow valide ; shellcheck/pyflakes non exécutés |
 
-Total distinct : **181 tests / 1522 assertions**. Les tests SQL B05/B06, dont deux processus concurrents d'inscription, restent inclus. Nouveaux scénarios : cookies chiffrés réutilisés d'une requête à l'autre, identifiant SQL remplacé au login/détruit au logout, token renouvelé, mauvais mot de passe/compte absent/bcrypt historique sans fuite différentielle du contenu, Unicode long et rehash, expiration, changement de mot de passe, suspension, faux logout sans CSRF, token altéré, deux origines HAAS, B2/preview/suffixe trompeur interdits, prévols et erreurs CORS 401/403/419/422/429, configuration production trop large refusée.
+Total distinct : **182 tests / 1538 assertions**. Les tests SQL B05/B06, dont deux processus concurrents d'inscription, restent inclus. Nouveaux scénarios : cookies chiffrés réutilisés d'une requête à l'autre, identifiant SQL remplacé au login/détruit au logout, token renouvelé, mauvais mot de passe/compte absent/bcrypt historique sans fuite différentielle du contenu, Unicode long et rehash, expiration, changement de mot de passe, suspension, faux logout sans CSRF, token altéré, deux origines HAAS, B2/preview/suffixe trompeur interdits, prévols et erreurs CORS 401/403/419/422/429, configuration production trop large refusée et cookies locaux host-only sur HTTP.
 
 Les middlewares CSRF sont effectivement actifs dans les nouveaux scénarios via une classe de test qui retire uniquement l'exemption PHPUnit. Aucun actingAs utilisé. Routes de fixture protégées uniquement dans les tests ; elles ne constituent pas un endpoint /me livré. La session PostgreSQL est relue depuis les cookies, avec gardes/stores de requête recréés.
 
 Corrections après échecs réels : initialisation différée du limiteur pour éviter une résolution prématurée de cache/DB ; contrôles de configuration placés à la frontière HTTP ; types des enums et entrées de configuration précisés ; backend array conservé entre requêtes de test, garde de conteneur recréé. Une révocation suspendue conservait l'utilisateur dans le garde Sanctum : oubli explicite de ce cache après logout web. Après changement de mot de passe, le client de test initialise de nouveau CSRF avant connexion, conformément au contrat. Les exécutions initiales en échec ne sont pas présentées comme réussies.
 
 ## Limites
+
+La première CI, [36956745374](https://github.com/haas-projet/haas/actions/runs/36956745374) sur le commit applicatif `a8bfcaaefa485e6374db4a9332127a75a0e3ffba`, a échoué : APP_URL utilisait encore localhost sans port dans le workflow, en conflit avec Sanctum localhost:8000. Workflow et .env.testing.example alignés sur les quatre variables d'origine, sans assouplir les contrôles applicatifs. Les suites HTTP et PostgreSQL ci-dessus ont été relancées avec ces valeurs explicites ; la nouvelle CI reste à observer. Un test HTTP dédié vérifie les cookies locaux. Le run initial en échec n'est pas une validation.
 
 B07 IN_PROGRESS jusqu'à observation de sa CI propre, puis revue humaine. Aucun navigateur sur domaines réels, DNS/TLS Vercel/Systalink, Qodana ou déploiement exécuté ; DEP-AC02 et BACKEND_GATE restent non validés. Conditions réelles absentes : inscription 503 par défaut. B08 doit fournir les courriels et la réinitialisation (nécessaire aux anciens comptes bcrypt), B09 le profil privé et les Policies. B32 doit gérer la révocation globale lors des commandes de modération/rôle ; seul le rejet de la session utilisée est couvert ici.

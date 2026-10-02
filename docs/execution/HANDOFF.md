@@ -94,6 +94,6 @@ Observer la CI propre de B06 avant IN_REVIEW. Conditions réelles absentes : REG
 
 ## Reprise active B07
 
-#8/#9 sont fusionnées sur autorisation utilisateur ; main local 075e6eb, CI post-fusion verte. B07 part de ce commit sur backend/socle-auth-sessions. Lire SESSIONS.md et B07_SESSIONS.md. 181 tests / 1522 assertions locaux réussis, PostgreSQL compris ; cluster temporaire arrêté. Composer install requis pour Sanctum 4.3.3 ; aucun autre package mis à jour.
+#8/#9 sont fusionnées sur autorisation utilisateur ; main local 075e6eb, CI post-fusion verte. B07 part de ce commit sur backend/socle-auth-sessions. Lire SESSIONS.md et B07_SESSIONS.md. 182 tests / 1538 assertions locaux réussis, PostgreSQL compris ; cluster temporaire arrêté. Composer install requis pour Sanctum 4.3.3 ; aucun autre package mis à jour.
 
 Publier la PR B07 contre main et observer sa CI avant IN_REVIEW. Cookies + Origin/Referer de confiance + X-XSRF-TOKEN pour les mutations ; /me reste B09. B08 vient ensuite : courriels et reset, notamment pour les anciens hashes bcrypt refusés par le login. Conditions d'inscription réelles toujours absentes. Aucun GO_FRONTEND ou déploiement.

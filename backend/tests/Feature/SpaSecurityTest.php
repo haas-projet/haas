@@ -35,6 +35,30 @@ final class SpaSecurityTest extends TestCase
         }
     }
 
+    public function test_local_configuration_issues_host_only_cookies_over_http(): void
+    {
+        config([
+            'app.url' => 'http://localhost:8000',
+            'spa.frontend_url' => 'http://localhost:5173',
+            'cors.allowed_origins' => ['http://localhost:5173'],
+            'sanctum.stateful' => ['localhost:5173', 'localhost:8000'],
+            'session.domain' => null, 'session.secure' => false,
+        ]);
+        $response = $this->call('GET', 'http://localhost:8000/sanctum/csrf-cookie', server: [
+            'HTTP_ORIGIN' => 'http://localhost:5173', 'HTTP_ACCEPT' => 'application/json',
+        ])->assertNoContent()->assertHeader('Access-Control-Allow-Origin', 'http://localhost:5173')
+            ->assertHeader('Access-Control-Allow-Credentials', 'true');
+        $cookies = collect($response->headers->getCookies())->keyBy(fn ($cookie) => $cookie->getName());
+        foreach (['haas_session', 'XSRF-TOKEN'] as $name) {
+            $cookie = $cookies->get($name);
+            $this->assertNotNull($cookie);
+            $this->assertFalse($cookie->isSecure());
+            $this->assertNull($cookie->getDomain());
+            $this->assertSame('lax', $cookie->getSameSite());
+            $this->assertSame($name === 'haas_session', $cookie->isHttpOnly());
+        }
+    }
+
     #[DataProvider('untrustedOrigins')]
     public function test_untrusted_origins_cannot_open_a_session(string $origin): void
     {

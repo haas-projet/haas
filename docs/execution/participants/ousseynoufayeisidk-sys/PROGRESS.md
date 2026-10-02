@@ -50,4 +50,4 @@ PR #9, commit applicatif 4e40f1e ; run 36954111512 réussi sous PHP 8.4.26/8.5.1
 
 ## 2026-10-02 — B05/B06 intégrés, B07 préparé
 
-Fusion autorisée de #8/#9, main 075e6eb et CI 36954939123 verte. B05/B06 DONE ; preuve MERGE_B05_B06.md. B07 depuis ce main : sessions Sanctum, login/logout, CSRF, CORS, limites et tests de cookies. 181 tests / 1522 assertions locaux réussis, SQL compris ; qualité/Composer verts. IN_PROGRESS avant CI propre ; prochain B08. Aucun déploiement ou revue humaine simulée.
+Fusion autorisée de #8/#9, main 075e6eb et CI 36954939123 verte. B05/B06 DONE ; preuve MERGE_B05_B06.md. B07 depuis ce main : sessions Sanctum, login/logout, CSRF, CORS, limites et tests de cookies. 182 tests / 1538 assertions locaux réussis, SQL compris ; qualité/Composer verts. IN_PROGRESS avant CI propre ; prochain B08. Aucun déploiement ou revue humaine simulée.

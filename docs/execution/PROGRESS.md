@@ -1,6 +1,6 @@
 # Suivi du dépôt HAAS
 
-**Statut actif :** B01–B06 DONE après fusion autorisée de #8/#9 ; B07 IN_PROGRESS sur `backend/socle-auth-sessions` ; S01/S02 IN_PROGRESS. Les autres lots restent TODO. 122 lots proposés, 106 identifiants antérieurs conservés. Ajouts BH01–10/FH01–05/RH01, F18, AC69–90 et UX21–23. Ne pas écraser les statuts ou preuves existants.
+**Statut actif :** B01–B06 DONE après fusion autorisée de #8/#9 ; B07 IN_REVIEW sur `backend/socle-auth-sessions` (PR #10, CI verte) ; S01/S02 IN_PROGRESS. Les autres lots restent TODO. 122 lots proposés, 106 identifiants antérieurs conservés. Ajouts BH01–10/FH01–05/RH01, F18, AC69–90 et UX21–23. Ne pas écraser les statuts ou preuves existants.
 
 À renseigner après commandes réelles : date / lot / responsable / fichiers / commandes / observé / commit ou raison de non-commit / blocage / prochaine action. Les contrôles documentaires de ce pack ne valident pas BACKEND_GATE, FRONTEND_GATE ou RELEASE_GATE.
 
@@ -126,3 +126,7 @@ Autorisation explicite : « fusionner et continuer ». #8 fusionnée (2a6b737), 
 B07 sur backend/socle-auth-sessions : login/logout/csrf-cookie, sessions Sanctum, CORS exact, CSRF réellement actif, cookies/rotation/invalidation, limites de connexion, service de vérification et contrat OpenAPI. Sanctum 4.3.3 MIT seul package ajouté, 106 versions conservées. 182 tests / 1538 assertions locaux réussis, dont PostgreSQL et anciens scénarios concurrents ; analyse, lint, validation Composer, prérequis et audit réussis. Cluster temporaire arrêté.
 
 Preuve B07_SESSIONS.md, contrat SESSIONS.md. B07 IN_PROGRESS jusqu'à observation de sa CI. Aucun /me, courriel de compte, navigateur sur domaines réels, Qodana ou déploiement validé. Prochain lot B08, puis B09. Conditions réelles toujours à fournir ; bcrypt historique exige la réinitialisation B08. Commit réel et CI à consigner après publication.
+
+## 2026-10-02 — B07 en revue
+
+PR #10 contre main ; applicatif a8bfcaa, correction des origines CI 645e74e. Premier run en échec conservé dans la preuve ; run 36957084503 réussi sur 645e74ea0dd868317c89782fee479fddb37d2d06, PHP 8.4.26/8.5.11, chacun 182 tests / 1538 assertions avec PostgreSQL. Lint/analyse/audit/documentation et backend-ci verts, journaux lus. B07 IN_REVIEW ; aucun avis humain ou merge présumé. Prochain lot B08, courriels de compte ; dernier SHA documentaire et CI dans la PR et le bilan.

@@ -105,7 +105,7 @@
       "refs": "AC01/AC02 ; N01 ; ADR-004 / DEP",
       "phase": "B",
       "execution_order": 9,
-      "status": "IN_PROGRESS",
+      "status": "IN_REVIEW",
       "evidence": ["docs/quality/B07_SESSIONS.md"]
     },
     {

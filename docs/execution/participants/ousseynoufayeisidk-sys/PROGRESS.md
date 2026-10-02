@@ -35,3 +35,7 @@ PR #7 ouverte, commit `1c4c343`. CI run 36946538852 réellement verte et logs lu
 ## 2026-10-02 — Fusions B02–B04, puis B05
 
 Sur instruction explicite, PR #5/#6/#7 fusionnées après synchronisation et contrôles ; main 438ff5a, CI post-fusion 36950943010 réussie. B02–B04 DONE. Branche B05 backend/socle-auth-identity créée depuis ce main ; identité, profils et technologies partagés avec migration nouvelle et protections des champs serveur. 98 tests / 739 assertions locaux réussis ; lint/analyse/Composer/audit réussis, cluster SQL arrêté. B05 IN_PROGRESS en attendant sa CI. [Preuve](../../../quality/B05_IDENTITY.md). Prochain lot B06, inscription ; aucun avis de collègue inventé.
+
+## 2026-10-02 — B05 en revue
+
+PR #8 ouverte contre main, commit 5913f37. Run 36951975464 réussi et logs lus : PHP 8.4.26/8.5.11, 98 tests / 739 assertions chacun, SQL inclus, lint/analyse/audit/documentation verts. B05 IN_REVIEW, sans fusion ni revue humaine présumée. Prochain lot B06 ; preuves et contrôles du dernier SHA dans la PR et le bilan.

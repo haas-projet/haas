@@ -2,7 +2,7 @@
 
 Inspecter le dépôt, préserver les fichiers/commits/saisies existants, lire ADR-006. Appliquer F18 : projets ouverts, offres consenties, décision propriétaire, fil et projection publique contrôlés. Nouvelle recette avant GO_FRONTEND ; ne pas prendre un ancien gate pour un accord sur ce périmètre. Systalink/Vercel inchangé.
 
-État courant : B01–B04 DONE, PR #5/#6/#7 fusionnées sur autorisation explicite ; B05 IN_PROGRESS sur `backend/socle-auth-identity`. Voir `quality/MERGE_B02_B04.md`, `quality/B05_IDENTITY.md` depuis `docs/` et la dernière section. S01/S02 restent IN_PROGRESS. BH01–BH10 précèdent B39 et le frontend attend GO_FRONTEND humain.
+État courant : B01–B04 DONE, PR #5/#6/#7 fusionnées sur autorisation explicite ; B05 IN_REVIEW sur `backend/socle-auth-identity` (PR #8, CI verte). Voir `quality/MERGE_B02_B04.md`, `quality/B05_IDENTITY.md` depuis `docs/` et la dernière section. S01/S02 restent IN_PROGRESS. BH01–BH10 précèdent B39 et le frontend attend GO_FRONTEND humain.
 
 ## Reprise après préparation GitHub — 2026-10-01
 
@@ -81,3 +81,5 @@ Mise à jour active : PR #7 ouverte, B04 IN_REVIEW après le run 36946538852 sur
 #5/#6/#7 sont fusionnées ; main à 438ff5a et CI post-fusion verte. B05 part directement de ce main, branche backend/socle-auth-identity. Modèles d'identité et référentiel, migration et contrats prêts localement ; 98 tests / 739 assertions réussis, SQL compris, serveur de test arrêté. Lire IDENTITY_DATA.md : utiliser handle, plus name ; les factories sont non vérifiées par défaut. Aucun endpoint d'inscription livré.
 
 Proposer B05 contre main, observer sa CI propre avant IN_REVIEW. Prochain lot B06 : inscription, conditions versionnées et refus HTTP des champs serveur. Le test d'inscription privilégiée de B05 constate encore l'absence de route ; il ne remplace pas les tests du futur FormRequest. Les collègues récupèrent origin/main puis l'intègrent dans leur branche sans force-push. Aucun gate ni déploiement.
+
+Mise à jour active : B05 IN_REVIEW, PR #8 ouverte contre main. Run 36951975464 sur 5913f37 réussi sous PHP 8.4.26 et 8.5.11, chacun 98 tests / 739 assertions avec PostgreSQL. Lire la preuve B05, puis reprendre B06 sur une branche distincte si #8 reste ouverte ; aucune fusion de B05 présumée. Le dernier SHA documentaire et son run sont dans la PR et le bilan.

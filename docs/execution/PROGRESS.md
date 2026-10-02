@@ -1,6 +1,6 @@
 # Suivi du dépôt HAAS
 
-**Statut actif :** B01–B04 DONE ; B05 IN_PROGRESS sur `backend/socle-auth-identity`, contrôles locaux réussis et CI à observer ; S01/S02 IN_PROGRESS. Les autres lots restent TODO. 122 lots proposés, 106 identifiants antérieurs conservés. Ajouts BH01–10/FH01–05/RH01, F18, AC69–90 et UX21–23. Ne pas écraser les statuts ou preuves existants.
+**Statut actif :** B01–B04 DONE ; B05 IN_REVIEW sur `backend/socle-auth-identity`, PR #8, CI PHP 8.4/8.5 verte ; S01/S02 IN_PROGRESS. Les autres lots restent TODO. 122 lots proposés, 106 identifiants antérieurs conservés. Ajouts BH01–10/FH01–05/RH01, F18, AC69–90 et UX21–23. Ne pas écraser les statuts ou preuves existants.
 
 À renseigner après commandes réelles : date / lot / responsable / fichiers / commandes / observé / commit ou raison de non-commit / blocage / prochaine action. Les contrôles documentaires de ce pack ne valident pas BACKEND_GATE, FRONTEND_GATE ou RELEASE_GATE.
 
@@ -101,3 +101,8 @@
 - Nouvelle branche B05 issue de ce main. Modèles User/Profile/Technology, enums, defaults sûrs, champs privés, migration additive et précontrôle des identités existantes. Contrat : [IDENTITY_DATA.md](../architecture/IDENTITY_DATA.md).
 - Contrôles locaux réussis : 73 tests / 517 assertions sans base, 25 tests / 222 assertions SQL, total 98 / 739 ; lint/analyse/Composer/audit réussis. Migration, contraintes et rollback exécutés uniquement sur PostgreSQL dédié puis serveur arrêté. Preuve : [B05_IDENTITY.md](../quality/B05_IDENTITY.md).
 - B05 attend sa propre CI avant IN_REVIEW ; aucune inscription/connexion disponible ni AC04 intégralement reçu. Prochain lot B06. Les collègues intègrent origin/main dans leur propre branche ; leurs commits et branches sont préservés.
+
+## 2026-10-02 — B05 en revue, CI verte
+
+- PR #8 ouverte contre main, commit applicatif `5913f3753ba65c6a42c26a19066bf726da24464d`. Run 36951975464 réellement réussi, logs lus : PHP 8.4.26 et 8.5.11, 98 tests / 739 assertions par version avec PostgreSQL ; lint/analyse/audit/documentation réussis, backend-ci vert.
+- B05 IN_REVIEW ; 243 empreintes locales vérifiées. Les PR #5/#6/#7 sont fusionnées ; #8 reste ouverte, aucun avis humain simulé. Preuve B05 enrichie ; le dernier commit documentaire et sa CI sont dans la PR et le bilan. Prochain lot B06.

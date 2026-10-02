@@ -30,4 +30,16 @@ Total distinct : **98 tests / 739 assertions**. Les tests SQL utilisent uniqueme
 
 ## Limites et suite
 
-B05 IN_PROGRESS tant que sa CI distante n'est pas observée. Inscription, mot de passe 12–128, conditions versionnées, Sanctum/CORS/CSRF et Policies ne sont pas livrés par les seuls modèles ; B06 est le prochain lot. Validation complète du profil et limite de technologies en B10 ; annuaire/préférences dans les lots du pilote communauté. Aucun effet automatique de rôle sur les droits métier. Hébergement, Qodana et collation de production non vérifiés ; aucun gate ou déploiement.
+B05 IN_REVIEW après observation de sa CI propre. Inscription, mot de passe 12–128, conditions versionnées, Sanctum/CORS/CSRF et Policies ne sont pas livrés par les seuls modèles ; B06 est le prochain lot. Validation complète du profil et limite de technologies en B10 ; annuaire/préférences dans les lots du pilote communauté. Aucun effet automatique de rôle sur les droits métier. Hébergement, Qodana et collation de production non vérifiés ; aucun gate ou déploiement.
+
+## CI distante observée
+
+[PR #8](https://github.com/haas-projet/haas/pull/8) contre main, commit applicatif `5913f3753ba65c6a42c26a19066bf726da24464d`. [Run 36951975464](https://github.com/haas-projet/haas/actions/runs/36951975464) réussi le 2 octobre 2026 ; logs lus, sans résultat déduit d'un lot précédent.
+
+| Runtime réel | Résultats observés |
+|---|---|
+| PHP 8.4.26 / PostgreSQL 17 | 73 tests / 517 assertions + 25 tests / 222 assertions SQL ; lint/analyse/audit/Composer et contrôles documentaires réussis |
+| PHP 8.5.11 / PostgreSQL 17 | Mêmes résultats : 98 tests / 739 assertions distincts |
+| backend-ci | Réussite des deux versions exigée et constatée |
+
+Les 243 empreintes livrées ont été contrôlées localement, aucune différence. La PR B05 reste ouverte et non fusionnée, sans revue humaine présumée. Le complément documentaire reçoit sa propre CI ; son SHA et le run final figurent dans la PR et le bilan, sans autoréférence de commit.

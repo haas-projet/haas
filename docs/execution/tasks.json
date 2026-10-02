@@ -81,7 +81,7 @@
       "refs": "AC04 ; F01/F11",
       "phase": "B",
       "execution_order": 7,
-      "status": "IN_PROGRESS",
+      "status": "IN_REVIEW",
       "evidence": ["docs/quality/B05_IDENTITY.md"]
     },
     {

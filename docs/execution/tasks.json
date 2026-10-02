@@ -69,7 +69,7 @@
       "refs": "AC03/AC05 ; N01",
       "phase": "B",
       "execution_order": 6,
-      "status": "IN_PROGRESS",
+      "status": "IN_REVIEW",
       "evidence": ["docs/quality/B04_HTTP.md"]
     },
     {

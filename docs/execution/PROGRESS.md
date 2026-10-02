@@ -1,6 +1,6 @@
 # Suivi du dépôt HAAS
 
-**Statut actif :** B01 DONE ; B02/B03 IN_REVIEW ; B04 IN_PROGRESS sur `backend/socle-auth-http`, contrôles locaux réussis, CI à observer ; S01/S02 IN_PROGRESS. Les autres lots restent TODO. 122 lots proposés, 106 identifiants antérieurs conservés. Ajouts BH01–10/FH01–05/RH01, F18, AC69–90 et UX21–23. Ne pas écraser les statuts ou preuves existants.
+**Statut actif :** B01 DONE ; B02/B03/B04 IN_REVIEW ; B04 sur `backend/socle-auth-http`, PR #7, CI PHP 8.4/8.5 verte ; S01/S02 IN_PROGRESS. Les autres lots restent TODO. 122 lots proposés, 106 identifiants antérieurs conservés. Ajouts BH01–10/FH01–05/RH01, F18, AC69–90 et UX21–23. Ne pas écraser les statuts ou preuves existants.
 
 À renseigner après commandes réelles : date / lot / responsable / fichiers / commandes / observé / commit ou raison de non-commit / blocage / prochaine action. Les contrôles documentaires de ce pack ne valident pas BACKEND_GATE, FRONTEND_GATE ou RELEASE_GATE.
 
@@ -89,3 +89,8 @@
 - Contrôles locaux réussis sous PHP 8.5.10 : lint, analyse, validation Composer/prérequis/audit ; 60 tests / 459 assertions sans base, 2 tests / 116 assertions PostgreSQL réel. Total 62 tests / 575 assertions. Cluster temporaire arrêté, aucune migration sur la base applicative.
 - Ajout dev symfony/yaml v8.0.15, licence MIT vérifiée, aucune mise à jour des dépendances existantes. AC03/AC05 restent partiels : contrats HTTP testés, règles métier et frontend à vérifier ultérieurement.
 - B04 attend l'observation de sa propre CI avant IN_REVIEW. Intégration dans l'ordre B02/B03/B04, sans revue humaine simulée. Prochain lot : B05.
+
+## 2026-10-02 — B04 en revue, CI verte
+
+- PR #7 ouverte contre B03, commit `1c4c343d11d4bf86e65c928a92e82b29758a04de`. Run 36946538852 réellement réussi : PHP 8.4.26, PHP 8.5.11, PostgreSQL 17 et backend-ci. Logs lus ; 62 tests / 575 assertions par version, lint/analyse/audit et documentation réussis.
+- B04 IN_REVIEW, preuve enrichie ; 230 empreintes vérifiées sans différence. Aucun merge ni avis humain. Le complément de preuve relance la CI ; consulter le dernier SHA/run de la PR et du bilan. Prochain lot B05.

@@ -44,4 +44,16 @@ Les routes de fixture n'existent que pendant les tests. Le contrôle OpenAPI ana
 
 AC03/AC05 : socle de rendu des interdictions et de validation vérifié ; les commandes métier, absence de mutation, interfaces et conservation de saisie restent à tester dans leurs lots. Ces AC ne sont pas déclarés intégralement reçus. Sanctum, vraie session/CSRF, CORS et codes métier spécifiques sont à implémenter dans les lots concernés. Le test 419 vérifie le renderer, pas un parcours navigateur authentifié.
 
-CI distante de ce commit à observer après publication ; les résultats B03 ne sont pas attribués au code B04. Qodana et hébergement restent non vérifiés. Intégrer les PR dans l'ordre B02 → B03 → B04 ; recibler sur main après intégration des prérequis et revérifier les contrôles. Prochain lot personnel : B05 identité/rôles/états. BACKEND_GATE reste PENDING, aucun GO_FRONTEND ou déploiement.
+Qodana et hébergement restent non vérifiés. Intégrer les PR dans l'ordre B02 → B03 → B04 ; recibler sur main après intégration des prérequis et revérifier les contrôles. Prochain lot personnel : B05 identité/rôles/états. BACKEND_GATE reste PENDING, aucun GO_FRONTEND ou déploiement.
+
+## CI observée — B04 en revue
+
+[PR #7](https://github.com/haas-projet/haas/pull/7), commit applicatif `1c4c343d11d4bf86e65c928a92e82b29758a04de`. [Run 36946538852](https://github.com/haas-projet/haas/actions/runs/36946538852) terminé avec succès le 2 octobre 2026. Les logs ont été lus :
+
+| Runtime réel | Résultats |
+|---|---|
+| PHP 8.4.26 / PostgreSQL 17 | 60 tests / 459 assertions + SQL 2 tests / 116 assertions ; lint, analyse, Composer/audit, contrôles documentaires réussis |
+| PHP 8.5.11 / PostgreSQL 17 | Mêmes résultats : 62 tests / 575 assertions distincts |
+| backend-ci | Réussite des deux jobs exigée et constatée |
+
+B04 est IN_REVIEW ; PR ouverte, non fusionnée, sans revue humaine présumée. Les 230 empreintes des fichiers livrés ont été vérifiées localement, aucune différence. Le complément documentaire reçoit sa propre exécution CI ; le bilan et les contrôles de PR indiquent le dernier SHA/run, sans inscrire le SHA de ce complément dans lui-même.

@@ -27,3 +27,7 @@ PR #6 ouverte contre la branche B02, commit workflow `fa0ffd6`. Run GitHub 36944
 ## 2026-10-02 — B04 préparé
 
 Branche `backend/socle-auth-http`, parent B03 `a895269`. Rendu des erreurs, UUID de requête, pagination bornée et OpenAPI commun avec fragments des trois pilotes. 62 tests / 575 assertions locaux réussis, dont PostgreSQL ; lint/analyse/Composer/audit réussis. [Preuve B04](../../../quality/B04_HTTP.md). IN_PROGRESS jusqu'à observation de sa CI. PR à cibler sur `backend/socle-auth-ci` tant que #5/#6 attendent leur intégration. Prochain lot B05 ; aucun merge implicite.
+
+## 2026-10-02 — B04 en revue
+
+PR #7 ouverte, commit `1c4c343`. CI run 36946538852 réellement verte et logs lus : PHP 8.4.26 et 8.5.11, 62 tests / 575 assertions chacun, SQL inclus, lint/analyse/audit/documentation réussis. B04 IN_REVIEW. Intégrer les prérequis #5 puis #6 avant B04 ; prochain lot B05. Aucun avis humain présumé.

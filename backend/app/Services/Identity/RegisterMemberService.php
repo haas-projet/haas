@@ -44,6 +44,7 @@ final class RegisterMemberService
                     'version' => $data->termsVersion,
                     'accepted_at' => now(),
                 ]);
+                $user->sendEmailVerificationNotification();
 
                 return $user;
             });

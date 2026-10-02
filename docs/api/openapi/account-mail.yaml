@@ -1,0 +1,171 @@
+paths:
+  /forgot-password:
+    post:
+      operationId: requestPasswordReset
+      summary: Demander un lien de réinitialisation
+      description: Même 202 pour compte actif, absent, suspendu ou demande récente. Aucun statut du compte révélé. Cinq tentatives par minute et courriel/IP, vingt par IP.
+      security: []
+      parameters:
+        - $ref: './identity.yaml#/components/parameters/XsrfToken'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [email]
+              properties:
+                email:
+                  $ref: '#/components/schemas/Email'
+      responses:
+        '202':
+          $ref: '#/components/responses/Acknowledgement'
+        '403':
+          $ref: './identity.yaml#/components/responses/SessionError'
+        '419':
+          $ref: './identity.yaml#/components/responses/SessionError'
+        '422':
+          $ref: './identity.yaml#/components/responses/SessionError'
+        '429':
+          $ref: './identity.yaml#/components/responses/SessionError'
+        '500':
+          $ref: './identity.yaml#/components/responses/SessionError'
+  /reset-password:
+    post:
+      operationId: resetPassword
+      summary: Consommer un lien et remplacer le mot de passe
+      description: Jeton Laravel de 60 minutes, haché en SQL, à usage unique. Mutation et consommation sérialisées par verrou utilisateur. Toutes ses sessions SQL sont révoquées ; le navigateur courant est déconnecté, sans connexion automatique. Un compte suspendu ne peut pas utiliser le lien. La vérification du courriel ne change pas. Cinq tentatives/minute par courriel/IP, vingt par IP.
+      security: []
+      parameters:
+        - $ref: './identity.yaml#/components/parameters/XsrfToken'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResetPasswordInput'
+      responses:
+        '200':
+          $ref: '#/components/responses/Acknowledgement'
+        '403':
+          $ref: './identity.yaml#/components/responses/SessionError'
+        '419':
+          $ref: './identity.yaml#/components/responses/SessionError'
+        '422':
+          $ref: './identity.yaml#/components/responses/SessionError'
+        '429':
+          $ref: './identity.yaml#/components/responses/SessionError'
+        '500':
+          $ref: './identity.yaml#/components/responses/SessionError'
+  /email/verification-notification:
+    post:
+      operationId: resendEmailVerification
+      summary: Renouveler le courriel de vérification de son compte
+      description: >-
+        Une demande par minute et six par heure par compte. Compte déjà vérifié : même réponse, aucun courriel supplémentaire. Aucun compte cible ou URL de retour accepté.
+      security:
+        - SessionCookie: []
+      parameters:
+        - $ref: './identity.yaml#/components/parameters/XsrfToken'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema: {type: object, additionalProperties: false}
+      responses:
+        '202':
+          $ref: '#/components/responses/Acknowledgement'
+        '401':
+          $ref: './identity.yaml#/components/responses/SessionError'
+        '403':
+          $ref: './identity.yaml#/components/responses/SessionError'
+        '419':
+          $ref: './identity.yaml#/components/responses/SessionError'
+        '422':
+          $ref: './identity.yaml#/components/responses/SessionError'
+        '429':
+          $ref: './identity.yaml#/components/responses/SessionError'
+        '500':
+          $ref: './identity.yaml#/components/responses/SessionError'
+  /email/verify/{id}/{hash}:
+    get:
+      operationId: verifyEmail
+      summary: Vérifier son courriel avec un lien signé expirant
+      description: URL absolue signée sur APP_URL API, utilisable une heure après sa demande. Session du compte destinataire requise ; ni autre membre ni admin ne le remplace. Un rejeu valide retourne 200 sans nouvelle mutation ni événement. Signature, expiration, id et courriel courant sont contrôlés ; aucune redirection.
+      security:
+        - SessionCookie: []
+      parameters:
+        - {name: id, in: path, required: true, schema: {type: string, format: uuid}}
+        - {name: hash, in: path, required: true, schema: {type: string, pattern: '^[a-f0-9]{40}$'}}
+        - {name: expires, in: query, required: true, schema: {type: integer}}
+        - {name: signature, in: query, required: true, schema: {type: string, pattern: '^[a-f0-9]{64}$'}}
+      responses:
+        '200':
+          description: Courriel vérifié, y compris rejeu sans effet supplémentaire.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [data]
+                properties:
+                  data:
+                    $ref: './identity.yaml#/components/schemas/SessionMember'
+        '401':
+          $ref: './identity.yaml#/components/responses/SessionError'
+        '403':
+          $ref: './identity.yaml#/components/responses/SessionError'
+        '422':
+          $ref: './identity.yaml#/components/responses/SessionError'
+        '429':
+          $ref: './identity.yaml#/components/responses/SessionError'
+        '500':
+          $ref: './identity.yaml#/components/responses/SessionError'
+components:
+  securitySchemes:
+    SessionCookie:
+      $ref: './identity.yaml#/components/securitySchemes/SessionCookie'
+  schemas:
+    Email:
+      type: string
+      format: email
+      maxLength: 255
+      description: Privé ; espaces périphériques retirés puis normalisation en minuscules.
+    ResetPasswordInput:
+      type: object
+      additionalProperties: false
+      required: [email, token, password, password_confirmation]
+      properties:
+        email:
+          $ref: '#/components/schemas/Email'
+        token:
+          type: string
+          pattern: '^[a-f0-9]{64}$'
+          writeOnly: true
+        password:
+          type: string
+          minLength: 12
+          maxLength: 128
+          writeOnly: true
+          description: Caractères Unicode, espaces conservés ; Argon2id, y compris après bcrypt historique.
+        password_confirmation:
+          type: string
+          writeOnly: true
+          description: Identique au mot de passe.
+  responses:
+    Acknowledgement:
+      description: Message sans identifiant, courriel ou jeton. Cache-Control no-store, X-Request-ID et CORS autorisé.
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+            required: [data]
+            properties:
+              data:
+                type: object
+                additionalProperties: false
+                required: [message]
+                properties:
+                  message: {type: string}

@@ -1,5 +1,7 @@
 # B07 — Sessions de confiance
 
+Complément B08 : [courriels de compte](ACCOUNT_MAIL.md), reset et empreinte du mot de passe enregistrée dès la connexion, contrôlée pour les sessions web comme API. La navigation GET de vérification signée accepte le Referer d'un client mail si Origin est absent ; les autres contrôles d'origine restent applicables.
+
 Sanctum 4.3.3 utilise le garde Laravel `web` et les sessions PostgreSQL, sans jeton bearer ni remember-me. Contrat OpenAPI 0.5.0 : `GET /sanctum/csrf-cookie`, `POST /login`, `POST /logout`. L'inscription B06 utilise le même contrôle CSRF. Aucun endpoint `/api/v1/me` n'est encore livré : B09 ; aucune route de test n'est enregistrée en production.
 
 ## Contrat HTTP

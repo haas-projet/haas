@@ -1,8 +1,8 @@
 # B06 — Inscription
 
-`POST /register`, corps JSON. Contrat détaillé dans [identity.yaml](openapi/identity.yaml), référencé par OpenAPI. Route dans le groupe web Laravel avec CSRF et limite de cinq tentatives par minute et adresse IP. B07 fournit [les cookies Sanctum et CORS](SESSIONS.md) ; B08 doit encore livrer les courriels de compte.
+`POST /register`, corps JSON. Contrat détaillé dans [identity.yaml](openapi/identity.yaml), référencé par OpenAPI. Route dans le groupe web Laravel avec CSRF et limite de cinq tentatives par minute et adresse IP. B07 fournit [les cookies Sanctum et CORS](SESSIONS.md) ; B08 ajoute [les courriels de compte](ACCOUNT_MAIL.md).
 
-Champs exacts : `handle`, `email`, `password`, `password_confirmation`, `terms_accepted`, `terms_version`. Tout autre champ est refusé, même s'il vaut null ou vient de la query string. Création publique, sans ressource préexistante ni rôle à accorder par Policy. Le serveur fixe membre/actif/non vérifié/non démo ; aucune connexion automatique, aucun jeton, aucune notification envoyée par ce lot.
+Champs exacts : `handle`, `email`, `password`, `password_confirmation`, `terms_accepted`, `terms_version`. Tout autre champ est refusé, même s'il vaut null ou vient de la query string. Création publique, sans ressource préexistante ni rôle à accorder par Policy. Le serveur fixe membre/actif/non vérifié/non démo ; aucune connexion automatique ni jeton d'accès. Depuis B08, un job de vérification chiffré est créé dans la même transaction, puis envoyé par le worker après commit.
 
 Le pseudonyme contient 3–30 caractères Unicode, sans contrôle ; les espaces périphériques sont retirés. Le courriel privé est validé et normalisé en minuscules. Les index PostgreSQL arbitrent les doublons, y compris deux créations simultanées ; erreur 422 générique sur handle/email, sans divulguer le compte existant ni la requête SQL. Cette réponse ne prétend pas empêcher l'énumération d'adresses ; la récupération de mot de passe B08 a son propre contrat neutre.
 

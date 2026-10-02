@@ -7,6 +7,7 @@ use App\Enums\Identity\AccountStatus;
 use App\Enums\Identity\Role;
 use App\Exceptions\Identity\RegistrationRejected;
 use App\Models\User;
+use App\Notifications\Identity\VerifyAccountEmail;
 use App\Services\Identity\RegisterMemberService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Log\Logger as LaravelLogger;
@@ -47,7 +48,7 @@ final class RegistrationTest extends PostgresTestCase
         $this->assertDatabaseHas('user_terms_acceptances', ['user_id' => $user->id, 'version' => 'fixture-v1', 'accepted_at' => now()]);
         $this->assertTrue(Hash::check($payload['password'], $user->password));
         $this->assertSame('argon2id', Hash::info($user->password)['algoName']);
-        Notification::assertNothingSent();
+        Notification::assertSentTo($user, VerifyAccountEmail::class);
         $schema = Yaml::parseFile(base_path('../docs/api/openapi/identity.yaml'))['components']['schemas']['RegisteredMember'];
         $this->assertEqualsCanonicalizing($schema['required'], array_keys($response->json('data')));
     }

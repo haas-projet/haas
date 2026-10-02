@@ -18,6 +18,7 @@ final class RegistrationConcurrencyTest extends PostgresTestCase
         config(['database.connections.registration_cleanup' => $configuration]);
         $environment = [
             'APP_ENV' => 'testing', 'APP_DEBUG' => 'false', 'DB_CONNECTION' => 'pgsql', 'DB_URL' => '',
+            'APP_KEY' => 'base64:'.base64_encode(random_bytes(32)), 'MAIL_MAILER' => 'array',
             'DB_HOST' => $configuration['host'], 'DB_PORT' => (string) $configuration['port'],
             'DB_DATABASE' => $configuration['database'], 'DB_USERNAME' => $configuration['username'],
             'DB_PASSWORD' => $configuration['password'],
@@ -55,6 +56,7 @@ final class RegistrationConcurrencyTest extends PostgresTestCase
             $this->assertDatabaseCount('users', 1);
             $this->assertDatabaseCount('profiles', 1);
             $this->assertDatabaseCount('user_terms_acceptances', 1);
+            $this->assertDatabaseCount('jobs', 1);
         } finally {
             foreach ($streams as $stream) {
                 $stream->close();
@@ -66,6 +68,7 @@ final class RegistrationConcurrencyTest extends PostgresTestCase
             }
             // Les enfants ont réellement commité, hors de la transaction PHPUnit du parent.
             DB::connection('registration_cleanup')->table('users')->where('email', 'concurrent@example.test')->delete();
+            DB::connection('registration_cleanup')->table('jobs')->where('queue', 'account-mail')->delete();
             DB::purge('registration_cleanup');
         }
     }

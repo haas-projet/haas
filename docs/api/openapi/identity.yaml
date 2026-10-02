@@ -1,5 +1,13 @@
 # Pilote : ousseynoufayeisidk-sys. B05 identité, B06 inscription, B07 sessions.
 paths:
+  /forgot-password:
+    $ref: './account-mail.yaml#/paths/~1forgot-password'
+  /reset-password:
+    $ref: './account-mail.yaml#/paths/~1reset-password'
+  /email/verification-notification:
+    $ref: './account-mail.yaml#/paths/~1email~1verification-notification'
+  /email/verify/{id}/{hash}:
+    $ref: './account-mail.yaml#/paths/~1email~1verify~1{id}~1{hash}'
   /sanctum/csrf-cookie:
     get:
       operationId: initializeCsrf

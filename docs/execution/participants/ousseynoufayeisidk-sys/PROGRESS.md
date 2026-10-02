@@ -55,3 +55,7 @@ Fusion autorisée de #8/#9, main 075e6eb et CI 36954939123 verte. B05/B06 DONE ;
 ## 2026-10-02 — B07 en revue
 
 PR #10, applicatif a8bfcaa et correction CI 645e74e ; run 36957084503 réussi sur PHP 8.4.26/8.5.11, chacun 182 tests / 1538 assertions avec PostgreSQL. B07 IN_REVIEW. Échec CI initial dû aux origines de test corrigé et documenté, aucun contrôle assoupli. Prochain lot B08 ; dernier SHA documentaire et ses contrôles dans la PR.
+
+## 2026-10-02 — B08 préparé
+
+Branche permanente backend/socle-auth depuis b9b38db pour ne pas multiplier les branches. PR #10 préservée. Courriels de vérification et reset, liens sûrs, réponses neutres, consommation unique, file SQL chiffrée et empreinte de session dès login. 212 tests / 1948 assertions locaux réussis, dont PostgreSQL réel, worker array et deux processus concurrents de reset. Lint/analyse/Composer/audit verts ; cluster arrêté. B08 IN_PROGRESS avant sa CI ; preuve B08_ACCOUNT_MAIL.md, prochain B09.

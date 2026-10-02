@@ -39,3 +39,7 @@ Sur instruction explicite, PR #5/#6/#7 fusionnées après synchronisation et con
 ## 2026-10-02 — B05 en revue
 
 PR #8 ouverte contre main, commit 5913f37. Run 36951975464 réussi et logs lus : PHP 8.4.26/8.5.11, 98 tests / 739 assertions chacun, SQL inclus, lint/analyse/audit/documentation verts. B05 IN_REVIEW, sans fusion ni revue humaine présumée. Prochain lot B06 ; preuves et contrôles du dernier SHA dans la PR et le bilan.
+
+## 2026-10-02 — B06 préparé
+
+Branche backend/socle-auth-registration dérivée de B05 4de376f ; PR #8 préservée. Inscription, profil et acceptation versionnée atomiques ; Argon2id et liste blanche stricte. 153 tests / 1218 assertions locaux réussis, dont concurrence de deux processus PostgreSQL et panne SQL réelle. Preuve docs/quality/B06_REGISTRATION.md. IN_PROGRESS en attente de CI ; aucune fusion implicite. Prochain lot B07, sessions et CSRF/CORS.

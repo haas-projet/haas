@@ -2,6 +2,8 @@
 
 namespace App\Support\Http;
 
+use App\Exceptions\Identity\RegistrationRejected;
+use App\Exceptions\Identity\RegistrationUnavailable;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -13,7 +15,7 @@ final class ApiExceptionRenderer
 {
     public static function handles(Request $request): bool
     {
-        return $request->is('api', 'api/*') || $request->expectsJson();
+        return $request->is('api', 'api/*', 'register') || $request->expectsJson();
     }
 
     public function render(Throwable $exception, Request $request): ?JsonResponse
@@ -23,7 +25,8 @@ final class ApiExceptionRenderer
         }
 
         $status = match (true) {
-            $exception instanceof ValidationException => 422,
+            $exception instanceof ValidationException, $exception instanceof RegistrationRejected => 422,
+            $exception instanceof RegistrationUnavailable => 503,
             $exception instanceof AuthenticationException => 401,
             $exception instanceof HttpExceptionInterface => $exception->getStatusCode(),
             default => 500,
@@ -60,7 +63,11 @@ final class ApiExceptionRenderer
             'error' => [
                 'code' => $code,
                 'message' => $message,
-                'fields' => (object) ($exception instanceof ValidationException ? $exception->errors() : []),
+                'fields' => (object) match (true) {
+                    $exception instanceof ValidationException => $exception->errors(),
+                    $exception instanceof RegistrationRejected => $exception->fields,
+                    default => [],
+                },
             ],
             'request_id' => $id,
         ], $status, $headers);

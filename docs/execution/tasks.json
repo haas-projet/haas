@@ -93,7 +93,8 @@
       "refs": "AC01/AC04",
       "phase": "B",
       "execution_order": 8,
-      "status": "TODO"
+      "status": "IN_PROGRESS",
+      "evidence": ["docs/quality/B06_REGISTRATION.md"]
     },
     {
       "id": "B07",

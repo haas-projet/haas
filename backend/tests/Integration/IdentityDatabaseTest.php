@@ -126,6 +126,7 @@ final class IdentityDatabaseTest extends PostgresTestCase
 
     public function test_privileged_registration_payload_never_creates_an_account(): void
     {
+        config(['app.key' => 'base64:'.base64_encode(random_bytes(32)), 'registration.terms_version' => 'fixture-v1']);
         $payload = ['handle' => 'Awa', 'email' => 'awa@example.test', 'password' => 'mot-de-passe-de-test', 'role' => 'admin', 'author_id' => (string) Str::uuid(), 'email_verified_at' => now()->toISOString()];
         $this->postJson('/register', $payload)->assertClientError();
         $this->postJson('/api/v1/register', $payload)->assertClientError();

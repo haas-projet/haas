@@ -1,4 +1,5 @@
 # Décisions à compléter avant livraison
+- B06 : texte des conditions d'utilisation et version publiée à fournir avant ouverture réelle de l'inscription. `REGISTRATION_TERMS_VERSION` reste vide par défaut (503) ; les versions de test ne valent pas validation. Voir `api/REGISTRATION.md`.
 - ARB01 : date limite réelle, sujet complémentaire et modalités de dépôt. Les dates 25/31 octobre du dossier restent non réconciliées.
 - ARB02/03/05 : cession, licences/outils, distribution des kits et droits des contributions externes.
 - ARB04 : Ultimate est déclaré disponible ; reste projet Qodana/token/contributeurs, forfait GitHub et capacité CI.

@@ -1,6 +1,6 @@
 # Suivi du dépôt HAAS
 
-**Statut actif :** B01–B04 DONE ; B05 IN_REVIEW sur `backend/socle-auth-identity`, PR #8, CI PHP 8.4/8.5 verte ; S01/S02 IN_PROGRESS. Les autres lots restent TODO. 122 lots proposés, 106 identifiants antérieurs conservés. Ajouts BH01–10/FH01–05/RH01, F18, AC69–90 et UX21–23. Ne pas écraser les statuts ou preuves existants.
+**Statut actif :** B01–B04 DONE ; B05 IN_REVIEW (PR #8) ; B06 IN_PROGRESS sur `backend/socle-auth-registration`, tests locaux réussis ; S01/S02 IN_PROGRESS. Les autres lots restent TODO. 122 lots proposés, 106 identifiants antérieurs conservés. Ajouts BH01–10/FH01–05/RH01, F18, AC69–90 et UX21–23. Ne pas écraser les statuts ou preuves existants.
 
 À renseigner après commandes réelles : date / lot / responsable / fichiers / commandes / observé / commit ou raison de non-commit / blocage / prochaine action. Les contrôles documentaires de ce pack ne valident pas BACKEND_GATE, FRONTEND_GATE ou RELEASE_GATE.
 
@@ -106,3 +106,11 @@
 
 - PR #8 ouverte contre main, commit applicatif `5913f3753ba65c6a42c26a19066bf726da24464d`. Run 36951975464 réellement réussi, logs lus : PHP 8.4.26 et 8.5.11, 98 tests / 739 assertions par version avec PostgreSQL ; lint/analyse/audit/documentation réussis, backend-ci vert.
 - B05 IN_REVIEW ; 243 empreintes locales vérifiées. Les PR #5/#6/#7 sont fusionnées ; #8 reste ouverte, aucun avis humain simulé. Preuve B05 enrichie ; le dernier commit documentaire et sa CI sont dans la PR et le bilan. Prochain lot B06.
+
+## 2026-10-02 — B06, inscription
+
+Continuation demandée ; branche distincte issue de B05 4de376f, PR #8 conservée ouverte. Inscription atomique membre/profil/conditions versionnées, validation stricte sans champ serveur, secret Argon2id entier, Resource privée et erreurs du contrat B04. Lire docs/api/REGISTRATION.md et docs/quality/B06_REGISTRATION.md.
+
+Tests locaux réels : 118 tests / 922 assertions sans SQL, 35 tests / 296 assertions PostgreSQL ; total 153 / 1218. Deux processus concurrents donnent un seul compte complet ; panne SQL contrôlée annulée sans secrets dans le journal applicatif. Nouveau cluster temporaire dédié arrêté après usage. Aucun nouveau package.
+
+B06 IN_PROGRESS en attente de sa propre CI. Conditions publiées/version réelle à fournir avant ouverture de l'inscription ; par défaut 503. Connexion, cookies SPA/CORS en B07 ; vérification et reset en B08. Aucune fusion, validation humaine ou gate présumée. Commit et run réels à consigner après création.

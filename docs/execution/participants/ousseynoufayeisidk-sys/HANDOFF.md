@@ -1,6 +1,6 @@
 # Reprise — socle/auth
 
-Branche active : `backend/socle-auth-profiles` (B10), dérivée de B09 `6985eee`, PR #10/#11/#13 encore ouvertes. Laravel 13.34.0, PHP local 8.5.10, PostgreSQL 17.0 ; résolution Composer sur PHP 8.4.0. Lire `docs/COMMANDS.md`, `docs/quality/B10_PROFILES.md` et la dernière entrée ci-dessous ; les entrées précédentes sont historiques.
+Branche active : `backend/socle-auth-profiles` (B10), dérivée de B09 `6985eee`, PR #14 en brouillon avec CI verte ; PR #10/#11/#13 encore ouvertes. Laravel 13.34.0, PHP local 8.5.10, PostgreSQL 17.0 ; résolution Composer sur PHP 8.4.0. Lire `docs/COMMANDS.md`, `docs/quality/B10_PROFILES.md` et la dernière entrée ci-dessous ; les entrées précédentes sont historiques.
 
 PostgreSQL temporaire arrêté. Les prochains tests SQL exigent une nouvelle base locale/CI dédiée `haas_*_test`, rôle `haas_test`, et une connexion explicite. Ne pas réutiliser automatiquement le port de recette. Aucun secret applicatif enregistré.
 
@@ -45,3 +45,9 @@ Prochain lot : B10, profils publics et édition. ACCOUNT_SUPPORT_EMAIL est une a
 Base 6985eee, branche backend/socle-auth-profiles. Lire PROFILES.md et B10_PROFILES.md : profils/édition/technologies prêts localement, 294 tests / 2808 assertions ; version optimiste et deux vrais processus SQL, contrôles PHP verts. Publier une PR de première livraison contre backend/socle-auth-permissions puis observer sa CI. Intégrer #10/#11/#13 avant B10, sans réécriture et sans suppression des branches permanentes.
 
 B10 reste IN_PROGRESS tant que les contributions réelles ne sont pas raccordées : null ne signifie pas zéro. Sources à coordonner avec LamineGL (résolutions), mdev44-code (publications/attributions), puis visibility/retraits/démonstration à tester ; voir BLOCKERS.md. B12, audit/révisions, est la prochaine partie indépendante. Carte Systalink B10 « En cours », aucune nouvelle carte terminée à cette étape.
+
+## B10 publié — reprise après CI verte
+
+PR #14 en brouillon, applicatif c5c1706 ; run 37076878442 réussi, PHP 8.4.26/8.5.11 avec PostgreSQL 17, chacun 294 tests / 2808 assertions. Lire PROFILES.md et B10_PROFILES.md ; consulter les contrôles du dernier SHA documentaire dans la PR. Code local propre et serveur de test arrêté.
+
+B10 reste IN_PROGRESS : contributions réelles à raccorder avec les domaines concernés, aucun compteur fictif. La carte Systalink reste « En cours », même après une éventuelle fusion de cette première partie. Intégrer #10/#11/#13 avant #14, avec reciblage et vérification des contrôles ; préserver les trois branches permanentes. Prochain lot indépendant B12 (audit et révisions), B11 appartient à LamineGL. Aucun GO_FRONTEND ou déploiement.

@@ -36,7 +36,9 @@ Une contrainte SQL de fixture interdit l'insertion du pivot après modification 
 
 `node scripts/validate-pack.mjs` : 18/18 ; `node scripts/check-deployment-docs.mjs` : 7/7 ; `git diff --check` : aucune erreur. Serveur PostgreSQL B10 arrêté après les tests. Empreintes actualisées avant commit.
 
-CI à observer après publication ; aucun résultat distant présumé. Ordre d'intégration : #10 → #11 → #13 → première livraison B10 ; recibler et retester avant fusion. Les trois branches permanentes sont conservées ; branches temporaires retirées seulement après intégration vérifiée.
+[PR #14 en brouillon](https://github.com/haas-projet/haas/pull/14), commit applicatif `c5c1706be17b917835d3fdc794249b779ae78a70`. [Run 37076878442](https://github.com/haas-projet/haas/actions/runs/37076878442) réussi, journaux lus : PHP 8.4.26 et 8.5.11 avec PostgreSQL 17, chacun 213 tests / 2008 assertions sans base et 81 tests / 800 assertions SQL, soit **294 tests / 2808 assertions par version**. Pint, PHPStan niveau 8, validation/prérequis/audit Composer, documentation et `backend-ci` verts. La preuve initiale porte sur ce commit ; le dernier SHA documentaire et ses contrôles sont consultables dans la PR et le bilan.
+
+B10 reste IN_PROGRESS malgré cette CI verte : les contributions ne sont pas encore raccordées. Ordre d'intégration : #10 → #11 → #13 → #14 ; recibler et retester avant fusion. Les trois branches permanentes sont conservées ; branches temporaires retirées seulement après intégration vérifiée.
 
 ## Limites
 

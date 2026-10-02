@@ -110,6 +110,8 @@ Ces chemins définissent les responsabilités : B01 installe les fichiers du soc
 
 Chaque pilote possède ses tests Feature/Unit/Integration et sa base PostgreSQL locale de test dédiée. Ne jamais partager une base de tests entre les trois postes, ni pointer les scripts sur une base applicative ou de production. Garder `TestCase.php`, les fixtures globales et les seeders d'assemblage sous coordination du responsable 1.
 
+Contrat partagé préparé en B04 : [HTTP_CONTRACT.md](../api/HTTP_CONTRACT.md). Réutiliser PaginatedRequest, PageData et PaginatedResourceCollection ; le renderer reste central. Chaque pilote écrit son fragment OpenAPI, puis le responsable du socle ajoute les références de chemins dans le point d'entrée lors de l'intégration. Les fichiers de fragments vides ne déclarent aucun endpoint disponible.
+
 ## Ordre d'intégration
 
 1. Compléter S01/S02 ; B01 est intégré. Petites PR B02–B05 par le responsable 1 pendant que les autres codent les parties indépendantes de leurs domaines, préparent leurs contrats/tests et relisent le socle.

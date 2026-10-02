@@ -1,0 +1,17 @@
+{
+  "date": "2026-10-02",
+  "scope": "B04 : ajout dev aux 105 dépendances conservées",
+  "packages": [
+    {
+      "name": "symfony/yaml",
+      "version": "v8.0.15",
+      "scope": "dev",
+      "licenses": [
+        "MIT"
+      ],
+      "source": "https://github.com/symfony/yaml.git",
+      "reference": "38e4b36d74a20dd9124a5b34c3e83e270b9649b8",
+      "distribution": "https://api.github.com/repos/symfony/yaml/zipball/38e4b36d74a20dd9124a5b34c3e83e270b9649b8"
+    }
+  ]
+}

@@ -67,3 +67,9 @@ Workflow validé par actionlint, actions et image PostgreSQL épinglées, permis
 Le run GitHub 36944003232 de la PR #6 est réellement réussi sur `fa0ffd6` : PHP 8.4.26 et 8.5.11, 23 tests / 33 assertions par version et PostgreSQL réel. Les logs d'analyse/audit/tests ont été lus. Voir [B03_CI.md](../quality/B03_CI.md). La preuve initiale reste liée à ce SHA ; le bilan et les contrôles de PR donnent le résultat du dernier commit documentaire.
 
 Intégrer B02 (#5) avant B03 (#6), puis recibler #6 sur main et revérifier le dernier commit. Aucune fusion ni approbation humaine inventée. Si le gestionnaire d'identifiants Git Windows bloque, l'authentification GitHub CLI est disponible sans modifier la configuration globale. Prochain lot : B04, contrat HTTP/erreurs, puis B05 identité. Aucun GO_FRONTEND ou déploiement.
+
+## Reprise active B04 — 2026-10-02
+
+Branche `backend/socle-auth-http`, dérivée de B03 `a895269`. Erreurs HTTP, corrélation, pagination et OpenAPI commun livrés ; lire [B04_HTTP.md](../quality/B04_HTTP.md) et [le contrat partagé](../api/HTTP_CONTRACT.md). 62 tests / 575 assertions locaux réussis, PostgreSQL compris ; analyse/lint/audit réussis. Cluster de test arrêté. Symfony YAML ajouté aux outils dev : composer install requis après récupération.
+
+Ouvrir la PR contre `backend/socle-auth-ci`, observer la CI PHP 8.4/8.5 du dernier commit et consigner son run avant de déclarer IN_REVIEW. Garder #5 puis #6 puis B04 dans cet ordre d'intégration, recibler après fusion du prérequis sans force-push. Aucune authentification ni CORS livré par B04 ; prochain lot B05. Les trois pilotes peuvent utiliser les fragments et composants après intégration du socle, selon leurs prérequis.

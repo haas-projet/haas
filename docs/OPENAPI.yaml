@@ -1,10 +1,17 @@
 openapi: 3.1.0
 info:
   title: HAAS — Socle API
-  version: 0.1.0
-  description: Contrat B01 de la sonde de démarrage. Contrats métier à implémenter.
+  version: 0.2.0
+  description: Socle B01/B04. Schémas HTTP communs disponibles ; endpoints métier à implémenter.
 servers:
   - url: http://localhost:8000
+x-haas-domain-fragments:
+  identity:
+    $ref: './api/openapi/identity.yaml'
+  community:
+    $ref: './api/openapi/community.yaml'
+  capsules-lab:
+    $ref: './api/openapi/capsules-lab.yaml'
 paths:
   /up:
     get:
@@ -15,6 +22,9 @@ paths:
       responses:
         '200':
           description: Application démarrée
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/RequestId'
           content:
             application/json:
               schema:
@@ -25,3 +35,121 @@ paths:
                   status:
                     type: string
                     enum: [ok]
+components:
+  headers:
+    RequestId:
+      description: UUID généré par le serveur pour chaque requête ; un identifiant fourni par le client est ignoré.
+      schema:
+        type: string
+        format: uuid
+    RetryAfter:
+      description: Délai en secondes ou date HTTP si le serveur dispose de cette information. Aucune mutation rejouée automatiquement.
+      schema:
+        type: string
+  parameters:
+    Page:
+      name: page
+      in: query
+      required: false
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+        maximum: 2147483647
+        default: 1
+    PerPage:
+      name: per_page
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 50
+        default: 20
+  schemas:
+    ApiError:
+      type: object
+      additionalProperties: false
+      required: [error, request_id]
+      properties:
+        error:
+          type: object
+          additionalProperties: false
+          required: [code, message, fields]
+          properties:
+            code:
+              type: string
+              description: Code stable commun ou code métier documenté par le domaine ; jamais une classe PHP.
+              pattern: '^[A-Z][A-Z0-9_]+$'
+            message:
+              type: string
+              description: Message public en français ; aucune trace ni information interne.
+            fields:
+              type: object
+              description: Erreurs par champ ; objet vide hors validation. Les clés imbriquées utilisent la notation pointée.
+              additionalProperties:
+                type: array
+                items:
+                  type: string
+        request_id:
+          type: string
+          format: uuid
+          description: Identique à X-Request-ID, utile pour retrouver une panne journalisée.
+    PaginationMeta:
+      type: object
+      additionalProperties: false
+      required: [current_page, per_page, last_page, total, from, to]
+      properties:
+        current_page:
+          type: integer
+          minimum: 1
+          maximum: 2147483647
+        per_page:
+          type: integer
+          minimum: 1
+          maximum: 50
+        last_page:
+          type: integer
+          minimum: 1
+        total:
+          type: integer
+          minimum: 0
+        from:
+          type: [integer, 'null']
+          minimum: 1
+        to:
+          type: [integer, 'null']
+          minimum: 1
+    PaginatedResult:
+      type: object
+      additionalProperties: false
+      required: [data, meta]
+      properties:
+        data:
+          type: array
+          description: Chaque endpoint doit préciser sa Resource dans items ; ce schéma est le socle commun.
+          items:
+            type: object
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+  responses:
+    ApiFailure:
+      description: Erreur HAAS. Voir le tableau de codes communs dans HTTP_CONTRACT.md.
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/RequestId'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+    RetryableFailure:
+      description: Erreur 429 ou 503 ; Retry-After conservé lorsqu'il est disponible.
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/RequestId'
+        Retry-After:
+          $ref: '#/components/headers/RetryAfter'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'

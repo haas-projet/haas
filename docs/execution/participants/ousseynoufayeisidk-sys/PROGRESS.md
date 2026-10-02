@@ -59,3 +59,7 @@ PR #10, applicatif a8bfcaa et correction CI 645e74e ; run 36957084503 réussi su
 ## 2026-10-02 — B08 préparé
 
 Branche permanente backend/socle-auth depuis b9b38db pour ne pas multiplier les branches. PR #10 préservée. Courriels de vérification et reset, liens sûrs, réponses neutres, consommation unique, file SQL chiffrée et empreinte de session dès login. 212 tests / 1948 assertions locaux réussis, dont PostgreSQL réel, worker array et deux processus concurrents de reset. Lint/analyse/Composer/audit verts ; cluster arrêté. B08 IN_PROGRESS avant sa CI ; preuve B08_ACCOUNT_MAIL.md, prochain B09.
+
+## 2026-10-02 — B08 en revue
+
+PR #11 dépendante de #10, applicatif 3a3d241 ; run 37015668695 réussi sur PHP 8.4.26/8.5.11, chacun 212 tests / 1948 assertions SQL comprises. B08 IN_REVIEW, aucun merge ou avis humain présumé. Prochain lot B09. Dernier SHA documentaire et CI dans la PR ; conserver backend/socle-auth après fusion.

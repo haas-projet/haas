@@ -33,8 +33,12 @@ Un observateur SQL indépendant ne voit ni compte ni job avant commit ; après c
 
 Corrections guidées par contrôles : annotations typées et contrat concret du broker, ponctuation YAML ; protection d'une session écrite après un reset ; navigation depuis un client mail externe permise uniquement en GET signé sans Origin, avec session destinataire. Les essais en échec ne sont pas comptés comme réussis.
 
+## CI observée
+
+Commit applicatif `3a3d24189a13fb5b6131b1e166791f1af21c13f1`, [PR #11](https://github.com/haas-projet/haas/pull/11) contre backend/socle-auth-sessions. [Run 37015668695](https://github.com/haas-projet/haas/actions/runs/37015668695) réussi ; journaux lus : PHP 8.4.26 et 8.5.11, chacun 158 tests / 1453 assertions puis 54 tests / 495 assertions PostgreSQL, soit 212 tests / 1948 assertions par version. Lint, analyse niveau 8, installation verrouillée, validation Composer, prérequis, audit et documentation réussis ; backend-ci vert. Dernier SHA documentaire et ses checks dans la PR et le bilan de session.
+
 ## Statut et limites
 
-B08 IN_PROGRESS jusqu'à observation de sa propre CI, puis IN_REVIEW. Cibler la branche B07 tant que #10 attend sa fusion ; intégrer #10 avant B08 et recibler vers main. Conserver les trois branches permanentes et main ; ne supprimer la branche temporaire de #10 qu'après fusion et reciblage des PR dépendantes.
+B08 IN_REVIEW après CI observée, sans avis humain présumé. PR #11 ciblant B07 tant que #10 attend sa fusion ; intégrer #10 avant B08 et recibler vers main. Conserver les trois branches permanentes et main ; ne supprimer la branche temporaire de #10 qu'après fusion et reciblage des PR dépendantes.
 
 SMTP/délivrabilité réelle, navigateur sur domaines finaux, DNS/TLS, Qodana et déploiement non exécutés. Conditions réelles d'inscription toujours absentes : 503 par défaut. B09 reste à livrer pour /me et les capacités métier ; les Policies de domaines devront utiliser verified. Aucune revue humaine simulée, aucun BACKEND_GATE ou GO_FRONTEND validé. Aucun mail envoyé à une personne ; uniquement transport mémoire et adresses fictives de test.

@@ -117,7 +117,7 @@
       "refs": "AC01/AC02 ; ADR-004 / DEP",
       "phase": "B",
       "execution_order": 10,
-      "status": "IN_PROGRESS",
+      "status": "IN_REVIEW",
       "evidence": ["docs/quality/B08_ACCOUNT_MAIL.md"]
     },
     {

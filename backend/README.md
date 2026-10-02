@@ -2,7 +2,7 @@
 
 Cette première étape crée les dossiers partagés pour les trois développeurs. Les fichiers `.gitkeep` permettent de conserver les dossiers vides dans Git, afin que chaque clone reçoive la même arborescence.
 
-**État : B01–B06 intégrés dans `main`.** Laravel 13.34.0, PHP 8.4 minimum, PostgreSQL, identifiants utilisateur UUID et fuseau UTC. `/up` vérifie le démarrage sans accès SQL. B07 livre les sessions Sanctum en revue dans la PR #10, CI verte ; B08 prépare les [courriels de compte](../docs/api/ACCOUNT_MAIL.md) et son worker SQL sur `backend/socle-auth`. `/api/v1/me` et les capacités métier restent B09 ; SMTP réel non testé.
+**État : B01–B06 intégrés dans `main`.** Laravel 13.34.0, PHP 8.4 minimum, PostgreSQL, identifiants utilisateur UUID et fuseau UTC. `/up` vérifie le démarrage sans accès SQL. B07 livre les sessions Sanctum en revue dans la PR #10 ; B08 livre les [courriels de compte](../docs/api/ACCOUNT_MAIL.md) et son worker SQL en revue dans #11, CI verte, sur `backend/socle-auth`. `/api/v1/me` et les capacités métier restent B09 ; SMTP réel non testé.
 
 Suivre [les commandes d'installation et de test](../docs/COMMANDS.md). Consulter [les versions observées](../docs/VERSIONS.md) et [les preuves B01](../docs/quality/B01_BOOTSTRAP.md) : 12 tests et 22 assertions réussis, dont une intégration PostgreSQL réelle.
 

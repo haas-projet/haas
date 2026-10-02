@@ -2,7 +2,7 @@
 
 Cette première étape crée les dossiers partagés pour les trois développeurs. Les fichiers `.gitkeep` permettent de conserver les dossiers vides dans Git, afin que chaque clone reçoive la même arborescence.
 
-**État : B01 intégré dans `main` par la PR #4.** Laravel 13.34.0, PHP 8.4 minimum, PostgreSQL, identifiants utilisateur UUID et fuseau UTC. `/up` vérifie le démarrage sans accès SQL. Les parcours d'inscription et de connexion restent à développer.
+**État : B01–B04 intégrés dans `main`, B05 en revue.** Laravel 13.34.0, PHP 8.4 minimum, PostgreSQL, identifiants utilisateur UUID et fuseau UTC. `/up` vérifie le démarrage sans accès SQL. B06 ajoute l'inscription sur une branche dérivée de B05 ; lire [le contrat](../docs/api/REGISTRATION.md). La connexion SPA et les courriels de compte restent à livrer.
 
 Suivre [les commandes d'installation et de test](../docs/COMMANDS.md). Consulter [les versions observées](../docs/VERSIONS.md) et [les preuves B01](../docs/quality/B01_BOOTSTRAP.md) : 12 tests et 22 assertions réussis, dont une intégration PostgreSQL réelle.
 
@@ -60,6 +60,6 @@ Lire [le plan de travail à trois](../docs/execution/BACKEND_A_TROIS.md) pour le
 
 ## Prochaine étape
 
-B02 (qualité PHP) est testé sur `backend/socle-auth`, en attente de revue : `composer lint`, `composer analyse`, `composer test` et `composer test:integration`. Voir [les preuves B02](../docs/quality/B02_QUALITY.md). Le responsable du socle poursuit ensuite B03 (CI), B04 (contrat HTTP), B05 (identité), puis l'authentification. Les deux autres développeurs peuvent coder les parties indépendantes de leur domaine sur cette base ; les PR dépendantes attendent leurs prérequis. L'inventaire des services externes S01/S02 reste partiel.
+B01–B04 sont intégrés ; B05 (#8) et B06 (#9) suivent leur revue dans cet ordre. Le responsable du socle poursuit B07 (sessions Sanctum et CORS), puis B08 (courriels de compte). Contrôles disponibles : `composer lint`, `composer analyse`, `composer test`, `composer test:integration` ; voir [les preuves B06](../docs/quality/B06_REGISTRATION.md). Les deux autres développeurs peuvent coder les parties indépendantes de leur domaine ; les PR dépendantes attendent leurs prérequis. S01/S02 restent partiels.
 
 Ne pas démarrer des installations Laravel indépendantes sur les autres branches. Après intégration du socle validé, chacun récupère `main` avant de développer les fonctionnalités qui en dépendent. Backend P0 et GO_FRONTEND humain précèdent toute application React.

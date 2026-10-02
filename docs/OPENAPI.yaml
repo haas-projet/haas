@@ -1,8 +1,8 @@
 openapi: 3.1.0
 info:
   title: HAAS — Socle API
-  version: 0.3.0
-  description: Socle B01/B04/B05. Schémas HTTP et types d'identité disponibles ; endpoints métier à implémenter.
+  version: 0.4.0
+  description: Socle B01–B06, contrats HTTP et inscription ; sessions SPA et vérification du courriel à livrer.
 servers:
   - url: http://localhost:8000
 x-haas-domain-fragments:
@@ -13,6 +13,8 @@ x-haas-domain-fragments:
   capsules-lab:
     $ref: './api/openapi/capsules-lab.yaml'
 paths:
+  /register:
+    $ref: './api/openapi/identity.yaml#/paths/~1register'
   /up:
     get:
       operationId: getHealth

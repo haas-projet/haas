@@ -1,7 +1,116 @@
-# Pilote : ousseynoufayeisidk-sys. B05 : types partagés ; endpoints dans les lots suivants.
-paths: {}
+# Pilote : ousseynoufayeisidk-sys. B05 : types partagés ; B06 : inscription.
+paths:
+  /register:
+    post:
+      operationId: registerMember
+      summary: Inscrire un membre sans le connecter
+      description: >-
+        Route web protégée par CSRF, JSON en entrée et sortie. Accepter exactement la version
+        publiée des conditions configurée sur le serveur. Sans version configurée, erreur 503.
+        Limite de cinq tentatives par minute et adresse IP. Aucun courriel envoyé par B06.
+        Le parcours SPA avec cookie XSRF et CORS est livré séparément dans B07.
+      security: []
+      parameters:
+        - in: header
+          name: X-XSRF-TOKEN
+          description: Jeton CSRF issu du cookie de session, requis hors tests ; jamais un bearer token.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterMemberInput'
+      responses:
+        '201':
+          description: Membre non vérifié, profil vide et acceptation créés atomiquement ; aucune connexion automatique.
+          headers:
+            X-Request-ID:
+              $ref: '../../OPENAPI.yaml#/components/headers/RequestId'
+            Cache-Control:
+              schema:
+                type: string
+                const: no-store, private
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [data]
+                properties:
+                  data:
+                    $ref: '#/components/schemas/RegisteredMember'
+        '419':
+          $ref: '#/components/responses/RegistrationError'
+        '422':
+          $ref: '#/components/responses/RegistrationError'
+        '429':
+          $ref: '#/components/responses/RegistrationError'
+        '500':
+          $ref: '#/components/responses/RegistrationError'
+        '503':
+          $ref: '#/components/responses/RegistrationError'
 components:
+  responses:
+    RegistrationError:
+      description: Erreur du contrat commun ; 422 pour entrée invalide ou doublon, 503 pour conditions indisponibles.
+      headers:
+        X-Request-ID:
+          $ref: '../../OPENAPI.yaml#/components/headers/RequestId'
+        Retry-After:
+          $ref: '../../OPENAPI.yaml#/components/headers/RetryAfter'
+      content:
+        application/json:
+          schema:
+            $ref: '../../OPENAPI.yaml#/components/schemas/ApiError'
   schemas:
+    RegisterMemberInput:
+      type: object
+      additionalProperties: false
+      required: [handle, email, password, password_confirmation, terms_accepted, terms_version]
+      properties:
+        handle:
+          $ref: '#/components/schemas/Handle'
+        email:
+          type: string
+          format: email
+          maxLength: 255
+          description: Adresse privée, normalisée en minuscules après retrait des espaces périphériques.
+        password:
+          type: string
+          minLength: 12
+          maxLength: 128
+          writeOnly: true
+          description: Longueur Unicode ; espaces conservés ; hash Argon2id sans troncature.
+        password_confirmation:
+          type: string
+          minLength: 12
+          maxLength: 128
+          writeOnly: true
+          description: Identique au mot de passe.
+        terms_accepted:
+          type: boolean
+          const: true
+        terms_version:
+          type: string
+          maxLength: 64
+          pattern: '^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$'
+          description: Version exacte du texte consulté, égale à REGISTRATION_TERMS_VERSION ; jamais implicite.
+    RegisteredMember:
+      type: object
+      additionalProperties: false
+      required: [id, handle, email_verified]
+      properties:
+        id:
+          type: string
+          format: uuid
+        handle:
+          $ref: '#/components/schemas/Handle'
+        email_verified:
+          type: boolean
+          const: false
     AccountRole:
       type: string
       enum: [member, moderator, admin]

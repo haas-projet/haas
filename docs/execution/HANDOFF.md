@@ -83,3 +83,11 @@ Mise à jour active : PR #7 ouverte, B04 IN_REVIEW après le run 36946538852 sur
 Proposer B05 contre main, observer sa CI propre avant IN_REVIEW. Prochain lot B06 : inscription, conditions versionnées et refus HTTP des champs serveur. Le test d'inscription privilégiée de B05 constate encore l'absence de route ; il ne remplace pas les tests du futur FormRequest. Les collègues récupèrent origin/main puis l'intègrent dans leur branche sans force-push. Aucun gate ni déploiement.
 
 Mise à jour active : B05 IN_REVIEW, PR #8 ouverte contre main. Run 36951975464 sur 5913f37 réussi sous PHP 8.4.26 et 8.5.11, chacun 98 tests / 739 assertions avec PostgreSQL. Lire la preuve B05, puis reprendre B06 sur une branche distincte si #8 reste ouverte ; aucune fusion de B05 présumée. Le dernier SHA documentaire et son run sont dans la PR et le bilan.
+
+## Reprise B06 — inscription
+
+Branche backend/socle-auth-registration depuis B05 4de376f. PR #8 encore ouverte ; proposer B06 contre backend/socle-auth-identity et ne pas modifier les branches des collègues. Contrat REGISTRATION.md, preuve B06_REGISTRATION.md. Total local 153 tests / 1218 assertions, SQL et deux processus concurrents compris ; cluster temporaire arrêté.
+
+Observer la CI propre de B06 avant IN_REVIEW. Conditions réelles absentes : REGISTRATION_TERMS_VERSION vide entraîne 503 ; utiliser uniquement des versions fictives en test, aucune approbation juridique présumée. Argon2id obligatoire ; traiter explicitement les anciens hashes bcrypt avant connexion B07. B07 doit livrer cookies Sanctum/CORS/login/logout, B08 les courriels. Aucun GO_FRONTEND ou déploiement.
+
+État actif : B06 IN_REVIEW, PR #9, commit applicatif 4e40f1e. Run 36954111512 vert sur PHP 8.4.26 et 8.5.11, chacun 153 tests / 1218 assertions, PostgreSQL compris. Intégrer #8 avant #9 ; dernier SHA documentaire et sa CI dans la PR. Prochaine continuation : B07 sur une nouvelle branche dérivée si les PR attendent leur intégration.

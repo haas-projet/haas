@@ -9,9 +9,9 @@ use Illuminate\Http\Resources\Json\JsonResource;
 /** @mixin User */
 final class UserSummaryResource extends JsonResource
 {
-    /** @return array{id: string, name: string} */
+    /** @return array{id: string, handle: string} */
     public function toArray(Request $request): array
     {
-        return ['id' => $this->id, 'name' => $this->name];
+        return ['id' => $this->id, 'handle' => $this->handle];
     }
 }

@@ -2,7 +2,7 @@
 
 Inspecter le dépôt, préserver les fichiers/commits/saisies existants, lire ADR-006. Appliquer F18 : projets ouverts, offres consenties, décision propriétaire, fil et projection publique contrôlés. Nouvelle recette avant GO_FRONTEND ; ne pas prendre un ancien gate pour un accord sur ce périmètre. Systalink/Vercel inchangé.
 
-État courant : B01 DONE ; B02 IN_REVIEW sur `backend/socle-auth` (PR #5) ; B03 IN_REVIEW sur `backend/socle-auth-ci` (PR #6), CI distante réussie. Voir `quality/B03_CI.md` depuis `docs/` et la dernière section. S01/S02 restent IN_PROGRESS. BH01–BH10 précèdent B39 et le frontend attend GO_FRONTEND humain.
+État courant : B01–B04 DONE, PR #5/#6/#7 fusionnées sur autorisation explicite ; B05 IN_PROGRESS sur `backend/socle-auth-identity`. Voir `quality/MERGE_B02_B04.md`, `quality/B05_IDENTITY.md` depuis `docs/` et la dernière section. S01/S02 restent IN_PROGRESS. BH01–BH10 précèdent B39 et le frontend attend GO_FRONTEND humain.
 
 ## Reprise après préparation GitHub — 2026-10-01
 
@@ -75,3 +75,9 @@ Branche `backend/socle-auth-http`, dérivée de B03 `a895269`. Erreurs HTTP, cor
 Ouvrir la PR contre `backend/socle-auth-ci`, observer la CI PHP 8.4/8.5 du dernier commit et consigner son run avant de déclarer IN_REVIEW. Garder #5 puis #6 puis B04 dans cet ordre d'intégration, recibler après fusion du prérequis sans force-push. Aucune authentification ni CORS livré par B04 ; prochain lot B05. Les trois pilotes peuvent utiliser les fragments et composants après intégration du socle, selon leurs prérequis.
 
 Mise à jour active : PR #7 ouverte, B04 IN_REVIEW après le run 36946538852 sur `1c4c343` ; PHP 8.4.26 et 8.5.11, chacun 62 tests / 575 assertions avec PostgreSQL. La preuve B04 lie ce run immuable. Le dernier complément documentaire et ses contrôles sont indiqués dans la PR et le bilan. Reprendre B05 sur une branche dérivée distincte si les PR précédentes attendent encore leur intégration.
+
+## Reprise active après fusions — B05
+
+#5/#6/#7 sont fusionnées ; main à 438ff5a et CI post-fusion verte. B05 part directement de ce main, branche backend/socle-auth-identity. Modèles d'identité et référentiel, migration et contrats prêts localement ; 98 tests / 739 assertions réussis, SQL compris, serveur de test arrêté. Lire IDENTITY_DATA.md : utiliser handle, plus name ; les factories sont non vérifiées par défaut. Aucun endpoint d'inscription livré.
+
+Proposer B05 contre main, observer sa CI propre avant IN_REVIEW. Prochain lot B06 : inscription, conditions versionnées et refus HTTP des champs serveur. Le test d'inscription privilégiée de B05 constate encore l'absence de route ; il ne remplace pas les tests du futur FormRequest. Les collègues récupèrent origin/main puis l'intègrent dans leur branche sans force-push. Aucun gate ni déploiement.

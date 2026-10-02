@@ -20,9 +20,11 @@ Si l'utilisateur demande explicitement de continuer pendant une revue, préparer
 
 La PR #4 est fusionnée dans `main` depuis le 1er octobre 2026, sur demande explicite de l'utilisateur. Cette demande permet de commencer le code indépendant des trois domaines en parallèle dès B01. Les prérequis ci-dessous portent sur la fusion du code dépendant ; ils ne bloquent plus tout démarrage d'un domaine.
 
+Le 2 octobre, les PR #5/#6/#7 ont aussi été fusionnées sur demande explicite : B01–B04 sont disponibles dans main (`438ff5a`, CI verte). B05 est préparé séparément ; ne pas supposer ses modèles déjà intégrés tant que sa PR n'est pas fusionnée. Voir [la preuve d'intégration](../quality/MERGE_B02_B04.md).
+
 | Développeur | Code à commencer sur sa branche | Dépendances à intégrer avant livraison complète |
 |---|---|---|
-| `ousseynoufayeisidk-sys` | B02 : outils qualité, puis B03/B04/B05 et authentification | Aucun autre domaine requis pour B02 |
+| `ousseynoufayeisidk-sys` | B05 : identité/référentiels, puis authentification | B01–B04 intégrés ; aucun autre domaine requis pour B05 |
 | `LamineGL` | Préparation B11 : enums d'état propres aux demandes, DTO, règles indépendantes et tests unitaires ; préparer les migrations et cas PostgreSQL | B05 pour Technology et l'identité ; B06–B09 pour les endpoints authentifiés |
 | `mdev44-code` | Préparation B22 : enums propres aux capsules, DTO de contenu/provenance et tests unitaires ; préparer le contrat de versionnement | B05 pour les référentiels ; B11 pour les références aux demandes ; droits/auth avant endpoints |
 
@@ -34,6 +36,7 @@ Chacun récupère sa branche synchronisée, depuis un répertoire propre :
 git fetch origin
 git switch backend/communaute-entraide # Adapter à sa branche ; --track origin/... au premier checkout.
 git pull --ff-only
+git merge origin/main # Récupérer le socle partagé dans sa branche, sans réécriture.
 cd backend
 composer install # Avec PHP 8.4 minimum sélectionné ; voir docs/COMMANDS.md.
 composer test
@@ -54,7 +57,7 @@ Livrer le socle Laravel/PostgreSQL reproductible, l'identité et les services pa
 - B29–B32 : notifications dédupliquées, signalements, retrait de contenu, suspension et rôles. Chaque pilote métier fournit les règles de visibilité de son domaine.
 - B39–B44 : coordonner sécurité, contrat complet, recette, exploitation, Qodana selon accès réel, puis BACKEND_GATE. Les trois personnes fournissent leurs preuves et corrigent leurs domaines.
 
-**B01 intégré ; prochaine PR :** B02, puis B03, B04 et B05, par PR cohérentes. B01–B05 doivent être intégrés avant la fusion des PR métier qui en dépendent. Leur préparation indépendante peut avancer dès maintenant. La fusion de ce socle n'est pas un BACKEND_GATE.
+**B01–B04 intégrés ; prochaine PR :** B05, puis B06–B10 par PR cohérentes. B05 doit être intégré avant la fusion des PR métier qui consomment les modèles d'identité et référentiels. Leur préparation indépendante peut avancer dès maintenant. La fusion de ce socle n'est pas un BACKEND_GATE.
 
 **Sortie attendue :** installation reproductible ; commandes locales documentées ; résultats de CI réellement observés ; contrats d'identité/audit/idempotence utilisables par les autres. Aucun rôle d'admin ne remplace l'auteur d'une demande. Pas de jeton navigateur dans localStorage.
 

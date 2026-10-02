@@ -45,8 +45,8 @@
       "refs": "N05/N06",
       "phase": "B",
       "execution_order": 4,
-      "status": "IN_REVIEW",
-      "evidence": ["docs/quality/B02_QUALITY.md"]
+      "status": "DONE",
+      "evidence": ["docs/quality/B02_QUALITY.md", "docs/quality/MERGE_B02_B04.md"]
     },
     {
       "id": "B03",
@@ -57,8 +57,8 @@
       "refs": "AC28 ; N05",
       "phase": "B",
       "execution_order": 5,
-      "status": "IN_REVIEW",
-      "evidence": ["docs/quality/B03_CI.md"]
+      "status": "DONE",
+      "evidence": ["docs/quality/B03_CI.md", "docs/quality/MERGE_B02_B04.md"]
     },
     {
       "id": "B04",
@@ -69,8 +69,8 @@
       "refs": "AC03/AC05 ; N01",
       "phase": "B",
       "execution_order": 6,
-      "status": "IN_REVIEW",
-      "evidence": ["docs/quality/B04_HTTP.md"]
+      "status": "DONE",
+      "evidence": ["docs/quality/B04_HTTP.md", "docs/quality/MERGE_B02_B04.md"]
     },
     {
       "id": "B05",
@@ -81,7 +81,8 @@
       "refs": "AC04 ; F01/F11",
       "phase": "B",
       "execution_order": 7,
-      "status": "TODO"
+      "status": "IN_PROGRESS",
+      "evidence": ["docs/quality/B05_IDENTITY.md"]
     },
     {
       "id": "B06",

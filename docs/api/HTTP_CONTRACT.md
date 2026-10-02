@@ -38,7 +38,7 @@ Page initiale 1 ; taille 20 ; maximum 50. Zéro, négatifs, décimaux, tableaux 
 
 ## OpenAPI et travail parallèle
 
-`docs/OPENAPI.yaml` est le point d'entrée. Schémas, paramètres et réponses communs appartiennent au pilote du socle. Les trois fragments `openapi/identity.yaml`, `community.yaml` et `capsules-lab.yaml` appartiennent à leurs pilotes ; ils sont vides tant qu'aucun endpoint métier n'est livré. L'extension x-haas-domain-fragments est un index documentaire, pas un assemblage automatique de routes.
+`docs/OPENAPI.yaml` est le point d'entrée. Schémas, paramètres et réponses communs appartiennent au pilote du socle. Les trois fragments `openapi/identity.yaml`, `community.yaml` et `capsules-lab.yaml` appartiennent à leurs pilotes ; leurs chemins restent vides tant qu'aucun endpoint métier n'est livré. B05 définit les types partagés dans identity.yaml. L'extension x-haas-domain-fragments est un index documentaire, pas un assemblage automatique de routes.
 
 Lors de l'intégration d'un endpoint, le pilote du socle ajoute une référence Path Item explicite dans le point d'entrée, par exemple `/api/v1/projects: {$ref: './api/openapi/community.yaml#/paths/~1api~1v1~1projects'}` lorsque ce chemin est effectivement implémenté. Un composant de fragment peut référencer `../../OPENAPI.yaml#/components/schemas/ApiError`. Ne pas copier les composants communs dans chaque domaine. Aucun chemin fictif n'est déclaré disponible.
 

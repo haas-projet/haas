@@ -1,6 +1,6 @@
 # Reprise — socle/auth
 
-Branche : `backend/socle-auth`. B01 testé avec Laravel 13.34.0, PHP 8.5.10 et PostgreSQL 17.0 ; résolution Composer sur PHP 8.4.0. Lire `docs/COMMANDS.md` et `docs/quality/B01_BOOTSTRAP.md` avant toute relance.
+Branche de base : `backend/socle-auth` (B02, PR #5). Branche active : `backend/socle-auth-ci` (B03, PR #6). B01 testé avec Laravel 13.34.0, PHP 8.5.10 et PostgreSQL 17.0 ; résolution Composer sur PHP 8.4.0. Lire `docs/COMMANDS.md` et la preuve du lot courant avant toute relance.
 
 PostgreSQL temporaire arrêté. Les prochains tests SQL exigent une nouvelle base locale/CI dédiée `haas_*_test`, rôle `haas_test`, et une connexion explicite. Ne pas réutiliser automatiquement le port de recette. Aucun secret applicatif enregistré.
 
@@ -9,3 +9,5 @@ B01 est intégré dans main par la PR #4, commit `462af72b992ed9bc5c77440ac04ec4
 Reprendre B03 après revue/intégration de B02 et synchronisation avec main. Composer 2.10.3 a été vérifié en copie temporaire ; installation globale inchangée. PHP minimal 8.4 reste à exécuter nativement dans la CI. Retrouver le SHA et la PR dans le bilan de session. Inscription et connexion non implémentées ; les deux collègues poursuivent les parties indépendantes selon `docs/execution/BACKEND_A_TROIS.md`.
 
 Continuation active : `backend/socle-auth-ci`, issue de B02, pour préparer B03 sans modifier la PR #5. Workflow localement valide ; CI distante à observer après publication. Lire `docs/quality/B03_CI.md`. B03 doit être proposé contre `backend/socle-auth` puis reciblé vers main après intégration de B02 ; ne pas fusionner les prérequis dans l'ordre inverse. Les limites PHP 8.4/CI ci-dessus restent valables jusqu'à observation d'un run réel.
+
+Mise à jour du 2 octobre 2026 : CI réellement verte dans le run 36944003232 sur `fa0ffd6`, PHP 8.4.26 et 8.5.11 avec PostgreSQL ; 23 tests / 33 assertions par version. B03 IN_REVIEW. Le dernier commit et son run sont indiqués dans la PR et le bilan. Intégrer #5 avant de recibler #6 vers main. Prochain lot : B04. Qodana et hébergement restent non vérifiés ; les mentions précédentes décrivent les étapes historiques.

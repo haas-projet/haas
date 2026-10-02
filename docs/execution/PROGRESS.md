@@ -1,6 +1,6 @@
 # Suivi du dépôt HAAS
 
-**Statut actif :** B01 DONE ; B02 IN_REVIEW sur `backend/socle-auth` ; B03 IN_PROGRESS sur la branche dérivée `backend/socle-auth-ci` ; S01/S02 IN_PROGRESS. Les autres lots restent TODO. 122 lots proposés, 106 identifiants antérieurs conservés. Ajouts BH01–10/FH01–05/RH01, F18, AC69–90 et UX21–23. Ne pas écraser les statuts ou preuves existants.
+**Statut actif :** B01 DONE ; B02 IN_REVIEW sur `backend/socle-auth` ; B03 IN_REVIEW sur la branche dérivée `backend/socle-auth-ci`, CI distante observée verte ; S01/S02 IN_PROGRESS. Les autres lots restent TODO. 122 lots proposés, 106 identifiants antérieurs conservés. Ajouts BH01–10/FH01–05/RH01, F18, AC69–90 et UX21–23. Ne pas écraser les statuts ou preuves existants.
 
 À renseigner après commandes réelles : date / lot / responsable / fichiers / commandes / observé / commit ou raison de non-commit / blocage / prochaine action. Les contrôles documentaires de ce pack ne valident pas BACKEND_GATE, FRONTEND_GATE ou RELEASE_GATE.
 
@@ -75,3 +75,10 @@
 - Vérifications locales : actionlint 1.7.12 sans diagnostic (ShellCheck/Pyflakes non exécutés), pack 18/18, déploiement 7/7, diff sans erreur. Code applicatif inchangé depuis B02 et ses tests réels ; aucune nouvelle preuve SQL locale inventée.
 - GitHub Actions activé, runners hébergés utilisés ; aucune protection ou option de facturation modifiée. CI distante à observer après publication ; B03 reste IN_PROGRESS à ce stade. Preuves et références : [B03_CI.md](../quality/B03_CI.md).
 - Prochaine action : ouvrir la PR B03 dépendante de B02, observer ses contrôles et corriger tout échec réel avant de la déclarer prête pour revue.
+
+## 2026-10-02 — CI B03 réellement exécutée
+
+- Commit du workflow : `fa0ffd6da6ab9b8ba702d71815833c2d3f1c47ce`. [PR #6](https://github.com/haas-projet/haas/pull/6) vers `backend/socle-auth`, dépendante de la PR #5, restée inchangée. Aucun merge ni protection modifiée.
+- [Run 36944003232](https://github.com/haas-projet/haas/actions/runs/36944003232) terminé avec success : PHP 8.4.26, PHP 8.5.11 et contrôle global backend-ci. Logs lus : 23 tests / 33 assertions par version, PostgreSQL réel, lint/analyse/audit et documentation réussis.
+- B03 passe IN_REVIEW avec preuve réelle. La réserve PHP 8.4 natif est levée pour le socle testé ; Qodana, hébergement et fonctionnalités futures restent non vérifiés. Les 122 lots et leurs dépendances sont préservés.
+- Le complément documentaire relance la CI sur son propre commit ; consulter les contrôles du dernier SHA dans la PR et le bilan. Prochain lot métier : B04 (HTTP/erreurs), puis B05 ; intégrer B02 avant B03 et conserver la revue humaine.

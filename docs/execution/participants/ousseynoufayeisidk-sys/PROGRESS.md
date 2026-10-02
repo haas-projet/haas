@@ -19,3 +19,7 @@ Qualité locale livrée depuis `1735a69` : Pint, Larastan/PHPStan niveau 8, scri
 ## 2026-10-01 — Préparation B03
 
 Continuation demandée pendant la revue B02 : branche dérivée `backend/socle-auth-ci` depuis `b665a78`, PR précédente préservée. Workflow PHP 8.4/8.5 et PostgreSQL validé localement par actionlint ; contrôles documentaires 18/18 et 7/7. B03 IN_PROGRESS tant que son exécution GitHub n'a pas été observée. Preuve : [B03_CI.md](../../../quality/B03_CI.md). Aucun merge ni revue humaine simulé.
+
+## 2026-10-02 — B03 en revue, CI verte
+
+PR #6 ouverte contre la branche B02, commit workflow `fa0ffd6`. Run GitHub 36944003232 réellement réussi : PHP 8.4.26, PHP 8.5.11 et backend-ci ; 23 tests / 33 assertions par version, SQL compris. B03 IN_REVIEW. Mettre à jour la base de #6 vers main après intégration de #5 et vérifier les contrôles du dernier SHA. Prochain lot : B04.

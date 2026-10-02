@@ -57,7 +57,8 @@
       "refs": "AC28 ; N05",
       "phase": "B",
       "execution_order": 5,
-      "status": "IN_PROGRESS"
+      "status": "IN_REVIEW",
+      "evidence": ["docs/quality/B03_CI.md"]
     },
     {
       "id": "B04",

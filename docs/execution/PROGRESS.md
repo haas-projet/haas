@@ -1,6 +1,6 @@
 # Suivi du dépôt HAAS
 
-**Statut actif :** B01 DONE, intégré dans `main` par la PR #4 ; B02 IN_REVIEW sur `backend/socle-auth` ; S01/S02 IN_PROGRESS. Les autres lots restent TODO. 122 lots proposés, 106 identifiants antérieurs conservés. Ajouts BH01–10/FH01–05/RH01, F18, AC69–90 et UX21–23. Ne pas écraser les statuts ou preuves existants.
+**Statut actif :** B01 DONE ; B02 IN_REVIEW sur `backend/socle-auth` ; B03 IN_PROGRESS sur la branche dérivée `backend/socle-auth-ci` ; S01/S02 IN_PROGRESS. Les autres lots restent TODO. 122 lots proposés, 106 identifiants antérieurs conservés. Ajouts BH01–10/FH01–05/RH01, F18, AC69–90 et UX21–23. Ne pas écraser les statuts ou preuves existants.
 
 À renseigner après commandes réelles : date / lot / responsable / fichiers / commandes / observé / commit ou raison de non-commit / blocage / prochaine action. Les contrôles documentaires de ce pack ne valident pas BACKEND_GATE, FRONTEND_GATE ou RELEASE_GATE.
 
@@ -67,3 +67,11 @@
 - Contrôles documentaires : pack 18/18, déploiement 7/7 et `git diff --check` sans erreur. Empreintes actualisées avant commit.
 - Limites : PHP 8.4 natif, CI et Qodana non exécutés. B02 IN_REVIEW ; aucun merge autorisé implicitement par cette continuation, aucun gate ni revue humaine simulé. Commit réel et PR à retrouver dans le bilan.
 - Prochain lot : B03 après revue/intégration de B02, puis B04/B05 et authentification. B11/B22 et leurs prérequis restent sous la responsabilité des autres développeurs.
+
+## 2026-10-01 — Préparation B03 sur branche dérivée
+
+- Demande utilisateur : continuer. B02 est encore en revue dans la PR #5 ; création de `backend/socle-auth-ci` depuis `b665a78` pour préserver sa PR. La préparation B03 cible temporairement la branche B02 et attend ses prérequis avant intégration dans main.
+- Workflow Backend CI : PHP 8.4/8.5, PostgreSQL 17 isolé, installation verrouillée, lint/analyse/tests/audit/documents et résultat global backend-ci. Actions épinglées par SHA, image par digest ; permissions en lecture, aucun secret de production et aucun filtre de chemins sur les PR.
+- Vérifications locales : actionlint 1.7.12 sans diagnostic (ShellCheck/Pyflakes non exécutés), pack 18/18, déploiement 7/7, diff sans erreur. Code applicatif inchangé depuis B02 et ses tests réels ; aucune nouvelle preuve SQL locale inventée.
+- GitHub Actions activé, runners hébergés utilisés ; aucune protection ou option de facturation modifiée. CI distante à observer après publication ; B03 reste IN_PROGRESS à ce stade. Preuves et références : [B03_CI.md](../quality/B03_CI.md).
+- Prochaine action : ouvrir la PR B03 dépendante de B02, observer ses contrôles et corriger tout échec réel avant de la déclarer prête pour revue.

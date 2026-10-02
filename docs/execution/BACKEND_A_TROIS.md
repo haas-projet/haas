@@ -137,7 +137,7 @@ git fetch origin
 git merge origin/main
 ```
 
-Suivre [COMMANDS.md](../COMMANDS.md) après intégration du socle B01 : `composer install`, `composer test`, `composer test:integration`, avec une base PostgreSQL de test dédiée et identifiée. `composer lint` et `composer analyse` seront ajoutées en B02. Mettre dans la PR les commandes exactes, résultats, SHA et contrôles non exécutés.
+Suivre [COMMANDS.md](../COMMANDS.md) après intégration du socle B01 : `composer install`, `composer test`, `composer test:integration`, avec une base PostgreSQL de test dédiée et identifiée. B02 ajoute `composer lint`, `composer analyse` et le contrôle d'architecture ; récupérer ce lot après sa revue et sa fusion. Mettre dans la PR les commandes exactes, résultats, SHA et contrôles non exécutés.
 
 Ajouter uniquement les fichiers du lot, committer selon `COMMIT_CONVENTION.md`, pousser sa branche et ouvrir une PR vers `main` liée à sa tâche. Garder la tâche de coordination ouverte tant que tous ses lots ne sont pas vérifiés ; utiliser `Refs #numéro` pour une livraison partielle, pas `Closes`.
 

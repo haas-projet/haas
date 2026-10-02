@@ -9,6 +9,6 @@ Aucune de ces données n’est inventée par Codex. Un compte fournisseur non in
 ## B01 — réserves constatées le 1er octobre 2026
 
 - Socle testé sous PHP 8.5.10 et PostgreSQL 17.0, sur une base temporaire dédiée. La version minimale PHP 8.4 reste à exécuter dans la CI B03.
-- Composer 2.8.5 fonctionne mais émet des dépréciations sous PHP 8.5 ; qualifier une version compatible en B02.
+- B02 qualifie Composer 2.10.3 en copie temporaire sous PHP 8.5.10, sans dépréciation observée. L'installation globale 2.8.5 reste inchangée ; sélectionner une version adaptée sur chaque poste.
 - Les accès/versions de l'hébergement, SMTP, Qodana et CI ne sont pas vérifiés. S01/S02 restent IN_PROGRESS ; cela ne transforme pas les tests locaux B01 en validation de production.
 - B01 est intégré par la PR #4 sur autorisation explicite de fusion donnée par l'utilisateur ; aucune revue GitHub par un autre développeur n'est attestée. L'authentification n'est pas encore livrée. Les PR métier qui dépendent des référentiels B05 ou de l'authentification attendent leur intégration.

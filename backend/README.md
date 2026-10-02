@@ -60,6 +60,6 @@ Lire [le plan de travail à trois](../docs/execution/BACKEND_A_TROIS.md) pour le
 
 ## Prochaine étape
 
-Le responsable du socle poursuit B02 (qualité PHP), B03 (CI), B04 (contrat HTTP), B05 (identité), puis l'authentification. Les deux autres développeurs peuvent coder les parties indépendantes de leur domaine sur cette base ; les PR dépendantes attendent leurs prérequis. Voir le démarrage parallèle dans le plan d'équipe. L'inventaire des services externes S01/S02 reste partiel.
+B02 (qualité PHP) est testé sur `backend/socle-auth`, en attente de revue : `composer lint`, `composer analyse`, `composer test` et `composer test:integration`. Voir [les preuves B02](../docs/quality/B02_QUALITY.md). Le responsable du socle poursuit ensuite B03 (CI), B04 (contrat HTTP), B05 (identité), puis l'authentification. Les deux autres développeurs peuvent coder les parties indépendantes de leur domaine sur cette base ; les PR dépendantes attendent leurs prérequis. L'inventaire des services externes S01/S02 reste partiel.
 
 Ne pas démarrer des installations Laravel indépendantes sur les autres branches. Après intégration du socle validé, chacun récupère `main` avant de développer les fonctionnalités qui en dépendent. Backend P0 et GO_FRONTEND humain précèdent toute application React.

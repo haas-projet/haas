@@ -2,7 +2,7 @@
 
 Inspecter le dépôt, préserver les fichiers/commits/saisies existants, lire ADR-006. Appliquer F18 : projets ouverts, offres consenties, décision propriétaire, fil et projection publique contrôlés. Nouvelle recette avant GO_FRONTEND ; ne pas prendre un ancien gate pour un accord sur ce périmètre. Systalink/Vercel inchangé.
 
-État courant : B01 DONE, intégré dans `main` par la PR #4 ; voir la dernière section et `quality/B01_BOOTSTRAP.md` depuis `docs/`. S01/S02 restent IN_PROGRESS. Prochain lot : B02 ; code indépendant B11/B22 en parallèle selon `BACKEND_A_TROIS.md`. BH01–BH10 précèdent B39 et le frontend attend GO_FRONTEND humain.
+État courant : B01 DONE, intégré dans `main` par la PR #4 ; B02 IN_REVIEW sur `backend/socle-auth`, preuves dans `quality/B02_QUALITY.md` depuis `docs/`. S01/S02 restent IN_PROGRESS. Prochain lot : B03 après revue/intégration ; code indépendant B11/B22 en parallèle selon `BACKEND_A_TROIS.md`. BH01–BH10 précèdent B39 et le frontend attend GO_FRONTEND humain.
 
 ## Reprise après préparation GitHub — 2026-10-01
 
@@ -47,3 +47,11 @@ PR #4 fusionnée sur demande explicite de l'utilisateur : `462af72b992ed9bc5c774
 Les trois branches doivent récupérer ce socle et le suivi d'intégration par avancement simple, sans écraser un éventuel travail supplémentaire. La publication vérifie les références distantes ; consulter le bilan final pour son commit. Chaque développeur travaille dans son clone et sa branche, avec son environnement et sa base de test.
 
 La demande de travail parallèle permet à LamineGL et mdev44-code de coder dès maintenant leurs parties indépendantes (enums propres au domaine, DTO, règles et tests unitaires), pendant que le responsable du socle livre B02–B05 puis l'authentification. Les migrations/services qui consomment des référentiels ou modèles manquants attendent leurs prérequis avant validation et fusion. Ne pas recréer ces modèles partagés dans chaque branche. Le détail et les commandes sont dans `BACKEND_A_TROIS.md`.
+
+## Reprise après B02 — 2026-10-01
+
+B02 est prêt pour revue sur `backend/socle-auth`. Lire [la preuve](../quality/B02_QUALITY.md) et [les commandes](../COMMANDS.md) : Pint, PHPStan/Larastan niveau 8 et architecture sont exécutables ; 23 tests / 33 assertions distincts réussis, dont PostgreSQL réel. Le témoin volontairement incorrect a été retiré et le serveur SQL temporaire arrêté. Aucun fichier `.env` privé livré.
+
+Composer 2.10.3 a été utilisé en copie temporaire vérifiée ; l'ancien Composer global reste inchangé. Les collègues devront récupérer B02 après fusion et lancer composer install pour recevoir les outils verrouillés. Ne pas annoncer la CI avant B03 ; PHP 8.4 natif et Qodana restent non exécutés. Aucun lot d'authentification ni gate validé par cette étape.
+
+Ne pas démarrer B03 sur cette branche tant que sa PR B02 attend la revue, conformément au plan à trois. Après intégration : synchroniser main, créer backend-ci avec PostgreSQL dédié et actions épinglées, puis observer son exécution réelle. Retrouver le SHA et l'URL de PR dans le bilan de session.

@@ -1,6 +1,6 @@
 # Suivi du dépôt HAAS
 
-**Statut actif :** B01 DONE, intégré dans `main` par la PR #4 ; S01/S02 IN_PROGRESS. Les autres lots restent TODO. 122 lots proposés, 106 identifiants antérieurs conservés. Ajouts BH01–10/FH01–05/RH01, F18, AC69–90 et UX21–23. Ne pas écraser les statuts ou preuves existants.
+**Statut actif :** B01 DONE, intégré dans `main` par la PR #4 ; B02 IN_REVIEW sur `backend/socle-auth` ; S01/S02 IN_PROGRESS. Les autres lots restent TODO. 122 lots proposés, 106 identifiants antérieurs conservés. Ajouts BH01–10/FH01–05/RH01, F18, AC69–90 et UX21–23. Ne pas écraser les statuts ou preuves existants.
 
 À renseigner après commandes réelles : date / lot / responsable / fichiers / commandes / observé / commit ou raison de non-commit / blocage / prochaine action. Les contrôles documentaires de ce pack ne valident pas BACKEND_GATE, FRONTEND_GATE ou RELEASE_GATE.
 
@@ -56,3 +56,14 @@
 - Synchronisation prévue par avancement simple des trois branches vers le même socle et ce suivi. Vérifier les références distantes dans le bilan final ; aucune suppression, aucun force-push ni écrasement de contribution.
 - Changements de cette étape uniquement documentaires ; tests applicatifs non relancés sans changement de code. `node scripts/validate-pack.mjs` : 18/18 ; `node scripts/check-deployment-docs.mjs` : 7/7 ; `git diff --check` sans erreur. Empreintes actualisées avant le commit de suivi.
 - Prochain lot du responsable 1 : B02. LamineGL commence les éléments indépendants B11 ; mdev44-code ceux de B22. Les référentiels B05, l'authentification et la CI restent à livrer.
+
+## 2026-10-01 — B02, qualité PHP locale
+
+- Demande : continuer la partie socle/authentification attribuée à `ousseynoufayeisidk-sys`. Base propre `1735a69`, aucune PR de cette branche ouverte au démarrage ; contributions des autres domaines préservées.
+- Livraison : Pint, PHPStan/Larastan niveau 8 ciblant PHP 8.4, scripts Composer qualité/tests, contrôle AST des dépendances HTTP de Data/Services et tests négatifs. Aucun ignore général ni baseline. Quatre ajouts dev MIT, aucune version existante mise à jour.
+- Résultats réels : lint et analyse passent ; 22 tests / 28 assertions sans base et 1 test / 5 assertions sur PostgreSQL 17.0 dédié. Le test d'architecture seul passe et est déjà compté dans les 22. Total distinct : 23 tests / 33 assertions. Installation verrouillée, validation Composer, prérequis et audit réussis.
+- Témoin invalide ajouté puis retiré : les trois commandes lint, analyse et test:architecture échouent bien avec code 1. Corrections de diagnostics réels : contrôle de type APP_URL, annotations de tests et imports ordonnés. Serveur SQL temporaire arrêté ; service existant inchangé.
+- Preuves : [B02_QUALITY.md](../quality/B02_QUALITY.md), [B02_DEPENDENCIES.json](../quality/B02_DEPENDENCIES.json), COMMANDS/VERSIONS et suivi individuel actualisés. Composer 2.10.3 temporaire vérifié, installation globale inchangée.
+- Contrôles documentaires : pack 18/18, déploiement 7/7 et `git diff --check` sans erreur. Empreintes actualisées avant commit.
+- Limites : PHP 8.4 natif, CI et Qodana non exécutés. B02 IN_REVIEW ; aucun merge autorisé implicitement par cette continuation, aucun gate ni revue humaine simulé. Commit réel et PR à retrouver dans le bilan.
+- Prochain lot : B03 après revue/intégration de B02, puis B04/B05 et authentification. B11/B22 et leurs prérequis restent sous la responsabilité des autres développeurs.

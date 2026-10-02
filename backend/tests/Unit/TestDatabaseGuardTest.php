@@ -9,6 +9,7 @@ use Tests\Support\TestDatabaseGuard;
 
 final class TestDatabaseGuardTest extends TestCase
 {
+    /** @param array<string, mixed> $overrides */
     #[DataProvider('unsafeConfigurations')]
     public function test_unsafe_database_configuration_is_rejected(string $environment, string $driver, array $overrides): void
     {
@@ -22,6 +23,7 @@ final class TestDatabaseGuardTest extends TestCase
         $this->expectNotToPerformAssertions();
     }
 
+    /** @return array<string, array{string, string, array<string, mixed>}> */
     public static function unsafeConfigurations(): array
     {
         return [
@@ -36,6 +38,7 @@ final class TestDatabaseGuardTest extends TestCase
         ];
     }
 
+    /** @return array<string, string> */
     private static function safeConnection(): array
     {
         return ['driver' => 'pgsql', 'host' => '127.0.0.1', 'database' => 'haas_bootstrap_test', 'username' => 'haas_test'];

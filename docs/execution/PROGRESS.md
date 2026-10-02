@@ -1,6 +1,6 @@
 # Suivi du dépôt HAAS
 
-**Statut actif :** B01 DONE ; B02 IN_REVIEW sur `backend/socle-auth` ; B03 IN_REVIEW sur la branche dérivée `backend/socle-auth-ci`, CI distante observée verte ; S01/S02 IN_PROGRESS. Les autres lots restent TODO. 122 lots proposés, 106 identifiants antérieurs conservés. Ajouts BH01–10/FH01–05/RH01, F18, AC69–90 et UX21–23. Ne pas écraser les statuts ou preuves existants.
+**Statut actif :** B01 DONE ; B02/B03/B04 IN_REVIEW ; B04 sur `backend/socle-auth-http`, PR #7, CI PHP 8.4/8.5 verte ; S01/S02 IN_PROGRESS. Les autres lots restent TODO. 122 lots proposés, 106 identifiants antérieurs conservés. Ajouts BH01–10/FH01–05/RH01, F18, AC69–90 et UX21–23. Ne pas écraser les statuts ou preuves existants.
 
 À renseigner après commandes réelles : date / lot / responsable / fichiers / commandes / observé / commit ou raison de non-commit / blocage / prochaine action. Les contrôles documentaires de ce pack ne valident pas BACKEND_GATE, FRONTEND_GATE ou RELEASE_GATE.
 
@@ -82,3 +82,15 @@
 - [Run 36944003232](https://github.com/haas-projet/haas/actions/runs/36944003232) terminé avec success : PHP 8.4.26, PHP 8.5.11 et contrôle global backend-ci. Logs lus : 23 tests / 33 assertions par version, PostgreSQL réel, lint/analyse/audit et documentation réussis.
 - B03 passe IN_REVIEW avec preuve réelle. La réserve PHP 8.4 natif est levée pour le socle testé ; Qodana, hébergement et fonctionnalités futures restent non vérifiés. Les 122 lots et leurs dépendances sont préservés.
 - Le complément documentaire relance la CI sur son propre commit ; consulter les contrôles du dernier SHA dans la PR et le bilan. Prochain lot métier : B04 (HTTP/erreurs), puis B05 ; intégrer B02 avant B03 et conserver la revue humaine.
+
+## 2026-10-02 — B04, contrat HTTP commun
+
+- Continuation demandée : branche `backend/socle-auth-http` issue de B03 `a895269`, sans modification des PR #5/#6. Renderer commun, request_id, pagination 20/max50, contrat OpenAPI et fragments par domaine livrés. Voir [B04_HTTP.md](../quality/B04_HTTP.md) et [HTTP_CONTRACT.md](../api/HTTP_CONTRACT.md).
+- Contrôles locaux réussis sous PHP 8.5.10 : lint, analyse, validation Composer/prérequis/audit ; 60 tests / 459 assertions sans base, 2 tests / 116 assertions PostgreSQL réel. Total 62 tests / 575 assertions. Cluster temporaire arrêté, aucune migration sur la base applicative.
+- Ajout dev symfony/yaml v8.0.15, licence MIT vérifiée, aucune mise à jour des dépendances existantes. AC03/AC05 restent partiels : contrats HTTP testés, règles métier et frontend à vérifier ultérieurement.
+- B04 attend l'observation de sa propre CI avant IN_REVIEW. Intégration dans l'ordre B02/B03/B04, sans revue humaine simulée. Prochain lot : B05.
+
+## 2026-10-02 — B04 en revue, CI verte
+
+- PR #7 ouverte contre B03, commit `1c4c343d11d4bf86e65c928a92e82b29758a04de`. Run 36946538852 réellement réussi : PHP 8.4.26, PHP 8.5.11, PostgreSQL 17 et backend-ci. Logs lus ; 62 tests / 575 assertions par version, lint/analyse/audit et documentation réussis.
+- B04 IN_REVIEW, preuve enrichie ; 230 empreintes vérifiées sans différence. Aucun merge ni avis humain. Le complément de preuve relance la CI ; consulter le dernier SHA/run de la PR et du bilan. Prochain lot B05.

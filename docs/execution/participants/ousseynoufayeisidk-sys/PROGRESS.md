@@ -73,3 +73,15 @@ Continuation de la partie socle demandée, avec bilan Systalink à chaque livrai
 ## 2026-10-02 — B09 en revue
 
 PR #13 contre backend/socle-auth, dépendante de #11/#10. Commit applicatif cb8f7379cd48ca2938774fd7912efcb94ce6a6ad ; CI 37074478785 réussie, journaux lus : PHP 8.4.26/8.5.11 avec PostgreSQL 17, chacun 244 tests / 2406 assertions. Lint/analyse/Composer/audit/documentation et backend-ci verts. B09 IN_REVIEW ; dernier SHA documentaire et sa CI dans la PR. Aucun merge ni avis humain présumé. Prochain lot B10. Systalink : B09 « En cours — prêt pour revue », aucune nouvelle carte « Terminé ».
+
+## 2026-10-02 — B10, profils et technologies préparés
+
+Continuation demandée. Branche temporaire backend/socle-auth-profiles depuis B09 6985eee ; PR #10/#11/#13 et branches des collègues préservées. Profils public/propre, PATCH sous version et verrou, huit technologies maximum, référentiel paginé, initiales Unicode, données privées exclues et liens GitHub sûrs. Migration additive ; aucun package ajouté. Contrat PROFILES.md, preuve B10_PROFILES.md.
+
+294 tests / 2808 assertions locaux réussis : 213 / 2008 sans base, 81 / 800 PostgreSQL. Concurrence réelle observée avec deux workers en attente SQL, un seul gagnant et aucun mélange. Lint/analyse/Composer/audit réussis. B10 reste IN_PROGRESS : contributions réelles non raccordées faute de sources métier livrées ; null explicite, aucun chiffre inventé. PR de première livraison à publier et CI à observer. Systalink : « En cours ». Prochain lot indépendant : B12.
+
+## 2026-10-02 — B10, première livraison publiée et CI verte
+
+PR #14 en brouillon contre backend/socle-auth-permissions, commit applicatif c5c1706be17b917835d3fdc794249b779ae78a70. Run 37076878442 réussi, journaux lus : PHP 8.4.26/8.5.11 et PostgreSQL 17, chacun 294 tests / 2808 assertions (213 / 2008 sans base et 81 / 800 SQL). Pint, PHPStan niveau 8, Composer, audit, documentation et backend-ci verts. Preuve B10_PROFILES.md ; dernier SHA documentaire et ses contrôles dans la PR et le bilan.
+
+B10 reste IN_PROGRESS : première partie profils/technologies validée, contributions réelles encore dépendantes de B19/B25/BV209 et des règles de visibilité/retrait. Aucun merge ni revue humaine présumé. Systalink : B10 « En cours », aucune nouvelle carte « Terminé ». Ordre d'intégration #10 → #11 → #13 → #14 ; prochain lot indépendant B12, audit et révisions.

@@ -141,7 +141,8 @@
       "refs": "F11 ; AC27 ; ADR-005 / [M]",
       "phase": "B",
       "execution_order": 12,
-      "status": "TODO"
+      "status": "IN_PROGRESS",
+      "evidence": ["docs/quality/B10_PROFILES.md"]
     },
     {
       "id": "B11",

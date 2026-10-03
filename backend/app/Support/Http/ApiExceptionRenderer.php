@@ -5,6 +5,8 @@ namespace App\Support\Http;
 use App\Exceptions\Identity\InactiveAccount;
 use App\Exceptions\Identity\InvalidCredentials;
 use App\Exceptions\Identity\InvalidResetToken;
+use App\Exceptions\Identity\ProfileUpdateRejected;
+use App\Exceptions\Identity\ProfileVersionConflict;
 use App\Exceptions\Identity\RegistrationRejected;
 use App\Exceptions\Identity\RegistrationUnavailable;
 use Illuminate\Auth\AuthenticationException;
@@ -30,6 +32,8 @@ final class ApiExceptionRenderer
         $status = match (true) {
             $exception instanceof ValidationException, $exception instanceof RegistrationRejected => 422,
             $exception instanceof InvalidCredentials, $exception instanceof InvalidResetToken => 422,
+            $exception instanceof ProfileUpdateRejected => 422,
+            $exception instanceof ProfileVersionConflict => 409,
             $exception instanceof InactiveAccount => 403,
             $exception instanceof RegistrationUnavailable => 503,
             $exception instanceof AuthenticationException => 401,
@@ -78,6 +82,7 @@ final class ApiExceptionRenderer
                     $exception instanceof RegistrationRejected => $exception->fields,
                     $exception instanceof InvalidCredentials => ['email' => ['Ces identifiants ne permettent pas de vous connecter.']],
                     $exception instanceof InvalidResetToken => ['token' => ['Ce lien ne permet pas de réinitialiser le mot de passe. Demandez un nouveau lien.']],
+                    $exception instanceof ProfileUpdateRejected => ['technology_ids' => ['Une technologie sélectionnée est indisponible. Rechargez la liste.']],
                     default => [],
                 },
             ],

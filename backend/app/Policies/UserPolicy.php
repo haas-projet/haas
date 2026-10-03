@@ -21,6 +21,11 @@ final class UserPolicy
         return $this->access->owns($actor, $user->id) && $user->status === AccountStatus::Active;
     }
 
+    public function viewPublicProfile(?User $actor, User $user): bool
+    {
+        return $this->access->verified($user);
+    }
+
     public function participate(User $actor): bool
     {
         return $this->access->verified($actor);

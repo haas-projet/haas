@@ -1,5 +1,11 @@
 # Pilote : ousseynoufayeisidk-sys. B05 identité, B06 inscription, B07 sessions.
 paths:
+  /api/v1/members/{handle}:
+    $ref: './profiles.yaml#/paths/~1api~1v1~1members~1{handle}'
+  /api/v1/me/profile:
+    $ref: './profiles.yaml#/paths/~1api~1v1~1me~1profile'
+  /api/v1/technologies:
+    $ref: './profiles.yaml#/paths/~1api~1v1~1technologies'
   /api/v1/me:
     $ref: './current-account.yaml#/paths/~1api~1v1~1me'
   /api/v1/account-access:

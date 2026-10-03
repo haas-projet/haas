@@ -1,8 +1,8 @@
 openapi: 3.1.0
 info:
   title: HAAS — Socle API
-  version: 0.7.0
-  description: Socle B01–B09, inscription, sessions SPA, courriels et compte courant privé.
+  version: 0.8.0
+  description: Socle B01–B09 et profils B10 ; contributions métier à raccorder.
 servers:
   - url: http://localhost:8000
 x-haas-domain-fragments:
@@ -13,6 +13,12 @@ x-haas-domain-fragments:
   capsules-lab:
     $ref: './api/openapi/capsules-lab.yaml'
 paths:
+  /api/v1/members/{handle}:
+    $ref: './api/openapi/identity.yaml#/paths/~1api~1v1~1members~1{handle}'
+  /api/v1/me/profile:
+    $ref: './api/openapi/identity.yaml#/paths/~1api~1v1~1me~1profile'
+  /api/v1/technologies:
+    $ref: './api/openapi/identity.yaml#/paths/~1api~1v1~1technologies'
   /api/v1/me:
     $ref: './api/openapi/identity.yaml#/paths/~1api~1v1~1me'
   /api/v1/account-access:

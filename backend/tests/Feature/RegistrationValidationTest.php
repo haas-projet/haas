@@ -3,7 +3,7 @@
 namespace Tests\Feature;
 
 use App\Data\Identity\RegisterMemberData;
-use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
+use App\Http\Middleware\RequireCsrfToken;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\Support\RegistrationFixtures;
 use Tests\TestCase;
@@ -72,7 +72,7 @@ final class RegistrationValidationTest extends TestCase
 
     public function test_real_csrf_middleware_rejects_missing_token(): void
     {
-        $this->app->bind(PreventRequestForgery::class, fn ($app) => new class($app, $app['encrypter']) extends PreventRequestForgery
+        $this->app->bind(RequireCsrfToken::class, fn ($app) => new class($app, $app['encrypter']) extends RequireCsrfToken
         {
             protected function runningUnitTests(): bool
             {

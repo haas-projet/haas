@@ -47,3 +47,11 @@ Branche backend/socle-auth-registration dérivée de B05 4de376f ; PR #8 préser
 ## 2026-10-02 — B06 en revue
 
 PR #9, commit applicatif 4e40f1e ; run 36954111512 réussi sous PHP 8.4.26/8.5.11, chacun 153 tests / 1218 assertions avec PostgreSQL. B06 IN_REVIEW ; #8 précède #9, aucune fusion présumée. Prochain lot B07.
+
+## 2026-10-02 — B05/B06 intégrés, B07 préparé
+
+Fusion autorisée de #8/#9, main 075e6eb et CI 36954939123 verte. B05/B06 DONE ; preuve MERGE_B05_B06.md. B07 depuis ce main : sessions Sanctum, login/logout, CSRF, CORS, limites et tests de cookies. 182 tests / 1538 assertions locaux réussis, SQL compris ; qualité/Composer verts. IN_PROGRESS avant CI propre ; prochain B08. Aucun déploiement ou revue humaine simulée.
+
+## 2026-10-02 — B07 en revue
+
+PR #10, applicatif a8bfcaa et correction CI 645e74e ; run 36957084503 réussi sur PHP 8.4.26/8.5.11, chacun 182 tests / 1538 assertions avec PostgreSQL. B07 IN_REVIEW. Échec CI initial dû aux origines de test corrigé et documenté, aucun contrôle assoupli. Prochain lot B08 ; dernier SHA documentaire et ses contrôles dans la PR.

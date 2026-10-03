@@ -2,6 +2,8 @@
 
 namespace App\Support\Http;
 
+use App\Exceptions\Identity\InactiveAccount;
+use App\Exceptions\Identity\InvalidCredentials;
 use App\Exceptions\Identity\RegistrationRejected;
 use App\Exceptions\Identity\RegistrationUnavailable;
 use Illuminate\Auth\AuthenticationException;
@@ -15,7 +17,7 @@ final class ApiExceptionRenderer
 {
     public static function handles(Request $request): bool
     {
-        return $request->is('api', 'api/*', 'register') || $request->expectsJson();
+        return $request->is('api', 'api/*', 'register', 'login', 'logout', 'sanctum/*') || $request->expectsJson();
     }
 
     public function render(Throwable $exception, Request $request): ?JsonResponse
@@ -26,6 +28,8 @@ final class ApiExceptionRenderer
 
         $status = match (true) {
             $exception instanceof ValidationException, $exception instanceof RegistrationRejected => 422,
+            $exception instanceof InvalidCredentials => 422,
+            $exception instanceof InactiveAccount => 403,
             $exception instanceof RegistrationUnavailable => 503,
             $exception instanceof AuthenticationException => 401,
             $exception instanceof HttpExceptionInterface => $exception->getStatusCode(),
@@ -66,6 +70,7 @@ final class ApiExceptionRenderer
                 'fields' => (object) match (true) {
                     $exception instanceof ValidationException => $exception->errors(),
                     $exception instanceof RegistrationRejected => $exception->fields,
+                    $exception instanceof InvalidCredentials => ['email' => ['Ces identifiants ne permettent pas de vous connecter.']],
                     default => [],
                 },
             ],

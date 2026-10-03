@@ -1,6 +1,6 @@
 # B06 — Inscription
 
-`POST /register`, corps JSON. Contrat détaillé dans [identity.yaml](openapi/identity.yaml), référencé par OpenAPI 0.4.0. Route dans le groupe web Laravel avec CSRF et limite de cinq tentatives par minute et adresse IP. B07 doit encore fournir le parcours SPA complet, les cookies Sanctum et CORS ; B08 les courriels de compte.
+`POST /register`, corps JSON. Contrat détaillé dans [identity.yaml](openapi/identity.yaml), référencé par OpenAPI. Route dans le groupe web Laravel avec CSRF et limite de cinq tentatives par minute et adresse IP. B07 fournit [les cookies Sanctum et CORS](SESSIONS.md) ; B08 doit encore livrer les courriels de compte.
 
 Champs exacts : `handle`, `email`, `password`, `password_confirmation`, `terms_accepted`, `terms_version`. Tout autre champ est refusé, même s'il vaut null ou vient de la query string. Création publique, sans ressource préexistante ni rôle à accorder par Policy. Le serveur fixe membre/actif/non vérifié/non démo ; aucune connexion automatique, aucun jeton, aucune notification envoyée par ce lot.
 

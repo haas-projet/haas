@@ -1,6 +1,6 @@
 # Reprise — socle/auth
 
-Branche active : `backend/socle-auth-registration` (B06), dérivée de B05 `4de376f`. PR #8 puis #9 à intégrer dans cet ordre après revue. Laravel 13.34.0, PHP local 8.5.10, PostgreSQL 17.0 ; résolution Composer sur PHP 8.4.0. Lire `docs/COMMANDS.md`, `docs/quality/B06_REGISTRATION.md` et la dernière entrée ci-dessous ; les entrées précédentes sont historiques.
+Branche active : `backend/socle-auth-sessions` (B07), dérivée de main `075e6eb` après fusion de #8/#9. Laravel 13.34.0, PHP local 8.5.10, PostgreSQL 17.0 ; résolution Composer sur PHP 8.4.0. Lire `docs/COMMANDS.md`, `docs/quality/B07_SESSIONS.md` et la dernière entrée ci-dessous ; les entrées précédentes sont historiques.
 
 PostgreSQL temporaire arrêté. Les prochains tests SQL exigent une nouvelle base locale/CI dédiée `haas_*_test`, rôle `haas_test`, et une connexion explicite. Ne pas réutiliser automatiquement le port de recette. Aucun secret applicatif enregistré.
 
@@ -23,3 +23,7 @@ Mise à jour après autorisation « fusionner et continuer » : les trois PR son
 Reprise active B06 : backend/socle-auth-registration, parent B05 4de376f. Inscription prête localement : 153 tests / 1218 assertions ; cluster PostgreSQL dédié arrêté. Ouvrir la PR contre backend/socle-auth-identity, puis observer sa CI. Consulter REGISTRATION.md et B06_REGISTRATION.md. Conditions à publier/configurer avant ouverture réelle ; cookies SPA/CORS en B07, courriels en B08. Aucun merge de #8 ni GO_FRONTEND présumé.
 
 Mise à jour active : B06 IN_REVIEW dans #9, run 36954111512 réussi sur 4e40f1e ; 153 tests / 1218 assertions pour chacune des versions PHP 8.4.26/8.5.11 avec PostgreSQL. Reprendre B07 après lecture des contrats auth/CORS, sur branche séparée si #8/#9 restent ouvertes. Dernier SHA documentaire et CI dans la PR.
+
+Reprise active : B05/B06 DONE après fusion autorisée #8/#9. B07 sur backend/socle-auth-sessions depuis 075e6eb ; 182 tests / 1538 assertions locaux, serveur PostgreSQL temporaire arrêté. Lire SESSIONS.md et B07_SESSIONS.md, publier contre main et observer la CI. Prochain lot B08 ; /me et Policies en B09. Ni conditions réelles ni GO_FRONTEND présumés.
+
+État actif : B07 IN_REVIEW dans #10, run 36957084503 réussi sur 645e74e ; 182 tests / 1538 assertions pour chacune des versions PHP 8.4.26/8.5.11 avec PostgreSQL. Reprendre B08, courriels et reset, sur une branche distincte. Lire les contrôles du dernier SHA documentaire dans la PR ; aucune fusion de #10 ni revue de collègue présumée.

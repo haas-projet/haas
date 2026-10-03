@@ -1,0 +1,20 @@
+{
+  "date": "2026-10-02",
+  "scope": "B07: ajout Sanctum, versions existantes conservees",
+  "total": 107,
+  "unchanged": 106,
+  "changed": [],
+  "packages": [
+    {
+      "name": "laravel/sanctum",
+      "version": "v4.3.3",
+      "scope": "runtime",
+      "licenses": [
+        "MIT"
+      ],
+      "source": "https://github.com/laravel/sanctum.git",
+      "reference": "fee27a573d1a013af3721d86153a65e0b11927e6",
+      "distribution": "https://api.github.com/repos/laravel/sanctum/zipball/fee27a573d1a013af3721d86153a65e0b11927e6"
+    }
+  ]
+}

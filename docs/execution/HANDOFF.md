@@ -2,7 +2,7 @@
 
 Inspecter le dépôt, préserver les fichiers/commits/saisies existants, lire ADR-006. Appliquer F18 : projets ouverts, offres consenties, décision propriétaire, fil et projection publique contrôlés. Nouvelle recette avant GO_FRONTEND ; ne pas prendre un ancien gate pour un accord sur ce périmètre. Systalink/Vercel inchangé.
 
-État courant : B01–B04 DONE, PR #5/#6/#7 fusionnées sur autorisation explicite ; B05 IN_REVIEW sur `backend/socle-auth-identity` (PR #8, CI verte). Voir `quality/MERGE_B02_B04.md`, `quality/B05_IDENTITY.md` depuis `docs/` et la dernière section. S01/S02 restent IN_PROGRESS. BH01–BH10 précèdent B39 et le frontend attend GO_FRONTEND humain.
+État courant : B01–B06 DONE après fusion autorisée de #8/#9 ; B07 IN_REVIEW sur `backend/socle-auth-sessions` (PR #10, CI verte). Voir `quality/MERGE_B05_B06.md`, `quality/B07_SESSIONS.md` depuis `docs/` et la dernière section. S01/S02 restent IN_PROGRESS. BH01–BH10 précèdent B39 et le frontend attend GO_FRONTEND humain.
 
 ## Reprise après préparation GitHub — 2026-10-01
 
@@ -91,3 +91,11 @@ Branche backend/socle-auth-registration depuis B05 4de376f. PR #8 encore ouverte
 Observer la CI propre de B06 avant IN_REVIEW. Conditions réelles absentes : REGISTRATION_TERMS_VERSION vide entraîne 503 ; utiliser uniquement des versions fictives en test, aucune approbation juridique présumée. Argon2id obligatoire ; traiter explicitement les anciens hashes bcrypt avant connexion B07. B07 doit livrer cookies Sanctum/CORS/login/logout, B08 les courriels. Aucun GO_FRONTEND ou déploiement.
 
 État actif : B06 IN_REVIEW, PR #9, commit applicatif 4e40f1e. Run 36954111512 vert sur PHP 8.4.26 et 8.5.11, chacun 153 tests / 1218 assertions, PostgreSQL compris. Intégrer #8 avant #9 ; dernier SHA documentaire et sa CI dans la PR. Prochaine continuation : B07 sur une nouvelle branche dérivée si les PR attendent leur intégration.
+
+## Reprise active B07
+
+#8/#9 sont fusionnées sur autorisation utilisateur ; main local 075e6eb, CI post-fusion verte. B07 part de ce commit sur backend/socle-auth-sessions. Lire SESSIONS.md et B07_SESSIONS.md. 182 tests / 1538 assertions locaux réussis, PostgreSQL compris ; cluster temporaire arrêté. Composer install requis pour Sanctum 4.3.3 ; aucun autre package mis à jour.
+
+Publier la PR B07 contre main et observer sa CI avant IN_REVIEW. Cookies + Origin/Referer de confiance + X-XSRF-TOKEN pour les mutations ; /me reste B09. B08 vient ensuite : courriels et reset, notamment pour les anciens hashes bcrypt refusés par le login. Conditions d'inscription réelles toujours absentes. Aucun GO_FRONTEND ou déploiement.
+
+État actif : B07 IN_REVIEW, PR #10. Applicatif a8bfcaa, correction CI 645e74e ; run 36957084503 réussi, PHP 8.4.26/8.5.11 avec PostgreSQL, chacun 182 tests / 1538 assertions. Lire la preuve B07_SESSIONS.md et les checks du dernier SHA documentaire dans la PR. Prochain lot B08 sur branche dédiée ; ne pas modifier les branches des collègues. Les origines de test sont maintenant explicitement alignées, serveur local dédié arrêté.

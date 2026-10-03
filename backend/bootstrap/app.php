@@ -1,11 +1,15 @@
 <?php
 
 use App\Http\Middleware\AssignRequestId;
+use App\Http\Middleware\EnsureActiveSession;
+use App\Http\Middleware\ProtectSpaRequests;
+use App\Http\Middleware\RequireCsrfToken;
 use App\Support\Http\ApiExceptionRenderer;
 use App\Support\Http\RequestId;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Http\Request;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -20,6 +24,10 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->prepend(AssignRequestId::class);
+        $middleware->append(ProtectSpaRequests::class);
+        $middleware->statefulApi();
+        $middleware->web(append: [EnsureActiveSession::class], replace: [PreventRequestForgery::class => RequireCsrfToken::class]);
+        $middleware->api(append: [EnsureActiveSession::class]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

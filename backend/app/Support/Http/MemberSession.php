@@ -4,14 +4,22 @@ namespace App\Support\Http;
 
 use App\Models\User;
 use Illuminate\Auth\RequestGuard;
+use Illuminate\Auth\SessionGuard;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use LogicException;
 
 final class MemberSession
 {
     public function start(Request $request, User $user): void
     {
-        Auth::guard('web')->login($user, false);
+        $guard = Auth::guard('web');
+        if (! $guard instanceof SessionGuard) {
+            throw new LogicException('Le garde web doit utiliser les sessions Laravel.');
+        }
+        $guard->login($user, false);
+        // Lie immédiatement la session au secret vérifié, même si un reset devance son écriture SQL.
+        $request->session()->put('password_hash_web', $guard->hashPasswordForCookie($user->getAuthPassword()));
         $request->session()->regenerate();
     }
 

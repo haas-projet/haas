@@ -35,7 +35,7 @@ trait SpaHttpRequests
      * @param  array<string, string>  $headers
      * @return TestResponse<Response>
      */
-    private function browserRequest(string $method, string $path, array $body = [], array $headers = [], bool $sendXsrf = true): TestResponse
+    private function browserRequest(string $method, string $path, array $body = [], array $headers = [], bool $sendXsrf = true, bool $withoutOrigin = false): TestResponse
     {
         // Chaque appel recharge garde et session depuis les vrais cookies reçus.
         Auth::forgetGuards();
@@ -48,6 +48,9 @@ trait SpaHttpRequests
             app('session')->driver()->setHandler($arrayHandler);
         }
         $headers = array_merge(['Accept' => 'application/json', 'Origin' => 'https://app.haas.example.com'], $headers);
+        if ($withoutOrigin) {
+            unset($headers['Origin']);
+        }
         if ($sendXsrf && isset($this->browserCookies['XSRF-TOKEN'])) {
             $headers['X-XSRF-TOKEN'] ??= $this->browserCookies['XSRF-TOKEN'];
         }

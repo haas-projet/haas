@@ -2,7 +2,7 @@
 
 Inspecter le dépôt, préserver les fichiers/commits/saisies existants, lire ADR-006. Appliquer F18 : projets ouverts, offres consenties, décision propriétaire, fil et projection publique contrôlés. Nouvelle recette avant GO_FRONTEND ; ne pas prendre un ancien gate pour un accord sur ce périmètre. Systalink/Vercel inchangé.
 
-État courant : B01–B06 DONE après fusion autorisée de #8/#9 ; B07 IN_REVIEW sur `backend/socle-auth-sessions` (PR #10, CI verte). Voir `quality/MERGE_B05_B06.md`, `quality/B07_SESSIONS.md` depuis `docs/` et la dernière section. S01/S02 restent IN_PROGRESS. BH01–BH10 précèdent B39 et le frontend attend GO_FRONTEND humain.
+État courant : B01–B06 DONE ; B07 IN_REVIEW (PR #10), B08 IN_REVIEW (PR #11, CI verte) sur la branche permanente `backend/socle-auth`. Voir `quality/B08_ACCOUNT_MAIL.md` depuis `docs/` et la dernière section. S01/S02 restent IN_PROGRESS. BH01–BH10 précèdent B39 et le frontend attend GO_FRONTEND humain.
 
 ## Reprise après préparation GitHub — 2026-10-01
 
@@ -99,3 +99,7 @@ Observer la CI propre de B06 avant IN_REVIEW. Conditions réelles absentes : REG
 Publier la PR B07 contre main et observer sa CI avant IN_REVIEW. Cookies + Origin/Referer de confiance + X-XSRF-TOKEN pour les mutations ; /me reste B09. B08 vient ensuite : courriels et reset, notamment pour les anciens hashes bcrypt refusés par le login. Conditions d'inscription réelles toujours absentes. Aucun GO_FRONTEND ou déploiement.
 
 État actif : B07 IN_REVIEW, PR #10. Applicatif a8bfcaa, correction CI 645e74e ; run 36957084503 réussi, PHP 8.4.26/8.5.11 avec PostgreSQL, chacun 182 tests / 1538 assertions. Lire la preuve B07_SESSIONS.md et les checks du dernier SHA documentaire dans la PR. Prochain lot B08 sur branche dédiée ; ne pas modifier les branches des collègues. Les origines de test sont maintenant explicitement alignées, serveur local dédié arrêté.
+
+Reprise B08 : backend/socle-auth depuis b9b38db ; 212 tests / 1948 assertions locaux réussis, PostgreSQL temporaire arrêté. Lire ACCOUNT_MAIL.md et B08_ACCOUNT_MAIL.md. Ouvrir la PR vers backend/socle-auth-sessions tant que #10 reste ouverte, observer sa CI avant IN_REVIEW. File account-mail dédiée sur SQL ; worker requis pour l'envoi, array local, SMTP réel non testé. Ne pas supprimer la branche permanente ; après fusion #10, recibler B08 vers main puis nettoyer la branche temporaire. Prochain lot B09, /me et capacités ; aucun GO_FRONTEND.
+
+État actif B08 : IN_REVIEW, #11, commit 3a3d241 ; CI 37015668695 réussie sous PHP 8.4.26/8.5.11, chacun 212 tests / 1948 assertions avec PostgreSQL. Consulter les checks du dernier SHA documentaire dans la PR. Reprendre B09 après lecture des capacités ; préserver #10/#11 et les branches permanentes. Conditions réelles et SMTP restent à fournir/configurer avant ouverture réelle.

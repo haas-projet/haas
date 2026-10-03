@@ -4,6 +4,8 @@ namespace App\Models;
 
 use App\Enums\Identity\AccountStatus;
 use App\Enums\Identity\Role;
+use App\Notifications\Identity\ResetAccountPassword;
+use App\Notifications\Identity\VerifyAccountEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -16,6 +18,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
+use SensitiveParameter;
 
 /**
  * @property AccountStatus $status
@@ -30,6 +33,16 @@ class User extends Authenticatable implements MustVerifyEmail
 
     /** @var array<string, mixed> */
     protected $attributes = ['role' => 'member', 'status' => 'active', 'is_demo' => false];
+
+    public function sendEmailVerificationNotification(): void
+    {
+        $this->notify(new VerifyAccountEmail($this->email));
+    }
+
+    public function sendPasswordResetNotification(#[SensitiveParameter] $token): void
+    {
+        $this->notify(new ResetAccountPassword($this->email, $token));
+    }
 
     /** @return Attribute<string, string> */
     protected function email(): Attribute

@@ -17,7 +17,7 @@ F18 « Coup de main » : ouverture volontaire d’un projet, proposition limité
 ## État du développement
 Le socle Laravel/PostgreSQL B01–B06 est intégré dans `main` : bootstrap, qualité, CI PHP 8.4/8.5, contrat HTTP, identité et inscription. Les PR #8/#9 ont été fusionnées le 2 octobre 2026 sur demande explicite, avec CI post-fusion verte. Voir [la preuve d'intégration](docs/quality/MERGE_B05_B06.md), [le backend](backend/README.md) et [les commandes](docs/COMMANDS.md).
 
-B07 livre [les sessions Sanctum et CORS](docs/api/SESSIONS.md) en revue dans [la PR #10](https://github.com/haas-projet/haas/pull/10), CI PHP 8.4/8.5 verte ; [preuves B07](docs/quality/B07_SESSIONS.md). Les courriels de compte, le profil privé et les fonctionnalités métier restent à développer. Les conditions réelles doivent être configurées avant ouverture des inscriptions. Aucune application React, exécution de laboratoire ou mise en production n'est encore validée.
+B07 livre [les sessions Sanctum et CORS](docs/api/SESSIONS.md) en revue dans [la PR #10](https://github.com/haas-projet/haas/pull/10). B08 livre [les courriels de compte](docs/api/ACCOUNT_MAIL.md) en revue dans [la PR #11](https://github.com/haas-projet/haas/pull/11), sur la branche permanente `backend/socle-auth` ; CI PHP 8.4/8.5 verte et [preuves](docs/quality/B08_ACCOUNT_MAIL.md). Le profil privé et les fonctionnalités métier restent à développer. Les conditions réelles doivent être configurées avant ouverture des inscriptions. Aucune application React, délivrabilité SMTP réelle, exécution de laboratoire ou mise en production n'est encore validée.
 
 ## Démarrer sans écraser
 Équipe de trois : voir [la répartition backend, les branches et les règles de fusion](docs/execution/BACKEND_A_TROIS.md).

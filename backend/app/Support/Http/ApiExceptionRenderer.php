@@ -4,6 +4,7 @@ namespace App\Support\Http;
 
 use App\Exceptions\Identity\InactiveAccount;
 use App\Exceptions\Identity\InvalidCredentials;
+use App\Exceptions\Identity\InvalidResetToken;
 use App\Exceptions\Identity\RegistrationRejected;
 use App\Exceptions\Identity\RegistrationUnavailable;
 use Illuminate\Auth\AuthenticationException;
@@ -17,7 +18,7 @@ final class ApiExceptionRenderer
 {
     public static function handles(Request $request): bool
     {
-        return $request->is('api', 'api/*', 'register', 'login', 'logout', 'sanctum/*') || $request->expectsJson();
+        return $request->is('api', 'api/*', 'register', 'login', 'logout', 'sanctum/*', 'email/*', 'forgot-password', 'reset-password') || $request->expectsJson();
     }
 
     public function render(Throwable $exception, Request $request): ?JsonResponse
@@ -28,7 +29,7 @@ final class ApiExceptionRenderer
 
         $status = match (true) {
             $exception instanceof ValidationException, $exception instanceof RegistrationRejected => 422,
-            $exception instanceof InvalidCredentials => 422,
+            $exception instanceof InvalidCredentials, $exception instanceof InvalidResetToken => 422,
             $exception instanceof InactiveAccount => 403,
             $exception instanceof RegistrationUnavailable => 503,
             $exception instanceof AuthenticationException => 401,
@@ -71,6 +72,7 @@ final class ApiExceptionRenderer
                     $exception instanceof ValidationException => $exception->errors(),
                     $exception instanceof RegistrationRejected => $exception->fields,
                     $exception instanceof InvalidCredentials => ['email' => ['Ces identifiants ne permettent pas de vous connecter.']],
+                    $exception instanceof InvalidResetToken => ['token' => ['Ce lien ne permet pas de réinitialiser le mot de passe. Demandez un nouveau lien.']],
                     default => [],
                 },
             ],

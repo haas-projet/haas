@@ -1,8 +1,8 @@
 openapi: 3.1.0
 info:
   title: HAAS — Socle API
-  version: 0.5.0
-  description: Socle B01–B07, inscription et sessions SPA ; vérification du courriel et profil privé à livrer.
+  version: 0.6.0
+  description: Socle B01–B08, inscription, sessions SPA et courriels de compte ; profil privé à livrer.
 servers:
   - url: http://localhost:8000
 x-haas-domain-fragments:
@@ -13,6 +13,14 @@ x-haas-domain-fragments:
   capsules-lab:
     $ref: './api/openapi/capsules-lab.yaml'
 paths:
+  /forgot-password:
+    $ref: './api/openapi/identity.yaml#/paths/~1forgot-password'
+  /reset-password:
+    $ref: './api/openapi/identity.yaml#/paths/~1reset-password'
+  /email/verification-notification:
+    $ref: './api/openapi/identity.yaml#/paths/~1email~1verification-notification'
+  /email/verify/{id}/{hash}:
+    $ref: './api/openapi/identity.yaml#/paths/~1email~1verify~1{id}~1{hash}'
   /sanctum/csrf-cookie:
     $ref: './api/openapi/identity.yaml#/paths/~1sanctum~1csrf-cookie'
   /login:

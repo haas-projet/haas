@@ -3,7 +3,7 @@
 $origins = env('CORS_ALLOWED_ORIGINS', 'http://localhost:5173');
 
 return [
-    'paths' => ['api/*', 'sanctum/csrf-cookie', 'login', 'logout', 'register'],
+    'paths' => ['api/*', 'sanctum/csrf-cookie', 'login', 'logout', 'register', 'forgot-password', 'reset-password', 'email/*'],
     'allowed_methods' => ['GET', 'HEAD', 'POST', 'OPTIONS'],
     'allowed_origins' => is_string($origins) ? array_map('trim', explode(',', $origins)) : [],
     'allowed_origins_patterns' => [],

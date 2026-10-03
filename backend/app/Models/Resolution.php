@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 // (request_id, proposal_id) → proposals (request_id, id).
 // Contrainte d'appartenance proposition/demande demandée par
 // docs/execution/tasks.json:147 et docs/execution/PLAN_COMMITS.md:133.
-#[Fillable(['validation_note', 'accepted_at'])]
+#[Fillable(['validation_note'])]
 class Resolution extends Model
 {
     /** @use HasFactory<ResolutionFactory> */

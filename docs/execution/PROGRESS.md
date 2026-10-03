@@ -1,6 +1,6 @@
 # Suivi du dépôt HAAS
 
-**Statut actif :** B01–B09, B12–B13 et B32 DONE (12 lots) après intégration autorisée. B10/B29/B30/B31 et B39–B42 IN_PROGRESS ; B43/B44 BLOCKED. S01/S02 restent partiels. Les dix PR du socle sont fusionnées dans main (a051e81, CI 37146178657 verte). Neuf branches temporaires supprimées, quatre branches permanentes conservées. Branche de reprise : `backend/socle-auth`. BACKEND_GATE NON REÇU, aucun GO_FRONTEND/GO_PRODUCTION.
+**Statut actif :** B01–B09, B12–B13 et B32 DONE (12 lots) après intégration autorisée du socle. B11 préparé en revue sur `backend/communaute-entraide`, depuis main `7a8c672`, avec les commits B11 existants de mdev44-code préservés. Les 26 autres lots de la coordination #2 restent à faire. B10/B29/B30/B31 et B39–B42 IN_PROGRESS ; B43/B44 BLOCKED. S01/S02 restent partiels. BACKEND_GATE NON REÇU, aucun GO_FRONTEND/GO_PRODUCTION. Voir [la preuve B11](../quality/B11_COLLABORATION.md) et le [suivi de Lamine](participants/LamineGL/HANDOFF.md).
 
 À renseigner après commandes réelles : date / lot / responsable / fichiers / commandes / observé / commit ou raison de non-commit / blocage / prochaine action. Les contrôles documentaires de ce pack ne valident pas BACKEND_GATE, FRONTEND_GATE ou RELEASE_GATE.
 
@@ -226,3 +226,12 @@ Demande explicite « faite ca » : intégration des PR #10, #11, #13–#20, dans
 Les neuf branches temporaires sont supprimées après vérification des 30 références de commits dans main et de l'absence de PR dépendante. Restent main et les trois branches permanentes ; backend/socle-auth synchronisée, branches des collègues et PR #12 conservées. Aucune réécriture, aucun contournement de protection, aucun déploiement.
 
 B07/B08/B09/B12/B13/B32 DONE ; le tableau Systalink comporte maintenant 12 lots terminés, 8 partiels et 2 bloqués. Contributions et autres raccordements attendent les pilotes ; Qodana et réception complète restent ouverts. Aucun GO_FRONTEND. Reprendre sur backend/socle-auth ; ne pas recréer les anciennes branches pour consulter leurs commits, tous conservés dans main.
+
+## 2026-10-03 — Reprise de la partie de Lamine, B11
+
+- Demande : « continuer avec ceux de Lamine ». Reprise sur sa branche permanente ; socle main `7a8c672` et travail B11 de mdev44-code `1c380c4` conservés par merge local `93009c3`, sans conflit ni réécriture d'auteur.
+- Compléments B11 : migration additive de versions positives pour les contenus éditables, protection de la date d'acceptation, factory de résolution attribuée à l'auteur, tests des FK/suppressions et annulation/réapplication des migrations, contrat des données.
+- Contrôles locaux : Pint/PHPStan réussis ; 282 tests / 2483 assertions unités-HTTP-architecture et 151 tests / 1316 assertions PostgreSQL. Tests B11 ciblés rejoués après les corrections : 18 tests / 66 assertions. Audit Composer sans alerte, validation stricte réussie avec dépréciations de Composer 2.8.5 sous PHP 8.5 ; 28 types API à jour.
+- Preuves : `docs/quality/B11_COLLABORATION.md` ; suivi et 27 cartes Systalink dans `participants/LamineGL/`. B11 préparé pour revue, sans fusion ni validation humaine présumée ; garder la carte Systalink En cours jusqu'à intégration.
+- Limites : aucun endpoint des demandes ni résolution concurrente livré, aucun autre lot de Lamine terminé. La branche B11 du collègue et la PR capsules #12 sont préservées. Prochain lot B14 après intégration de B11 ; coordonner HelpIntent avec BV201 avant BC07.
+- Référence réelle du commit final et CI à communiquer dans la PR et le bilan ; aucun SHA autoréférent écrit dans ce commit.

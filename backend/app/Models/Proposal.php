@@ -17,6 +17,9 @@ class Proposal extends Model
     /** @use HasFactory<ProposalFactory> */
     use HasFactory, HasUuids;
 
+    /** @var array<string, mixed> */
+    protected $attributes = ['lock_version' => 1];
+
     /** @return BelongsTo<HelpRequest, $this> */
     public function request(): BelongsTo
     {
@@ -41,6 +44,7 @@ class Proposal extends Model
     protected function casts(): array
     {
         return [
+            'lock_version' => 'integer',
             'state' => ProposalState::class,
         ];
     }

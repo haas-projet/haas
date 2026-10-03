@@ -15,6 +15,9 @@ class Comment extends Model
     /** @use HasFactory<CommentFactory> */
     use HasFactory, HasUuids;
 
+    /** @var array<string, mixed> */
+    protected $attributes = ['lock_version' => 1];
+
     /** @return BelongsTo<HelpRequest, $this> */
     public function request(): BelongsTo
     {
@@ -33,6 +36,7 @@ class Comment extends Model
     protected function casts(): array
     {
         return [
+            'lock_version' => 'integer',
             'edited_at' => 'immutable_datetime',
             'hidden_at' => 'immutable_datetime',
         ];

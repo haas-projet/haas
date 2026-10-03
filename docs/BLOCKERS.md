@@ -17,3 +17,14 @@ Profils publics, édition et référentiel technologies développés dans la bra
 - B02 qualifie Composer 2.10.3 en copie temporaire sous PHP 8.5.10, sans dépréciation observée. L'installation globale 2.8.5 reste inchangée ; sélectionner une version adaptée sur chaque poste.
 - Les accès/versions de l'hébergement, SMTP et Qodana ne sont pas vérifiés. La CI B03 a été exécutée, sans présumer sa protection obligatoire sur main. S01/S02 restent IN_PROGRESS ; les tests locaux et CI ne sont pas une validation de production.
 - B01 est intégré par la PR #4 sur autorisation explicite de fusion donnée par l'utilisateur ; aucune revue GitHub par un autre développeur n'est attestée. L'authentification n'est pas encore livrée. Les PR métier qui dépendent des référentiels B05 ou de l'authentification attendent leur intégration.
+
+## Réception du socle — constat du 3 octobre 2026
+
+- B29 : l’outbox/boîte privée et le producteur profil.modéré fonctionnent ; événements proposition/acceptation/réouverture/revue/lab/offres/cas/comparaisons à raccorder après livraison par leurs pilotes.
+- B30/B31 : adaptateur profil testé ; signalement/retrait des demandes/projets/offres, versions de capsules, recherche et anciens kits encore absents. Pas d’AC25 global reçu.
+- B39/B40/B41 : tests, contrats et parcours du socle disponibles ; sécurité/contrat/recette F01–F18 impossibles à terminer avant les domaines des autres pilotes, BH10 compris.
+- B42 : sauvegarde/restauration locale et santé testées ; hébergement et stockage distant non inspectés, supervision/runner/rollback réel non exécutés. Ce contrôle distant est bloqué, aucune topologie installée annoncée.
+- B43 : aucun secret GitHub configuré au constat ; projet Qodana demandé, token à fournir uniquement via un environnement CI autorisé. Analyse et témoin de blocage NON EXÉCUTÉS, aucune dérogation humaine acquise.
+- B44 : domaines P0 incomplets et revue humaine absente ; BACKEND_GATE NON REÇU, GO_FRONTEND NON. La CI verte du socle ne lève pas ce blocage.
+
+Voir [les preuves](quality/SOCLE_RECEPTION_PARTIELLE.md) et [les cartes individuelles](execution/participants/ousseynoufayeisidk-sys/SYSTALINK_TASKS.md). L’ordre d’intégration reste #10 → #11 → #13 → #14 → #15 → #16 → #17 → #18 → #19 → réception ; les brouillons doivent être complétés ou découpés par accord avant de recevoir le lot entier. Aucun compte rendu de revue d’un collègue n’a été fabriqué.

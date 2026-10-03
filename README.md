@@ -23,6 +23,10 @@ B12 ajoute l'[audit transactionnel et les révisions privées](docs/architecture
 
 B13 est en revue dans la [PR #16](https://github.com/haas-projet/haas/pull/16) : [idempotence des commandes](docs/api/IDEMPOTENCY.md), premier usage sur le profil, rejeu 24 h sans doublon, droits revérifiés, réponse minimale et purge des intentions expirées. [Preuves locales et CI](docs/quality/B13_IDEMPOTENCY.md) : 361 tests / 3088 assertions, également réussis sous PHP 8.4/8.5 avec PostgreSQL 17. Fusion encore attendue.
 
+B32 ajoute l’administration des rôles/suspensions avec révocation et protection du dernier administrateur ([PR #17](https://github.com/haas-projet/haas/pull/17), prêt pour revue). B29 ajoute la boîte de notifications privée ([#18](https://github.com/haas-projet/haas/pull/18), partiel) ; B30/B31 le signalement et masquage des profils ([#19](https://github.com/haas-projet/haas/pull/19), partiels). Leurs CI PHP 8.4/8.5 sont vertes.
+
+La [réception partielle du socle](docs/quality/SOCLE_RECEPTION_PARTIELLE.md) apporte contrôle des routes/OpenAPI, types générés sans SPA, santé console et exercice de restauration chiffrée local. Les raccordements métier, la réception transversale, Qodana et l’exploitation réelle restent ouverts. BACKEND_GATE NON REÇU. [Tableau des 22 tâches du responsable socle](docs/execution/participants/ousseynoufayeisidk-sys/SYSTALINK_TASKS.md).
+
 ## Démarrer sans écraser
 Équipe de trois : voir [la répartition backend, les branches et les règles de fusion](docs/execution/BACKEND_A_TROIS.md).
 

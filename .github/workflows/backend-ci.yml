@@ -110,6 +110,9 @@ jobs:
 
       - name: Vérifier la documentation
         run: |
+          php -l ../scripts/ops/exercise-backup.php
+          php -l ../scripts/generate-api-types.php
+          php ../scripts/generate-api-types.php --check
           node ../scripts/validate-pack.mjs
           node ../scripts/check-deployment-docs.mjs
 

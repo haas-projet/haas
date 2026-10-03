@@ -176,7 +176,7 @@
       "refs": "AC06/AC10 ; N01",
       "phase": "B",
       "execution_order": 15,
-      "status": "IN_PROGRESS",
+      "status": "IN_REVIEW",
       "evidence": ["docs/quality/B13_IDEMPOTENCY.md"]
     },
     {

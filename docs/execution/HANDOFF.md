@@ -2,7 +2,7 @@
 
 Inspecter le dépôt, préserver les fichiers/commits/saisies existants, lire ADR-006. Appliquer F18 : projets ouverts, offres consenties, décision propriétaire, fil et projection publique contrôlés. Nouvelle recette avant GO_FRONTEND ; ne pas prendre un ancien gate pour un accord sur ce périmètre. Systalink/Vercel inchangé.
 
-État courant : B01–B06 DONE ; B07 IN_REVIEW (PR #10), B08 IN_REVIEW (PR #11, CI verte) ; B09 IN_REVIEW (PR #13, CI verte) sur `backend/socle-auth-permissions`. B10 IN_PROGRESS sur `backend/socle-auth-profiles` (PR #14 en brouillon, CI verte), contributions restantes. Voir `quality/B10_PROFILES.md` depuis `docs/` et la dernière section. B12 IN_REVIEW sur `backend/socle-auth-audit` (PR #15, CI verte) ; voir `quality/B12_AUDIT.md` et la dernière entrée. B13 IN_PROGRESS sur `backend/socle-auth-idempotency` ; lire `quality/B13_IDEMPOTENCY.md`. S01/S02 restent IN_PROGRESS. BH01–BH10 précèdent B39 et le frontend attend GO_FRONTEND humain.
+État courant : B01–B06 DONE ; B07 IN_REVIEW (PR #10), B08 IN_REVIEW (PR #11, CI verte) ; B09 IN_REVIEW (PR #13, CI verte) sur `backend/socle-auth-permissions`. B10 IN_PROGRESS sur `backend/socle-auth-profiles` (PR #14 en brouillon, CI verte), contributions restantes. Voir `quality/B10_PROFILES.md` depuis `docs/` et la dernière section. B12 IN_REVIEW sur `backend/socle-auth-audit` (PR #15, CI verte) ; voir `quality/B12_AUDIT.md` et la dernière entrée. B13 IN_REVIEW sur `backend/socle-auth-idempotency` (PR #16, CI verte) ; lire `quality/B13_IDEMPOTENCY.md`. S01/S02 restent IN_PROGRESS. BH01–BH10 précèdent B39 et le frontend attend GO_FRONTEND humain.
 
 ## Reprise après préparation GitHub — 2026-10-01
 
@@ -141,3 +141,9 @@ Prochain lot B13 (idempotence des commandes), sur branche séparée si la revue 
 Branche backend/socle-auth-idempotency depuis 7233019, PR B12 #15 encore ouverte. Lire api/IDEMPOTENCY.md et quality/B13_IDEMPOTENCY.md depuis docs. Déduplication réelle du profil, résultat minimal, droits courants, rollback commun métier/audit/intention, expiration 24 h et purge bornée. 361 tests / 3088 assertions locaux ; contrôles PHP verts ; PostgreSQL temporaire arrêté. La planification doit être activée et supervisée lors de l'exploitation, aucune tâche de production créée.
 
 Publier la PR contre backend/socle-auth-audit et observer sa CI avant IN_REVIEW. Intégrer #10/#11/#13 puis première partie #14 et #15 avant B13, avec reciblage/retest ; aucun merge implicite, préserver les trois branches permanentes. Les futurs consommateurs doivent vérifier leur projection courante et respecter l'ordre de verrous ; ne pas recopier de corps privé. B10 reste en cours. Prochain lot B29 — Notifications internes, à découper selon les événements déjà livrés par les pilotes. Carte Systalink B13 En cours jusqu'à fusion vérifiée.
+
+## B13 en revue — reprise après CI verte
+
+PR #16 ouverte contre backend/socle-auth-audit, applicatif 86cf6fb ; run 37091330505 réussi, PHP 8.4.26/8.5.11 et PostgreSQL 17, chacun 361 tests / 3088 assertions. B13 IN_REVIEW. Lire le contrat api/IDEMPOTENCY.md, la preuve quality/B13_IDEMPOTENCY.md et les contrôles du dernier SHA documentaire dans la PR. PostgreSQL temporaire arrêté ; ne lancer de nouveaux tests SQL qu'avec une cible dédiée explicite.
+
+Prochain lot B29 — Notifications internes, avec événements métier réellement disponibles et droits actuels. Intégrer #10/#11/#13 puis la première partie #14 et #15 avant #16 ; reciblage et revérification obligatoires. Aucun merge implicite ni suppression de branche non fusionnée. B10 reste en cours pour les contributions. Systalink : B13 « En cours — prêt pour revue », pas « Terminé » avant intégration vérifiée.

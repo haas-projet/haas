@@ -143,12 +143,15 @@ components:
                 allOf:
                   - $ref: '#/components/schemas/ProfileFields'
                   - type: object
-                    required: [lock_version, can_update]
+                    required: [lock_version, can_update, hidden]
                     properties:
                       lock_version:
                         type: integer
                         minimum: 0
                         maximum: 2147483647
+                      hidden:
+                        type: boolean
+                        description: Profil masqué publiquement ; une édition personnelle ne le republie pas.
                       can_update:
                         type: boolean
                 unevaluatedProperties: false

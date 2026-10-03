@@ -10,6 +10,7 @@ final class OwnProfileResource extends PublicProfileResource
     {
         return array_merge(parent::toArray($request), [
             'lock_version' => $this->profile->lock_version ?? 0,
+            'hidden' => $this->profile?->hidden_at !== null,
             'can_update' => $this->resource->can('updateProfile', $this->resource),
         ]);
     }

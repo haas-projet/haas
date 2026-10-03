@@ -14,6 +14,7 @@ final class ProfileQuery
     public function publicProfile(string $handle): User
     {
         $user = $this->query()->where('status', AccountStatus::Active)->whereNotNull('email_verified_at')
+            ->whereDoesntHave('profile', fn ($query) => $query->whereNotNull('hidden_at'))
             ->whereRaw('lower(handle) = lower(?)', [$handle])->firstOrFail();
         Gate::authorize('viewPublicProfile', $user);
 

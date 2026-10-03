@@ -101,3 +101,30 @@ Contrôles exécutés localement sous PHP 8.4.15 :
 Limites : aucun DTO/FormRequest/Service/Controller/Resource/Policy/route livré en B11 ; ces couches sont portées par B14–B21. Aucun fichier interdit touché (`composer.json`, `composer.lock`, `bootstrap/`, `config/`, `.env.example`, `phpunit.xml`, `routes/api.php`, `.github/workflows/`). Fragment `docs/api/openapi/community.yaml` inchangé. Aucun push, PR ouverte ou merge. Revue humaine `LamineGL` ou `ousseynoufayeisidk-sys` en attente.
 
 Prochaine action : attendre le feu vert pour pousser `backend/communaute-entraide-b11-schema` et ouvrir une PR vers `main` avec `Refs #2` et la mention « Responsables consultés : LamineGL (accord de LamineGL du 2026-10-03) ».
+
+## 2026-10-03 — Fusion de main et corrections post-revue (B11)
+
+Fusion `git merge origin/main` sans conflit (commit `b152fc1`). `origin/main` a avancé de `075e6eb` à `a051e81` entre-temps : B07–B13 et B29/B30/B32 fusionnés par `ousseynoufayeisidk-sys`. Dépendances B07–B13 désormais disponibles. `IdentityMigrationTest.php` n'a pas été modifié côté main depuis B05 : mon ajout reste la seule différence sur ce fichier.
+
+Corrections appliquées sur demande de l'utilisateur (commit `12c0d50`) :
+
+- **Retrait des 10 CHECK de longueur** (help_requests ×5, proposals ×4, comments ×1). Motif cité : `CAHIER_DES_CHARGES.md:381` autorise explicitement `"aucune"` (6 caractères) pour `attempts`, incompatible avec un CHECK ≥ 20. Les règles conditionnelles de `help_intent=ask_question` (CAHIER:408) justifient aussi un report en FormRequest B14+/B17+/B18+. `title varchar(140)` et `version_label varchar(40)` conservés (strictement cités) ; CHECK d'énumération d'état conservés.
+- **Correction du commentaire d'en-tête `create_help_requests_table`** : la référence erronée à `users_technologies.technology_id->users` est remplacée par « RESTRICT par défaut : aucune suppression de demande dans le produit (CAHIER:394) ».
+- **Retrait de `state` des `#[Fillable]`** des modèles `HelpRequest` et `Proposal` : la transition d'état passe par les Services B14+/B18+ et n'est pas assignable depuis le corps JSON.
+- **ResolutionFactory** : plus de `create()` dans `definition()`. `proposal_id => Proposal::factory()` (résolu par Laravel au moment de l'écriture) ; `request_id` lu via closure sur la proposition résolue (via `DB::table` pour un typage strict PHPStan niveau 8).
+- **Factories simplifiées** : plus de `padRight` pour contourner les CHECK retirés.
+- **Tests enums simplifiés** : suppression de `test_default_state_is_draft` et `test_default_state_is_proposed`.
+- **HelpRequestsSchemaTest adapté** : renommage de `test_check_constraints_reject_invalid_state_and_short_body` en `test_check_constraints_reject_invalid_state_values` ; retrait de l'assertion sur `comments.body` ; test NOT NULL simplifié.
+
+Contrôles exécutés localement sous PHP 8.4.15 après fusion et corrections :
+
+| Commande | Résultat observé |
+|---|---|
+| `composer lint` (Pint `--test`) | `{"tool":"pint","result":"passed"}` |
+| `composer analyse` (PHPStan niveau 8) | `[OK] No errors` |
+| `composer test` | **253 tests / 2454 assertions, OK** en 4,95 s (ancien 122 → 253 avec B07–B32 de main) |
+| `composer test:integration` | **141 tests / 1266 assertions, OK** en 80,27 s sur PostgreSQL 17 sur `haas_capsules_test` (ancien 43 → 141 avec intégrations B07–B32) |
+| `composer audit --locked --no-interaction` | `No security vulnerability advisories found.` |
+| `composer validate --strict --no-check-publish` | `./composer.json is valid` |
+
+Nouveaux commits sur la branche : `b152fc1` (merge main) et `12c0d50` (corrections). HEAD à `12c0d50`, sept commits ahead of `origin/main` au total (dont le merge commit).

@@ -105,8 +105,8 @@
       "refs": "AC01/AC02 ; N01 ; ADR-004 / DEP",
       "phase": "B",
       "execution_order": 9,
-      "status": "IN_REVIEW",
-      "evidence": ["docs/quality/B07_SESSIONS.md"]
+      "status": "DONE",
+      "evidence": ["docs/quality/B07_SESSIONS.md", "docs/quality/MERGE_SOCLE.md"]
     },
     {
       "id": "B08",
@@ -117,8 +117,8 @@
       "refs": "AC01/AC02 ; ADR-004 / DEP",
       "phase": "B",
       "execution_order": 10,
-      "status": "IN_REVIEW",
-      "evidence": ["docs/quality/B08_ACCOUNT_MAIL.md"]
+      "status": "DONE",
+      "evidence": ["docs/quality/B08_ACCOUNT_MAIL.md", "docs/quality/MERGE_SOCLE.md"]
     },
     {
       "id": "B09",
@@ -129,8 +129,8 @@
       "refs": "AC02/AC03/AC04/AC09",
       "phase": "B",
       "execution_order": 11,
-      "status": "IN_REVIEW",
-      "evidence": ["docs/quality/B09_CURRENT_ACCOUNT.md"]
+      "status": "DONE",
+      "evidence": ["docs/quality/B09_CURRENT_ACCOUNT.md", "docs/quality/MERGE_SOCLE.md"]
     },
     {
       "id": "B10",
@@ -164,8 +164,8 @@
       "refs": "N07 ; AC25",
       "phase": "B",
       "execution_order": 14,
-      "status": "IN_REVIEW",
-      "evidence": ["docs/quality/B12_AUDIT.md"]
+      "status": "DONE",
+      "evidence": ["docs/quality/B12_AUDIT.md", "docs/quality/MERGE_SOCLE.md"]
     },
     {
       "id": "B13",
@@ -176,8 +176,8 @@
       "refs": "AC06/AC10 ; N01",
       "phase": "B",
       "execution_order": 15,
-      "status": "IN_REVIEW",
-      "evidence": ["docs/quality/B13_IDEMPOTENCY.md"]
+      "status": "DONE",
+      "evidence": ["docs/quality/B13_IDEMPOTENCY.md", "docs/quality/MERGE_SOCLE.md"]
     },
     {
       "id": "B14",
@@ -389,8 +389,8 @@
       "refs": "AC26 ; F09",
       "phase": "B",
       "execution_order": 34,
-      "status": "IN_REVIEW",
-      "evidence": ["docs/quality/B32_ADMINISTRATION.md"]
+      "status": "DONE",
+      "evidence": ["docs/quality/B32_ADMINISTRATION.md", "docs/quality/MERGE_SOCLE.md"]
     },
     {
       "id": "B33",

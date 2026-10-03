@@ -63,3 +63,7 @@ La cible ADR-004 est applicable. Vérifier les contrôles de sa phase dans DEPLO
 - [ ] AC69–87 serveur : consentements, TTL, quotas, acceptation atomique, nouveau fil/rattachement et confidentialité testés sur PostgreSQL.
 - [ ] Aucun droit supplémentaire acquis ; offres pending privées ; double envoi ne crée qu’un fil/événement.
 - [ ] Revue humaine additionnelle et GO_FRONTEND pour F18 ; pas d’approbation copiée d’une ancienne livraison.
+
+## Intégration autorisée du 3 octobre 2026
+
+Les PR du socle #10/#11/#13–#20 sont fusionnées dans main a051e819cb923bc8e2755941cd494ec6d3f5cd81 sur demande explicite de l'utilisateur. CI post-fusion 37146178657 réussie, 384 tests / 3702 assertions par PHP 8.4/8.5 ; [preuves](MERGE_SOCLE.md). Les services disponibles sont intégrés ; les domaines P0 absents, Qodana et les réserves d'exploitation persistent. Aucune revue croisée d'un autre développeur ni signature de phase fabriquée. BACKEND_GATE reste NON REÇU et GO_FRONTEND NON.

@@ -1,3 +1,6 @@
 <?php
 
-// Les commandes et tâches planifiées seront ajoutées avec leurs lots métier.
+use Illuminate\Support\Facades\Schedule;
+
+Schedule::command('idempotency:prune')->everyFiveMinutes()->withoutOverlapping(5);
+Schedule::command('notifications:deliver')->everyMinute()->withoutOverlapping(5);

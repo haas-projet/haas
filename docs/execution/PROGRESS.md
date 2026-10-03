@@ -1,6 +1,6 @@
 # Suivi du dépôt HAAS
 
-**Statut actif :** B01–B04 DONE ; B05 IN_REVIEW (PR #8) ; B06 IN_REVIEW (PR #9), CI PHP 8.4/8.5 verte ; S01/S02 IN_PROGRESS. Les autres lots restent TODO. 122 lots proposés, 106 identifiants antérieurs conservés. Ajouts BH01–10/FH01–05/RH01, F18, AC69–90 et UX21–23. Ne pas écraser les statuts ou preuves existants.
+**Statut actif :** B01–B06 DONE ; B07/B08/B09/B12/B13/B32 IN_REVIEW ; B10/B29/B30/B31 IN_PROGRESS (raccordements métier restants) ; B39–B42 IN_PROGRESS (preuves du socle seulement) ; B43/B44 BLOCKED (Qodana, domaines, réception et revue humaine). S01/S02 restent partiels. Branche active : `backend/socle-auth-reception`, PR #20 en brouillon, CI 37141557467 verte, dérivée de #19. Aucun BACKEND_GATE, GO_FRONTEND ou GO_PRODUCTION validé. Les 122 identifiants et les preuves antérieures sont conservés.
 
 À renseigner après commandes réelles : date / lot / responsable / fichiers / commandes / observé / commit ou raison de non-commit / blocage / prochaine action. Les contrôles documentaires de ce pack ne valident pas BACKEND_GATE, FRONTEND_GATE ou RELEASE_GATE.
 
@@ -118,3 +118,103 @@ B06 IN_PROGRESS en attente de sa propre CI. Conditions publiées/version réelle
 ## 2026-10-02 — B06 en revue
 
 Commit applicatif 4e40f1e7879a6594d2f2869e7fd84b8f9aea3a0c, PR #9 contre backend/socle-auth-identity. Run 36954111512 réussi et logs lus : PHP 8.4.26/8.5.11, chacun 153 tests / 1218 assertions avec PostgreSQL, lint/analyse/audit/documentation verts. B06 IN_REVIEW. Preuve B06_REGISTRATION.md ; aucun merge ou avis humain simulé. Prochain lot B07.
+
+## 2026-10-02 — Fusions B05/B06 et préparation B07
+
+Autorisation explicite : « fusionner et continuer ». #8 fusionnée (2a6b737), #9 reciblée/synchronisée, CI 36954760336 verte puis fusionnée (075e6eb). CI main 36954939123 réussie. B05/B06 DONE ; preuve MERGE_B05_B06.md, aucune revue de collègue simulée.
+
+B07 sur backend/socle-auth-sessions : login/logout/csrf-cookie, sessions Sanctum, CORS exact, CSRF réellement actif, cookies/rotation/invalidation, limites de connexion, service de vérification et contrat OpenAPI. Sanctum 4.3.3 MIT seul package ajouté, 106 versions conservées. 182 tests / 1538 assertions locaux réussis, dont PostgreSQL et anciens scénarios concurrents ; analyse, lint, validation Composer, prérequis et audit réussis. Cluster temporaire arrêté.
+
+Preuve B07_SESSIONS.md, contrat SESSIONS.md. B07 IN_PROGRESS jusqu'à observation de sa CI. Aucun /me, courriel de compte, navigateur sur domaines réels, Qodana ou déploiement validé. Prochain lot B08, puis B09. Conditions réelles toujours à fournir ; bcrypt historique exige la réinitialisation B08. Commit réel et CI à consigner après publication.
+
+## 2026-10-02 — B07 en revue
+
+PR #10 contre main ; applicatif a8bfcaa, correction des origines CI 645e74e. Premier run en échec conservé dans la preuve ; run 36957084503 réussi sur 645e74ea0dd868317c89782fee479fddb37d2d06, PHP 8.4.26/8.5.11, chacun 182 tests / 1538 assertions avec PostgreSQL. Lint/analyse/audit/documentation et backend-ci verts, journaux lus. B07 IN_REVIEW ; aucun avis humain ou merge présumé. Prochain lot B08, courriels de compte ; dernier SHA documentaire et CI dans la PR et le bilan.
+
+## 2026-10-02 — B08 sur la branche permanente
+
+Préférence confirmée : conserver main et les trois branches de départ. Les quatre anciennes branches temporaires fusionnées ont été retirées après vérification des pointes dans main ; sessions reste pour #10. Branche backend/socle-auth avancée par fast-forward depuis b9b38db, sans modifier #10 ni les branches des collègues.
+
+B08 : vérification signée/expirante, renouvellement limité, reset neutre et à usage unique, file mail chiffrée et transactionnelle, vrai transport local array, révocation des sessions et protection contre une connexion tardive. Contrat ACCOUNT_MAIL.md, preuve B08_ACCOUNT_MAIL.md, aucun package ajouté. 212 tests / 1948 assertions locaux réussis, dont 54 tests SQL et deux processus concurrents de reset ; lint/analyse/Composer/audit verts. Cluster dédié arrêté. IN_PROGRESS avant CI propre, PR dépendante de #10 à publier. Prochain lot B09 ; SMTP réel, Qodana et domaines finaux non testés.
+
+## 2026-10-02 — B08 en revue
+
+PR #11 dépendante de #10, commit applicatif 3a3d24189a13fb5b6131b1e166791f1af21c13f1. Run 37015668695 réussi, logs lus : PHP 8.4.26/8.5.11, chacun 212 tests / 1948 assertions avec PostgreSQL, qualité/audit/documentation verts. B08 IN_REVIEW. Intégrer #10 avant #11, conserver backend/socle-auth. Prochain lot B09 ; dernier SHA documentaire et CI dans la PR. Aucune fusion, revue humaine ou délivrabilité SMTP inventée.
+
+## 2026-10-02 — B09 préparé
+
+Continuation de la partie socle demandée, avec bilan Systalink à chaque livraison. Branche temporaire backend/socle-auth-permissions depuis c8c0a30 ; PR #10/#11 préservées. Compte courant privé, capacités et propriété sans bypass admin, suspension et information publique de recours. Contrat CURRENT_ACCOUNT.md et preuve B09_CURRENT_ACCOUNT.md.
+
+244 tests / 2406 assertions locaux réussis : 177 / 1721 sans base et 67 / 685 sur PostgreSQL dédié. Lint/analyse/Composer/audit verts. Aucun package ni migration ajouté. B09 IN_PROGRESS avant sa CI propre ; Systalink « En cours », aucune nouvelle carte terminée avant fusion. Prochain lot B10. Les scénarios métier des collègues et AC03/AC09 complets restent à exécuter.
+
+## 2026-10-02 — B09 en revue
+
+PR #13 contre backend/socle-auth, dépendante de #11/#10. Commit applicatif cb8f7379cd48ca2938774fd7912efcb94ce6a6ad ; CI 37074478785 réussie, journaux lus : PHP 8.4.26/8.5.11 avec PostgreSQL 17, chacun 244 tests / 2406 assertions. Lint/analyse/Composer/audit/documentation et backend-ci verts. B09 IN_REVIEW ; dernier SHA documentaire et sa CI dans la PR. Aucun merge ni avis humain présumé. Prochain lot B10. Systalink : B09 « En cours — prêt pour revue », aucune nouvelle carte « Terminé ».
+
+## 2026-10-02 — B10, profils et technologies préparés
+
+Continuation demandée. Branche temporaire backend/socle-auth-profiles depuis B09 6985eee ; PR #10/#11/#13 et branches des collègues préservées. Profils public/propre, PATCH sous version et verrou, huit technologies maximum, référentiel paginé, initiales Unicode, données privées exclues et liens GitHub sûrs. Migration additive ; aucun package ajouté. Contrat PROFILES.md, preuve B10_PROFILES.md.
+
+294 tests / 2808 assertions locaux réussis : 213 / 2008 sans base, 81 / 800 PostgreSQL. Concurrence réelle observée avec deux workers en attente SQL, un seul gagnant et aucun mélange. Lint/analyse/Composer/audit réussis. B10 reste IN_PROGRESS : contributions réelles non raccordées faute de sources métier livrées ; null explicite, aucun chiffre inventé. PR de première livraison à publier et CI à observer. Systalink : « En cours ». Prochain lot indépendant : B12.
+
+## 2026-10-02 — B10, première livraison publiée et CI verte
+
+PR #14 en brouillon contre backend/socle-auth-permissions, commit applicatif c5c1706be17b917835d3fdc794249b779ae78a70. Run 37076878442 réussi, journaux lus : PHP 8.4.26/8.5.11 et PostgreSQL 17, chacun 294 tests / 2808 assertions (213 / 2008 sans base et 81 / 800 SQL). Pint, PHPStan niveau 8, Composer, audit, documentation et backend-ci verts. Preuve B10_PROFILES.md ; dernier SHA documentaire et ses contrôles dans la PR et le bilan.
+
+B10 reste IN_PROGRESS : première partie profils/technologies validée, contributions réelles encore dépendantes de B19/B25/BV209 et des règles de visibilité/retrait. Aucun merge ni revue humaine présumé. Systalink : B10 « En cours », aucune nouvelle carte « Terminé ». Ordre d'intégration #10 → #11 → #13 → #14 ; prochain lot indépendant B12, audit et révisions.
+
+## 2026-10-02 — B12, audit et révisions préparés
+
+Continuation demandée. Branche backend/socle-auth-audit depuis 3ab1c02 ; PR #10/#11/#13/#14 et domaines des collègues préservés. AuditWriter et migration content_revisions, métadonnées par liste blanche, acteur/date serveur, transaction obligatoire et version sous verrou. UpdateProfileService écrit réellement son audit ; panne d'audit et rollback métier annulent tout. Purge interne autorisée, sans copie du contenu ancien, répétable et atomique ; aucun endpoint d'historique ou de modération ajouté.
+
+322 tests / 2912 assertions locaux réussis (227 / 2023 sans base, 95 / 889 SQL), dont deux processus concurrents observés bloqués avant deux éditions et deux révisions ordonnées. Lint, analyse niveau 8, validation/prérequis/audit Composer verts ; aucun package ajouté. Cluster PostgreSQL dédié 54691/haas_audit_test arrêté. Contrat AUDIT_ET_REVISIONS.md et preuve B12_AUDIT.md ; B12 IN_PROGRESS avant publication/CI, puis revue. Aucun AC25 global, B31 ou revue humaine déclaré validé. Prochain B13 ; B10 reste en cours pour ses contributions. Systalink : B12 En cours, aucune nouvelle carte terminée.
+
+## 2026-10-02 — B12 en revue, CI verte
+
+PR #15 contre backend/socle-auth-profiles, commit applicatif 2d5c361cd264b158bd4a2709de65e4b15092a57e. Run 37079906877 réussi, journaux lus : PHP 8.4.26/8.5.11 et PostgreSQL 17, chacun 322 tests / 2912 assertions (227 / 2023 sans base, 95 / 889 SQL). Lint, analyse, dépendances, audit, documentation et backend-ci verts. B12 IN_REVIEW ; dernier SHA documentaire et ses contrôles dans la PR et le bilan. Aucun merge ni avis humain présumé.
+
+Systalink : B12 « En cours — prêt pour revue », aucune nouvelle carte « Terminé » avant fusion. B10 reste IN_PROGRESS pour ses contributions ; B31 et AC25 global non reçus. Intégrer les prérequis #10/#11/#13/#14 avant #15 et revérifier après reciblage. Prochain lot B13 — Idempotence des commandes.
+
+## 2026-10-03 — B13, idempotence préparée
+
+Continuation demandée. Branche backend/socle-auth-idempotency depuis 7233019, PR #10/#11/#13/#14/#15 et domaines des collègues préservés. IdempotencyService, table api_idempotency, UUID v4 hashé, charge HMAC canonique bornée, résultat limité aux références/version. Acteur/Policy recontrôlés avant lecture du résultat, transaction/contrainte unique, TTL 24 h sans prolongation. Profil raccordé avec header facultatif ; commandes des collègues non simulées. Purge bornée et déclaration scheduler, sans activation en production.
+
+361 tests / 3088 assertions locaux réussis (249 / 2078 sans base, 112 / 1010 PostgreSQL), dont deux processus observés simultanément en attente de verrou pour mêmes charges/charges différentes ; une seule modification, audit et intention. Lint, analyse niveau 8, Composer validation/prérequis/audit verts, aucune dépendance ajoutée. Cluster dédié 54692/haas_idempotency_test arrêté. Contrat IDEMPOTENCY.md, preuve B13_IDEMPOTENCY.md, OpenAPI 0.9.0. B13 IN_PROGRESS avant sa CI ; publier contre la branche B12. Prochain lot B29 — Notifications internes, avec événements à raccorder aux domaines livrés. B10 reste en cours ; Systalink B13 En cours, aucune nouvelle carte terminée.
+
+## 2026-10-03 — B13 en revue, CI verte
+
+PR #16 contre backend/socle-auth-audit, commit applicatif 86cf6fbdff38696ddd8411e1ec34af1c31811493. Run 37091330505 réussi, journaux lus : PHP 8.4.26/8.5.11 et PostgreSQL 17, chacun 361 tests / 3088 assertions (249 / 2078 sans base, 112 / 1010 SQL). Lint, analyse niveau 8, dépendances, audit, documentation et backend-ci verts. B13 IN_REVIEW ; preuve B13_IDEMPOTENCY.md. Dernier SHA documentaire et ses contrôles dans la PR et le bilan ; aucun merge ni avis humain présumé.
+
+Systalink : B13 « En cours — prêt pour revue », aucune carte « Terminé » avant fusion vérifiée. B10 reste IN_PROGRESS pour les contributions. Intégrer les prérequis #10/#11/#13/#14/#15 avant #16 et revérifier après reciblage. Prochain lot B29 — Notifications internes ; raccorder seulement les événements réellement livrés, en coordination avec leurs pilotes.
+
+## 2026-10-03 — B32 administration développée
+
+Continuation de toute la partie socle demandée. B32 sur branche séparée depuis B13 7c466c9 : commandes admin, verrou du dernier administrateur, motif chiffré, audit atomique, suppression et version des sessions. 367 tests / 3244 assertions, PHPStan niveau 8 et Pint réussis sur PHP 8.5.10/PostgreSQL 17 dédié. Contrat ACCOUNT_ADMINISTRATION.md et preuves B32_ADMINISTRATION.md. B32 IN_PROGRESS avant CI ; publication contre B13, sans fusion ni revue humaine présumée.
+
+Poursuivre B29 puis B30/B31 avec les ressources réellement disponibles. B10 et la réception B39–B44 dépendent aussi des autres pilotes. Aucun secret Qodana configuré dans GitHub au constat du 3 octobre ; projet demandé à l'utilisateur, aucun jeton collecté dans le chat. Pas de GO_FRONTEND ni GO_PRODUCTION.
+
+## 2026-10-03 — B32 en revue ; B29 première livraison
+
+B32 : PR #17, commit fc2785f68ea05a43c5cb4cf334e3e83daf4e97a5, CI 37135203385 verte, journaux lus : chaque PHP 8.4/8.5 exécute 249 tests / 2149 assertions et 118 tests / 1095 assertions PostgreSQL (367 / 3244). B32 IN_REVIEW, revue/fusion attendues.
+
+B29 : outbox transactionnelle, livraison séparée bornée/dédupliquée, boîte privée et lu/non lu. Typage/formatage réussis ; 249 tests / 2214 assertions de base et 4 tests / 47 assertions SQL ciblés. Preuve B29_NOTIFICATIONS.md, contrat INTERNAL_NOTIFICATIONS.md. B29 IN_PROGRESS : abonnements aux événements métier des collègues encore absents. Publier en brouillon contre B32 ; prochain B30/B31 sur les profils disponibles. Systalink B32 prêt pour revue, B29 en cours.
+
+## 2026-10-03 — B30/B31, modération du profil
+
+379 tests / 3643 assertions complets réussis ; Pint/PHPStan niveau 8 verts. Signalement privé, quotas atomiques, file filtrée, décisions motivées et profil masqué par API ; audit/purge/notification transactionnels. Trois courses PostgreSQL réelles. Contrat MODERATION.md, preuve B30_B31_MODERATION.md. B30/B31 IN_PROGRESS pour les adaptateurs métier absents ; publier la première livraison contre B29. Aucun lot des collègues reçu par hypothèse.
+
+B29 PR #18 en brouillon, CI 37135770117 verte sur 29803cb : chaque PHP 8.4/8.5 exécute 249 tests / 2214 assertions et 122 tests / 1142 assertions PostgreSQL, soit 371 / 3356. Journaux lus ; B29 reste partiel. B32 PR #17 prête pour revue. Prochain travail : B39/B40/B41 sur le socle disponible, exercice local B42, réserves Qodana/BACKEND_GATE ; aucune fusion implicite.
+
+## 2026-10-03 — Préparation de la réception du socle
+
+Demande : continuer toute la partie attribuée. Branche backend/socle-auth-reception depuis 264695d. B30/B31 #19 : CI 37140211552 réellement verte, journaux lus, 379 tests / 3643 assertions par PHP 8.4/8.5 avec PostgreSQL 17. B32 #17 prêt pour revue ; B29 #18 et B30/B31 #19 restent des livraisons partielles en brouillon.
+
+Ajouts : inventaire routes/OpenAPI, génération de 28 types JSON sans SPA, contrôle console SQL/files, script borné de sauvegarde chiffrée/restauration locale dédiée et runbook. Types compilés avec TypeScript 5.9.3 temporaire (Apache-2.0 vérifiée). Exercice réel de restauration, intégrité des comptes/profils/rapports/audit/notification et déchiffrement contrôlés ; refus archive altérée/clé erronée/base non vide. 251 tests / 2452 assertions sans base et 3 tests / 11 assertions SQL ciblés réussis. Voir SOCLE_RECEPTION_PARTIELLE.md pour les limites et la CI propre à cette branche après publication.
+
+Consolidation : B39–B42 IN_PROGRESS pour le périmètre disponible ; B43/B44 BLOCKED. Aucun travail des collègues inventé, aucun merge ni revue humaine, aucun frontend/déploiement. Tableau SYSTALINK_TASKS.md prêt à recopier ; seules B01–B06 sont des cartes entières terminées à ce stade. Compléter les domaines puis les raccordements et la recette avant réception globale.
+
+## 2026-10-03 — Réception partielle publiée et CI verte
+
+PR #20 en brouillon contre backend/socle-auth-moderation, code 68b00f8d3fa865bc8995a6b43dda52b178d47ba0. Run 37141557467 réussi, journaux lus : PHP 8.4/8.5 avec PostgreSQL 17, chacun 384 tests / 3702 assertions (251/2452 sans base, 133/1250 SQL). Pint/PHPStan niveau 8/audit/documentation/types générés verts. Exercice local de restauration et refus documentés dans SOCLE_RECEPTION_PARTIELLE.md ; 463 empreintes contrôlées. Cluster temporaire 54693 arrêté, service existant inchangé.
+
+B01–B06 restent les seules cartes entières terminées ; B07/B08/B09/B12/B13/B32 prêts pour revue. Les autres cartes de la partie socle gardent les réserves explicites du tableau SYSTALINK_TASKS.md. Reprendre après publication des domaines métier/Qodana et revue réelle ; aucun gate ni frontend autorisé. Intégrer dans l'ordre des dépendances, recibler les PR avant de supprimer les branches temporaires fusionnées ; conserver les trois branches permanentes et main.

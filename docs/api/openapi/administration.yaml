@@ -1,0 +1,93 @@
+paths:
+  /api/v1/admin/members:
+    get:
+      operationId: listAccountsForAdministration
+      summary: Lister les comptes pour un administrateur actif vérifié
+      description: Pagination stable par pseudonyme et UUID. Aucun courriel, motif ni secret dans cette projection. Réponse no-store.
+      security: [{ SessionCookie: [] }]
+      parameters:
+        - $ref: '../../OPENAPI.yaml#/components/parameters/Page'
+        - $ref: '../../OPENAPI.yaml#/components/parameters/PerPage'
+      responses:
+        '200':
+          description: Comptes administrables
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [data, meta]
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Account' }
+                  meta: { $ref: '../../OPENAPI.yaml#/components/schemas/PaginationMeta' }
+        '401': { $ref: './identity.yaml#/components/responses/SessionError' }
+        '403': { $ref: './identity.yaml#/components/responses/SessionError' }
+        '422': { $ref: './identity.yaml#/components/responses/SessionError' }
+  /api/v1/admin/members/{id}:
+    patch:
+      operationId: changeAccountAccess
+      summary: Suspendre, réactiver ou changer le rôle avec un motif
+      description: >-
+        Administrateur actif vérifié seulement. Une seule propriété role ou status avec sa version courante.
+        Session et CSRF obligatoires, limite 30/minute. Décision chiffrée, audit minimal et révocation atomiques.
+        Le dernier administrateur actif vérifié est préservé même face à deux décisions simultanées.
+        Version périmée, état identique ou retrait du dernier admin donnent 409 sans mutation.
+        Relance après succès avec la même version donne 409 ; relire la liste avant une nouvelle décision.
+      security: [{ SessionCookie: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - $ref: './identity.yaml#/components/parameters/XsrfToken'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [lock_version, reason]
+              oneOf:
+                - required: [role]
+                  not: { required: [status] }
+                - required: [status]
+                  not: { required: [role] }
+              properties:
+                lock_version: { type: integer, minimum: 0, maximum: 2147483646 }
+                role: { type: string, enum: [member, moderator, admin] }
+                status: { type: string, enum: [active, suspended] }
+                reason: { type: string, minLength: 20, maxLength: 1000, description: Motif sans secret ni caractères de contrôle. }
+      responses:
+        '200':
+          description: Décision enregistrée, anciennes sessions révoquées
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/Account' }
+        '401': { $ref: './identity.yaml#/components/responses/SessionError' }
+        '403': { $ref: './identity.yaml#/components/responses/SessionError' }
+        '404': { $ref: './identity.yaml#/components/responses/SessionError' }
+        '409': { $ref: './identity.yaml#/components/responses/SessionError' }
+        '419': { $ref: './identity.yaml#/components/responses/SessionError' }
+        '422': { $ref: './identity.yaml#/components/responses/SessionError' }
+        '429': { $ref: './identity.yaml#/components/responses/SessionError' }
+        '500': { $ref: './identity.yaml#/components/responses/SessionError' }
+components:
+  schemas:
+    Account:
+      type: object
+      additionalProperties: false
+      required: [id, handle, status, role, lock_version]
+      properties:
+        id: { type: string, format: uuid }
+        handle: { type: string }
+        role: { type: string, enum: [member, moderator, admin] }
+        status: { type: string, enum: [active, suspended] }
+        lock_version: { type: integer, minimum: 0 }

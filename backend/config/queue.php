@@ -31,6 +31,12 @@ return [
 
     'connections' => [
 
+        // Même connexion SQL que les comptes : le job n'est visible qu'après commit.
+        'account-mail' => [
+            'driver' => 'database', 'connection' => null, 'table' => 'jobs',
+            'queue' => 'account-mail', 'retry_after' => 90, 'after_commit' => false,
+        ],
+
         'sync' => [
             'driver' => 'sync',
         ],

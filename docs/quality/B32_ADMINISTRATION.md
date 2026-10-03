@@ -1,0 +1,11 @@
+# B32 — Administration et révocation
+
+3 octobre 2026, branche backend/socle-auth-administration depuis B13 7c466c9. Contrat : [ACCOUNT_ADMINISTRATION.md](../api/ACCOUNT_ADMINISTRATION.md), OpenAPI 0.10.0. GET/PATCH admin, contrôle du dernier admin actif vérifié, motif chiffré, version, audit et révocation atomiques. Une session tardive ne ressuscite pas après réactivation.
+
+Commandes locales : vendor/bin/pint (réussi), vendor/bin/phpstan analyse --memory-limit=512M --no-progress (niveau 8, aucune erreur), vendor/bin/phpunit --no-progress (367 tests / 3244 assertions). PHP 8.5.10, PostgreSQL 17.0, cluster temporaire localhost:54693, base haas_socle_test, rôle haas_test ; aucune base applicative utilisée. Les suites antérieures sont incluses. Deux processus PHP attendent réellement le verrou administration_guard avant libération : un retrait du rôle admin réussit, le second est refusé, un admin subsiste.
+
+Autres preuves : session/CSRF réels, modérateur refusé, acteur périmé recontrôlé, champs forgés/combinaisons refusés, retry de version sans deuxième audit, SQL en échec annulant sessions/compte/audit, motif absent de la projection et chiffré au stockage, accès au recours après révocation. Corrections pendant la recette : règle de validation indisponible remplacée par Rule::prohibitedIf, types corrigés, simulation d'écriture tardive par updateOrInsert car une visite anonyme pouvait déjà recréer la ligne. Suite complète finale réussie, aucun test retiré.
+
+CI à observer après publication. Réception des effets sur annuaire/offres/lab à exécuter avec leurs pilotes lorsque leurs domaines existent ; aucun AC62/AC83 complet annoncé. Revue humaine et fusion encore attendues. Systalink B32 En cours, puis prêt pour revue après CI. Prochain travail : B29, B30/B31 sur les ressources réellement livrées ; B39–B44 restent conditionnés aux domaines et accès externes.
+
+CI réelle : [run 37135203385](https://github.com/haas-projet/haas/actions/runs/37135203385) sur fc2785f, PR #17. Journaux lus, 367 tests / 3244 assertions pour chaque PHP 8.4/8.5 avec PostgreSQL 17 ; Pint, PHPStan et audit verts. B32 IN_REVIEW.

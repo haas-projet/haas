@@ -1,0 +1,245 @@
+paths:
+  /api/v1/members/{handle}:
+    get:
+      operationId: getPublicProfile
+      summary: Lire le profil public d'un membre
+      description: >-
+        Recherche exacte du pseudonyme, insensible à la casse. Compte actif et vérifié uniquement ;
+        absent, non vérifié ou suspendu donnent le même 404, même pour un admin.
+        Aucun paramètre hors chemin accepté. Aucune inscription automatique à l'annuaire BC06.
+        Réponse no-store, sans courriel, rôle, statut administratif ni version privée.
+      security: []
+      parameters:
+        - name: handle
+          in: path
+          required: true
+          schema:
+            $ref: './identity.yaml#/components/schemas/Handle'
+      responses:
+        '200':
+          description: Profil public ; les textes sont à afficher comme texte, jamais comme HTML.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [data]
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PublicProfile'
+        '403':
+          $ref: './identity.yaml#/components/responses/SessionError'
+        '404':
+          $ref: './identity.yaml#/components/responses/SessionError'
+        '422':
+          $ref: './identity.yaml#/components/responses/SessionError'
+  /api/v1/me/profile:
+    get:
+      operationId: getOwnProfile
+      summary: Lire son profil et sa version courante
+      description: Session active requise, même non vérifiée. Aucun paramètre accepté. Lecture sans création implicite du profil, version zéro si absent. Réponse no-store.
+      security:
+        - SessionCookie: []
+      responses:
+        '200':
+          $ref: '#/components/responses/OwnProfile'
+        '401':
+          $ref: './identity.yaml#/components/responses/SessionError'
+        '403':
+          $ref: './identity.yaml#/components/responses/SessionError'
+        '422':
+          $ref: './identity.yaml#/components/responses/SessionError'
+    patch:
+      operationId: updateOwnProfile
+      summary: Modifier son propre profil
+      description: >-
+        Session active, courriel vérifié et CSRF requis. L'acteur provient de la session.
+        lock_version obligatoire et au moins un champ modifiable ; champs omis conservés.
+        Les technologies fournies remplacent la sélection complète, huit UUID existants distincts maximum.
+        Bio vide ou null efface le texte ; country/github_url null effacent ces valeurs.
+        Version, profil, technologies et révision d'audit privée sont modifiés atomiquement sous verrou.
+        L'audit conserve seulement les noms des champs changés, la version et le nombre de technologies.
+        Une panne d'audit annule la modification entière ; aucun historique dans la réponse.
+        409 si la version a changé ; recharger avant décision, aucun écrasement automatique.
+        Aucun champ de rôle, identité, contributions ou annuaire accepté. Aucun fichier ni fetch de lien.
+        Idempotency-Key est facultatif sur cette route existante. Même intention dans les 24 h :
+        pas de seconde écriture ni d'audit, avec droits courants et projection relue.
+        Même clé et autre charge : 409 IDEMPOTENCY_CONFLICT. Profil modifié depuis : 409 RESOURCE_CONFLICT.
+        Cible disparue : 404 ; aucun ancien texte mémorisé renvoyé. Un header mal formé donne 422.
+      security:
+        - SessionCookie: []
+      parameters:
+        - $ref: './identity.yaml#/components/parameters/XsrfToken'
+        - name: Idempotency-Key
+          in: header
+          required: false
+          description: UUID v4 stable pour les relances de la même intention ; absence conserve le contrôle lock_version habituel.
+          schema:
+            $ref: '../../OPENAPI.yaml#/components/schemas/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProfilePatch'
+      responses:
+        '200':
+          $ref: '#/components/responses/OwnProfile'
+        '401':
+          $ref: './identity.yaml#/components/responses/SessionError'
+        '403':
+          $ref: './identity.yaml#/components/responses/SessionError'
+        '409':
+          $ref: './identity.yaml#/components/responses/SessionError'
+        '404':
+          $ref: './identity.yaml#/components/responses/SessionError'
+        '419':
+          $ref: './identity.yaml#/components/responses/SessionError'
+        '422':
+          $ref: './identity.yaml#/components/responses/SessionError'
+        '500':
+          $ref: './identity.yaml#/components/responses/SessionError'
+  /api/v1/technologies:
+    get:
+      operationId: listTechnologies
+      summary: Lire le référentiel paginé des technologies
+      description: Tri stable par slug puis UUID. Aucun tri ou filtre libre ni création depuis le client. Une liste vide signifie que le référentiel n'a pas encore été alimenté.
+      security: []
+      parameters:
+        - $ref: '../../OPENAPI.yaml#/components/parameters/Page'
+        - $ref: '../../OPENAPI.yaml#/components/parameters/PerPage'
+      responses:
+        '200':
+          description: Technologies existantes et pagination, sans utilisateurs associés.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [data, meta]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Technology'
+                  meta:
+                    $ref: '../../OPENAPI.yaml#/components/schemas/PaginationMeta'
+        '403':
+          $ref: './identity.yaml#/components/responses/SessionError'
+        '422':
+          $ref: './identity.yaml#/components/responses/SessionError'
+components:
+  responses:
+    OwnProfile:
+      description: Profil propre avec version et droit de modification, no-store. Aucun courriel ni rôle dans cette projection.
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+            required: [data]
+            properties:
+              data:
+                allOf:
+                  - $ref: '#/components/schemas/ProfileFields'
+                  - type: object
+                    required: [lock_version, can_update, hidden]
+                    properties:
+                      lock_version:
+                        type: integer
+                        minimum: 0
+                        maximum: 2147483647
+                      hidden:
+                        type: boolean
+                        description: Profil masqué publiquement ; une édition personnelle ne le republie pas.
+                      can_update:
+                        type: boolean
+                unevaluatedProperties: false
+  schemas:
+    PublicProfile:
+      allOf:
+        - $ref: '#/components/schemas/ProfileFields'
+      unevaluatedProperties: false
+    ProfileFields:
+      type: object
+      required: [id, handle, avatar_initials, bio, country, primary_language, github_url, technologies, is_demo, contributions]
+      properties:
+        id:
+          type: string
+          format: uuid
+        handle:
+          $ref: './identity.yaml#/components/schemas/Handle'
+        avatar_initials:
+          type: string
+          minLength: 1
+          maxLength: 2
+        bio:
+          type: string
+          maxLength: 500
+        country:
+          type: [string, 'null']
+          maxLength: 100
+        primary_language:
+          type: string
+          maxLength: 35
+        github_url:
+          type: [string, 'null']
+          format: uri
+          maxLength: 2048
+        technologies:
+          type: array
+          maxItems: 8
+          items:
+            $ref: '#/components/schemas/Technology'
+        is_demo:
+          type: boolean
+          description: Identification explicite des données de démonstration ; aucun indicateur d'adoption.
+        contributions:
+          type: 'null'
+          description: Indisponible tant que les sources métier autorisées ne sont pas livrées. Ne pas afficher zéro, badge ni classement. Raccordement restant du lot B10.
+    Technology:
+      type: object
+      additionalProperties: false
+      required: [id, slug, name]
+      properties:
+        id:
+          type: string
+          format: uuid
+        slug:
+          type: string
+          maxLength: 64
+        name:
+          type: string
+          maxLength: 80
+    ProfilePatch:
+      type: object
+      additionalProperties: false
+      required: [lock_version]
+      minProperties: 2
+      properties:
+        lock_version:
+          type: integer
+          minimum: 0
+          maximum: 2147483646
+        bio:
+          type: [string, 'null']
+          maxLength: 500
+        country:
+          type: [string, 'null']
+          maxLength: 100
+        primary_language:
+          type: string
+          maxLength: 35
+          pattern: '^[a-zA-Z]{2,3}(?:-[a-zA-Z0-9]{2,8})*$'
+        github_url:
+          type: [string, 'null']
+          format: uri
+          maxLength: 2048
+          description: Origine https://github.com exclusivement, sans identifiants, port, paramètres ni fragment ; aucun contrôle d'existence ou de propriété du compte externe.
+        technology_ids:
+          type: array
+          maxItems: 8
+          uniqueItems: true
+          items:
+            type: string
+            format: uuid

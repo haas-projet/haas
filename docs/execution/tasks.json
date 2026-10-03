@@ -365,7 +365,8 @@
       "refs": "AC25 ; F09",
       "phase": "B",
       "execution_order": 32,
-      "status": "TODO"
+      "status": "IN_PROGRESS",
+      "evidence": ["docs/quality/B30_B31_MODERATION.md"]
     },
     {
       "id": "B31",
@@ -376,7 +377,8 @@
       "refs": "AC15/AC25 ; N01",
       "phase": "B",
       "execution_order": 33,
-      "status": "TODO"
+      "status": "IN_PROGRESS",
+      "evidence": ["docs/quality/B30_B31_MODERATION.md"]
     },
     {
       "id": "B32",

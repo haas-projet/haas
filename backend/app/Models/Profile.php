@@ -26,7 +26,7 @@ class Profile extends Model
     /** @return array<string, string> */
     protected function casts(): array
     {
-        return ['lock_version' => 'integer'];
+        return ['lock_version' => 'integer', 'hidden_at' => 'immutable_datetime'];
     }
 
     /** @return BelongsTo<User, $this> */

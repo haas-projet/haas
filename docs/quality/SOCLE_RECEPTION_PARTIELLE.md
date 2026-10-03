@@ -1,5 +1,7 @@
 # Réception partielle du socle — B39 à B44
 
+**Mise à jour après intégration :** les PR #10/#11/#13–#20 sont fusionnées sur demande explicite. B07/B08/B09/B12/B13/B32 sont DONE ; les autres réserves demeurent. Neuf branches temporaires supprimées, quatre branches permanentes conservées. Voir [MERGE_SOCLE.md](MERGE_SOCLE.md). Les sections suivantes conservent les preuves et l’état avant fusion.
+
 3 octobre 2026. Responsable : ousseynoufayeisidk-sys. Branche backend/socle-auth-reception, base de code 264695dd7e8dfd23e0e0c872ff0ccd3b740d2708 (PR #19). Cette preuve couvre les opérations livrées du socle ; **BACKEND_GATE NON REÇU**, aucun GO_FRONTEND ni GO_PRODUCTION. Les exigences des domaines encore absents restent ouvertes.
 
 ## Livraisons vérifiées avant cette réception

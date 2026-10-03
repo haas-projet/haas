@@ -32,3 +32,5 @@ Utiliser le titre et le texte ci-dessous comme titre/description de la carte. Si
 Sous-tâches développées et testées pendant cette session : administration B32 ; infrastructure/boîte privée de notifications ; signalement/modération du profil ; inventaire OpenAPI/types générés ; contrôle de santé console ; exercice local de sauvegarde/restauration. Elles peuvent être cochées comme réalisées dans leurs cartes, en conservant la revue et les raccordements restants visibles. **Aucune nouvelle carte de lot entier ne passe à Terminé avant sa réception/fusion vérifiée.**
 
 Preuves : [réception partielle](../../../quality/SOCLE_RECEPTION_PARTIELLE.md), [progression](PROGRESS.md), [blocages](../../../BLOCKERS.md). B01–B06 étaient déjà intégrés. Prochaine étape : revue des PR dans l'ordre des dépendances et livraison des domaines par les deux autres responsables ; pas de frontend avant BACKEND_GATE + GO_FRONTEND humain.
+
+Dernière livraison : [PR #20](https://github.com/haas-projet/haas/pull/20), code 68b00f8, CI 37141557467 verte (384 tests / 3702 assertions par PHP 8.4/8.5). Les cartes B39–B44 conservent leurs réserves.

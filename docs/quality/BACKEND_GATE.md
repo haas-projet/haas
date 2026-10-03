@@ -16,7 +16,7 @@ Ce fichier est un formulaire de décision, pas une preuve d’exécution ni une 
 | B2 | API idempotente et contrat prêts ; aucune SPA B2 construite avant passage. | NON EXÉCUTÉ | — | — |
 | Contrat | OpenAPI complet, exemples fictifs, erreurs normalisées et types générables indépendamment de la SPA. | PARTIEL — opérations livrées | SOCLE_RECEPTION_PARTIELLE.md : inventaire réel et 28 types compilés ; autres opérations absentes | — |
 | Qualité locale | Tests configurés et réellement exécutés, formatage/analyse et couverture utile. | PARTIEL — socle exécuté | SOCLE_RECEPTION_PARTIELLE.md ; résultats détaillés par lot | — |
-| CI distante | Exécution GitHub Actions prouvée, ou absence explicitement classée comme réserve externe. | RÉUSSIE pour les commits cités du socle | PR #10/#11/#13–#19 ; runs précis dans les preuves ; aucune réception globale | — |
+| CI distante | Exécution GitHub Actions prouvée, ou absence explicitement classée comme réserve externe. | RÉUSSIE pour les commits cités du socle | PR #10/#11/#13–#20 ; runs précis dans les preuves ; aucune réception globale | — |
 | Qodana | Rapport/commit/offre réels, ou statut non exécuté et décision explicite sur la réserve. | NON EXÉCUTÉ | — | — |
 | Installation | Procédure reproductible et environnement requis décrits, aucune base réelle ciblée par tests. | PARTIEL — local/CI | COMMANDS.md, OPERATIONS_RUNBOOK.md ; hébergement réel non reçu | — |
 | Revue | Autre personne identifiée, observations traitées et décision de phase réellement donnée. | NON EXÉCUTÉ | — | — |

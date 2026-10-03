@@ -57,7 +57,7 @@ Limites : archive bornée à 64 Mio, mémoire nécessaire ; outil d'exercice loc
 - PHP 8.5.10 : `vendor/bin/phpunit --testsuite Unit,Feature,Architecture --no-progress` : 251 tests / 2452 assertions réussis.
 - PostgreSQL dédié haas_socle_test : `vendor/bin/phpunit tests/Integration/OperationsCheckTest.php --no-progress` : 3 tests / 11 assertions réussis.
 - `vendor/bin/pint --test` et `vendor/bin/phpstan analyse --memory-limit=512M --no-progress` : réussis (niveau 8). Une ambiguïté de type sur timestamp dans la nouvelle fixture a été corrigée en utilisant getTimestamp(), sans suppression de diagnostic.
-- Syntaxe des deux scripts et fraîcheur des types : réussies. Contrôles documentaires validate-pack 18/18, check-deployment-docs 7/7 et git diff --check réussis. La CI de cette branche reste à consigner après publication ; ne pas attribuer la CI de #19 au code nouveau.
+- Syntaxe des deux scripts et fraîcheur des types : réussies. Contrôles documentaires validate-pack 18/18, check-deployment-docs 7/7 et git diff --check réussis. La CI propre à cette branche est détaillée ci-dessous ; celle de #19 reste liée au code précédent.
 
 ## B43 et B44 — réserves bloquantes
 
@@ -66,3 +66,11 @@ B43 : Ultimate déclaré disponible, mais aucun projet/token configuré pour ce 
 B44 : toutes les fonctions P0 F01–F18 ne sont pas livrées, B39–B42 incomplets, Qodana sans décision, aucune revue humaine de ces PR. [BACKEND_GATE](BACKEND_GATE.md) reste NON REÇU, B44 BLOCKED. L'exigence du skill haas-release-readiness est respectée : « Une signature humaine ou accord GO_FRONTEND doit venir d’une personne, pas être inventé. »
 
 Prochaine reprise : intégrer les petites PR dans l'ordre après revue humaine, raccorder B10/B29/B30/B31 aux contributions des deux pilotes, compléter les tests transversaux et la recette, fournir Qodana via les secrets CI autorisés, recevoir l'exploitation sur des capacités constatées. Nettoyer uniquement les branches temporaires fusionnées et sans PR dépendante. Le tableau [Systalink](../execution/participants/ousseynoufayeisidk-sys/SYSTALINK_TASKS.md) distingue les cartes terminées de celles encore en revue ou dépendantes.
+
+## Validation distante et fin d'exercice
+
+[PR #20 en brouillon](https://github.com/haas-projet/haas/pull/20), commit de code **68b00f8d3fa865bc8995a6b43dda52b178d47ba0**. [Run 37141557467](https://github.com/haas-projet/haas/actions/runs/37141557467) réussi, journaux lus : chaque PHP 8.4/8.5 exécute 251 tests / 2452 assertions sans base et 133 tests / 1250 assertions PostgreSQL, soit **384 tests / 3702 assertions par version**. Pint, PHPStan niveau 8, audit Composer, fraîcheur des 28 types, syntaxe des scripts et contrôles documentaires réussis. Le dernier commit documentaire et ses checks restent consultables dans la PR ; aucun changement applicatif ajouté après ce run.
+
+Les 463 empreintes sont conformes ; les 122 identifiants, travaux et dépendances sont préservés et seuls les statuts/preuves B39–B44 changent dans cette livraison. PostgreSQL temporaire 54693 arrêté avec pg_ctl -m fast ; le service existant n'a pas été modifié. Après fetch, main reste 075e6eb, communauté 1735a69, capsules/laboratoire eb5d20a (préparation/enums, aucun service métier capsule/lab livré). Les fichiers et branches des collègues sont conservés. Ces constats expliquent les raccordements encore impossibles, sans préjuger de leur travail local non publié.
+
+Aucune PR fusionnée pendant cette session, aucune revue humaine enregistrée pour les PR du socle ouvertes. B32 prêt pour revue ; B29/B30/B31 et B39–B42 partiels ; B43/B44 bloqués. Aucune nouvelle carte complète à déplacer vers Terminé. Les sous-tâches réalisées sont détaillées dans SYSTALINK_TASKS.md.

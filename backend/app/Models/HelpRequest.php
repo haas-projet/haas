@@ -19,7 +19,7 @@ class HelpRequest extends Model
     use HasFactory, HasUuids;
 
     /** @var array<string, mixed> */
-    protected $attributes = ['state' => 'draft', 'lock_version' => 1];
+    protected $attributes = ['lock_version' => 1];
 
     /** @return BelongsTo<User, $this> */
     public function author(): BelongsTo

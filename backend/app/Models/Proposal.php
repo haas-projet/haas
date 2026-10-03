@@ -17,9 +17,6 @@ class Proposal extends Model
     /** @use HasFactory<ProposalFactory> */
     use HasFactory, HasUuids;
 
-    /** @var array<string, mixed> */
-    protected $attributes = ['state' => 'proposed'];
-
     /** @return BelongsTo<HelpRequest, $this> */
     public function request(): BelongsTo
     {

@@ -7,8 +7,9 @@ use Illuminate\Support\Facades\Schema;
 
 // Table proposals — colonnes citées littéralement dans
 // docs/product/CAHIER_DES_CHARGES.md:828.
-// États : docs/architecture/ARCHITECTURE.md:256. Défaut 'proposed' aligné sur
-// l'ordre d'énumération.
+// États : docs/architecture/ARCHITECTURE.md:256. Aucun défaut en base :
+// aucune citation littérale ne fixe la valeur initiale ; les Services B18+
+// posent l'état explicitement.
 // Longueurs 20–4 000 : docs/product/CAHIER_DES_CHARGES.md:418, repris dans
 // docs/execution/tasks.json:224 et docs/execution/PLAN_COMMITS.md:203.
 // Colonne `code` : exigence citée (code facultatif 12 000 — CAHIER:418,
@@ -31,7 +32,7 @@ return new class extends Migration
             $table->text('fix');
             $table->text('verification');
             $table->text('limits');
-            $table->string('state', 32)->default('proposed');
+            $table->string('state', 32);
             $table->timestampsTz();
 
             $table->unique(['request_id', 'id'], 'proposals_request_id_id_unique');

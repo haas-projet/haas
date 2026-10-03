@@ -22,8 +22,10 @@ final class HelpRequestsSchemaTest extends PostgresTestCase
 {
     use RefreshDatabase;
 
-    public function test_valid_help_request_graph_persists_with_defaults(): void
+    public function test_valid_help_request_graph_persists_with_factory_values(): void
     {
+        // Aucun défaut en base sur `state` ; la factory fixe draft/proposed
+        // pour que le test reflète le flux attendu via Services (B14+).
         $author = User::factory()->create();
         $technology = Technology::factory()->create();
 
@@ -138,6 +140,40 @@ final class HelpRequestsSchemaTest extends PostgresTestCase
             fn () => DB::table('proposals')->where('id', Proposal::factory()->create(['request_id' => $request->id])->id)->update(['state' => 'invalid_state']),
             '23514'
         );
+    }
+
+    public function test_state_columns_are_not_null_without_database_default(): void
+    {
+        // Aucun défaut en base : une INSERT raw qui omet `state` échoue en 23502.
+        $this->assertSqlFailure(
+            fn () => DB::table('help_requests')->insert([
+                'id' => (string) Str::uuid(),
+                'author_id' => User::factory()->create()->id,
+                'title' => str_pad('Blocage test ', 20, 'x'),
+                'goal' => str_pad('Objectif attendu minimum ', 40, 'x'),
+                'expected' => str_pad('Résultat attendu minimum ', 40, 'x'),
+                'observed' => str_pad('Comportement observé minimum ', 40, 'x'),
+                'attempts' => str_pad('Tentatives faites ', 30, 'x'),
+                'environment' => 'Linux',
+                'lock_version' => 1,
+                'created_at' => CarbonImmutable::now(),
+                'updated_at' => CarbonImmutable::now(),
+            ]),
+            '23502'
+        );
+    }
+
+    public function test_cascade_removes_request_technologies_when_help_request_is_deleted(): void
+    {
+        // request_technologies.request_id est en CASCADE par analogie B05
+        // (user_technologies.user_id cascadeOnDelete dans la migration B05).
+        $request = HelpRequest::factory()->create();
+        $technology = Technology::factory()->create();
+        $request->technologies()->attach($technology);
+        $this->assertSame(1, DB::table('request_technologies')->where('request_id', $request->id)->count());
+
+        DB::table('help_requests')->where('id', $request->id)->delete();
+        $this->assertSame(0, DB::table('request_technologies')->where('request_id', $request->id)->count());
     }
 
     /** @param Closure(): mixed $operation */

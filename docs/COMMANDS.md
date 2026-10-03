@@ -57,6 +57,10 @@ Le test d'architecture inspecte les références PHP et les helpers HTTP connus 
 
 Depuis la racine : `node scripts/validate-pack.mjs`, `node scripts/check-deployment-docs.mjs`, `git diff --check`. Le validateur documentaire contrôle les fichiers livrés par Git et exige une preuve pour les statuts IN_REVIEW/DONE. Ne pas employer `--ignore-platform-reqs`.
 
+## Entretien de l'idempotence — B13
+
+`php artisan idempotency:prune` retire au plus 1000 intentions API expirées par appel, sans contenu métier ni donnée dans la sortie hors nombre retiré. `php artisan schedule:list` permet d'inspecter sa déclaration toutes les cinq minutes, sans chevauchement. L'exploitation devra activer et superviser le scheduler Laravel sur le VPS ; aucune tâche de production n'a été installée par B13. Une clé expirée est inutilisable dès son échéance même si la purge est en retard. Voir [le contrat](api/IDEMPOTENCY.md).
+
 ## CI GitHub — B03
 
 Le workflow Backend CI exécute ces contrôles sur chaque PR et chaque push de main, avec PHP 8.4/8.5 et PostgreSQL dédié. Le contrôle final s'appelle `backend-ci`. Consulter l'onglet Checks de la PR ou `gh pr checks NUMERO --repo haas-projet/haas`. Une CI en attente ou absente ne constitue pas une réussite. Pour le run exact : `gh run view RUN_ID --repo haas-projet/haas` ; les logs doivent correspondre au dernier commit proposé.

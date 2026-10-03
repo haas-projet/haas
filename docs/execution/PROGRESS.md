@@ -1,6 +1,6 @@
 # Suivi du dépôt HAAS
 
-**Statut actif :** B01–B06 DONE ; B07 IN_REVIEW sur `backend/socle-auth-sessions` (PR #10, CI verte) ; B08 IN_REVIEW sur la branche permanente `backend/socle-auth` (PR #11, CI verte) ; B09 IN_REVIEW (PR #13, CI verte) sur `backend/socle-auth-permissions` ; B10 IN_PROGRESS sur `backend/socle-auth-profiles` (PR #14 en brouillon, CI verte, contributions restantes) ; B12 IN_REVIEW sur `backend/socle-auth-audit` (PR #15, CI verte) ; S01/S02 IN_PROGRESS. Les autres lots restent TODO. 122 lots proposés, 106 identifiants antérieurs conservés. Ajouts BH01–10/FH01–05/RH01, F18, AC69–90 et UX21–23. Ne pas écraser les statuts ou preuves existants.
+**Statut actif :** B01–B06 DONE ; B07 IN_REVIEW sur `backend/socle-auth-sessions` (PR #10, CI verte) ; B08 IN_REVIEW sur la branche permanente `backend/socle-auth` (PR #11, CI verte) ; B09 IN_REVIEW (PR #13, CI verte) sur `backend/socle-auth-permissions` ; B10 IN_PROGRESS sur `backend/socle-auth-profiles` (PR #14 en brouillon, CI verte, contributions restantes) ; B12 IN_REVIEW sur `backend/socle-auth-audit` (PR #15, CI verte) ; B13 IN_REVIEW sur `backend/socle-auth-idempotency` (PR #16, CI verte) ; S01/S02 IN_PROGRESS. Les autres lots restent TODO. 122 lots proposés, 106 identifiants antérieurs conservés. Ajouts BH01–10/FH01–05/RH01, F18, AC69–90 et UX21–23. Ne pas écraser les statuts ou preuves existants.
 
 À renseigner après commandes réelles : date / lot / responsable / fichiers / commandes / observé / commit ou raison de non-commit / blocage / prochaine action. Les contrôles documentaires de ce pack ne valident pas BACKEND_GATE, FRONTEND_GATE ou RELEASE_GATE.
 
@@ -174,3 +174,15 @@ Continuation demandée. Branche backend/socle-auth-audit depuis 3ab1c02 ; PR #10
 PR #15 contre backend/socle-auth-profiles, commit applicatif 2d5c361cd264b158bd4a2709de65e4b15092a57e. Run 37079906877 réussi, journaux lus : PHP 8.4.26/8.5.11 et PostgreSQL 17, chacun 322 tests / 2912 assertions (227 / 2023 sans base, 95 / 889 SQL). Lint, analyse, dépendances, audit, documentation et backend-ci verts. B12 IN_REVIEW ; dernier SHA documentaire et ses contrôles dans la PR et le bilan. Aucun merge ni avis humain présumé.
 
 Systalink : B12 « En cours — prêt pour revue », aucune nouvelle carte « Terminé » avant fusion. B10 reste IN_PROGRESS pour ses contributions ; B31 et AC25 global non reçus. Intégrer les prérequis #10/#11/#13/#14 avant #15 et revérifier après reciblage. Prochain lot B13 — Idempotence des commandes.
+
+## 2026-10-03 — B13, idempotence préparée
+
+Continuation demandée. Branche backend/socle-auth-idempotency depuis 7233019, PR #10/#11/#13/#14/#15 et domaines des collègues préservés. IdempotencyService, table api_idempotency, UUID v4 hashé, charge HMAC canonique bornée, résultat limité aux références/version. Acteur/Policy recontrôlés avant lecture du résultat, transaction/contrainte unique, TTL 24 h sans prolongation. Profil raccordé avec header facultatif ; commandes des collègues non simulées. Purge bornée et déclaration scheduler, sans activation en production.
+
+361 tests / 3088 assertions locaux réussis (249 / 2078 sans base, 112 / 1010 PostgreSQL), dont deux processus observés simultanément en attente de verrou pour mêmes charges/charges différentes ; une seule modification, audit et intention. Lint, analyse niveau 8, Composer validation/prérequis/audit verts, aucune dépendance ajoutée. Cluster dédié 54692/haas_idempotency_test arrêté. Contrat IDEMPOTENCY.md, preuve B13_IDEMPOTENCY.md, OpenAPI 0.9.0. B13 IN_PROGRESS avant sa CI ; publier contre la branche B12. Prochain lot B29 — Notifications internes, avec événements à raccorder aux domaines livrés. B10 reste en cours ; Systalink B13 En cours, aucune nouvelle carte terminée.
+
+## 2026-10-03 — B13 en revue, CI verte
+
+PR #16 contre backend/socle-auth-audit, commit applicatif 86cf6fbdff38696ddd8411e1ec34af1c31811493. Run 37091330505 réussi, journaux lus : PHP 8.4.26/8.5.11 et PostgreSQL 17, chacun 361 tests / 3088 assertions (249 / 2078 sans base, 112 / 1010 SQL). Lint, analyse niveau 8, dépendances, audit, documentation et backend-ci verts. B13 IN_REVIEW ; preuve B13_IDEMPOTENCY.md. Dernier SHA documentaire et ses contrôles dans la PR et le bilan ; aucun merge ni avis humain présumé.
+
+Systalink : B13 « En cours — prêt pour revue », aucune carte « Terminé » avant fusion vérifiée. B10 reste IN_PROGRESS pour les contributions. Intégrer les prérequis #10/#11/#13/#14/#15 avant #16 et revérifier après reciblage. Prochain lot B29 — Notifications internes ; raccorder seulement les événements réellement livrés, en coordination avec leurs pilotes.

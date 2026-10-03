@@ -11,6 +11,6 @@ final class UpdateProfileController extends Controller
 {
     public function __invoke(UpdateProfileRequest $request, UpdateProfileService $service): OwnProfileResource
     {
-        return new OwnProfileResource($service->update($request->member(), $request->profileData()));
+        return new OwnProfileResource($service->update($request->member(), $request->profileData(), $request->idempotencyKey()));
     }
 }

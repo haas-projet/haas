@@ -21,6 +21,8 @@ B07 livre [les sessions Sanctum et CORS](docs/api/SESSIONS.md) en revue dans [la
 
 B12 ajoute l'[audit transactionnel et les révisions privées](docs/architecture/AUDIT_ET_REVISIONS.md), raccordés à l'édition du profil, avec purge interne des anciennes métadonnées. [PR #15 en revue](https://github.com/haas-projet/haas/pull/15), [preuves locales et CI PHP 8.4/8.5 verte](docs/quality/B12_AUDIT.md) : 322 tests / 2912 assertions par version.
 
+B13 est en revue dans la [PR #16](https://github.com/haas-projet/haas/pull/16) : [idempotence des commandes](docs/api/IDEMPOTENCY.md), premier usage sur le profil, rejeu 24 h sans doublon, droits revérifiés, réponse minimale et purge des intentions expirées. [Preuves locales et CI](docs/quality/B13_IDEMPOTENCY.md) : 361 tests / 3088 assertions, également réussis sous PHP 8.4/8.5 avec PostgreSQL 17. Fusion encore attendue.
+
 ## Démarrer sans écraser
 Équipe de trois : voir [la répartition backend, les branches et les règles de fusion](docs/execution/BACKEND_A_TROIS.md).
 

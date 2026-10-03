@@ -62,10 +62,20 @@ paths:
         Une panne d'audit annule la modification entière ; aucun historique dans la réponse.
         409 si la version a changé ; recharger avant décision, aucun écrasement automatique.
         Aucun champ de rôle, identité, contributions ou annuaire accepté. Aucun fichier ni fetch de lien.
+        Idempotency-Key est facultatif sur cette route existante. Même intention dans les 24 h :
+        pas de seconde écriture ni d'audit, avec droits courants et projection relue.
+        Même clé et autre charge : 409 IDEMPOTENCY_CONFLICT. Profil modifié depuis : 409 RESOURCE_CONFLICT.
+        Cible disparue : 404 ; aucun ancien texte mémorisé renvoyé. Un header mal formé donne 422.
       security:
         - SessionCookie: []
       parameters:
         - $ref: './identity.yaml#/components/parameters/XsrfToken'
+        - name: Idempotency-Key
+          in: header
+          required: false
+          description: UUID v4 stable pour les relances de la même intention ; absence conserve le contrôle lock_version habituel.
+          schema:
+            $ref: '../../OPENAPI.yaml#/components/schemas/IdempotencyKey'
       requestBody:
         required: true
         content:
@@ -80,6 +90,8 @@ paths:
         '403':
           $ref: './identity.yaml#/components/responses/SessionError'
         '409':
+          $ref: './identity.yaml#/components/responses/SessionError'
+        '404':
           $ref: './identity.yaml#/components/responses/SessionError'
         '419':
           $ref: './identity.yaml#/components/responses/SessionError'

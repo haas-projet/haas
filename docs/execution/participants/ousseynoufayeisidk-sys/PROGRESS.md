@@ -91,3 +91,9 @@ B10 reste IN_PROGRESS : première partie profils/technologies validée, contribu
 Continuation demandée. Branche backend/socle-auth-audit depuis 3ab1c02 ; PR #10/#11/#13/#14 et domaines des collègues préservés. AuditWriter et migration content_revisions, métadonnées par liste blanche, acteur/date serveur, transaction obligatoire et version sous verrou. UpdateProfileService écrit réellement son audit ; panne d'audit et rollback métier annulent tout. Purge interne autorisée, sans copie du contenu ancien, répétable et atomique ; aucun endpoint d'historique ou de modération ajouté.
 
 322 tests / 2912 assertions locaux réussis (227 / 2023 sans base, 95 / 889 SQL), dont deux processus concurrents observés bloqués avant deux éditions et deux révisions ordonnées. Lint, analyse niveau 8, validation/prérequis/audit Composer verts ; aucun package ajouté. Cluster PostgreSQL dédié 54691/haas_audit_test arrêté. Contrat AUDIT_ET_REVISIONS.md et preuve B12_AUDIT.md ; B12 IN_PROGRESS avant publication/CI, puis revue. Aucun AC25 global, B31 ou revue humaine déclaré validé. Prochain B13 ; B10 reste en cours pour ses contributions. Systalink : B12 En cours, aucune nouvelle carte terminée.
+
+## 2026-10-02 — B12 en revue, CI verte
+
+PR #15 contre backend/socle-auth-profiles, commit applicatif 2d5c361cd264b158bd4a2709de65e4b15092a57e. Run 37079906877 réussi, journaux lus : PHP 8.4.26/8.5.11 et PostgreSQL 17, chacun 322 tests / 2912 assertions (227 / 2023 sans base, 95 / 889 SQL). Lint, analyse, dépendances, audit, documentation et backend-ci verts. B12 IN_REVIEW ; dernier SHA documentaire et ses contrôles dans la PR et le bilan. Aucun merge ni avis humain présumé.
+
+Systalink : B12 « En cours — prêt pour revue », aucune nouvelle carte « Terminé » avant fusion. B10 reste IN_PROGRESS pour ses contributions ; B31 et AC25 global non reçus. Intégrer les prérequis #10/#11/#13/#14 avant #15 et revérifier après reciblage. Prochain lot B13 — Idempotence des commandes.

@@ -2,6 +2,7 @@
 
 namespace App\Support\Http;
 
+use App\Exceptions\Idempotency\IdempotencyConflict;
 use App\Exceptions\Identity\InactiveAccount;
 use App\Exceptions\Identity\InvalidCredentials;
 use App\Exceptions\Identity\InvalidResetToken;
@@ -33,7 +34,7 @@ final class ApiExceptionRenderer
             $exception instanceof ValidationException, $exception instanceof RegistrationRejected => 422,
             $exception instanceof InvalidCredentials, $exception instanceof InvalidResetToken => 422,
             $exception instanceof ProfileUpdateRejected => 422,
-            $exception instanceof ProfileVersionConflict => 409,
+            $exception instanceof ProfileVersionConflict, $exception instanceof IdempotencyConflict => 409,
             $exception instanceof InactiveAccount => 403,
             $exception instanceof RegistrationUnavailable => 503,
             $exception instanceof AuthenticationException => 401,
@@ -62,6 +63,10 @@ final class ApiExceptionRenderer
         if ($exception instanceof InactiveAccount) {
             $code = 'ACCOUNT_SUSPENDED';
             $message = 'Ce compte est suspendu. Consultez les informations d’accès au compte pour connaître la procédure de contact.';
+        }
+        if ($exception instanceof IdempotencyConflict) {
+            $code = 'IDEMPOTENCY_CONFLICT';
+            $message = 'Cette clé correspond à une autre intention. Reprenez la demande d’origine.';
         }
 
         $headers = $exception instanceof HttpExceptionInterface ? $exception->getHeaders() : [];

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Identity;
 
+use App\Data\Idempotency\IdempotencyKey;
 use App\Data\Identity\UpdateProfileData;
 use App\Models\User;
 use App\Rules\GithubUrl;
@@ -50,6 +51,10 @@ final class UpdateProfileRequest extends FormRequest
     public function withValidator(Validator $validator): void
     {
         $validator->after(function (Validator $validator): void {
+            $key = $this->header('Idempotency-Key');
+            if ($key !== null && ! IdempotencyKey::valid($key)) {
+                $validator->errors()->add('Idempotency-Key', 'Utilisez un UUID v4 pour identifier cette intention.');
+            }
             $allowed = ['lock_version', 'bio', 'country', 'primary_language', 'github_url', 'technology_ids'];
             foreach (array_diff(array_keys($this->all()), $allowed) as $field) {
                 $validator->errors()->add($field, 'Ce champ ne peut pas être modifié.');
@@ -80,5 +85,12 @@ final class UpdateProfileRequest extends FormRequest
 
         return new UpdateProfileData($data['lock_version'], array_intersect_key($data, array_flip(['bio', 'country', 'primary_language', 'github_url'])),
             isset($data['technology_ids']) ? array_values(array_map('strtolower', $data['technology_ids'])) : null);
+    }
+
+    public function idempotencyKey(): ?IdempotencyKey
+    {
+        $key = $this->header('Idempotency-Key');
+
+        return $key === null ? null : new IdempotencyKey($key);
     }
 }

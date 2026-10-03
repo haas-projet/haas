@@ -39,6 +39,10 @@ UpdateProfileRequest → UpdateProfileData readonly → UpdateProfileService →
 
 Technologie supprimée/inconnue : 422 sur technology_ids ; invité : 401 ; non vérifié/action interdite : 403 ; CSRF absent : 419 ; champ invalide : 422. Une panne SQL provoque rollback complet, erreur 500 neutre et exception sans bindings ni texte de profil. B12 raccorde l'[audit transactionnel privé](../architecture/AUDIT_ET_REVISIONS.md) : noms des champs changés, version et nombre de technologies uniquement. Une panne d'audit annule aussi le profil et ses pivots. Aucune donnée d'historique n'est ajoutée aux réponses HTTP.
 
+## Relances idempotentes (B13)
+
+Le header facultatif `Idempotency-Key` (UUID v4) protège les relances de la même intention pendant 24 heures. Même clé/charge : une seule édition et un seul audit ; charge différente : 409 `IDEMPOTENCY_CONFLICT`. Le serveur relit les droits et la projection courante ; un profil modifié depuis donne 409 et un profil disparu 404, sans restituer son ancien texte. Aucun corps de profil n'est mémorisé. Sans clé, le comportement `lock_version` reste inchangé. Voir [le contrat commun](IDEMPOTENCY.md), notamment l'expiration et la conduite après perte réseau.
+
 ## Reprise des données existantes
 
 Migration additive B10 : lock_version=0 sur les profils existants et CHECK SQL non négatif. Précontrôle des associations existantes sous verrou : plus de huit technologies arrête la migration sans supprimer de choix ; corriger explicitement après examen. Aucune migration B05/B06 n'est modifiée. Rollback B10 limité à sa colonne, testé uniquement sur PostgreSQL jetable.

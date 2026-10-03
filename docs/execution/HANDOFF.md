@@ -2,7 +2,7 @@
 
 Inspecter le dépôt, préserver les fichiers/commits/saisies existants, lire ADR-006. Appliquer F18 : projets ouverts, offres consenties, décision propriétaire, fil et projection publique contrôlés. Nouvelle recette avant GO_FRONTEND ; ne pas prendre un ancien gate pour un accord sur ce périmètre. Systalink/Vercel inchangé.
 
-État courant : B01–B06 DONE ; B07 IN_REVIEW (PR #10), B08 IN_REVIEW (PR #11, CI verte) sur la branche permanente `backend/socle-auth`. Voir `quality/B08_ACCOUNT_MAIL.md` depuis `docs/` et la dernière section. S01/S02 restent IN_PROGRESS. BH01–BH10 précèdent B39 et le frontend attend GO_FRONTEND humain.
+État courant : B01–B06 DONE ; B07 IN_REVIEW (PR #10), B08 IN_REVIEW (PR #11, CI verte) ; B09 IN_REVIEW (PR #13, CI verte) sur `backend/socle-auth-permissions`. Voir `quality/B09_CURRENT_ACCOUNT.md` depuis `docs/` et la dernière section. S01/S02 restent IN_PROGRESS. BH01–BH10 précèdent B39 et le frontend attend GO_FRONTEND humain.
 
 ## Reprise après préparation GitHub — 2026-10-01
 
@@ -103,3 +103,11 @@ Publier la PR B07 contre main et observer sa CI avant IN_REVIEW. Cookies + Origi
 Reprise B08 : backend/socle-auth depuis b9b38db ; 212 tests / 1948 assertions locaux réussis, PostgreSQL temporaire arrêté. Lire ACCOUNT_MAIL.md et B08_ACCOUNT_MAIL.md. Ouvrir la PR vers backend/socle-auth-sessions tant que #10 reste ouverte, observer sa CI avant IN_REVIEW. File account-mail dédiée sur SQL ; worker requis pour l'envoi, array local, SMTP réel non testé. Ne pas supprimer la branche permanente ; après fusion #10, recibler B08 vers main puis nettoyer la branche temporaire. Prochain lot B09, /me et capacités ; aucun GO_FRONTEND.
 
 État actif B08 : IN_REVIEW, #11, commit 3a3d241 ; CI 37015668695 réussie sous PHP 8.4.26/8.5.11, chacun 212 tests / 1948 assertions avec PostgreSQL. Consulter les checks du dernier SHA documentaire dans la PR. Reprendre B09 après lecture des capacités ; préserver #10/#11 et les branches permanentes. Conditions réelles et SMTP restent à fournir/configurer avant ouverture réelle.
+
+## Reprise active B09
+
+B09 préparé depuis B08 c8c0a30 sur backend/socle-auth-permissions. Compte courant et autorisations : CURRENT_ACCOUNT.md, preuve B09_CURRENT_ACCOUNT.md. 244 tests / 2406 assertions locaux, SQL compris ; lint/analyse/Composer/audit verts. Publier la PR contre backend/socle-auth puis observer sa CI avant IN_REVIEW. Intégrer #10 puis #11 avant B09 et recibler vers main à chaque étape, sans réécriture. Conserver les trois branches permanentes ; supprimer la temporaire B09 uniquement après fusion vérifiée.
+
+Prochain lot : B10, profils publics et édition. ACCOUNT_SUPPORT_EMAIL est une adresse publique de recours à configurer avant ouverture réelle ; aucune adresse inventée. Pas de contact effectif, SMTP réel, frontend ou déploiement validé. B32 livrera la révocation globale des sessions. À chaque bilan demandé par l'utilisateur : indiquer la carte Systalink et distinguer « En cours — prêt pour revue » de « Terminé — fusion vérifiée ».
+
+État actif B09 : IN_REVIEW, PR #13, applicatif cb8f737 ; run 37074478785 vert sous PHP 8.4.26/8.5.11 avec PostgreSQL, chacun 244 tests / 2406 assertions. Voir B09_CURRENT_ACCOUNT.md. Serveur PostgreSQL temporaire arrêté. Ordre d'intégration #10 → #11 → #13, avec reciblage et vérification des checks du dernier SHA. Systalink : B07/B08/B09 restent « En cours » avant fusion ; prochain lot B10.

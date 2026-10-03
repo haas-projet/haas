@@ -5,14 +5,14 @@ Le texte « Attendu du cahier » est repris des tableaux source sans changement 
 | ID | Attendu du cahier | Phases / portée | État / preuve |
 |---|---|---|---|
 | AC01 | Inscription valide : compte créé, courriel privé, lien de vérification utilisable une fois selon son état. | Backend/API ou support serveur ; Frontend/navigateur | NON EXÉCUTÉ — aucune preuve |
-| AC02 | Compte non vérifié : lecture autorisée, publication et laboratoire refusés. | Backend/API ou support serveur ; Frontend/navigateur | NON EXÉCUTÉ — aucune preuve |
-| AC03 | Un membre tente de modifier une demande d’autrui : 403/404, aucune mutation. | Backend/API ou support serveur ; Frontend/navigateur | NON EXÉCUTÉ — aucune preuve |
-| AC04 | Le client envoie role=admin ou author_id tiers : rejet, aucune élévation. | Backend/API ou support serveur | NON EXÉCUTÉ — aucune preuve |
+| AC02 | Compte non vérifié : lecture autorisée, publication et laboratoire refusés. | Backend/API ou support serveur ; Frontend/navigateur | PARTIEL — [B09](B09_CURRENT_ACCOUNT.md) : /me lisible, capacités et middleware verified refusent la participation ; publication/laboratoire réels et navigateur restent à tester. |
+| AC03 | Un membre tente de modifier une demande d’autrui : 403/404, aucune mutation. | Backend/API ou support serveur ; Frontend/navigateur | NON EXÉCUTÉ sur demande réelle — règle commune de propriété préparée/testée en [B09](B09_CURRENT_ACCOUNT.md), scénario complet attendu en B16. |
+| AC04 | Le client envoie role=admin ou author_id tiers : rejet, aucune élévation. | Backend/API ou support serveur | PARTIEL — [B06](B06_REGISTRATION.md) et [B09](B09_CURRENT_ACCOUNT.md) : champs serveur rejetés à l'inscription et sur /me ; endpoints métier futurs à tester. |
 | AC05 | Champ obligatoire absent : 422, erreur liée au champ, saisie conservée. | Backend/API ou support serveur ; Frontend/navigateur | NON EXÉCUTÉ — aucune preuve |
 | AC06 | Double soumission avec même clé : une seule demande, même résultat. | Backend/API ou support serveur ; Frontend/navigateur | NON EXÉCUTÉ — aucune preuve |
 | AC07 | Extrait contenant HTML/script : texte affiché sans exécution ; alerte de secret si motif détecté. | Backend/API ou support serveur ; Frontend/navigateur | NON EXÉCUTÉ — aucune preuve |
 | AC08 | Une proposition structurée est publiée : demande en cours, notification unique. | Backend/API ou support serveur ; Frontend/navigateur | NON EXÉCUTÉ — aucune preuve |
-| AC09 | Une personne non auteur accepte : refus ; l’auteur accepte : résolution créée. | Backend/API ou support serveur ; Frontend/navigateur | NON EXÉCUTÉ — aucune preuve |
+| AC09 | Une personne non auteur accepte : refus ; l’auteur accepte : résolution créée. | Backend/API ou support serveur ; Frontend/navigateur | NON EXÉCUTÉ sur résolution réelle — [B09](B09_CURRENT_ACCOUNT.md) vérifie la propriété sans bypass admin sur fixture ; B19 et navigateur restent à tester. |
 | AC10 | Deux acceptations concurrentes : une seule résolution active. | Backend/API ou support serveur | NON EXÉCUTÉ — aucune preuve |
 | AC11 | Réouverture motivée : historique conservé, capsule liée signalée à revoir. | Backend/API ou support serveur ; Frontend/navigateur | NON EXÉCUTÉ — aucune preuve |
 | AC12 | Auteur tente sa propre publication éditoriale : revue indépendante requise. | Backend/API ou support serveur ; Frontend/navigateur | NON EXÉCUTÉ — aucune preuve |

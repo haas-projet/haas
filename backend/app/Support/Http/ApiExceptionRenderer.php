@@ -55,6 +55,11 @@ final class ApiExceptionRenderer
                 : ['REQUEST_FAILED', 'La requête ne peut pas être traitée.'],
         };
 
+        if ($exception instanceof InactiveAccount) {
+            $code = 'ACCOUNT_SUSPENDED';
+            $message = 'Ce compte est suspendu. Consultez les informations d’accès au compte pour connaître la procédure de contact.';
+        }
+
         $headers = $exception instanceof HttpExceptionInterface ? $exception->getHeaders() : [];
         // Le transport et le contenu de l'erreur restent sous le contrôle du renderer.
         $headers = array_filter($headers, static fn (string $name): bool => in_array(

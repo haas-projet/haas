@@ -129,7 +129,8 @@
       "refs": "AC02/AC03/AC04/AC09",
       "phase": "B",
       "execution_order": 11,
-      "status": "TODO"
+      "status": "IN_REVIEW",
+      "evidence": ["docs/quality/B09_CURRENT_ACCOUNT.md"]
     },
     {
       "id": "B10",

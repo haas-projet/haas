@@ -164,7 +164,8 @@
       "refs": "N07 ; AC25",
       "phase": "B",
       "execution_order": 14,
-      "status": "TODO"
+      "status": "IN_REVIEW",
+      "evidence": ["docs/quality/B12_AUDIT.md"]
     },
     {
       "id": "B13",

@@ -2,7 +2,7 @@
 
 Inspecter le dépôt, préserver les fichiers/commits/saisies existants, lire ADR-006. Appliquer F18 : projets ouverts, offres consenties, décision propriétaire, fil et projection publique contrôlés. Nouvelle recette avant GO_FRONTEND ; ne pas prendre un ancien gate pour un accord sur ce périmètre. Systalink/Vercel inchangé.
 
-État courant : B01–B06 DONE ; B07 IN_REVIEW (PR #10), B08 IN_REVIEW (PR #11, CI verte) ; B09 IN_REVIEW (PR #13, CI verte) sur `backend/socle-auth-permissions`. B10 IN_PROGRESS sur `backend/socle-auth-profiles` (PR #14 en brouillon, CI verte), contributions restantes. Voir `quality/B10_PROFILES.md` depuis `docs/` et la dernière section. S01/S02 restent IN_PROGRESS. BH01–BH10 précèdent B39 et le frontend attend GO_FRONTEND humain.
+État courant : B01–B06 DONE ; B07 IN_REVIEW (PR #10), B08 IN_REVIEW (PR #11, CI verte) ; B09 IN_REVIEW (PR #13, CI verte) sur `backend/socle-auth-permissions`. B10 IN_PROGRESS sur `backend/socle-auth-profiles` (PR #14 en brouillon, CI verte), contributions restantes. Voir `quality/B10_PROFILES.md` depuis `docs/` et la dernière section. B12 IN_REVIEW sur `backend/socle-auth-audit` (PR #15, CI verte) ; voir `quality/B12_AUDIT.md` et la dernière entrée. S01/S02 restent IN_PROGRESS. BH01–BH10 précèdent B39 et le frontend attend GO_FRONTEND humain.
 
 ## Reprise après préparation GitHub — 2026-10-01
 
@@ -123,3 +123,15 @@ B10 reste IN_PROGRESS tant que les contributions réelles ne sont pas raccordée
 PR #14 en brouillon, applicatif c5c1706 ; run 37076878442 réussi, PHP 8.4.26/8.5.11 avec PostgreSQL 17, chacun 294 tests / 2808 assertions. Lire PROFILES.md et B10_PROFILES.md ; consulter les contrôles du dernier SHA documentaire dans la PR. Code local propre et serveur de test arrêté.
 
 B10 reste IN_PROGRESS : contributions réelles à raccorder avec les domaines concernés, aucun compteur fictif. La carte Systalink reste « En cours », même après une éventuelle fusion de cette première partie. Intégrer #10/#11/#13 avant #14, avec reciblage et vérification des contrôles ; préserver les trois branches permanentes. Prochain lot indépendant B12 (audit et révisions), B11 appartient à LamineGL. Aucun GO_FRONTEND ou déploiement.
+
+## Reprise active B12 — audit et révisions
+
+Branche backend/socle-auth-audit depuis 3ab1c02, B12 préparé et testé localement. Lire architecture/AUDIT_ET_REVISIONS.md et quality/B12_AUDIT.md depuis docs : journal privé, métadonnées limitées, droits actuels, purges sans copie ; l'échec d'audit annule le profil et les pivots. Premier adaptateur profil, domaines des collègues préservés. 322 tests / 2912 assertions, contrôles PHP verts ; PostgreSQL temporaire arrêté.
+
+Publier la PR contre backend/socle-auth-profiles et observer sa CI avant IN_REVIEW. Intégrer #10 → #11 → #13 → première livraison #14 avant B12, avec reciblage et revérification ; aucune fusion implicite. B10 reste IN_PROGRESS pour les contributions. B31 complétera le retrait métier et ses autres projections, AC25 global reste à recevoir. Prochain lot B13 (idempotence). Systalink B12 reste En cours jusqu'à fusion ; conserver les trois branches permanentes.
+
+## B12 en revue — reprise après CI verte
+
+PR #15 ouverte contre backend/socle-auth-profiles, applicatif 2d5c361 ; run 37079906877 réussi, PHP 8.4.26/8.5.11 et PostgreSQL 17, chacun 322 tests / 2912 assertions. B12 IN_REVIEW. Lire le contrat AUDIT_ET_REVISIONS.md, la preuve B12_AUDIT.md et les contrôles du dernier SHA documentaire dans la PR. Aucun test SQL local à relancer sans une cible dédiée explicitement configurée ; cluster B12 arrêté.
+
+Prochain lot B13 (idempotence des commandes), sur branche séparée si la revue attend. Intégrer #10/#11/#13 puis la première partie #14 avant #15 ; aucune fusion implicite et aucun nettoyage de branche non fusionnée. B10 reste en cours, B31/AC25 global attendent leurs parcours. Systalink : B12 « En cours — prêt pour revue », pas « Terminé » avant intégration vérifiée.

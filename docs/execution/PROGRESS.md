@@ -1,6 +1,6 @@
 # Suivi du dépôt HAAS
 
-**Statut actif :** B01–B06 DONE ; B07 IN_REVIEW sur `backend/socle-auth-sessions` (PR #10, CI verte) ; B08 IN_REVIEW sur la branche permanente `backend/socle-auth` (PR #11, CI verte) ; B09 IN_REVIEW (PR #13, CI verte) sur `backend/socle-auth-permissions` ; B10 IN_PROGRESS sur `backend/socle-auth-profiles` (PR #14 en brouillon, CI verte, contributions restantes) ; S01/S02 IN_PROGRESS. Les autres lots restent TODO. 122 lots proposés, 106 identifiants antérieurs conservés. Ajouts BH01–10/FH01–05/RH01, F18, AC69–90 et UX21–23. Ne pas écraser les statuts ou preuves existants.
+**Statut actif :** B01–B06 DONE ; B07 IN_REVIEW sur `backend/socle-auth-sessions` (PR #10, CI verte) ; B08 IN_REVIEW sur la branche permanente `backend/socle-auth` (PR #11, CI verte) ; B09 IN_REVIEW (PR #13, CI verte) sur `backend/socle-auth-permissions` ; B10 IN_PROGRESS sur `backend/socle-auth-profiles` (PR #14 en brouillon, CI verte, contributions restantes) ; B12 IN_REVIEW sur `backend/socle-auth-audit` (PR #15, CI verte) ; S01/S02 IN_PROGRESS. Les autres lots restent TODO. 122 lots proposés, 106 identifiants antérieurs conservés. Ajouts BH01–10/FH01–05/RH01, F18, AC69–90 et UX21–23. Ne pas écraser les statuts ou preuves existants.
 
 À renseigner après commandes réelles : date / lot / responsable / fichiers / commandes / observé / commit ou raison de non-commit / blocage / prochaine action. Les contrôles documentaires de ce pack ne valident pas BACKEND_GATE, FRONTEND_GATE ou RELEASE_GATE.
 
@@ -162,3 +162,15 @@ Continuation demandée. Branche temporaire backend/socle-auth-profiles depuis B0
 PR #14 en brouillon contre backend/socle-auth-permissions, commit applicatif c5c1706be17b917835d3fdc794249b779ae78a70. Run 37076878442 réussi, journaux lus : PHP 8.4.26/8.5.11 et PostgreSQL 17, chacun 294 tests / 2808 assertions (213 / 2008 sans base et 81 / 800 SQL). Pint, PHPStan niveau 8, Composer, audit, documentation et backend-ci verts. Preuve B10_PROFILES.md ; dernier SHA documentaire et ses contrôles dans la PR et le bilan.
 
 B10 reste IN_PROGRESS : première partie profils/technologies validée, contributions réelles encore dépendantes de B19/B25/BV209 et des règles de visibilité/retrait. Aucun merge ni revue humaine présumé. Systalink : B10 « En cours », aucune nouvelle carte « Terminé ». Ordre d'intégration #10 → #11 → #13 → #14 ; prochain lot indépendant B12, audit et révisions.
+
+## 2026-10-02 — B12, audit et révisions préparés
+
+Continuation demandée. Branche backend/socle-auth-audit depuis 3ab1c02 ; PR #10/#11/#13/#14 et domaines des collègues préservés. AuditWriter et migration content_revisions, métadonnées par liste blanche, acteur/date serveur, transaction obligatoire et version sous verrou. UpdateProfileService écrit réellement son audit ; panne d'audit et rollback métier annulent tout. Purge interne autorisée, sans copie du contenu ancien, répétable et atomique ; aucun endpoint d'historique ou de modération ajouté.
+
+322 tests / 2912 assertions locaux réussis (227 / 2023 sans base, 95 / 889 SQL), dont deux processus concurrents observés bloqués avant deux éditions et deux révisions ordonnées. Lint, analyse niveau 8, validation/prérequis/audit Composer verts ; aucun package ajouté. Cluster PostgreSQL dédié 54691/haas_audit_test arrêté. Contrat AUDIT_ET_REVISIONS.md et preuve B12_AUDIT.md ; B12 IN_PROGRESS avant publication/CI, puis revue. Aucun AC25 global, B31 ou revue humaine déclaré validé. Prochain B13 ; B10 reste en cours pour ses contributions. Systalink : B12 En cours, aucune nouvelle carte terminée.
+
+## 2026-10-02 — B12 en revue, CI verte
+
+PR #15 contre backend/socle-auth-profiles, commit applicatif 2d5c361cd264b158bd4a2709de65e4b15092a57e. Run 37079906877 réussi, journaux lus : PHP 8.4.26/8.5.11 et PostgreSQL 17, chacun 322 tests / 2912 assertions (227 / 2023 sans base, 95 / 889 SQL). Lint, analyse, dépendances, audit, documentation et backend-ci verts. B12 IN_REVIEW ; dernier SHA documentaire et ses contrôles dans la PR et le bilan. Aucun merge ni avis humain présumé.
+
+Systalink : B12 « En cours — prêt pour revue », aucune nouvelle carte « Terminé » avant fusion. B10 reste IN_PROGRESS pour ses contributions ; B31 et AC25 global non reçus. Intégrer les prérequis #10/#11/#13/#14 avant #15 et revérifier après reciblage. Prochain lot B13 — Idempotence des commandes.

@@ -147,3 +147,9 @@ Publier la PR contre backend/socle-auth-audit et observer sa CI avant IN_REVIEW.
 PR #16 ouverte contre backend/socle-auth-audit, applicatif 86cf6fb ; run 37091330505 réussi, PHP 8.4.26/8.5.11 et PostgreSQL 17, chacun 361 tests / 3088 assertions. B13 IN_REVIEW. Lire le contrat api/IDEMPOTENCY.md, la preuve quality/B13_IDEMPOTENCY.md et les contrôles du dernier SHA documentaire dans la PR. PostgreSQL temporaire arrêté ; ne lancer de nouveaux tests SQL qu'avec une cible dédiée explicite.
 
 Prochain lot B29 — Notifications internes, avec événements métier réellement disponibles et droits actuels. Intégrer #10/#11/#13 puis la première partie #14 et #15 avant #16 ; reciblage et revérification obligatoires. Aucun merge implicite ni suppression de branche non fusionnée. B10 reste en cours pour les contributions. Systalink : B13 « En cours — prêt pour revue », pas « Terminé » avant intégration vérifiée.
+
+## 2026-10-03 — B32 administration développée
+
+Continuation de toute la partie socle demandée. B32 sur branche séparée depuis B13 7c466c9 : commandes admin, verrou du dernier administrateur, motif chiffré, audit atomique, suppression et version des sessions. 367 tests / 3244 assertions, PHPStan niveau 8 et Pint réussis sur PHP 8.5.10/PostgreSQL 17 dédié. Contrat ACCOUNT_ADMINISTRATION.md et preuves B32_ADMINISTRATION.md. B32 IN_PROGRESS avant CI ; publication contre B13, sans fusion ni revue humaine présumée.
+
+Poursuivre B29 puis B30/B31 avec les ressources réellement disponibles. B10 et la réception B39–B44 dépendent aussi des autres pilotes. Aucun secret Qodana configuré dans GitHub au constat du 3 octobre ; projet demandé à l'utilisateur, aucun jeton collecté dans le chat. Pas de GO_FRONTEND ni GO_PRODUCTION.

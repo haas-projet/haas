@@ -7,6 +7,7 @@ use App\Exceptions\Identity\InactiveAccount;
 use App\Models\User;
 use App\Support\Http\MemberSession;
 use Closure;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -15,6 +16,13 @@ final class EnsureAccountIsActive
     /** @param Closure(Request): Response $next */
     public function handle(Request $request, Closure $next): Response
     {
+        if ($request->user() instanceof User && $request->hasSession()
+            && $request->session()->get('security_version', 0) !== $request->user()->security_version) {
+            app(MemberSession::class)->end($request);
+            if (! $request->routeIs('account.access')) {
+                throw new AuthenticationException;
+            }
+        }
         if ($request->user() instanceof User && $request->user()->status !== AccountStatus::Active) {
             app(MemberSession::class)->end($request);
             // L'information de recours reste disponible après révocation de la session.

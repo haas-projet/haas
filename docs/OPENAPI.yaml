@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: HAAS — Socle API
-  version: 0.9.0
+  version: 0.10.0
   description: Socle B01–B09, profils B10, audit B12 et idempotence B13 ; contributions métier à raccorder.
 servers:
   - url: http://localhost:8000
@@ -13,6 +13,10 @@ x-haas-domain-fragments:
   capsules-lab:
     $ref: './api/openapi/capsules-lab.yaml'
 paths:
+  /api/v1/admin/members:
+    $ref: './api/openapi/administration.yaml#/paths/~1api~1v1~1admin~1members'
+  /api/v1/admin/members/{id}:
+    $ref: './api/openapi/administration.yaml#/paths/~1api~1v1~1admin~1members~1{id}'
   /api/v1/members/{handle}:
     $ref: './api/openapi/identity.yaml#/paths/~1api~1v1~1members~1{handle}'
   /api/v1/me/profile:

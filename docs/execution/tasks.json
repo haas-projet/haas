@@ -386,7 +386,8 @@
       "refs": "AC26 ; F09",
       "phase": "B",
       "execution_order": 34,
-      "status": "TODO"
+      "status": "IN_PROGRESS",
+      "evidence": ["docs/quality/B32_ADMINISTRATION.md"]
     },
     {
       "id": "B33",

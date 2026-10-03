@@ -1,0 +1,83 @@
+paths:
+  /api/v1/notifications:
+    get:
+      operationId: listOwnNotifications
+      summary: Lire ses notifications internes et le compteur non lu
+      description: >-
+        Session active requise, projection privée no-store. Ordre date/UUID décroissant.
+        Aucun courriel, texte de contenu, code, motif de signalement ou lien public retiré.
+        Premier type pris en charge : profile.moderated, raccordé au lot de modération.
+      security: [{ SessionCookie: [] }]
+      parameters:
+        - $ref: '../../OPENAPI.yaml#/components/parameters/Page'
+        - $ref: '../../OPENAPI.yaml#/components/parameters/PerPage'
+      responses:
+        '200':
+          description: Boîte du membre courant uniquement
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [data, meta, unread_count]
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Notification' }
+                  meta: { $ref: '../../OPENAPI.yaml#/components/schemas/PaginationMeta' }
+                  unread_count: { type: integer, minimum: 0 }
+        '401': { $ref: './identity.yaml#/components/responses/SessionError' }
+        '403': { $ref: './identity.yaml#/components/responses/SessionError' }
+        '422': { $ref: './identity.yaml#/components/responses/SessionError' }
+  /api/v1/notifications/{id}:
+    patch:
+      operationId: markOwnNotification
+      summary: Marquer sa notification comme lue ou non lue
+      description: Session/CSRF, propriétaire actif, relecture sous verrou. Un tiers reçoit 404 même administrateur. Répéter read=true conserve la première date.
+      security: [{ SessionCookie: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - $ref: './identity.yaml#/components/parameters/XsrfToken'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [read]
+              properties:
+                read: { type: boolean }
+      responses:
+        '200':
+          description: Statut de lecture enregistré
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/Notification' }
+        '401': { $ref: './identity.yaml#/components/responses/SessionError' }
+        '403': { $ref: './identity.yaml#/components/responses/SessionError' }
+        '404': { $ref: './identity.yaml#/components/responses/SessionError' }
+        '419': { $ref: './identity.yaml#/components/responses/SessionError' }
+        '422': { $ref: './identity.yaml#/components/responses/SessionError' }
+        '500': { $ref: './identity.yaml#/components/responses/SessionError' }
+components:
+  schemas:
+    Notification:
+      type: object
+      additionalProperties: false
+      required: [id, kind, message, target_path, read_at, created_at]
+      properties:
+        id: { type: string, format: uuid }
+        kind: { type: string, enum: [profile.moderated] }
+        message: { type: string }
+        target_path: { type: string, enum: [/me/profile] }
+        read_at: { type: [string, 'null'], format: date-time }
+        created_at: { type: string, format: date-time }

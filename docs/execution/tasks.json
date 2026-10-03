@@ -353,7 +353,8 @@
       "refs": "AC08 ; F10",
       "phase": "B",
       "execution_order": 31,
-      "status": "TODO"
+      "status": "IN_PROGRESS",
+      "evidence": ["docs/quality/B29_NOTIFICATIONS.md"]
     },
     {
       "id": "B30",
@@ -386,7 +387,7 @@
       "refs": "AC26 ; F09",
       "phase": "B",
       "execution_order": 34,
-      "status": "IN_PROGRESS",
+      "status": "IN_REVIEW",
       "evidence": ["docs/quality/B32_ADMINISTRATION.md"]
     },
     {

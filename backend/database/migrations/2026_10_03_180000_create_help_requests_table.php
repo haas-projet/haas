@@ -6,8 +6,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 // Table help_requests — colonnes citées littéralement dans
-// docs/product/CAHIER_DES_CHARGES.md:825 et longueurs du formulaire
-// dans docs/product/CAHIER_DES_CHARGES.md:378-384.
+// docs/product/CAHIER_DES_CHARGES.md:825.
 // États : docs/architecture/ARCHITECTURE.md:255. Aucun défaut en base :
 // aucune citation littérale ne fixe la valeur initiale ; les Services B14+
 // posent l'état explicitement.
@@ -15,9 +14,12 @@ use Illuminate\Support\Facades\Schema;
 // chiffrée non citée, longueur Laravel par défaut (255).
 // `expected`/`attempts` NOT NULL en B11 ; BV201 (ajout help_intent) et
 // BC07 (ask_question) les rendront nullables (CAHIER_DES_CHARGES.md:408).
-// ON DELETE : RESTRICT (aucune citation cascade ; alignement implicite sur
-// backend/database/migrations/2026_10_02_000005_b05_...php pour la FK
-// users_technologies.technology_id->users (restrictOnDelete)).
+// Longueurs CHECK retirées : les règles 15-140 / 30-2000 / 30-4000 / 20-3000
+// du formulaire (CAHIER:378-381) sont conditionnelles (`help_intent`
+// ask_question, « aucune » explicite autorisé CAHIER:381) et portées par
+// la FormRequest B14+. `title` conserve `varchar(140)` strictement citée.
+// ON DELETE : RESTRICT par défaut (aucune suppression de demande dans le
+// produit, CAHIER_DES_CHARGES.md:394).
 return new class extends Migration
 {
     public function up(): void
@@ -39,11 +41,6 @@ return new class extends Migration
             $table->index(['author_id', 'created_at']);
         });
 
-        DB::statement('ALTER TABLE help_requests ADD CONSTRAINT help_requests_title_length CHECK (char_length(btrim(title)) BETWEEN 15 AND 140)');
-        DB::statement('ALTER TABLE help_requests ADD CONSTRAINT help_requests_goal_length CHECK (char_length(btrim(goal)) BETWEEN 30 AND 2000)');
-        DB::statement('ALTER TABLE help_requests ADD CONSTRAINT help_requests_expected_length CHECK (char_length(btrim(expected)) BETWEEN 30 AND 2000)');
-        DB::statement('ALTER TABLE help_requests ADD CONSTRAINT help_requests_observed_length CHECK (char_length(btrim(observed)) BETWEEN 30 AND 4000)');
-        DB::statement('ALTER TABLE help_requests ADD CONSTRAINT help_requests_attempts_length CHECK (char_length(btrim(attempts)) BETWEEN 20 AND 3000)');
         DB::statement("ALTER TABLE help_requests ADD CONSTRAINT help_requests_state_values CHECK (state IN ('draft', 'open', 'in_progress', 'resolved', 'archived'))");
     }
 

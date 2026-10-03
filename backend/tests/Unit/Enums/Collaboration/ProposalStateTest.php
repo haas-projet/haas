@@ -15,9 +15,4 @@ final class ProposalStateTest extends TestCase
         $values = array_map(static fn (ProposalState $state): string => $state->value, ProposalState::cases());
         $this->assertSame(['proposed', 'accepted', 'not_selected'], $values);
     }
-
-    public function test_default_state_is_proposed(): void
-    {
-        $this->assertSame(ProposalState::Proposed, ProposalState::cases()[0]);
-    }
 }

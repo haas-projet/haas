@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['diagnosis', 'fix', 'verification', 'limits', 'state'])]
+#[Fillable(['diagnosis', 'fix', 'verification', 'limits'])]
 class Proposal extends Model
 {
     /** @use HasFactory<ProposalFactory> */

@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['title', 'goal', 'expected', 'observed', 'attempts', 'environment', 'state'])]
+#[Fillable(['title', 'goal', 'expected', 'observed', 'attempts', 'environment'])]
 class HelpRequest extends Model
 {
     /** @use HasFactory<HelpRequestFactory> */

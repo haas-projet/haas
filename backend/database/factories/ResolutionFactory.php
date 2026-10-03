@@ -2,12 +2,12 @@
 
 namespace Database\Factories;
 
-use App\Models\HelpRequest;
 use App\Models\Proposal;
 use App\Models\Resolution;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Facades\DB;
 
 /** @extends Factory<Resolution> */
 class ResolutionFactory extends Factory
@@ -15,12 +15,9 @@ class ResolutionFactory extends Factory
     /** @return array<string, mixed> */
     public function definition(): array
     {
-        $request = HelpRequest::factory()->create();
-        $proposal = Proposal::factory()->create(['request_id' => $request->id]);
-
         return [
-            'request_id' => $request->id,
-            'proposal_id' => $proposal->id,
+            'proposal_id' => Proposal::factory(),
+            'request_id' => fn (array $attributes): string => (string) DB::table('proposals')->where('id', $attributes['proposal_id'])->value('request_id'),
             'accepted_by' => User::factory(),
             'validation_note' => 'La proposition a résolu le blocage dans mon contexte.',
             'accepted_at' => CarbonImmutable::now(),

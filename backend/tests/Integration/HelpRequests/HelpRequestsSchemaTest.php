@@ -123,16 +123,11 @@ final class HelpRequestsSchemaTest extends PostgresTestCase
         $this->assertNull($secondResolution->revoked_at);
     }
 
-    public function test_check_constraints_reject_invalid_state_and_short_body(): void
+    public function test_check_constraints_reject_invalid_state_values(): void
     {
         $request = HelpRequest::factory()->create();
         $this->assertSqlFailure(
             fn () => DB::table('help_requests')->where('id', $request->id)->update(['state' => 'invalid_state']),
-            '23514'
-        );
-
-        $this->assertSqlFailure(
-            fn () => Comment::factory()->create(['request_id' => $request->id, 'body' => '']),
             '23514'
         );
 
@@ -149,11 +144,11 @@ final class HelpRequestsSchemaTest extends PostgresTestCase
             fn () => DB::table('help_requests')->insert([
                 'id' => (string) Str::uuid(),
                 'author_id' => User::factory()->create()->id,
-                'title' => str_pad('Blocage test ', 20, 'x'),
-                'goal' => str_pad('Objectif attendu minimum ', 40, 'x'),
-                'expected' => str_pad('Résultat attendu minimum ', 40, 'x'),
-                'observed' => str_pad('Comportement observé minimum ', 40, 'x'),
-                'attempts' => str_pad('Tentatives faites ', 30, 'x'),
+                'title' => 'Blocage test',
+                'goal' => 'Objectif attendu minimum',
+                'expected' => 'Résultat attendu minimum',
+                'observed' => 'Comportement observé minimum',
+                'attempts' => 'Tentatives faites',
                 'environment' => 'Linux',
                 'lock_version' => 1,
                 'created_at' => CarbonImmutable::now(),

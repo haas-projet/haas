@@ -10,8 +10,8 @@ use Illuminate\Support\Facades\Schema;
 // États : docs/architecture/ARCHITECTURE.md:256. Aucun défaut en base :
 // aucune citation littérale ne fixe la valeur initiale ; les Services B18+
 // posent l'état explicitement.
-// Longueurs 20–4 000 : docs/product/CAHIER_DES_CHARGES.md:418, repris dans
-// docs/execution/tasks.json:224 et docs/execution/PLAN_COMMITS.md:203.
+// Longueurs CHECK retirées : les règles 20-4000 (CAHIER:418) sont portées
+// par la FormRequest B18+ ; aucun CHECK en base.
 // Colonne `code` : exigence citée (code facultatif 12 000 — CAHIER:418,
 // tasks.json:224) mais aucun nom de colonne SQL cité dans le dépôt ; non codée
 // en B11, à confirmer avant le lot consommateur.
@@ -39,10 +39,6 @@ return new class extends Migration
             $table->index(['request_id', 'created_at']);
         });
 
-        DB::statement('ALTER TABLE proposals ADD CONSTRAINT proposals_diagnosis_length CHECK (char_length(btrim(diagnosis)) BETWEEN 20 AND 4000)');
-        DB::statement('ALTER TABLE proposals ADD CONSTRAINT proposals_fix_length CHECK (char_length(btrim(fix)) BETWEEN 20 AND 4000)');
-        DB::statement('ALTER TABLE proposals ADD CONSTRAINT proposals_verification_length CHECK (char_length(btrim(verification)) BETWEEN 20 AND 4000)');
-        DB::statement('ALTER TABLE proposals ADD CONSTRAINT proposals_limits_length CHECK (char_length(btrim(limits)) BETWEEN 20 AND 4000)');
         DB::statement("ALTER TABLE proposals ADD CONSTRAINT proposals_state_values CHECK (state IN ('proposed', 'accepted', 'not_selected'))");
     }
 

@@ -25,14 +25,14 @@ use SensitiveParameter;
  * @property Role $role
  */
 #[Fillable(['handle', 'email', 'password'])]
-#[Hidden(['email', 'password', 'remember_token', 'role', 'status', 'email_verified_at', 'is_demo', 'name'])]
+#[Hidden(['email', 'password', 'remember_token', 'role', 'status', 'email_verified_at', 'is_demo', 'name', 'security_version'])]
 class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, HasUuids, Notifiable;
 
     /** @var array<string, mixed> */
-    protected $attributes = ['role' => 'member', 'status' => 'active', 'is_demo' => false];
+    protected $attributes = ['role' => 'member', 'status' => 'active', 'is_demo' => false, 'security_version' => 0];
 
     public function sendEmailVerificationNotification(): void
     {
@@ -81,6 +81,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'role' => Role::class,
             'status' => AccountStatus::class,
             'is_demo' => 'boolean',
+            'security_version' => 'integer',
         ];
     }
 }

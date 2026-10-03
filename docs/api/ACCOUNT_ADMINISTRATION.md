@@ -1,0 +1,11 @@
+# Administration des comptes — B32
+
+`GET /api/v1/admin/members` fournit une liste paginée (20 par défaut, 50 maximum), triée par pseudonyme/UUID, réservée aux administrateurs actifs vérifiés. Champs : id, handle, role, status, lock_version. Aucun courriel ni motif. `PATCH /api/v1/admin/members/{id}` reçoit lock_version, reason (20–1000 caractères sans contrôle), et exactement un champ role ou status. Session/CSRF requis ; 30 commandes/minute ; champs inconnus refusés. Le contrat exact est dans openapi/administration.yaml.
+
+La version de sécurité est aussi la version optimiste de la décision. Une ancienne version ou un état identique renvoie 409 sans deuxième audit ; relire avant de décider à nouveau. Le dernier administrateur actif **et vérifié** ne peut ni être suspendu ni perdre son rôle. Un compte admin suspendu/non vérifié n'est pas une solution de secours. Le verrou singleton administration_guard sérialise les décisions, puis les comptes sont verrouillés par UUID : deux administrateurs ne peuvent pas simultanément supprimer tous les accès. Une base neuve n'invente aucun administrateur ; le premier accès d'exploitation reste une opération contrôlée hors API publique.
+
+Statut/rôle, version, suppression des sessions SQL, renouvellement du remember_token et décision d'audit sont atomiques. Le motif est chiffré avec APP_KEY dans account_decisions ; content_revisions ne contient que décision UUID/version, jamais le motif ni un secret. Une panne d'audit annule toute la décision. Aucun endpoint ne publie ces motifs.
+
+Chaque connexion inscrit security_version dans sa session. Le middleware compare cette valeur au compte relu ; une session écrite après sa suppression ne peut ressusciter, même après réactivation. Les sessions anciennes sans cette donnée ne restent compatibles que pour un compte de version zéro. Une nouvelle authentification est obligatoire après changement sensible. L'écran d'information `/api/v1/account-access` reste accessible sans session.
+
+Les services métier relisent toujours les droits sous leurs verrous. Cette livraison ne crée aucun laboratoire, annuaire, offre ou projet ; leurs pilotes doivent respecter ce contrat et vérifier AC62/AC83 avec leurs propres modèles. Elle ne donne pas à un administrateur le droit de résoudre la demande d'un tiers.

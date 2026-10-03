@@ -20,6 +20,7 @@ final class MemberSession
         $guard->login($user, false);
         // Lie immédiatement la session au secret vérifié, même si un reset devance son écriture SQL.
         $request->session()->put('password_hash_web', $guard->hashPasswordForCookie($user->getAuthPassword()));
+        $request->session()->put('security_version', $user->security_version);
         $request->session()->regenerate();
     }
 

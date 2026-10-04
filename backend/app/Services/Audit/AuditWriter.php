@@ -4,9 +4,11 @@ namespace App\Services\Audit;
 
 use App\Data\Audit\ProfileRevisionData;
 use App\Exceptions\Audit\AuditStorageFailed;
+use App\Models\HelpRequest;
 use App\Models\Profile;
 use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
@@ -16,6 +18,28 @@ use LogicException;
 
 final class AuditWriter
 {
+    public function helpRequestCreated(User $actor, HelpRequest $request): void
+    {
+        $this->requireTransaction($actor, $request);
+        try {
+            $owner = User::whereKey($actor->id)->lockForUpdate()->firstOrFail();
+            Gate::forUser($owner)->authorize('create', HelpRequest::class);
+            $current = HelpRequest::whereKey($request->id)->lockForUpdate()->firstOrFail();
+            if ($current->author_id !== $owner->id) {
+                throw new AuthorizationException;
+            }
+            DB::table('content_revisions')->insert([
+                'id' => (string) Str::uuid(), 'actor_id' => $owner->id, 'resource_type' => 'help_request',
+                'resource_id' => $current->id, 'revision' => 1, 'action' => 'help_request.created',
+                'metadata' => json_encode(['state' => $current->state->value, 'help_intent' => $current->help_intent->value,
+                    'request_version' => $current->lock_version, 'technology_count' => $current->technologies()->count()], JSON_THROW_ON_ERROR),
+                'occurred_at' => now()->utc(),
+            ]);
+        } catch (QueryException) {
+            throw new AuditStorageFailed('Échec du stockage de la révision.');
+        }
+    }
+
     public function profileUpdated(User $actor, Profile $profile, ProfileRevisionData $data): void
     {
         $this->requireTransaction($actor, $profile);
@@ -69,7 +93,7 @@ final class AuditWriter
         }
     }
 
-    private function requireTransaction(User $actor, Profile $profile): void
+    private function requireTransaction(User $actor, Model $profile): void
     {
         $connection = DB::connection();
         if ($connection->getDriverName() !== 'pgsql' || $connection->transactionLevel() < 1

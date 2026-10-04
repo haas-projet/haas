@@ -58,3 +58,9 @@ Aucun commit poussé, aucune PR ouverte, aucune fusion effectuée.
 ## Reprise B11 sur la branche permanente de Lamine — 3 octobre 2026
 
 Codex, à la demande de l'utilisateur : reprise sans réécriture du travail B11 de mdev44-code, compléments de versions positives/protection des champs serveur/factory, tests de FK et migrations, contrat et suivi. Aucune identité Git de collègue ni revue humaine simulée. Vérifications : Pint/PHPStan, 282 tests / 2483 assertions hors SQL, 151 tests / 1316 assertions PostgreSQL ; B11 ciblé 18 / 66 après corrections ; audit sans alerte et validation Composer. Preuves et limites dans `docs/quality/B11_COLLABORATION.md`. La CI et le SHA final seront rapportés dans la PR ; aucun déploiement ni frontend.
+
+## B14 — Création des demandes, 4 octobre 2026
+
+| Outil / intervention | Périmètre | Contrôles | Revue humaine de l'équipe |
+|---|---|---|---|
+| Codex, suite de Lamine à la demande de l'utilisateur, après confirmation que Madina n'a pas commencé B14/HelpIntent | Endpoint de création, validation, DTO, Policy, service, Resource, enum partagé unique, migration additive, audit/idempotence, contrats et tests ; B11 et suivi de Madina conservés | Pint/PHPStan ; 284 tests / 2686 assertions et 192 tests PostgreSQL / 1732 assertions ; audit sans alerte, validation Composer, 36 types API à jour. Voir B14_CREATION.md ; CI finale à observer dans la PR | En attente ; aucune signature humaine simulée |

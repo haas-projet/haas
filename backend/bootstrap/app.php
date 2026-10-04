@@ -26,6 +26,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->prepend(AssignRequestId::class);
+        $middleware->trimStrings(except: ['code']);
         $middleware->append(ProtectSpaRequests::class);
         $middleware->statefulApi();
         $middleware->alias(['verified' => RequireVerifiedEmail::class]);

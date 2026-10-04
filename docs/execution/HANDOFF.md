@@ -2,7 +2,7 @@
 
 Inspecter le dépôt, préserver les fichiers/commits/saisies existants, lire ADR-006. Appliquer F18 : projets ouverts, offres consenties, décision propriétaire, fil et projection publique contrôlés. Nouvelle recette avant GO_FRONTEND ; ne pas prendre un ancien gate pour un accord sur ce périmètre. Systalink/Vercel inchangé.
 
-État courant : B01–B09, B12–B13 et B32 DONE (12 lots) après intégration autorisée du socle. B11 préparé en revue sur `backend/communaute-entraide`, depuis main `7a8c672`, avec les commits B11 existants de mdev44-code préservés. Les 26 autres lots de la coordination #2 restent à faire. B10/B29/B30/B31 et B39–B42 IN_PROGRESS ; B43/B44 BLOCKED. S01/S02 restent partiels. BACKEND_GATE NON REÇU, aucun GO_FRONTEND/GO_PRODUCTION. Voir [la preuve B11](../quality/B11_COLLABORATION.md) et le [suivi de Lamine](participants/LamineGL/HANDOFF.md). Les entrées suivantes sont historiques.
+État courant : B01–B09, B12–B13 et B32 DONE (12 lots de socle). B11 et B14 IN_REVIEW : ordre #23 (Madina) → #22 (compléments) → B14 sur `backend/communaute-entraide-b14`. Les 25 autres lots de la coordination #2 restent à faire. B10/B29/B30/B31 et B39–B42 IN_PROGRESS ; B43/B44 BLOCKED. S01/S02 restent partiels. BACKEND_GATE NON REÇU, aucun GO_FRONTEND/GO_PRODUCTION. Voir [B14](../quality/B14_CREATION.md) et le [suivi de Lamine](participants/LamineGL/HANDOFF.md).
 
 ## Reprise après préparation GitHub — 2026-10-01
 

@@ -2,7 +2,7 @@
 
 Assigné : LamineGL. Étiquette : Backend. Priorité normale ; pas d'échéance inventée.
 
-B11 est réalisé et testé au niveau du schéma, mais reste **En cours** dans Systalink tant que sa revue et sa fusion ne sont pas terminées. Ne pas cocher toute la tâche de coordination #2 : elle contient 27 lots. Aucun autre lot de Lamine n'est déclaré terminé par cette livraison.
+B11 est réalisé et testé au niveau du schéma, mais reste **En cours** dans Systalink tant que sa revue et sa fusion ne sont pas terminées. Ne pas cocher toute la tâche de coordination #2 : elle contient 27 lots. Les autres lots ne sont pas déclarés terminés.
 
 Titre B11 à copier : **Créer le schéma des demandes, commentaires, propositions et résolutions**.
 
@@ -11,7 +11,7 @@ Description B11 : Créer les tables et relations PostgreSQL, protéger les réf�
 | Tâche | Colonne actuelle |
 |---|---|
 | B11 — Schéma de collaboration | En cours — prêt pour revue, non fusionné |
-| B14 — Créer une demande | À faire |
+| B14 — Créer une demande | En cours — API réalisée, revue et intégration en attente |
 | B15 — Lire et rechercher les demandes | À faire |
 | B16 — Modifier une demande | À faire |
 | B17 — Commentaires | À faire |
@@ -37,3 +37,5 @@ Description B11 : Créer les tables et relations PostgreSQL, protéger les réf�
 | BH08 — Projections publiques progrès et notifications | À faire |
 | BH09 — Contrats et documentation des offres | À faire |
 | BH10 — Recette transactionnelle et privée des coups de main | À faire |
+
+Mise à jour du 4 octobre : **B14 — Créer et publier une demande** est également En cours. Description à copier : enregistrer un brouillon privé ou publier une demande/une question ; valider les champs, refuser les champs serveur et secrets suspects, empêcher les doubles créations et tracer l'action. Les tests backend passent selon la preuve B14 ; la carte attend sa revue et sa fusion. B15 (lecture/recherche) reste À faire.

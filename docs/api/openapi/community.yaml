@@ -1,4 +1,513 @@
-# Pilote : LamineGL. Ajouter uniquement les contrats implémentés.
-paths: {}
+paths:
+  /api/v1/requests:
+    post:
+      operationId: createHelpRequest
+      summary: 'Enregistrer un brouillon privé ou publier une demande'
+      description: 'Membre actif et vérifié, session SPA et CSRF requis. mode=draft crée un brouillon ; mode=publish crée une demande open. Aucune transition libre, aucune édition par ce POST. Champs non déclarés (même null) refusés, y compris auteur/état/version/dates et project_id avant BC04. Les contenus et liens sont inertes, aucune récupération réseau. Idempotence 24 h, même acteur/route/clé/charge normalisée : même identifiant et même version, sans doublon ni nouvel audit. Ordre des technologies et casse des UUID ignorés. Droits courants relus avant rejeu ; contenu masqué interdit, version modifiée en conflit. Les brouillons sont privés, même pour un admin. Les routes de lecture arrivent en B15.'
+      security:
+        -
+          SessionCookie: {  }
+      parameters:
+        -
+          $ref: '../../OPENAPI.yaml#/components/parameters/IdempotencyKey'
+        -
+          name: X-XSRF-TOKEN
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateHelpRequestInput'
+      responses:
+        201:
+          description: 'Demande créée, ou même identifiant/version rejoué. Cache-Control: no-store.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HelpRequestCreated'
+        401:
+          $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure'
+        403:
+          $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure'
+        404:
+          $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure'
+        409:
+          $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure'
+        419:
+          $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure'
+        422:
+          $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure'
+        500:
+          $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure'
+        429:
+          $ref: '../../OPENAPI.yaml#/components/responses/RetryableFailure'
+        503:
+          $ref: '../../OPENAPI.yaml#/components/responses/RetryableFailure'
 components:
-  schemas: {}
+  schemas:
+    HelpIntent:
+      type: string
+      enum:
+        - unblock
+        - review_solution
+        - reproduce_behavior
+        - ask_question
+    RequestTechnologyInput:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          format: uuid
+        version_label:
+          type:
+            - string
+            - 'null'
+          maxLength: 40
+    HelpRequestDraftInput:
+      type: object
+      additionalProperties: false
+      required:
+        - mode
+        - help_intent
+        - title
+      properties:
+        mode:
+          type: string
+          enum:
+            - draft
+        help_intent:
+          type: string
+          enum:
+            - unblock
+            - review_solution
+            - reproduce_behavior
+            - ask_question
+        title:
+          type: string
+          maxLength: 140
+          minLength: 1
+        goal:
+          type:
+            - string
+            - 'null'
+          maxLength: 2000
+          minLength: 1
+        expected:
+          type:
+            - string
+            - 'null'
+          maxLength: 2000
+          minLength: 1
+        observed:
+          type:
+            - string
+            - 'null'
+          maxLength: 4000
+          minLength: 1
+        attempts:
+          type:
+            - string
+            - 'null'
+          maxLength: 3000
+        environment:
+          type:
+            - string
+            - 'null'
+          maxLength: 255
+        code:
+          type:
+            - string
+            - 'null'
+          maxLength: 12000
+          description: 'Texte inerte, espaces conservés. code_language requis si un code non vide est fourni. Motifs de secrets suspects refusés, sans garantie d’exhaustivité.'
+        code_language:
+          type:
+            - string
+            - 'null'
+          maxLength: 40
+          pattern: '^[a-z0-9][a-z0-9_+.#-]*$'
+        primary_language:
+          type: string
+          maxLength: 35
+          pattern: '^[a-zA-Z]{2,3}(?:-[a-zA-Z0-9]{2,8})*$'
+          default: fr
+        reproduction_url:
+          type:
+            - string
+            - 'null'
+          maxLength: 2048
+          format: uri
+          pattern: '^https://[^/@]+(?:/.*)?$'
+        technologies:
+          type: array
+          maxItems: 5
+          items:
+            $ref: '#/components/schemas/RequestTechnologyInput'
+      description: 'Brouillon privé : titre requis, autres contenus facultatifs avec plafonds conservés.'
+      allOf:
+        -
+          if:
+            required:
+              - code
+            properties:
+              code:
+                type: string
+                minLength: 1
+          then:
+            required:
+              - code_language
+            properties:
+              code_language:
+                type: string
+                minLength: 1
+    HelpRequestPublicationInput:
+      type: object
+      additionalProperties: false
+      required:
+        - mode
+        - help_intent
+        - title
+        - goal
+        - observed
+        - technologies
+        - expected
+        - attempts
+        - environment
+      properties:
+        mode:
+          type: string
+          enum:
+            - publish
+        help_intent:
+          type: string
+          enum:
+            - unblock
+            - review_solution
+            - reproduce_behavior
+        title:
+          type: string
+          maxLength: 140
+          minLength: 15
+        goal:
+          type: string
+          maxLength: 2000
+          minLength: 30
+        expected:
+          type: string
+          maxLength: 2000
+          minLength: 30
+        observed:
+          type: string
+          maxLength: 4000
+          minLength: 30
+        attempts:
+          type: string
+          maxLength: 3000
+          pattern: '^(?:[aA][uU][cC][uU][nN][eE]|[\s\S]{20,})$'
+        environment:
+          type: string
+          maxLength: 255
+          minLength: 1
+        code:
+          type:
+            - string
+            - 'null'
+          maxLength: 12000
+          description: 'Texte inerte, espaces conservés. code_language requis si un code non vide est fourni. Motifs de secrets suspects refusés, sans garantie d’exhaustivité.'
+        code_language:
+          type:
+            - string
+            - 'null'
+          maxLength: 40
+          pattern: '^[a-z0-9][a-z0-9_+.#-]*$'
+        primary_language:
+          type: string
+          maxLength: 35
+          pattern: '^[a-zA-Z]{2,3}(?:-[a-zA-Z0-9]{2,8})*$'
+          default: fr
+        reproduction_url:
+          type:
+            - string
+            - 'null'
+          maxLength: 2048
+          format: uri
+          pattern: '^https://[^/@]+(?:/.*)?$'
+        technologies:
+          type: array
+          maxItems: 5
+          items:
+            $ref: '#/components/schemas/RequestTechnologyInput'
+          minItems: 1
+      description: 'Publication technique : contexte complet et une à cinq technologies. attempts accepte aussi « aucune ».'
+      allOf:
+        -
+          if:
+            required:
+              - code
+            properties:
+              code:
+                type: string
+                minLength: 1
+          then:
+            required:
+              - code_language
+            properties:
+              code_language:
+                type: string
+                minLength: 1
+    HelpRequestQuestionInput:
+      type: object
+      additionalProperties: false
+      required:
+        - mode
+        - help_intent
+        - title
+        - goal
+        - observed
+        - technologies
+      properties:
+        mode:
+          type: string
+          enum:
+            - publish
+        help_intent:
+          type: string
+          enum:
+            - ask_question
+        title:
+          type: string
+          maxLength: 140
+          minLength: 15
+        goal:
+          type: string
+          maxLength: 2000
+          minLength: 30
+        expected:
+          type:
+            - string
+            - 'null'
+          maxLength: 2000
+          minLength: 30
+        observed:
+          type: string
+          maxLength: 4000
+          minLength: 30
+        attempts:
+          type:
+            - string
+            - 'null'
+          maxLength: 3000
+          pattern: '^(?:[aA][uU][cC][uU][nN][eE]|[\s\S]{20,})$'
+        environment:
+          type:
+            - string
+            - 'null'
+          maxLength: 255
+        code:
+          type:
+            - string
+            - 'null'
+          maxLength: 12000
+          description: 'Texte inerte, espaces conservés. code_language requis si un code non vide est fourni. Motifs de secrets suspects refusés, sans garantie d’exhaustivité.'
+        code_language:
+          type:
+            - string
+            - 'null'
+          maxLength: 40
+          pattern: '^[a-z0-9][a-z0-9_+.#-]*$'
+        primary_language:
+          type: string
+          maxLength: 35
+          pattern: '^[a-zA-Z]{2,3}(?:-[a-zA-Z0-9]{2,8})*$'
+          default: fr
+        reproduction_url:
+          type:
+            - string
+            - 'null'
+          maxLength: 2048
+          format: uri
+          pattern: '^https://[^/@]+(?:/.*)?$'
+        technologies:
+          type: array
+          maxItems: 5
+          items:
+            $ref: '#/components/schemas/RequestTechnologyInput'
+          minItems: 1
+      description: 'Question : aucun code, résultat attendu, tentative ou environnement obligatoire.'
+      allOf:
+        -
+          if:
+            required:
+              - code
+            properties:
+              code:
+                type: string
+                minLength: 1
+          then:
+            required:
+              - code_language
+            properties:
+              code_language:
+                type: string
+                minLength: 1
+    CreateHelpRequestInput:
+      oneOf:
+        -
+          $ref: '#/components/schemas/HelpRequestDraftInput'
+        -
+          $ref: '#/components/schemas/HelpRequestPublicationInput'
+        -
+          $ref: '#/components/schemas/HelpRequestQuestionInput'
+    HelpRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - help_intent
+        - title
+        - goal
+        - expected
+        - observed
+        - attempts
+        - environment
+        - code
+        - code_language
+        - primary_language
+        - reproduction_url
+        - technologies
+        - id
+        - author
+        - state
+        - lock_version
+        - created_at
+        - updated_at
+      properties:
+        help_intent:
+          type: string
+          enum:
+            - unblock
+            - review_solution
+            - reproduce_behavior
+            - ask_question
+        title:
+          type: string
+          maxLength: 140
+        goal:
+          type:
+            - string
+            - 'null'
+          maxLength: 2000
+        expected:
+          type:
+            - string
+            - 'null'
+          maxLength: 2000
+        observed:
+          type:
+            - string
+            - 'null'
+          maxLength: 4000
+        attempts:
+          type:
+            - string
+            - 'null'
+          maxLength: 3000
+        environment:
+          type:
+            - string
+            - 'null'
+          maxLength: 255
+        code:
+          type:
+            - string
+            - 'null'
+          maxLength: 12000
+          description: 'Texte inerte, espaces conservés. code_language requis si un code non vide est fourni. Motifs de secrets suspects refusés, sans garantie d’exhaustivité.'
+        code_language:
+          type:
+            - string
+            - 'null'
+          maxLength: 40
+          pattern: '^[a-z0-9][a-z0-9_+.#-]*$'
+        primary_language:
+          type: string
+          maxLength: 35
+          pattern: '^[a-zA-Z]{2,3}(?:-[a-zA-Z0-9]{2,8})*$'
+          default: fr
+        reproduction_url:
+          type:
+            - string
+            - 'null'
+          maxLength: 2048
+          format: uri
+          pattern: '^https://[^/@]+(?:/.*)?$'
+        technologies:
+          type: array
+          maxItems: 5
+          items:
+            type: object
+            additionalProperties: false
+            required:
+              - id
+              - slug
+              - name
+              - version_label
+            properties:
+              id:
+                type: string
+                format: uuid
+              slug:
+                type: string
+              name:
+                type: string
+              version_label:
+                type:
+                  - string
+                  - 'null'
+                maxLength: 40
+        id:
+          type: string
+          format: uuid
+        author:
+          type: object
+          additionalProperties: false
+          required:
+            - id
+            - handle
+          properties:
+            id:
+              type: string
+              format: uuid
+            handle:
+              type: string
+        state:
+          type: string
+          enum:
+            - draft
+            - open
+            - in_progress
+            - resolved
+            - archived
+        lock_version:
+          type: integer
+          minimum: 1
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    HelpRequestCreated:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+      properties:
+        data:
+          $ref: '#/components/schemas/HelpRequest'

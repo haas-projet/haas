@@ -189,7 +189,8 @@
       "refs": "AC03–AC07 ; F02",
       "phase": "B",
       "execution_order": 16,
-      "status": "TODO"
+      "status": "IN_REVIEW",
+      "evidence": ["docs/quality/B14_CREATION.md"]
     },
     {
       "id": "B15",

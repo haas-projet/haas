@@ -1,6 +1,6 @@
 # Suivi du dépôt HAAS
 
-**Statut actif :** B01–B09, B12–B13 et B32 DONE (12 lots) après intégration autorisée du socle. B11 préparé en revue sur `backend/communaute-entraide`, depuis main `7a8c672`, avec les commits B11 existants de mdev44-code préservés. Les 26 autres lots de la coordination #2 restent à faire. B10/B29/B30/B31 et B39–B42 IN_PROGRESS ; B43/B44 BLOCKED. S01/S02 restent partiels. BACKEND_GATE NON REÇU, aucun GO_FRONTEND/GO_PRODUCTION. Voir [la preuve B11](../quality/B11_COLLABORATION.md) et le [suivi de Lamine](participants/LamineGL/HANDOFF.md).
+**Statut actif :** B01–B09, B12–B13 et B32 DONE (12 lots de socle). B11 et B14 IN_REVIEW : ordre #23 (Madina) → #22 (compléments) → B14 sur `backend/communaute-entraide-b14`. Les 25 autres lots de la coordination #2 restent à faire. B10/B29/B30/B31 et B39–B42 IN_PROGRESS ; B43/B44 BLOCKED. S01/S02 restent partiels. BACKEND_GATE NON REÇU, aucun GO_FRONTEND/GO_PRODUCTION. Voir [B14](../quality/B14_CREATION.md) et le [suivi de Lamine](participants/LamineGL/HANDOFF.md).
 
 À renseigner après commandes réelles : date / lot / responsable / fichiers / commandes / observé / commit ou raison de non-commit / blocage / prochaine action. Les contrôles documentaires de ce pack ne valident pas BACKEND_GATE, FRONTEND_GATE ou RELEASE_GATE.
 
@@ -235,3 +235,12 @@ B07/B08/B09/B12/B13/B32 DONE ; le tableau Systalink comporte maintenant 12 lots 
 - Preuves : `docs/quality/B11_COLLABORATION.md` ; suivi et 27 cartes Systalink dans `participants/LamineGL/`. B11 préparé pour revue, sans fusion ni validation humaine présumée ; garder la carte Systalink En cours jusqu'à intégration.
 - Limites : aucun endpoint des demandes ni résolution concurrente livré, aucun autre lot de Lamine terminé. La branche B11 du collègue et la PR capsules #12 sont préservées. Prochain lot B14 après intégration de B11 ; coordonner HelpIntent avec BV201 avant BC07.
 - Référence réelle du commit final et CI à communiquer dans la PR et le bilan ; aucun SHA autoréférent écrit dans ce commit.
+
+## 2026-10-04 — B14, suite de Lamine coordonnée avec Madina
+
+- Demande : continuer en tenant compte de Madina ; confirmation que B14 et HelpIntent/BV201 ne sont pas commencés de son côté.
+- Les cinq migrations B11 et les commits de Madina restent inchangés. PR #22 reciblée sur sa PR #23 comme complément ; B14 préparé sur branche dérivée depuis 5854e04, sans fusion ni revue humaine simulée.
+- POST /api/v1/requests : brouillon/publication/question, validation, droits, audit et idempotence communs, code inerte, champs serveur protégés, migrations additives et contrat complet. HelpIntent unique partagé avec BV201/BC07 ; décision dans BACKEND_A_TROIS.md.
+- Validations réelles : 284 tests / 2686 assertions hors SQL et 192 tests / 1732 assertions PostgreSQL, dont création à deux processus réellement concurrents. Pint/PHPStan et audit/validation Composer réussis ; 36 types API générés. Preuves : docs/quality/B14_CREATION.md.
+- Statuts : B14 en revue, B11 toujours non fusionné. Systalink conserve ces deux cartes En cours ; les 25 autres lots restent à faire. Prochain lot B15, après intégration du prérequis ou préparation isolée explicitement demandée. Aucun frontend ni déploiement.
+- Le SHA final et sa CI seront communiqués après commit dans la PR et le bilan, sans autoréférence dans le commit.

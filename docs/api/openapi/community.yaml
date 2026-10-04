@@ -1,9 +1,65 @@
 paths:
   /api/v1/requests:
+    get:
+      operationId: listHelpRequests
+      summary: Rechercher les demandes visibles ou retrouver ses demandes
+      description: "Visibilité avant filtres et compteurs. Catalogue public sans brouillons ; scope=mine exige un membre actif vérifié et ne retourne que ses demandes, brouillons compris. Aucun contenu masqué ou auteur inactif/non vérifié. Recherche littérale ILIKE titre/goal/expected/observed/attempts/environment/nom et slug des technologies, jamais code/URL/contributions/identité privée. Filtres cumulés, tri stable avec id croissant en départage. Archives incluses. Paramètres inconnus rejetés, y compris page_size. Cache-Control: no-store. Voir HELP_REQUEST_READING.md."
+      security:
+        - {}
+        - SessionCookie: {}
+      parameters:
+        - $ref: '../../OPENAPI.yaml#/components/parameters/Page'
+        - $ref: '../../OPENAPI.yaml#/components/parameters/PerPage'
+        - name: scope
+          in: query
+          schema:
+            type: string
+            enum: [public, mine]
+            default: public
+        - name: q
+          in: query
+          description: Sous-chaîne littérale, casse ignorée selon la collation PostgreSQL, accents conservés. Vide désactive le filtre.
+          schema:
+            type: string
+            maxLength: 200
+        - name: technology
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: state
+          in: query
+          schema:
+            type: string
+            enum: [draft, open, in_progress, resolved, archived]
+        - name: sort
+          in: query
+          description: newest/oldest sur created_at, updated sur updated_at ; id croissant en départage.
+          schema:
+            type: string
+            enum: [newest, oldest, updated]
+            default: newest
+      responses:
+        200:
+          description: Liste filtrée ; meta.total exclut les contenus inaccessibles. Cache-Control no-store.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HelpRequestPage'
+        401:
+          $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure'
+        403:
+          $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure'
+        422:
+          $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure'
+        500:
+          $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure'
+        503:
+          $ref: '../../OPENAPI.yaml#/components/responses/RetryableFailure'
     post:
       operationId: createHelpRequest
       summary: 'Enregistrer un brouillon privé ou publier une demande'
-      description: 'Membre actif et vérifié, session SPA et CSRF requis. mode=draft crée un brouillon ; mode=publish crée une demande open. Aucune transition libre, aucune édition par ce POST. Champs non déclarés (même null) refusés, y compris auteur/état/version/dates et project_id avant BC04. Les contenus et liens sont inertes, aucune récupération réseau. Idempotence 24 h, même acteur/route/clé/charge normalisée : même identifiant et même version, sans doublon ni nouvel audit. Ordre des technologies et casse des UUID ignorés. Droits courants relus avant rejeu ; contenu masqué interdit, version modifiée en conflit. Les brouillons sont privés, même pour un admin. Les routes de lecture arrivent en B15.'
+      description: 'Membre actif et vérifié, session SPA et CSRF requis. mode=draft crée un brouillon ; mode=publish crée une demande open. Aucune transition libre, aucune édition par ce POST. Champs non déclarés (même null) refusés, y compris auteur/état/version/dates et project_id avant BC04. Les contenus et liens sont inertes, aucune récupération réseau. Idempotence 24 h, même acteur/route/clé/charge normalisée : même identifiant et même version, sans doublon ni nouvel audit. Ordre des technologies et casse des UUID ignorés. Droits courants relus avant rejeu ; contenu masqué interdit, version modifiée en conflit. Les brouillons sont privés, même pour un admin. Lectures documentées en B15.'
       security:
         -
           SessionCookie: {  }
@@ -47,8 +103,59 @@ paths:
           $ref: '../../OPENAPI.yaml#/components/responses/RetryableFailure'
         503:
           $ref: '../../OPENAPI.yaml#/components/responses/RetryableFailure'
+  /api/v1/requests/{id}:
+    get:
+      operationId: showHelpRequest
+      summary: Lire une demande publique ou son propre brouillon
+      description: "Auteur actif vérifié et contenu non masqué. Brouillon réservé à son auteur, aucun bypass admin/modérateur. UUID invalide/inconnu, demande cachée ou privée : même 404. Code inerte, aucun chargement d'URL ou de contributions. Cache-Control: no-store."
+      security:
+        - {}
+        - SessionCookie: {}
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: Données autorisées de la demande, même contrat de ressource que B14.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HelpRequestDetail'
+        401:
+          $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure'
+        403:
+          $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure'
+        404:
+          $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure'
+        500:
+          $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure'
+        503:
+          $ref: '../../OPENAPI.yaml#/components/responses/RetryableFailure'
 components:
   schemas:
+    HelpRequestDetail:
+      type: object
+      additionalProperties: false
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/HelpRequest'
+    HelpRequestPage:
+      type: object
+      additionalProperties: false
+      required: [data, meta]
+      properties:
+        data:
+          type: array
+          maxItems: 50
+          items:
+            $ref: '#/components/schemas/HelpRequest'
+        meta:
+          $ref: '../../OPENAPI.yaml#/components/schemas/PaginationMeta'
     HelpIntent:
       type: string
       enum:

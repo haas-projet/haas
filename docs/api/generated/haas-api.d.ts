@@ -31,7 +31,11 @@ export type community_HelpRequest = { readonly "help_intent": "unblock" | "revie
 
 export type community_HelpRequestCreated = { readonly "data": community_HelpRequest; };
 
+export type community_HelpRequestDetail = { readonly "data": community_HelpRequest; };
+
 export type community_HelpRequestDraftInput = (unknown) & { readonly "mode": "draft"; readonly "help_intent": "unblock" | "review_solution" | "reproduce_behavior" | "ask_question"; readonly "title": string; readonly "goal"?: string | null; readonly "expected"?: string | null; readonly "observed"?: string | null; readonly "attempts"?: string | null; readonly "environment"?: string | null; readonly "code"?: string | null; readonly "code_language"?: string | null; readonly "primary_language"?: string; readonly "reproduction_url"?: string | null; readonly "technologies"?: ReadonlyArray<community_RequestTechnologyInput>; };
+
+export type community_HelpRequestPage = { readonly "data": ReadonlyArray<community_HelpRequest>; readonly "meta": OPENAPI_PaginationMeta; };
 
 export type community_HelpRequestPublicationInput = (unknown) & { readonly "mode": "publish"; readonly "help_intent": "unblock" | "review_solution" | "reproduce_behavior"; readonly "title": string; readonly "goal": string; readonly "expected": string; readonly "observed": string; readonly "attempts": string; readonly "environment": string; readonly "code"?: string | null; readonly "code_language"?: string | null; readonly "primary_language"?: string; readonly "reproduction_url"?: string | null; readonly "technologies": ReadonlyArray<community_RequestTechnologyInput>; };
 

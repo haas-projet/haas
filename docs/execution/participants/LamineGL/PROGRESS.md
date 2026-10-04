@@ -15,3 +15,10 @@ Statut : en préparation de revue, pas encore fusionné. Les autres 26 lots de l
 - Livraison : POST /api/v1/requests, validation/DTO/Policy/Service/Resource, modes draft/publish, question sans code, audit atomique et idempotence commune, protection des champs serveur et motifs suspects, contrat OpenAPI/types. Enum HelpIntent unique à réutiliser dans BV201/BC07.
 - Tests et limites : [B14_CREATION.md](../../../quality/B14_CREATION.md). Les fixtures de concurrence sont réellement commitées ; deux processus attendent simultanément un verrou PostgreSQL. Aucun résultat métier fictif.
 - Prochain lot : B15 après intégration du prérequis, ou préparation séparée sur demande explicite pendant la revue. B11/B14 ne sont pas encore des cartes Terminé.
+
+## 2026-10-04 — B15, lecture/recherche de la partie de Lamine
+
+- Demande de continuer après B14. Branche `backend/communaute-entraide-b15`, worktree `.worktrees/b15`, depuis `6a0db1e`. PR #23 de Madina, #22 et #24 inchangées, PR #12 préservée ; la modification préexistante des routes capsules dans le répertoire principal est exclue et conservée.
+- GET liste/détail, visibilité commune avant recherche/pagination/total, brouillons réservés à leur auteur, vue mine explicite, filtres/tri bornés et chargement des relations sans N+1. Aucune migration ni dépendance ajoutée. Contrat [HELP_REQUEST_READING.md](../../../api/HELP_REQUEST_READING.md), preuve [B15_READING.md](../../../quality/B15_READING.md).
+- Résultats locaux : 284 tests / 2811 assertions hors SQL et 227 / 2023 sur PostgreSQL dédié (511 / 4834). Pint/PHPStan, Composer validation/prérequis/audit et documentation réussis, 38 types à jour. Quatre SELECT métier pour 5 comme pour 25 demandes. Cluster 54695/haas_b15_test arrêté après les tests.
+- B15 IN_REVIEW ; SHA final et CI à constater dans la PR et le bilan après publication. Ordre #23 → #22 → #24 → B15, sans fusion ni revue humaine simulée. B11/B14/B15 En cours dans Systalink, 24 autres lots à faire. Prochain B16, édition sous version. Aucun BACKEND_GATE ni frontend/déploiement.

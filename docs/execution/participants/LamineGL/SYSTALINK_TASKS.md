@@ -12,7 +12,7 @@ Description B11 : Créer les tables et relations PostgreSQL, protéger les réf�
 |---|---|
 | B11 — Schéma de collaboration | En cours — prêt pour revue, non fusionné |
 | B14 — Créer une demande | En cours — API réalisée, revue et intégration en attente |
-| B15 — Lire et rechercher les demandes | À faire |
+| B15 — Lire et rechercher les demandes | En cours — API réalisée, revue et intégration en attente |
 | B16 — Modifier une demande | À faire |
 | B17 — Commentaires | À faire |
 | B18 — Propositions de solution | À faire |
@@ -38,4 +38,7 @@ Description B11 : Créer les tables et relations PostgreSQL, protéger les réf�
 | BH09 — Contrats et documentation des offres | À faire |
 | BH10 — Recette transactionnelle et privée des coups de main | À faire |
 
-Mise à jour du 4 octobre : **B14 — Créer et publier une demande** est également En cours. Description à copier : enregistrer un brouillon privé ou publier une demande/une question ; valider les champs, refuser les champs serveur et secrets suspects, empêcher les doubles créations et tracer l'action. Les tests backend passent selon la preuve B14 ; la carte attend sa revue et sa fusion. B15 (lecture/recherche) reste À faire.
+Mise à jour du 4 octobre : **B14 — Créer et publier une demande** est également En cours. Description à copier : enregistrer un brouillon privé ou publier une demande/une question ; valider les champs, refuser les champs serveur et secrets suspects, empêcher les doubles créations et tracer l'action. Les tests backend passent selon la preuve B14 ; la carte attend sa revue et sa fusion. B15 est désormais réalisé et testé, en attente de revue et de fusion (voir mise à jour ci-dessous).
+
+
+Mise à jour B15 du 4 octobre : **Lire et rechercher les demandes** — En cours, prêt pour revue après CI vérifiée dans la PR. Description à copier : consulter une demande publique ou son propre brouillon, rechercher par texte/technologie/état, trier et paginer sans exposer les contenus privés/masqués ni leurs compteurs. Preuves : `docs/quality/B15_READING.md`. B11/B14/B15 restent En cours jusqu'à leur intégration vérifiée ; aucune nouvelle carte Terminé à cette étape. Prochain lot B16, édition versionnée.

@@ -215,7 +215,10 @@
       "refs": "AC03/AC05 ; F02",
       "phase": "B",
       "execution_order": 18,
-      "status": "TODO"
+      "status": "IN_REVIEW",
+      "evidence": [
+        "docs/quality/B16_EDITING.md"
+      ]
     },
     {
       "id": "B17",

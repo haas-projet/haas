@@ -1,5 +1,16 @@
 # Reprise — communauté et entraide
 
+Lot courant : **B16**, branche `backend/communaute-entraide-b16`, worktree `.worktrees/b16`, depuis B15 `0cfcde1`. Contrat [HELP_REQUEST_EDITING.md](../../../api/HELP_REQUEST_EDITING.md), preuve [B16_EDITING.md](../../../quality/B16_EDITING.md), tableau [SYSTALINK_TASKS.md](SYSTALINK_TASKS.md). SHA final et CI vérifiés à communiquer après commit dans le bilan et la PR.
+
+Livraison : édition partielle avec revalidation du contenu final sous verrou, version incrémentée, note après contribution, publication explicite et historique paginé. Notes des brouillons privées même après publication ; audit sans texte/code, rollback atomique. Validation B14 mutualisée ; aucune migration de Madina ni dépendance modifiée. Les futures commandes B17/B18/B19 et modération devront respecter le verrou parent.
+
+Ordre #23 → #22 → #24 → #25 → PR B16, temporairement basée sur `backend/communaute-entraide-b15`. Intégrer les prérequis avant reciblage/synchronisation et nouveaux contrôles ; aucun merge/revue humaine présumé. PR #12 et modification locale des routes capsules dans le répertoire principal préservées. Garder les trois branches permanentes et main après intégrations autorisées et nettoyage des temporaires vérifiés.
+
+Prochain lot **B17 — Commentaires**, après intégration des prérequis ou préparation séparée sur demande de continuer pendant revue. B11/B14/B15/B16 restent En cours dans Systalink ; 23 lots à faire. Aucun GO_FRONTEND/GO_PRODUCTION.
+
+## Reprise B15 antérieure conservée
+
+
 Lot courant : **B15**, prêt pour revue sur `backend/communaute-entraide-b15`, depuis B14 `6a0db1e`. Worktree isolé `.worktrees/b15` : une modification préexistante de `backend/routes/api/capsules-lab.php` dans le répertoire principal est préservée et exclue de cette livraison. B14 reste inchangé dans #24.
 
 Lire [le contrat B15](../../../api/HELP_REQUEST_READING.md), [les preuves](../../../quality/B15_READING.md) et [SYSTALINK_TASKS.md](SYSTALINK_TASKS.md). Le SHA final, le numéro de PR et la CI du commit exact sont communiqués après commit dans le bilan/PR, sans SHA autoréférent.

@@ -13,7 +13,7 @@ Description B11 : Créer les tables et relations PostgreSQL, protéger les réf�
 | B11 — Schéma de collaboration | En cours — prêt pour revue, non fusionné |
 | B14 — Créer une demande | En cours — API réalisée, revue et intégration en attente |
 | B15 — Lire et rechercher les demandes | En cours — API réalisée, revue et intégration en attente |
-| B16 — Modifier une demande | À faire |
+| B16 — Modifier une demande | En cours — édition/publication/historique, revue et intégration en attente |
 | B17 — Commentaires | À faire |
 | B18 — Propositions de solution | À faire |
 | B19 — Accepter une proposition | À faire |
@@ -42,3 +42,6 @@ Mise à jour du 4 octobre : **B14 — Créer et publier une demande** est égale
 
 
 Mise à jour B15 du 4 octobre : **Lire et rechercher les demandes** — En cours, prêt pour revue après CI vérifiée dans la PR. Description à copier : consulter une demande publique ou son propre brouillon, rechercher par texte/technologie/état, trier et paginer sans exposer les contenus privés/masqués ni leurs compteurs. Preuves : `docs/quality/B15_READING.md`. B11/B14/B15 restent En cours jusqu'à leur intégration vérifiée ; aucune nouvelle carte Terminé à cette étape. Prochain lot B16, édition versionnée.
+
+
+Mise à jour B16 du 4 octobre : **Modifier une demande avec contrôle de version et historique** — En cours. Description à copier : permettre à l'auteur de clarifier sa demande sans écraser une édition concurrente ; conserver une note après contribution, publier explicitement un brouillon complet et consulter les révisions autorisées. Preuves : `docs/quality/B16_EDITING.md`. Tests et CI à lire dans la PR avant revue/fusion ; B11/B14/B15/B16 ne sont pas encore des cartes Terminé. Prochain lot B17, commentaires.

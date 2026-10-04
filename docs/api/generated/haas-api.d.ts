@@ -39,7 +39,15 @@ export type community_HelpRequestPage = { readonly "data": ReadonlyArray<communi
 
 export type community_HelpRequestPublicationInput = (unknown) & { readonly "mode": "publish"; readonly "help_intent": "unblock" | "review_solution" | "reproduce_behavior"; readonly "title": string; readonly "goal": string; readonly "expected": string; readonly "observed": string; readonly "attempts": string; readonly "environment": string; readonly "code"?: string | null; readonly "code_language"?: string | null; readonly "primary_language"?: string; readonly "reproduction_url"?: string | null; readonly "technologies": ReadonlyArray<community_RequestTechnologyInput>; };
 
+export type community_HelpRequestPublishInput = { readonly "lock_version": number; };
+
 export type community_HelpRequestQuestionInput = (unknown) & { readonly "mode": "publish"; readonly "help_intent": "ask_question"; readonly "title": string; readonly "goal": string; readonly "expected"?: string | null; readonly "observed": string; readonly "attempts"?: string | null; readonly "environment"?: string | null; readonly "code"?: string | null; readonly "code_language"?: string | null; readonly "primary_language"?: string; readonly "reproduction_url"?: string | null; readonly "technologies": ReadonlyArray<community_RequestTechnologyInput>; };
+
+export type community_HelpRequestRevision = { readonly "id": string; readonly "request_version": number; readonly "action": "updated" | "published"; readonly "changed_fields": ReadonlyArray<"help_intent" | "title" | "goal" | "expected" | "observed" | "attempts" | "environment" | "code" | "code_language" | "primary_language" | "reproduction_url" | "technologies" | "state">; readonly "edit_note": string | null; readonly "occurred_at": string; };
+
+export type community_HelpRequestRevisionPage = { readonly "data": ReadonlyArray<community_HelpRequestRevision>; readonly "meta": OPENAPI_PaginationMeta; };
+
+export type community_HelpRequestUpdateInput = (unknown | unknown | unknown | unknown | unknown | unknown | unknown | unknown | unknown | unknown | unknown | unknown) & { readonly "lock_version": number; readonly "help_intent"?: "unblock" | "review_solution" | "reproduce_behavior" | "ask_question"; readonly "title"?: string; readonly "goal"?: string | null; readonly "expected"?: string | null; readonly "observed"?: string | null; readonly "attempts"?: string | null; readonly "environment"?: string | null; readonly "code"?: string | null; readonly "code_language"?: string | null; readonly "primary_language"?: string; readonly "reproduction_url"?: string | null; readonly "technologies"?: ReadonlyArray<community_RequestTechnologyInput>; readonly "edit_note"?: string | null; };
 
 export type community_RequestTechnologyInput = { readonly "id": string; readonly "version_label"?: string | null; };
 

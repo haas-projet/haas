@@ -2,7 +2,7 @@
 
 Inspecter le dépôt, préserver les fichiers/commits/saisies existants, lire ADR-006. Appliquer F18 : projets ouverts, offres consenties, décision propriétaire, fil et projection publique contrôlés. Nouvelle recette avant GO_FRONTEND ; ne pas prendre un ancien gate pour un accord sur ce périmètre. Systalink/Vercel inchangé.
 
-État courant : B01–B09, B12–B13 et B32 DONE (12 lots de socle). B11, B14 et B15 IN_REVIEW : ordre #23 (Madina) → #22 (compléments) → #24 (B14) → PR B15 sur `backend/communaute-entraide-b15`. Les 24 autres lots de la coordination #2 restent à faire. B10/B29/B30/B31 et B39–B42 IN_PROGRESS ; B43/B44 BLOCKED. S01/S02 restent partiels. BACKEND_GATE NON REÇU, aucun GO_FRONTEND/GO_PRODUCTION. Voir [B15](../quality/B15_READING.md) et le [suivi de Lamine](participants/LamineGL/HANDOFF.md).
+État courant : B01–B09, B12–B13 et B32 DONE (12 lots de socle). B11, B14, B15 et B16 IN_REVIEW : ordre #23 (Madina) → #22 (compléments) → #24 (B14) → #25 (B15) → PR B16 sur `backend/communaute-entraide-b16`. Les 23 autres lots de la coordination #2 restent à faire. B10/B29/B30/B31 et B39–B42 IN_PROGRESS ; B43/B44 BLOCKED. S01/S02 restent partiels. BACKEND_GATE NON REÇU, aucun GO_FRONTEND/GO_PRODUCTION. Voir [B16](../quality/B16_EDITING.md) et le [suivi de Lamine](participants/LamineGL/HANDOFF.md).
 
 ## Reprise après préparation GitHub — 2026-10-01
 
@@ -194,3 +194,11 @@ B07/B08/B09/B12/B13/B32 DONE ; le tableau Systalink comporte maintenant 12 lots 
 - GET liste/détail, visibilité commune avant recherche/pagination/total, brouillons réservés à leur auteur, vue mine explicite, filtres/tri bornés et chargement des relations sans N+1. Aucune migration ni dépendance ajoutée. Contrat [HELP_REQUEST_READING.md](../api/HELP_REQUEST_READING.md), preuve [B15_READING.md](../quality/B15_READING.md).
 - Résultats locaux : 284 tests / 2811 assertions hors SQL et 227 / 2023 sur PostgreSQL dédié (511 / 4834). Pint/PHPStan, Composer validation/prérequis/audit et documentation réussis, 38 types à jour. Quatre SELECT métier pour 5 comme pour 25 demandes. Cluster 54695/haas_b15_test arrêté après les tests.
 - B15 IN_REVIEW ; SHA final et CI à constater dans la PR et le bilan après publication. Ordre #23 → #22 → #24 → B15, sans fusion ni revue humaine simulée. B11/B14/B15 En cours dans Systalink, 24 autres lots à faire. Prochain B16, édition sous version. Aucun BACKEND_GATE ni frontend/déploiement.
+
+## Reprise B16 — 2026-10-04
+
+Lot B16 préparé depuis B15 `0cfcde1` sur `backend/communaute-entraide-b16` dans `.worktrees/b16`. Contrat [HELP_REQUEST_EDITING.md](../api/HELP_REQUEST_EDITING.md), preuves [B16_EDITING.md](../quality/B16_EDITING.md) et suivi [LamineGL](participants/LamineGL/HANDOFF.md). Édition sous version, note après contribution, publication distincte et historique privé/public atomiques. Les migrations de Madina sont conservées ; les tests de retour B05/B11 connaissent désormais la nouvelle table enfant.
+
+La PR doit cibler `backend/communaute-entraide-b15` pendant sa revue. Ordre #23 → #22 → #24 → #25 → B16 ; après chaque fusion autorisée, recibler/synchroniser et vérifier la CI. SHA réel et CI du commit publié dans le bilan/PR. Aucun avis humain ni merge présumé. Routes capsules locales dans le répertoire principal non incluses.
+
+B17 est le prochain lot. Ses écritures devront verrouiller le parent avant de contribuer et préserver le contrat de notes B16. B11/B14/B15/B16 restent En cours dans Systalink jusqu'à intégration ; 23 autres lots de Lamine à faire. Aucun GO_FRONTEND/GO_PRODUCTION.

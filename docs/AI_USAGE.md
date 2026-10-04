@@ -69,3 +69,7 @@ Codex, à la demande de l'utilisateur : reprise sans réécriture du travail B11
 ## B15 — Lecture et recherche, 4 octobre 2026
 
 Codex, à la demande de continuer la partie de Lamine : Queries de visibilité, liste/détail, Request/DTO, collection paginée, contrat et tests. Travail B11 de Madina et PR #12 conservés ; modification locale des routes capsules préservée dans le répertoire principal, livraison isolée dans `.worktrees/b15`. 511 tests / 4834 assertions réussis (dont 227 / 2023 PostgreSQL), Pint/PHPStan, validation/prérequis/audit Composer et documentation verts. Preuves et limites dans B15_READING.md. Revue humaine en attente ; aucune identité ni validation d'un collègue simulée. CI du SHA final à observer dans la PR.
+
+## B16 — Édition, publication et historique, 4 octobre 2026
+
+Codex, à la demande de continuer la partie de Lamine : FormRequests/DTO/Policy/Service/Queries/Resources, migration additive, validation B14 partagée, audit/idempotence, contrat et tests. Branches/PR de Madina et fichier capsules local préservés. Tests HTTP, droits et versions, rollback et six courses PostgreSQL réelles ; commandes et résultats exacts dans `docs/quality/B16_EDITING.md`. Corrections des tests de retour B05/B11 pour respecter la nouvelle clé étrangère. Revue humaine en attente ; aucune identité ni validation d'un collègue simulée. SHA final et CI à observer dans la PR. Aucun frontend ni déploiement.

@@ -2,8 +2,16 @@
 
 namespace App\Support\Http;
 
+use App\Exceptions\Idempotency\IdempotencyConflict;
+use App\Exceptions\Identity\AccountVersionConflict;
+use App\Exceptions\Identity\InactiveAccount;
+use App\Exceptions\Identity\InvalidCredentials;
+use App\Exceptions\Identity\InvalidResetToken;
+use App\Exceptions\Identity\ProfileUpdateRejected;
+use App\Exceptions\Identity\ProfileVersionConflict;
 use App\Exceptions\Identity\RegistrationRejected;
 use App\Exceptions\Identity\RegistrationUnavailable;
+use App\Exceptions\ModerationRejected;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -15,7 +23,7 @@ final class ApiExceptionRenderer
 {
     public static function handles(Request $request): bool
     {
-        return $request->is('api', 'api/*', 'register') || $request->expectsJson();
+        return $request->is('api', 'api/*', 'register', 'login', 'logout', 'sanctum/*', 'email/*', 'forgot-password', 'reset-password') || $request->expectsJson();
     }
 
     public function render(Throwable $exception, Request $request): ?JsonResponse
@@ -26,6 +34,10 @@ final class ApiExceptionRenderer
 
         $status = match (true) {
             $exception instanceof ValidationException, $exception instanceof RegistrationRejected => 422,
+            $exception instanceof InvalidCredentials, $exception instanceof InvalidResetToken => 422,
+            $exception instanceof ProfileUpdateRejected => 422,
+            $exception instanceof ProfileVersionConflict, $exception instanceof IdempotencyConflict, $exception instanceof AccountVersionConflict, $exception instanceof ModerationRejected => 409,
+            $exception instanceof InactiveAccount => 403,
             $exception instanceof RegistrationUnavailable => 503,
             $exception instanceof AuthenticationException => 401,
             $exception instanceof HttpExceptionInterface => $exception->getStatusCode(),
@@ -50,6 +62,15 @@ final class ApiExceptionRenderer
                 : ['REQUEST_FAILED', 'La requête ne peut pas être traitée.'],
         };
 
+        if ($exception instanceof InactiveAccount) {
+            $code = 'ACCOUNT_SUSPENDED';
+            $message = 'Ce compte est suspendu. Consultez les informations d’accès au compte pour connaître la procédure de contact.';
+        }
+        if ($exception instanceof IdempotencyConflict) {
+            $code = 'IDEMPOTENCY_CONFLICT';
+            $message = 'Cette clé correspond à une autre intention. Reprenez la demande d’origine.';
+        }
+
         $headers = $exception instanceof HttpExceptionInterface ? $exception->getHeaders() : [];
         // Le transport et le contenu de l'erreur restent sous le contrôle du renderer.
         $headers = array_filter($headers, static fn (string $name): bool => in_array(
@@ -66,6 +87,9 @@ final class ApiExceptionRenderer
                 'fields' => (object) match (true) {
                     $exception instanceof ValidationException => $exception->errors(),
                     $exception instanceof RegistrationRejected => $exception->fields,
+                    $exception instanceof InvalidCredentials => ['email' => ['Ces identifiants ne permettent pas de vous connecter.']],
+                    $exception instanceof InvalidResetToken => ['token' => ['Ce lien ne permet pas de réinitialiser le mot de passe. Demandez un nouveau lien.']],
+                    $exception instanceof ProfileUpdateRejected => ['technology_ids' => ['Une technologie sélectionnée est indisponible. Rechargez la liste.']],
                     default => [],
                 },
             ],

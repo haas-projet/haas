@@ -15,9 +15,14 @@ F18 « Coup de main » : ouverture volontaire d’un projet, proposition limité
 - livrables : cahier PDF/HTML et présentation PowerPoint/PDF régénérés.
 
 ## État du développement
-Le socle Laravel/PostgreSQL B01–B04 est intégré dans `main` : bootstrap, outils qualité, CI PHP 8.4/8.5 et contrat HTTP partagé. Les PR #5/#6/#7 ont été fusionnées le 2 octobre 2026 sur demande explicite, avec CI post-fusion verte. Voir [la preuve d'intégration](docs/quality/MERGE_B02_B04.md), [le backend](backend/README.md) et [les commandes](docs/COMMANDS.md).
 
-B05 propose les modèles d'identité et référentiels dans la [PR #8](https://github.com/haas-projet/haas/pull/8), CI verte ; voir [le contrat de données](docs/architecture/IDENTITY_DATA.md) et [les preuves](docs/quality/B05_IDENTITY.md). B06 ajoute [l'inscription](docs/api/REGISTRATION.md) sur une branche distincte, dépendante de B05 ; [preuves B06](docs/quality/B06_REGISTRATION.md). La connexion SPA, les courriels de compte et les fonctionnalités métier restent à développer. Aucune application React, exécution de laboratoire ou mise en production n'est encore validée.
+Le socle **B01–B09, B12–B13 et B32** est intégré dans main : Laravel/PostgreSQL, qualité/CI, HTTP, identité/inscription, sessions/CSRF/CORS, courriels/reset, compte et permissions, audit, idempotence, administration et révocation. Les PR #10/#11/#13–#20 ont été fusionnées le 3 octobre 2026 sur demande explicite. [Preuve des fusions](docs/quality/MERGE_SOCLE.md) : main `a051e81`, [CI 37146178657](https://github.com/haas-projet/haas/actions/runs/37146178657) verte, **384 tests / 3702 assertions par PHP 8.4/8.5** avec PostgreSQL.
+
+Les profils B10, notifications B29, signalements/modération B30–B31 et préparation B39–B42 sont intégrés pour leur périmètre disponible, mais restent **partiels**. Contributions, événements et adaptateurs des domaines des autres pilotes, recette transversale, Qodana et exploitation réelle restent ouverts. [Réception partielle](docs/quality/SOCLE_RECEPTION_PARTIELLE.md), [blocages](docs/BLOCKERS.md) et [tableau des 22 tâches du socle](docs/execution/participants/ousseynoufayeisidk-sys/SYSTALINK_TASKS.md).
+
+Quatre branches permanentes sont conservées : main, backend/socle-auth, backend/communaute-entraide et backend/capsules-laboratoire. Les neuf branches temporaires du socle ont été supprimées après vérification de leurs commits dans main. Les branches des collègues et la PR #12 sont préservées.
+
+Lire [les commandes](docs/COMMANDS.md) et [le backend](backend/README.md). Les conditions d'inscription, SMTP et domaines réels restent à configurer/vérifier avant ouverture. BACKEND_GATE NON REÇU, aucun GO_FRONTEND ni déploiement validé.
 
 ## Démarrer sans écraser
 Équipe de trois : voir [la répartition backend, les branches et les règles de fusion](docs/execution/BACKEND_A_TROIS.md).

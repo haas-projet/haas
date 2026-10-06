@@ -1,8 +1,8 @@
 openapi: 3.1.0
 info:
   title: HAAS — Socle API
-  version: 0.4.0
-  description: Socle B01–B06, contrats HTTP et inscription ; sessions SPA et vérification du courriel à livrer.
+  version: 0.12.0
+  description: Socle B01–B09, profils B10, audit B12 et idempotence B13 ; contributions métier à raccorder.
 servers:
   - url: http://localhost:8000
 x-haas-domain-fragments:
@@ -13,6 +13,46 @@ x-haas-domain-fragments:
   capsules-lab:
     $ref: './api/openapi/capsules-lab.yaml'
 paths:
+  /api/v1/reports:
+    $ref: './api/openapi/moderation.yaml#/paths/~1api~1v1~1reports'
+  /api/v1/admin/reports:
+    $ref: './api/openapi/moderation.yaml#/paths/~1api~1v1~1admin~1reports'
+  /api/v1/admin/reports/{id}:
+    $ref: './api/openapi/moderation.yaml#/paths/~1api~1v1~1admin~1reports~1{id}'
+  /api/v1/admin/reports/{id}/decisions:
+    $ref: './api/openapi/moderation.yaml#/paths/~1api~1v1~1admin~1reports~1{id}~1decisions'
+  /api/v1/notifications:
+    $ref: './api/openapi/notifications.yaml#/paths/~1api~1v1~1notifications'
+  /api/v1/notifications/{id}:
+    $ref: './api/openapi/notifications.yaml#/paths/~1api~1v1~1notifications~1{id}'
+  /api/v1/admin/members:
+    $ref: './api/openapi/administration.yaml#/paths/~1api~1v1~1admin~1members'
+  /api/v1/admin/members/{id}:
+    $ref: './api/openapi/administration.yaml#/paths/~1api~1v1~1admin~1members~1{id}'
+  /api/v1/members/{handle}:
+    $ref: './api/openapi/identity.yaml#/paths/~1api~1v1~1members~1{handle}'
+  /api/v1/me/profile:
+    $ref: './api/openapi/identity.yaml#/paths/~1api~1v1~1me~1profile'
+  /api/v1/technologies:
+    $ref: './api/openapi/identity.yaml#/paths/~1api~1v1~1technologies'
+  /api/v1/me:
+    $ref: './api/openapi/identity.yaml#/paths/~1api~1v1~1me'
+  /api/v1/account-access:
+    $ref: './api/openapi/identity.yaml#/paths/~1api~1v1~1account-access'
+  /forgot-password:
+    $ref: './api/openapi/identity.yaml#/paths/~1forgot-password'
+  /reset-password:
+    $ref: './api/openapi/identity.yaml#/paths/~1reset-password'
+  /email/verification-notification:
+    $ref: './api/openapi/identity.yaml#/paths/~1email~1verification-notification'
+  /email/verify/{id}/{hash}:
+    $ref: './api/openapi/identity.yaml#/paths/~1email~1verify~1{id}~1{hash}'
+  /sanctum/csrf-cookie:
+    $ref: './api/openapi/identity.yaml#/paths/~1sanctum~1csrf-cookie'
+  /login:
+    $ref: './api/openapi/identity.yaml#/paths/~1login'
+  /logout:
+    $ref: './api/openapi/identity.yaml#/paths/~1logout'
   /register:
     $ref: './api/openapi/identity.yaml#/paths/~1register'
   /up:
@@ -38,6 +78,9 @@ paths:
                     type: string
                     enum: [ok]
 components:
+  securitySchemes:
+    SessionCookie:
+      $ref: './api/openapi/identity.yaml#/components/securitySchemes/SessionCookie'
   headers:
     RequestId:
       description: UUID généré par le serveur pour chaque requête ; un identifiant fourni par le client est ignoré.
@@ -49,6 +92,13 @@ components:
       schema:
         type: string
   parameters:
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      description: UUID v4 créé par intention et conservé pour ses relances pendant 24 h. Les droits sont revérifiés au rejeu ; une autre charge avec la même clé donne 409 IDEMPOTENCY_CONFLICT.
+      schema:
+        $ref: '#/components/schemas/IdempotencyKey'
     Page:
       name: page
       in: query
@@ -69,6 +119,13 @@ components:
         maximum: 50
         default: 20
   schemas:
+    IdempotencyKey:
+      type: string
+      format: uuid
+      minLength: 36
+      maxLength: 36
+      pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$'
+      example: fda9a000-3333-4444-8888-123456789abc
     AccountRole:
       $ref: './api/openapi/identity.yaml#/components/schemas/AccountRole'
     AccountStatus:

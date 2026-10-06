@@ -21,7 +21,13 @@ class Profile extends Model
     protected $keyType = 'string';
 
     /** @var array<string, mixed> */
-    protected $attributes = ['bio' => '', 'primary_language' => 'fr'];
+    protected $attributes = ['bio' => '', 'primary_language' => 'fr', 'lock_version' => 0];
+
+    /** @return array<string, string> */
+    protected function casts(): array
+    {
+        return ['lock_version' => 'integer', 'hidden_at' => 'immutable_datetime'];
+    }
 
     /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo

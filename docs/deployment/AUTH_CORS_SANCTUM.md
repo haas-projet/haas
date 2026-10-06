@@ -1,6 +1,8 @@
 # HAAS — Sanctum entre Vercel et Systalink
 **Choix de conception :** sessions de confiance, pas de bearer token persistant dans le navigateur. Configuration illustrative, à adapter et tester. [D03]
 
+Implémentation B07 et limites observées : [SESSIONS.md](../api/SESSIONS.md). Les chemins de courriels ci-dessous sont prévus pour B08 ; seuls les endpoints effectivement livrés sont activés dans CORS. La recette sur les domaines réels reste à exécuter.
+
 ## Domaines retenus (exemples)
 - SPA : `https://app.haas.example.com` ; API : `https://api.haas.example.com`.
 - Parent de cookies : `.haas.example.com` ; réservé aux hôtes de confiance.
@@ -20,7 +22,7 @@ SESSION_DOMAIN=.haas.example.com
 SESSION_SECURE_COOKIE=true
 SESSION_HTTP_ONLY=true
 SESSION_SAME_SITE=lax
-SANCTUM_STATEFUL_DOMAINS=app.haas.example.com
+SANCTUM_STATEFUL_DOMAINS=app.haas.example.com,api.haas.example.com
 CORS_ALLOWED_ORIGINS=https://app.haas.example.com
 ```
 `FRONTEND_URL` et `CORS_ALLOWED_ORIGINS` sont des conventions du projet : leur lecture doit être implémentée dans la configuration. Les variables seules ne configurent pas Laravel par magie. Ne pas inclure schéma/protocole dans SANCTUM_STATEFUL_DOMAINS ; les ports sont explicites en local. Activer le middleware stateful API de Sanctum dans la version Laravel retenue.

@@ -1,0 +1,122 @@
+paths:
+  /api/v1/me:
+    get:
+      operationId: getCurrentAccount
+      summary: Lire son compte et ses capacités courantes
+      description: >-
+        Session Sanctum requise, compte actif même non vérifié. Aucun paramètre ni corps accepté.
+        Courriel et rôle réservés au compte courant. Les capacités décrivent l'éligibilité du membre,
+        jamais une permission sur une ressource tierce ni la disponibilité d'un module.
+        Réponse privée no-store ; aucune mutation. Aucun jeton bearer accepté.
+      security:
+        - SessionCookie: []
+      responses:
+        '200':
+          description: Compte relu en base ; droits calculés côté serveur.
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                const: no-store, private
+            X-Request-ID:
+              $ref: '../../OPENAPI.yaml#/components/headers/RequestId'
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [data]
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Me'
+        '401':
+          $ref: './identity.yaml#/components/responses/SessionError'
+        '403':
+          description: Origine interdite ou ACCOUNT_SUSPENDED après authentification. Session du compte suspendu révoquée ; information publique sur /api/v1/account-access.
+          content:
+            application/json:
+              schema:
+                $ref: '../../OPENAPI.yaml#/components/schemas/ApiError'
+        '422':
+          $ref: './identity.yaml#/components/responses/SessionError'
+        '500':
+          $ref: './identity.yaml#/components/responses/SessionError'
+        '503':
+          $ref: './identity.yaml#/components/responses/SessionError'
+  /api/v1/account-access:
+    get:
+      operationId: getAccountAccessInformation
+      summary: Lire la procédure publique de recours
+      description: >-
+        Accessible sans connexion et après suspension. Aucun compte recherché ni motif privé exposé.
+        Aucun paramètre ni corps accepté. Adresse publique définie par ACCOUNT_SUPPORT_EMAIL,
+        null si non configurée ; aucune adresse inventée, aucun mail envoyé par cette route.
+        Configuration invalide refusée avec 503. Réponse no-store.
+      security: []
+      responses:
+        '200':
+          description: Information générale indépendante de tout compte.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [data]
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: false
+                    required: [message, contact_email]
+                    properties:
+                      message:
+                        type: string
+                      contact_email:
+                        type: [string, 'null']
+                        format: email
+        '403':
+          $ref: './identity.yaml#/components/responses/SessionError'
+        '422':
+          $ref: './identity.yaml#/components/responses/SessionError'
+        '503':
+          $ref: './identity.yaml#/components/responses/SessionError'
+components:
+  schemas:
+    Me:
+      type: object
+      additionalProperties: false
+      required: [id, handle, email, email_verified, role, status, is_demo, can]
+      properties:
+        id:
+          type: string
+          format: uuid
+        handle:
+          $ref: './identity.yaml#/components/schemas/Handle'
+        email:
+          type: string
+          format: email
+          maxLength: 255
+        email_verified:
+          type: boolean
+        role:
+          $ref: './identity.yaml#/components/schemas/AccountRole'
+        status:
+          type: string
+          const: active
+        is_demo:
+          type: boolean
+        can:
+          type: object
+          additionalProperties: false
+          description: Les Policies métier imposent aussi propriété, visibilité, état, revue et quotas de chaque ressource.
+          required: [manage_account_mail, update_profile, participate, moderate, administer]
+          properties:
+            manage_account_mail:
+              type: boolean
+            update_profile:
+              type: boolean
+            participate:
+              type: boolean
+            moderate:
+              type: boolean
+            administer:
+              type: boolean

@@ -1,6 +1,6 @@
 {
   "document_status": "community_and_help_offers_design",
-  "status": "planned_not_implemented",
+  "status": "backend_in_progress",
   "tasks": [
     {
       "id": "S01",
@@ -81,8 +81,8 @@
       "refs": "AC04 ; F01/F11",
       "phase": "B",
       "execution_order": 7,
-      "status": "IN_REVIEW",
-      "evidence": ["docs/quality/B05_IDENTITY.md"]
+      "status": "DONE",
+      "evidence": ["docs/quality/B05_IDENTITY.md", "docs/quality/MERGE_B05_B06.md"]
     },
     {
       "id": "B06",
@@ -93,8 +93,8 @@
       "refs": "AC01/AC04",
       "phase": "B",
       "execution_order": 8,
-      "status": "IN_REVIEW",
-      "evidence": ["docs/quality/B06_REGISTRATION.md"]
+      "status": "DONE",
+      "evidence": ["docs/quality/B06_REGISTRATION.md", "docs/quality/MERGE_B05_B06.md"]
     },
     {
       "id": "B07",
@@ -105,7 +105,8 @@
       "refs": "AC01/AC02 ; N01 ; ADR-004 / DEP",
       "phase": "B",
       "execution_order": 9,
-      "status": "TODO"
+      "status": "DONE",
+      "evidence": ["docs/quality/B07_SESSIONS.md", "docs/quality/MERGE_SOCLE.md"]
     },
     {
       "id": "B08",
@@ -116,7 +117,8 @@
       "refs": "AC01/AC02 ; ADR-004 / DEP",
       "phase": "B",
       "execution_order": 10,
-      "status": "TODO"
+      "status": "DONE",
+      "evidence": ["docs/quality/B08_ACCOUNT_MAIL.md", "docs/quality/MERGE_SOCLE.md"]
     },
     {
       "id": "B09",
@@ -127,7 +129,8 @@
       "refs": "AC02/AC03/AC04/AC09",
       "phase": "B",
       "execution_order": 11,
-      "status": "TODO"
+      "status": "DONE",
+      "evidence": ["docs/quality/B09_CURRENT_ACCOUNT.md", "docs/quality/MERGE_SOCLE.md"]
     },
     {
       "id": "B10",
@@ -138,7 +141,8 @@
       "refs": "F11 ; AC27 ; ADR-005 / [M]",
       "phase": "B",
       "execution_order": 12,
-      "status": "TODO"
+      "status": "IN_PROGRESS",
+      "evidence": ["docs/quality/B10_PROFILES.md"]
     },
     {
       "id": "B11",
@@ -160,7 +164,8 @@
       "refs": "N07 ; AC25",
       "phase": "B",
       "execution_order": 14,
-      "status": "TODO"
+      "status": "DONE",
+      "evidence": ["docs/quality/B12_AUDIT.md", "docs/quality/MERGE_SOCLE.md"]
     },
     {
       "id": "B13",
@@ -171,7 +176,8 @@
       "refs": "AC06/AC10 ; N01",
       "phase": "B",
       "execution_order": 15,
-      "status": "TODO"
+      "status": "DONE",
+      "evidence": ["docs/quality/B13_IDEMPOTENCY.md", "docs/quality/MERGE_SOCLE.md"]
     },
     {
       "id": "B14",
@@ -347,7 +353,8 @@
       "refs": "AC08 ; F10",
       "phase": "B",
       "execution_order": 31,
-      "status": "TODO"
+      "status": "IN_PROGRESS",
+      "evidence": ["docs/quality/B29_NOTIFICATIONS.md"]
     },
     {
       "id": "B30",
@@ -358,7 +365,8 @@
       "refs": "AC25 ; F09",
       "phase": "B",
       "execution_order": 32,
-      "status": "TODO"
+      "status": "IN_PROGRESS",
+      "evidence": ["docs/quality/B30_B31_MODERATION.md"]
     },
     {
       "id": "B31",
@@ -369,7 +377,8 @@
       "refs": "AC15/AC25 ; N01",
       "phase": "B",
       "execution_order": 33,
-      "status": "TODO"
+      "status": "IN_PROGRESS",
+      "evidence": ["docs/quality/B30_B31_MODERATION.md"]
     },
     {
       "id": "B32",
@@ -380,7 +389,8 @@
       "refs": "AC26 ; F09",
       "phase": "B",
       "execution_order": 34,
-      "status": "TODO"
+      "status": "DONE",
+      "evidence": ["docs/quality/B32_ADMINISTRATION.md", "docs/quality/MERGE_SOCLE.md"]
     },
     {
       "id": "B33",
@@ -807,7 +817,8 @@
       "refs": "AC02–AC07/AC18/AC25/AC26 ; F13–F15 ; AC33–AC52 selon phase ; ADR-005 / [M]",
       "phase": "B",
       "execution_order": 69,
-      "status": "TODO"
+      "status": "IN_PROGRESS",
+      "evidence": ["docs/quality/SOCLE_RECEPTION_PARTIELLE.md"]
     },
     {
       "id": "B40",
@@ -818,7 +829,8 @@
       "refs": "F01–F12 ; N05 ; F13–F15 ; AC33–AC52 selon phase ; ADR-005 / [M]",
       "phase": "B",
       "execution_order": 70,
-      "status": "TODO"
+      "status": "IN_PROGRESS",
+      "evidence": ["docs/quality/SOCLE_RECEPTION_PARTIELLE.md"]
     },
     {
       "id": "B41",
@@ -829,7 +841,8 @@
       "refs": "AC08–AC21 ; AC32 partie API ; N02 ; F13–F15 ; AC33–AC52 selon phase ; ADR-005 / [M]",
       "phase": "B",
       "execution_order": 71,
-      "status": "TODO"
+      "status": "IN_PROGRESS",
+      "evidence": ["docs/quality/SOCLE_RECEPTION_PARTIELLE.md"]
     },
     {
       "id": "B42",
@@ -840,7 +853,8 @@
       "refs": "AC29/AC30 partie backend ; N04 ; ADR-004 / DEP",
       "phase": "B",
       "execution_order": 72,
-      "status": "TODO"
+      "status": "IN_PROGRESS",
+      "evidence": ["docs/quality/SOCLE_RECEPTION_PARTIELLE.md"]
     },
     {
       "id": "B43",
@@ -851,7 +865,8 @@
       "refs": "AC28 ; ARB04 ; ADR-004 / DEP",
       "phase": "B",
       "execution_order": 73,
-      "status": "TODO"
+      "status": "BLOCKED",
+      "evidence": ["docs/quality/SOCLE_RECEPTION_PARTIELLE.md"]
     },
     {
       "id": "B44",
@@ -862,10 +877,11 @@
       "refs": "F01–F12 partie backend ; N01–N08 ; F13–F15 ; AC33–AC52 selon phase ; ADR-004 / DEP ; ADR-005 / [M]",
       "phase": "B",
       "execution_order": 74,
-      "status": "TODO",
+      "status": "BLOCKED",
       "depends_on": [
         "BH10"
-      ]
+      ],
+      "evidence": ["docs/quality/SOCLE_RECEPTION_PARTIELLE.md"]
     },
     {
       "id": "F01",

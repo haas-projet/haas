@@ -1,0 +1,548 @@
+{
+  "paths": {
+    "/api/v1/reports": {
+      "post": {
+        "operationId": "createReport",
+        "summary": "Signaler un profil visible, sans recopier de secret",
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "./identity.yaml#/components/parameters/XsrfToken"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Signaler un profil visible, sans recopier de secret",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Receipt"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "./identity.yaml#/components/responses/SessionError"
+          },
+          "403": {
+            "$ref": "./identity.yaml#/components/responses/SessionError"
+          },
+          "404": {
+            "$ref": "./identity.yaml#/components/responses/SessionError"
+          },
+          "409": {
+            "$ref": "./identity.yaml#/components/responses/SessionError"
+          },
+          "419": {
+            "$ref": "./identity.yaml#/components/responses/SessionError"
+          },
+          "422": {
+            "$ref": "./identity.yaml#/components/responses/SessionError"
+          },
+          "429": {
+            "$ref": "./identity.yaml#/components/responses/SessionError"
+          },
+          "500": {
+            "$ref": "./identity.yaml#/components/responses/SessionError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "resource_type",
+                  "resource_id",
+                  "category",
+                  "detail"
+                ],
+                "properties": {
+                  "resource_type": {
+                    "type": "string",
+                    "enum": [
+                      "profile"
+                    ]
+                  },
+                  "resource_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "category": {
+                    "$ref": "#/components/schemas/Category"
+                  },
+                  "detail": {
+                    "type": "string",
+                    "minLength": 20,
+                    "maxLength": 1000
+                  }
+                }
+              }
+            }
+          }
+        },
+        "description": "Membre actif vérifié, CSRF, maximum 5 créations/heure et 20/24h sous verrou, un actif par membre/profil. Doublon ou quota : 409 sans sanction automatique. Type profile uniquement ; autres domaines encore non raccordés. Limite HTTP supplémentaire 10/minute."
+      }
+    },
+    "/api/v1/admin/reports": {
+      "get": {
+        "operationId": "listReports",
+        "summary": "Filtrer les signalements privés pour la modération",
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "../../OPENAPI.yaml#/components/parameters/Page"
+          },
+          {
+            "$ref": "../../OPENAPI.yaml#/components/parameters/PerPage"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "new",
+                "in_review",
+                "resolved",
+                "dismissed"
+              ]
+            }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/Category"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Filtrer les signalements privés pour la modération",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ModerationReport"
+                      }
+                    },
+                    "meta": {
+                      "$ref": "../../OPENAPI.yaml#/components/schemas/PaginationMeta"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "./identity.yaml#/components/responses/SessionError"
+          },
+          "403": {
+            "$ref": "./identity.yaml#/components/responses/SessionError"
+          },
+          "404": {
+            "$ref": "./identity.yaml#/components/responses/SessionError"
+          },
+          "409": {
+            "$ref": "./identity.yaml#/components/responses/SessionError"
+          },
+          "419": {
+            "$ref": "./identity.yaml#/components/responses/SessionError"
+          },
+          "422": {
+            "$ref": "./identity.yaml#/components/responses/SessionError"
+          },
+          "429": {
+            "$ref": "./identity.yaml#/components/responses/SessionError"
+          },
+          "500": {
+            "$ref": "./identity.yaml#/components/responses/SessionError"
+          }
+        },
+        "description": "Modérateur ou admin actif vérifié. Pagination, tri date/UUID décroissant, dates UTC inclusives. Context vaut null dans la liste ; GET détail fournit le contexte courant autorisé. Texte privé inerte à afficher sans HTML. Réponses no-store."
+      }
+    },
+    "/api/v1/admin/reports/{id}": {
+      "get": {
+        "operationId": "readReport",
+        "summary": "Lire le signalement et son contexte actuel",
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lire le signalement et son contexte actuel",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/ModerationReport"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "./identity.yaml#/components/responses/SessionError"
+          },
+          "403": {
+            "$ref": "./identity.yaml#/components/responses/SessionError"
+          },
+          "404": {
+            "$ref": "./identity.yaml#/components/responses/SessionError"
+          },
+          "409": {
+            "$ref": "./identity.yaml#/components/responses/SessionError"
+          },
+          "419": {
+            "$ref": "./identity.yaml#/components/responses/SessionError"
+          },
+          "422": {
+            "$ref": "./identity.yaml#/components/responses/SessionError"
+          },
+          "429": {
+            "$ref": "./identity.yaml#/components/responses/SessionError"
+          },
+          "500": {
+            "$ref": "./identity.yaml#/components/responses/SessionError"
+          }
+        },
+        "description": "Modérateur ou admin actif vérifié. Aucun accès public au dossier, y compris pour le signalant normal. Le contexte courant peut être null si la ressource a disparu. Aucun fetch des liens."
+      }
+    },
+    "/api/v1/admin/reports/{id}/decisions": {
+      "post": {
+        "operationId": "decideReport",
+        "summary": "Enregistrer une décision motivée de modération",
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "./identity.yaml#/components/parameters/XsrfToken"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Enregistrer une décision motivée de modération",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Receipt"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "./identity.yaml#/components/responses/SessionError"
+          },
+          "403": {
+            "$ref": "./identity.yaml#/components/responses/SessionError"
+          },
+          "404": {
+            "$ref": "./identity.yaml#/components/responses/SessionError"
+          },
+          "409": {
+            "$ref": "./identity.yaml#/components/responses/SessionError"
+          },
+          "419": {
+            "$ref": "./identity.yaml#/components/responses/SessionError"
+          },
+          "422": {
+            "$ref": "./identity.yaml#/components/responses/SessionError"
+          },
+          "429": {
+            "$ref": "./identity.yaml#/components/responses/SessionError"
+          },
+          "500": {
+            "$ref": "./identity.yaml#/components/responses/SessionError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "lock_version",
+                  "action",
+                  "reason"
+                ],
+                "properties": {
+                  "lock_version": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 2147483646
+                  },
+                  "action": {
+                    "type": "string",
+                    "enum": [
+                      "review",
+                      "dismiss",
+                      "request_correction",
+                      "hide"
+                    ]
+                  },
+                  "reason": {
+                    "type": "string",
+                    "minLength": 20,
+                    "maxLength": 1000
+                  },
+                  "profile_lock_version": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 2147483646
+                  }
+                },
+                "allOf": [
+                  {
+                    "if": {
+                      "properties": {
+                        "action": {
+                          "const": "hide"
+                        }
+                      }
+                    },
+                    "then": {
+                      "required": [
+                        "profile_lock_version"
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "description": "Modérateur/admin actif vérifié et CSRF. Version du rapport obligatoire, et du profil pour hide. Review ouvre examen ; dismiss ferme sans suite ; request_correction clôt avec notification sans masquer ; hide clôt et masque sans éditer le texte. Pas de répétition terminale, version périmée : 409. Audit, décision et intention de notification atomiques. Pas de restauration automatique par édition propriétaire. Retrait de version capsule non encore disponible. Limite 30/minute."
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ReportFields": {
+        "type": "object",
+        "required": [
+          "id",
+          "resource_type",
+          "resource_id",
+          "status",
+          "lock_version",
+          "created_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "resource_type": {
+            "type": "string",
+            "enum": [
+              "profile"
+            ]
+          },
+          "resource_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "new",
+              "in_review",
+              "resolved",
+              "dismissed"
+            ]
+          },
+          "lock_version": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483646
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Receipt": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ReportFields"
+          }
+        ],
+        "unevaluatedProperties": false
+      },
+      "ModerationReport": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ReportFields"
+          },
+          {
+            "type": "object",
+            "required": [
+              "category",
+              "detail",
+              "reporter_id",
+              "context"
+            ],
+            "properties": {
+              "category": {
+                "$ref": "#/components/schemas/Category"
+              },
+              "detail": {
+                "type": "string",
+                "minLength": 20,
+                "maxLength": 1000
+              },
+              "reporter_id": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "uuid"
+              },
+              "context": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "additionalProperties": false,
+                "required": [
+                  "bio",
+                  "country",
+                  "github_url",
+                  "hidden",
+                  "lock_version"
+                ],
+                "properties": {
+                  "bio": {
+                    "type": "string"
+                  },
+                  "country": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "github_url": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "hidden": {
+                    "type": "boolean"
+                  },
+                  "lock_version": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 2147483646
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "unevaluatedProperties": false
+      },
+      "Category": {
+        "type": "string",
+        "enum": [
+          "secret_exposed",
+          "abuse",
+          "uncertain_rights",
+          "misleading_solution",
+          "other"
+        ]
+      }
+    }
+  }
+}

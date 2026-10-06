@@ -12,9 +12,13 @@ Organisation confirmée par l'utilisateur le 1er octobre 2026. Elle remplace les
 
 Les 72 lots backend ont chacun un pilote. S01/S02 sont coordonnés par `ousseynoufayeisidk-sys`, avec les informations réelles des trois personnes. Chacun écrit les tests de son domaine, tient son contrat API et corrige les régressions qu'il introduit. Les relecteurs indiqués sont des responsabilités proposées, pas des validations déjà obtenues.
 
-Les trois tâches regroupent le travail ; elles ne doivent pas devenir trois grosses PR à fusionner en fin de projet. Un lot cohérent avec ses tests par PR, subdivisé si nécessaire. Ne pas commencer le lot suivant sur une branche dont la PR attend une revue. Les branches peuvent être réutilisées après leur synchronisation avec `main` ; si une branche a été supprimée après fusion, en recréer une depuis `origin/main`.
+Les trois tâches regroupent le travail ; elles ne doivent pas devenir trois grosses PR à fusionner en fin de projet. Un lot cohérent avec ses tests par PR, subdivisé si nécessaire. Ne pas commencer le lot suivant sur une branche dont la PR attend une revue. Les trois branches de départ du tableau et `main` sont conservées, conformément à la préférence confirmée le 2 octobre. Réutiliser sa branche permanente après synchronisation. Les branches temporaires sont supprimées après fusion et vérification de leurs commits dans `main`, une fois les éventuelles PR dépendantes reciblées ; ne pas activer une suppression automatique qui emporterait les branches permanentes.
 
 Si l'utilisateur demande explicitement de continuer pendant une revue, préparer le lot suivant sur une branche dérivée séparée, sans modifier la PR en attente. Cas B03 : `backend/socle-auth-ci` depuis B02, PR ciblant temporairement `backend/socle-auth`. Fusionner les prérequis dans l'ordre, puis recibler vers main et revérifier le dernier commit. Aucune fusion, revue ou validation n'est implicite dans cette préparation.
+
+## Socle intégré — 3 octobre 2026
+
+Les PR #10/#11/#13–#20 sont fusionnées sur demande explicite dans main `a051e81`, CI post-fusion verte. B01–B09/B12/B13/B32 sont DONE ; les profils, notifications, modération et réception gardent leurs réserves détaillées dans [MERGE_SOCLE.md](../quality/MERGE_SOCLE.md). Les neuf branches temporaires sont supprimées ; les trois branches permanentes et main restent présentes. backend/socle-auth est synchronisée avec main. Les deux autres pilotes intègrent origin/main depuis leur propre branche en préservant leurs travaux ; leur contenu n'a pas été écrasé. La PR #12 reste ouverte.
 
 ## Démarrage parallèle après B01
 

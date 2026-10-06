@@ -4,6 +4,8 @@ namespace App\Models;
 
 use App\Enums\Identity\AccountStatus;
 use App\Enums\Identity\Role;
+use App\Notifications\Identity\ResetAccountPassword;
+use App\Notifications\Identity\VerifyAccountEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -16,16 +18,31 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
+use SensitiveParameter;
 
+/**
+ * @property AccountStatus $status
+ * @property Role $role
+ */
 #[Fillable(['handle', 'email', 'password'])]
-#[Hidden(['email', 'password', 'remember_token', 'role', 'status', 'email_verified_at', 'is_demo', 'name'])]
+#[Hidden(['email', 'password', 'remember_token', 'role', 'status', 'email_verified_at', 'is_demo', 'name', 'security_version'])]
 class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, HasUuids, Notifiable;
 
     /** @var array<string, mixed> */
-    protected $attributes = ['role' => 'member', 'status' => 'active', 'is_demo' => false];
+    protected $attributes = ['role' => 'member', 'status' => 'active', 'is_demo' => false, 'security_version' => 0];
+
+    public function sendEmailVerificationNotification(): void
+    {
+        $this->notify(new VerifyAccountEmail($this->email));
+    }
+
+    public function sendPasswordResetNotification(#[SensitiveParameter] $token): void
+    {
+        $this->notify(new ResetAccountPassword($this->email, $token));
+    }
 
     /** @return Attribute<string, string> */
     protected function email(): Attribute
@@ -64,6 +81,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'role' => Role::class,
             'status' => AccountStatus::class,
             'is_demo' => 'boolean',
+            'security_version' => 'integer',
         ];
     }
 }

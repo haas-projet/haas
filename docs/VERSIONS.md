@@ -9,6 +9,7 @@ Inventaire S01 partiel, complété par B02 puis la CI B03 sur `backend/socle-aut
 | Minimum / résolution Composer | PHP 8.4 / `config.platform.php=8.4.0` ; CI réellement réussie sur PHP 8.4.26 et 8.5.11 |
 | Squelette officiel | laravel/laravel v13.10.1, import backend sélectif |
 | Laravel / PHPUnit verrouillés | 13.34.0 / 12.5.37 |
+| Sessions SPA B07 | laravel/sanctum 4.3.3, MIT ; seul ajout, 106 packages conservés, voir [inventaire](quality/B07_DEPENDENCIES.json) |
 | Composer de recette B02 | 2.10.3, copie temporaire vérifiée ; aucun avertissement de dépréciation observé. Installation globale 2.8.5 inchangée |
 | Qualité PHP B02 | Pint 1.32.1, Larastan 3.12.2, PHPStan 2.2.16, PHP-Parser 5.9.0 |
 | PostgreSQL | 17.0 ; recette sur un cluster temporaire distinct du service existant |

@@ -4,15 +4,15 @@ Le texte « Attendu du cahier » est repris des tableaux source sans changement 
 
 | ID | Attendu du cahier | Phases / portée | État / preuve |
 |---|---|---|---|
-| AC01 | Inscription valide : compte créé, courriel privé, lien de vérification utilisable une fois selon son état. | Backend/API ou support serveur ; Frontend/navigateur | NON EXÉCUTÉ — aucune preuve |
-| AC02 | Compte non vérifié : lecture autorisée, publication et laboratoire refusés. | Backend/API ou support serveur ; Frontend/navigateur | NON EXÉCUTÉ — aucune preuve |
-| AC03 | Un membre tente de modifier une demande d’autrui : 403/404, aucune mutation. | Backend/API ou support serveur ; Frontend/navigateur | NON EXÉCUTÉ — aucune preuve |
-| AC04 | Le client envoie role=admin ou author_id tiers : rejet, aucune élévation. | Backend/API ou support serveur | NON EXÉCUTÉ — aucune preuve |
-| AC05 | Champ obligatoire absent : 422, erreur liée au champ, saisie conservée. | Backend/API ou support serveur ; Frontend/navigateur | NON EXÉCUTÉ — aucune preuve |
+| AC01 | Inscription valide : compte créé, courriel privé, lien de vérification utilisable une fois selon son état. | Backend/API ou support serveur ; Frontend/navigateur | PARTIEL — [B06](B06_REGISTRATION.md)/[B08](B08_ACCOUNT_MAIL.md) : inscription et consommation du lien testées côté serveur ; SMTP réel et navigateur non reçus. |
+| AC02 | Compte non vérifié : lecture autorisée, publication et laboratoire refusés. | Backend/API ou support serveur ; Frontend/navigateur | PARTIEL — [B09](B09_CURRENT_ACCOUNT.md) : /me lisible, capacités et middleware verified refusent la participation ; publication/laboratoire réels et navigateur restent à tester. |
+| AC03 | Un membre tente de modifier une demande d’autrui : 403/404, aucune mutation. | Backend/API ou support serveur ; Frontend/navigateur | NON EXÉCUTÉ sur demande réelle — règle commune de propriété préparée/testée en [B09](B09_CURRENT_ACCOUNT.md), scénario complet attendu en B16. |
+| AC04 | Le client envoie role=admin ou author_id tiers : rejet, aucune élévation. | Backend/API ou support serveur | PARTIEL — [B06](B06_REGISTRATION.md) et [B09](B09_CURRENT_ACCOUNT.md) : champs serveur rejetés à l'inscription et sur /me ; endpoints métier futurs à tester. |
+| AC05 | Champ obligatoire absent : 422, erreur liée au champ, saisie conservée. | Backend/API ou support serveur ; Frontend/navigateur | PARTIEL — validation 422 testée sur inscription/profil/admin/modération ; conservation de saisie dans le frontend non exécutée. |
 | AC06 | Double soumission avec même clé : une seule demande, même résultat. | Backend/API ou support serveur ; Frontend/navigateur | NON EXÉCUTÉ — aucune preuve |
 | AC07 | Extrait contenant HTML/script : texte affiché sans exécution ; alerte de secret si motif détecté. | Backend/API ou support serveur ; Frontend/navigateur | NON EXÉCUTÉ — aucune preuve |
 | AC08 | Une proposition structurée est publiée : demande en cours, notification unique. | Backend/API ou support serveur ; Frontend/navigateur | NON EXÉCUTÉ — aucune preuve |
-| AC09 | Une personne non auteur accepte : refus ; l’auteur accepte : résolution créée. | Backend/API ou support serveur ; Frontend/navigateur | NON EXÉCUTÉ — aucune preuve |
+| AC09 | Une personne non auteur accepte : refus ; l’auteur accepte : résolution créée. | Backend/API ou support serveur ; Frontend/navigateur | NON EXÉCUTÉ sur résolution réelle — [B09](B09_CURRENT_ACCOUNT.md) vérifie la propriété sans bypass admin sur fixture ; B19 et navigateur restent à tester. |
 | AC10 | Deux acceptations concurrentes : une seule résolution active. | Backend/API ou support serveur | NON EXÉCUTÉ — aucune preuve |
 | AC11 | Réouverture motivée : historique conservé, capsule liée signalée à revoir. | Backend/API ou support serveur ; Frontend/navigateur | NON EXÉCUTÉ — aucune preuve |
 | AC12 | Auteur tente sa propre publication éditoriale : revue indépendante requise. | Backend/API ou support serveur ; Frontend/navigateur | NON EXÉCUTÉ — aucune preuve |
@@ -28,11 +28,11 @@ Le texte « Attendu du cahier » est repris des tableaux source sans changement 
 | AC22 | B2 hors connexion : enregistrement local explicite ; aucun accusé serveur inventé. | Frontend/navigateur ; Intégration/exploitation | NON EXÉCUTÉ — aucune preuve |
 | AC23 | B2 répète l’envoi après reprise : une seule commande de démonstration. | Backend/API ou support serveur ; Frontend/navigateur ; Intégration/exploitation | NON EXÉCUTÉ — aucune preuve |
 | AC24 | Stockage local B2 indisponible : avertissement, aucune garantie trompeuse de sauvegarde. | Frontend/navigateur ; Intégration/exploitation | NON EXÉCUTÉ — aucune preuve |
-| AC25 | Contenu masqué : inaccessible via URL directe, recherche et ancien lien de kit. | Backend/API ou support serveur ; Frontend/navigateur ; Intégration/exploitation | NON EXÉCUTÉ — aucune preuve |
-| AC26 | Compte suspendu : sessions révoquées, actions interdites. | Backend/API ou support serveur ; Frontend/navigateur ; Intégration/exploitation | NON EXÉCUTÉ — aucune preuve |
+| AC25 | Contenu masqué : inaccessible via URL directe, recherche et ancien lien de kit. | Backend/API ou support serveur ; Frontend/navigateur ; Intégration/exploitation | PARTIEL — [B30/B31](B30_B31_MODERATION.md) : profil masqué inaccessible par URL publique, historique expurgé et notification privée sans contenu retiré ; recherche/demandes/capsules/anciens kits non reçus. |
+| AC26 | Compte suspendu : sessions révoquées, actions interdites. | Backend/API ou support serveur ; Frontend/navigateur ; Intégration/exploitation | PARTIEL — [B32](B32_ADMINISTRATION.md) : révocation atomique, sessions tardives invalides après réactivation, refus des écritures du socle ; effets sur domaines métier/lab et navigateur encore à vérifier. |
 | AC27 | Jeu de démonstration : exclu des indicateurs d’usage réel. | Backend/API ou support serveur ; Frontend/navigateur ; Intégration/exploitation | NON EXÉCUTÉ — aucune preuve |
 | AC28 | PR introduisant une alerte bloquante : fusion/déploiement empêchés. | Backend/API ou support serveur ; Intégration/exploitation | NON EXÉCUTÉ — aucune preuve |
-| AC29 | Sauvegarde restaurée ailleurs : comptes de test, demandes et versions cohérents. | Backend/API ou support serveur ; Intégration/exploitation | NON EXÉCUTÉ — aucune preuve |
+| AC29 | Sauvegarde restaurée ailleurs : comptes de test, demandes et versions cohérents. | Backend/API ou support serveur ; Intégration/exploitation | PARTIEL LOCAL — [réception du socle](SOCLE_RECEPTION_PARTIELLE.md) : sauvegarde chiffrée restaurée dans une autre base dédiée, comptes/profil/rapport/audit/notifications cohérents ; demandes/versions métier et stockage distant non reçus. |
 | AC30 | Retour au build précédent : service fonctionnel sans migration inverse destructrice. | Backend/API ou support serveur ; Intégration/exploitation | NON EXÉCUTÉ — aucune preuve |
 | AC31 | Parcours mobile/clavier : aucune action essentielle inaccessible. | Frontend/navigateur ; Intégration/exploitation | NON EXÉCUTÉ — aucune preuve |
 | AC32 | Recette complète A→B→C : résolution, publication, test et réutilisation reliés. | Backend/API ou support serveur ; Frontend/navigateur ; Intégration/exploitation | NON EXÉCUTÉ — aucune preuve |

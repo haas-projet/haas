@@ -23,6 +23,10 @@ export type account_mail_ResetPasswordInput = { readonly "email": account_mail_E
 
 export type administration_Account = { readonly "id": string; readonly "handle": string; readonly "role": "member" | "moderator" | "admin"; readonly "status": "active" | "suspended"; readonly "lock_version": number; };
 
+export type capsules_lab_DemoOrder = { readonly "id": string; readonly "order_ref": string; readonly "amount_minor": number; readonly "currency": string; readonly "state": "confirmed"; };
+
+export type capsules_lab_DemoOrderInput = { readonly "order_ref": string; readonly "amount_minor": number; readonly "currency": string; };
+
 export type current_account_Me = { readonly "id": string; readonly "handle": identity_Handle; readonly "email": string; readonly "email_verified": boolean; readonly "role": identity_AccountRole; readonly "status": "active"; readonly "is_demo": boolean; readonly "can": { readonly "manage_account_mail": boolean; readonly "update_profile": boolean; readonly "participate": boolean; readonly "moderate": boolean; readonly "administer": boolean; }; };
 
 export type identity_AccountRole = "member" | "moderator" | "admin";

@@ -15,9 +15,10 @@ Session dédiée au seul lot B38 (API de démonstration B2). Le lot est le seul 
 ### Fichiers créés
 
 - Schéma : `backend/database/migrations/2026_10_06_160000_create_demo_orders_table.php`, `backend/app/Models/Demo/{DemoConnection,DemoOrder}.php`, `backend/database/factories/Demo/DemoOrderFactory.php`.
-- Service : `backend/app/Data/Demo/{DemoOrderData,RecordedDemoOrder}.php`, `backend/app/Services/Demo/RecordDemoOrderService.php`.
+- Service d'écriture : `backend/app/Data/Demo/{DemoOrderData,RecordedDemoOrder}.php`, `backend/app/Services/Demo/RecordDemoOrderService.php`.
 - HTTP : `backend/app/Http/Requests/Demo/RecordDemoOrderRequest.php`, `backend/app/Http/Resources/Demo/DemoOrderResource.php`, `backend/app/Http/Controllers/Demo/RecordDemoOrderController.php`, groupe B2 ajouté dans `backend/routes/api/capsules-lab.php`.
-- Tests : `backend/tests/Feature/Demo/RecordDemoOrderValidationTest.php` (16 tests), `backend/tests/Integration/Demo/RecordDemoOrderServiceTest.php` (7 tests), `backend/tests/Integration/Demo/RecordDemoOrderHttpTest.php` (5 tests).
+- Purge : `backend/app/Services/Demo/PurgeExpiredDemoOrdersService.php` (logique, rétention 24 h par défaut, bornes 1 s – 30 j, batch 1000) et `backend/app/Console/Commands/PruneDemoOrders.php` (commande Artisan mince `demo:prune [--older-than=<s>]`).
+- Tests : `backend/tests/Feature/Demo/RecordDemoOrderValidationTest.php` (5 méthodes, 16 cas), `backend/tests/Integration/Demo/RecordDemoOrderServiceTest.php` (6 méthodes, 10 cas), `backend/tests/Integration/Demo/RecordDemoOrderHttpTest.php` (5 méthodes, 5 cas), `backend/tests/Integration/Demo/PruneDemoOrdersTest.php` (6 méthodes, 6 cas).
 - Documentation : `docs/quality/B38_B2_API.md`, `docs/api/openapi/capsules-lab.yaml` (opération `recordDemoOrder` + schémas), `docs/api/generated/haas-api.d.ts` (régénéré).
 
 ### Contrôles exécutés et résultats réels
@@ -27,9 +28,13 @@ Session dédiée au seul lot B38 (API de démonstration B2). Le lot est le seul 
 | `composer lint` | PASS (Pint) | PHP 8.4.15 Laragon, Windows |
 | `composer analyse` | **[OK] No errors** (PHPStan/Larastan) | idem |
 | `composer test` | 267 tests / 2594 assertions ; **1 échec attendu** : `ApiInventoryTest` (route B38 absente de `docs/OPENAPI.yaml` racine, fichier responsable 1). Les 266 autres tests passent. | idem |
-| `composer test:integration` | **148 tests / 1307 assertions, OK** dont 15 cas Demo B38 (10 service + 5 http) ; aucun test Lab B35 présent sur cette branche dérivée de `main` | PostgreSQL 17 sur `haas_capsules_test`, rôle `haas_test` ; `TestDatabaseGuard` accepté sans contournement |
+| `composer test:integration` | **154 tests / 1332 assertions, OK** dont 21 cas Demo B38 (10 service + 5 http + 6 purge) ; aucun test Lab B35 présent sur cette branche dérivée de `main` | PostgreSQL 17 sur `haas_capsules_test`, rôle `haas_test` ; `TestDatabaseGuard` accepté sans contournement |
 | `php scripts/generate-api-types.php` | 30 types générés ; diff limité à `capsules_lab_DemoOrder` et `capsules_lab_DemoOrderInput` | PHP 8.4.15 |
 | CI distante | **NON EXÉCUTÉE** à ce stade (branche non poussée) | — |
+
+### Addendum 2026-10-06 — Purge `demo:prune`
+
+Dernier élément manquant du verify B38 (« Aucune session HAAS utilisée et données bornées/**purgées** ») livré en 2 commits locaux : service `PurgeExpiredDemoOrdersService` + commande Artisan `demo:prune`. Rétention par défaut 24 h, inférée de la convention `api_idempotency` du §24 et de la règle §15 — le cahier ne fixe pas de valeur pour `demo_orders`, arbitrage ouvert consigné dans `docs/quality/B38_B2_API.md`. Option CLI `--older-than=<secondes>` bornée à [1 s, 30 j]. Portée stricte : la suppression n'opère que sur `demo_orders` via `DemoConnection::NAME` ; aucune autre table n'est accédée. Idempotente : seconde invocation = 0 ligne. Six tests d'intégration ajoutés (`PruneDemoOrdersTest`) ; `composer test:integration` passe de 148/1307 à **154/1332**. `composer test` reste à 267/2594 avec le seul échec attendu `ApiInventoryTest`.
 
 ### Limites et étapes suivantes
 
@@ -41,6 +46,13 @@ Session dédiée au seul lot B38 (API de démonstration B2). Le lot est le seul 
       $ref: './api/openapi/capsules-lab.yaml#/paths/~1api~1v1~1b2~1demo-orders'
   ```
 
-- Aucun fichier interdit n’a été touché : `config/`, `bootstrap/`, `phpunit.xml`, `.env.example`, `composer.json/lock`, `.github/workflows/`, `routes/api.php`, `routes/api/identity.php`, `docs/OPENAPI.yaml` sont intacts.
+- Pour que la purge s'exécute automatiquement, le responsable 1 doit ajouter dans `backend/routes/console.php` :
+
+  ```php
+  Schedule::command('demo:prune')->everyFifteenMinutes()->withoutOverlapping(5);
+  ```
+
+  (fréquence suggérée, à arbitrer selon la volumétrie). Tant que cette ligne n'est pas ajoutée, `demo:prune` doit être exécutée manuellement sur le VPS.
+- Aucun fichier interdit n’a été touché : `config/`, `bootstrap/`, `phpunit.xml`, `.env.example`, `composer.json/lock`, `.github/workflows/`, `routes/api.php`, `routes/api/identity.php`, `routes/console.php`, `docs/OPENAPI.yaml` sont intacts.
 - La connexion `demo` n’est pas câblée : les tables vivent sur la base par défaut. Trois fichiers du socle à étendre lors du câblage (voir `docs/quality/B38_B2_API.md` §Écarts).
-- Branche non poussée, PR non ouverte. Push et PR brouillon à initier par la propriétaire.
+- PR brouillon **#28** publiée ; CI distante rouge uniquement sur `ApiInventoryTest` (attendu). Les deux commits locaux de purge ne sont pas encore poussés.

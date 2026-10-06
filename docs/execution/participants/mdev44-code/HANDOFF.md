@@ -4,7 +4,7 @@ Branche : `backend/capsules-laboratoire-b38-api-demo-b2`. Base : `origin/main` (
 
 ## À quelle question ce lot répond
 
-Deux envois d’un formulaire B2 avec la même clé stable (`Idempotency-Key`, UUID v4) et la même charge donnent une seule commande fictive. Une charge différente avec la même clé est rejetée. Aucune session HAAS, aucun cookie, aucune donnée métier HAAS n’est touché.
+Deux envois d’un formulaire B2 avec la même clé stable (`Idempotency-Key`, UUID v4) et la même charge donnent une seule commande fictive. Une charge différente avec la même clé est rejetée. Aucune session HAAS, aucun cookie, aucune donnée métier HAAS n’est touché. Les commandes fictives sont bornées en durée par la commande Artisan `demo:prune` (rétention 24 h par défaut).
 
 ## Dépendances et contrat
 
@@ -18,6 +18,12 @@ Deux envois d’un formulaire B2 avec la même clé stable (`Idempotency-Key`, U
 - Entrée : header `Idempotency-Key` (UUID v4) + body `{order_ref, amount_minor, currency}`.
 - Réponses : 201 création, 200 rejeu (header `X-Idempotent-Replay`), 409 conflit, 422 validation.
 - Aucun `Set-Cookie`, aucune session démarrée (contrôle explicite dans les tests).
+
+## Commande Artisan livrée
+
+- `demo:prune [--older-than=<secondes>]` : supprime au plus 1000 commandes fictives expirées par invocation ; sortie limitée au nombre de lignes retirées. Rétention par défaut 24 h (`PurgeExpiredDemoOrdersService::DEFAULT_RETENTION_SECONDS`), bornée à 30 j max.
+- Portée stricte : seule la table `demo_orders` sur `DemoConnection::NAME` est touchée.
+- Planification à poser par le responsable 1 dans `backend/routes/console.php` ; diff proposé dans `docs/quality/B38_B2_API.md` et dans la PR.
 
 ## Prochaines étapes pour la propriétaire
 
@@ -37,7 +43,7 @@ Deux envois d’un formulaire B2 avec la même clé stable (`Idempotency-Key`, U
 ## Contrôles réellement exécutés
 
 - `composer lint` PASS, `composer analyse` **[OK] No errors**.
-- `composer test` : 267 tests / 2594 assertions, 1 échec attendu `ApiInventoryTest`.
-- `composer test:integration` : 148 tests / 1307 assertions, OK.
+- `composer test` : 267 tests / 2594 assertions, 1 échec attendu `ApiInventoryTest` (route B38 absente de `docs/OPENAPI.yaml` racine, fichier responsable 1).
+- `composer test:integration` : **154 tests / 1332 assertions, OK** (dont 21 cas Demo B38 : 10 service + 5 http + 6 purge).
 - `php scripts/generate-api-types.php` : 30 types, diff limité à B38.
-- CI distante : non exécutée (branche non poussée).
+- CI distante PR #28 (run 37497715618, avant les deux commits de purge) : `PHP 8.4 / PostgreSQL 17` et `PHP 8.5 / PostgreSQL 17` échouent sur le seul `ApiInventoryTest` ; `backend-ci` échoue par dépendance. Rouge attendue tant que `docs/OPENAPI.yaml` n'est pas complété.

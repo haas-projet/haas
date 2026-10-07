@@ -6,6 +6,7 @@ namespace Tests\Integration\Capsules;
 
 use App\Enums\Capsules\CapsuleVisibility;
 use App\Models\Capsules\Capsule;
+use App\Models\HelpRequest;
 use App\Models\User;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
@@ -34,11 +35,13 @@ final class CapsulesSchemaTest extends PostgresTestCase
 
     public function test_capsule_rejects_both_source_request_and_editorial_origin(): void
     {
+        $realRequest = HelpRequest::factory()->create();
+
         $this->expectException(QueryException::class);
         $this->expectExceptionMessageMatches('/capsules_source_xor/i');
 
         Capsule::factory()->create([
-            'source_request_id' => (string) Str::uuid(),
+            'source_request_id' => $realRequest->id,
             'editorial_origin' => 'Démonstration',
         ]);
     }
@@ -90,13 +93,40 @@ final class CapsulesSchemaTest extends PostgresTestCase
         $owner->delete();
     }
 
-    public function test_source_request_id_column_accepts_arbitrary_uuid_until_help_requests_fk_is_added(): void
+    public function test_source_request_id_accepts_an_existing_help_request(): void
     {
+        $realRequest = HelpRequest::factory()->create();
+
         $capsule = Capsule::factory()->create([
-            'source_request_id' => $uuid = (string) Str::uuid(),
+            'source_request_id' => $realRequest->id,
             'editorial_origin' => null,
         ]);
 
-        $this->assertSame($uuid, $capsule->refresh()->source_request_id);
+        $this->assertSame($realRequest->id, $capsule->refresh()->source_request_id);
+    }
+
+    public function test_source_request_id_rejects_an_unknown_uuid(): void
+    {
+        $this->expectException(QueryException::class);
+        $this->expectExceptionMessageMatches('/foreign key|source_request_id/i');
+
+        Capsule::factory()->create([
+            'source_request_id' => (string) Str::uuid(),
+            'editorial_origin' => null,
+        ]);
+    }
+
+    public function test_source_help_request_cannot_be_deleted_while_a_capsule_references_it(): void
+    {
+        $realRequest = HelpRequest::factory()->create();
+        Capsule::factory()->create([
+            'source_request_id' => $realRequest->id,
+            'editorial_origin' => null,
+        ]);
+
+        $this->expectException(QueryException::class);
+        $this->expectExceptionMessageMatches('/foreign key|help_requests/i');
+
+        $realRequest->delete();
     }
 }

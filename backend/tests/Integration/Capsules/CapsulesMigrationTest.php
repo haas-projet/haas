@@ -58,9 +58,10 @@ final class CapsulesMigrationTest extends PostgresTestCase
                 'capsule_versions.capsule_id',
                 'capsule_versions.reviewer_id',
                 'capsules.owner_id',
+                'capsules.source_request_id',
             ],
             $sources,
-            'Les seules FK attendues du schéma B22 pointent vers users et vers l\'intérieur du domaine capsules.'
+            'FK attendues du schéma B22 : vers users, vers help_requests (source), et vers l\'intérieur du domaine capsules.'
         );
     }
 
@@ -77,18 +78,15 @@ final class CapsulesMigrationTest extends PostgresTestCase
         $this->assertFalse(Schema::hasTable('capsules'));
     }
 
-    public function test_schema_tolerates_a_capsule_without_help_requests_table(): void
+    public function test_schema_includes_help_requests_table_as_the_source_target(): void
     {
-        // La table help_requests ne doit pas être nécessaire pour que capsules fonctionne (B11 absent de main).
-        $this->assertFalse(Schema::hasTable('help_requests'));
+        // Après fusion de B11 : la table help_requests est présente, la FK capsules.source_request_id l'utilise.
+        $this->assertTrue(Schema::hasTable('help_requests'));
         $this->assertTrue(Schema::hasTable('capsules'));
-
-        // Insertion d'une capsule éditoriale sans FK vers help_requests : la validation est côté métier (B23+).
-        $hasOwnerColumn = Schema::hasColumn('capsules', 'source_request_id');
-        $this->assertTrue($hasOwnerColumn);
+        $this->assertTrue(Schema::hasColumn('capsules', 'source_request_id'));
     }
 
-    public function test_blueprint_source_request_id_is_uuid_type_not_foreign(): void
+    public function test_source_request_id_is_uuid_type(): void
     {
         $capsulesColumns = Schema::getColumns('capsules');
         $sourceRequestColumn = collect($capsulesColumns)->firstWhere('name', 'source_request_id');

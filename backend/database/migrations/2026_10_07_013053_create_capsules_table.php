@@ -13,8 +13,8 @@ return new class extends Migration
         Schema::create('capsules', function (Blueprint $table): void {
             $table->uuid('id')->primary();
             $table->string('slug', 120);
-            // FK vers help_requests ajoutée dans une migration ultérieure (B11 absent de main au 2026-10-07).
-            $table->uuid('source_request_id')->nullable();
+            // Demande résolue d'origine : RESTRICT pour que la demande source ne soit jamais supprimée tant qu'une capsule la cite.
+            $table->foreignUuid('source_request_id')->nullable()->constrained('help_requests')->restrictOnDelete();
             $table->foreignUuid('owner_id')->constrained('users')->restrictOnDelete();
             $table->string('editorial_origin', 100)->nullable();
             $table->enum('visibility', array_map(fn (CapsuleVisibility $v) => $v->value, CapsuleVisibility::cases()))

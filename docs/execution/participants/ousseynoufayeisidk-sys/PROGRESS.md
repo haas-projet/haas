@@ -185,3 +185,17 @@ Relecture croisée automatisée des commandes depuis composer.json, COMMANDS et 
 ### Publication distante bloquée — 7 octobre 2026
 
 Correction des README commitée localement dans 9605a4744d8462ac0abf325eb30a75d97e8bf601. Trois pushes refusés par GitHub avec Internal Server Error ; publication REST et GraphQL également en échec. Vérification finale : la PR #31 et sa branche distante restent sur 1642f4e63a3cb19a3c919d6ea85783cda675a2b8, sans la correction README. Aucun contrôle de protection contourné. Reprendre la publication depuis le worktree review-maadinaa lorsque le service GitHub accepte les écritures ; l'approbation humaine de #31 restera requise avant fusion. Le README du worktree initial B14 et son travail préexistant sont préservés.
+
+## 2026-10-07 — Publication reprise et nettoyage sûr des branches
+
+La publication des README et du suivi a réussi : le head distant constaté de la PR #31 est a56fae1c90780dc3bff2c0b186e208782fd65073. Le blocage de publication décrit ci-dessus est donc levé. La PR reste ouverte et son approbation humaine demeure requise avant fusion ; aucune protection GitHub contournée.
+
+Inventaire distant réduit de 13 à 11 branches. Les temporaires backend/communaute-entraide-b11-schema (2771d301) et backend/capsules-laboratoire-b35-brique-b1 (108aa7d) ont été supprimées après preuve d'ascendance vers main et contrôle de l'absence de PR ouverte dépendante. Leurs commits demeurent dans main. Les trois branches permanentes ont avancé sans réécriture vers f1f6238, comme main.
+
+Sept branches non fusionnées conservées : B22, B23, B38, B14, B15, B16 et la branche documentaire #31. Leurs PR et bases restent disponibles. Preuves détaillées : docs/quality/BRANCH_CLEANUP_20261007.md. La suite communautaire de Lamine et la préparation indépendante de B17 restent à coordonner ; aucun lot supplémentaire déclaré terminé, aucun test applicatif lancé pour ce compte rendu, aucun BACKEND_GATE ni autorisation frontend/déploiement.
+
+Contrôles documentaires du compte rendu : rapport UTF-8 strict valide, manifeste de 517 fichiers conservant son ordre ; validate-pack 18/18, check-deployment-docs 7/7, 28 types API à jour avec PHP 8.5.10 Laragon et git diff --check sans erreur. L'appel initial du générateur sous le PHP 8.3.12 du PATH a été refusé, puis relancé avec succès sur le binaire adapté. Commit local uniquement pour ce lot ; référence réelle à communiquer dans le bilan, publication à effectuer par l'intégrateur.
+
+### Addendum — synchronisations et B17 publié
+
+Après le nettoyage 13 → 11, publication de B17 dans #32 : **12 références**, quatre permanentes à `f1f6238` et huit temporaires. B14/B15/B16 `230b83b`/`a3eb9b9`/`d3d8407` ont une CI verte sur leur head exact. B17 `8234470` corrige seulement l'expiration des cookies dans le navigateur simulé après reproduction d'un ancien échec 419 ; run `37662853388`, PHP 8.4/8.5 et backend-ci réussis, **671 tests / 6805 assertions par version**. Aucun lot B14–B17 déclaré intégré : ordre #24 → #25 → #26 → #32 ; #24 et #31 attendent une approbation humaine. B23 passé extérieurement à `93fafea`, préservé sans nouvelle revue de contenu. Références, contrôles et limites dans BRANCH_CLEANUP_20261007.md. Prochain B18 après coordination ; aucun gate, frontend ni déploiement.

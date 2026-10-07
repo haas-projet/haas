@@ -74,3 +74,11 @@ Codex (GPT-6), à la demande explicite de l'utilisateur : revue automatisée des
 ## Correction des README — 7 octobre 2026
 
 Codex (GPT-6), sur demande de l'utilisateur : actualisation du README principal et du README backend à partir du code, des commandes et des fusions vérifiées. Relecture automatisée des prérequis et limites ; commandes d'installation décrites mais non exécutées, aucun nouveau test applicatif ni serveur lancé. Les résultats de CI cités restent datés et attribués aux runs réels. Suivi de l'intégrateur et empreintes actualisés ; aucune approbation humaine simulée.
+
+## Publication reprise et nettoyage des branches — 7 octobre 2026
+
+Codex (GPT-6), sur demande de l'utilisateur : publication des README et du suivi reprise sur la branche documentaire de la PR #31 ; vérification des références Git et des PR dépendantes avant suppression de deux branches temporaires entièrement intégrées (B11-schema et B35). Trois branches permanentes avancées par fast-forward vers main, sans réécriture ; sept branches portant du travail non fusionné conservées. Le total distant passe de 13 à 11. Preuves et SHA dans `docs/quality/BRANCH_CLEANUP_20261007.md` ; suivi du participant actualisé. Aucun test applicatif ni déploiement annoncé pour ce nettoyage, aucune revue humaine inventée. L'approbation humaine de #31 reste requise avant fusion.
+
+Contrôles du compte rendu : UTF-8 strict vérifié, 517 empreintes dans l'ordre existant, pack 18/18, documentation de déploiement 7/7, 28 types API à jour sous PHP 8.5.10 et `git diff --check` sans erreur. L'appel du générateur avec le PHP 8.3.12 du PATH a été refusé avant la relance réussie avec le binaire Laragon adapté.
+
+Addendum de publication : synchronisation B14/B15/B16 par merges normaux et CI vertes ; B17 publié dans #32, correctif de simulation des cookies `8234470`, CI `37662853388` verte PHP 8.4/8.5 avec 671 tests / 6805 assertions par version. Le bilan garde l'échec initial et sa reproduction ; aucun code applicatif assoupli. Total 12 références après création de B17, quatre permanentes et huit temporaires non intégrées. B23 `93fafea` provient d'une modification externe conservée sans validation de contenu par cette intervention. Revue humaine #24/#31 toujours requise ; aucune approbation, gate ou publication de production inventée.

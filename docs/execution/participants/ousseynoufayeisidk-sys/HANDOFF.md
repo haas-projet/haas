@@ -1,5 +1,11 @@
 # Reprise — socle/auth
 
+## État du 7 octobre 2026 après publication communautaire
+
+Main `f1f6238` contient les fusions #12/#23/#27 ; **13 lots backend entiers intégrés**, B35 partiel. README principal et backend publiés dans #31, approbation humaine obligatoire avant fusion. Deux temporaires intégrés supprimés et trois branches permanentes synchronisées avec main ; le snapshot 13 → 11 devient **12 références** après création de B17 : quatre permanentes et huit temporaires en revue.
+
+B14 `230b83b`, B15 `a3eb9b9`, B16 `d3d8407` synchronisés, CI exacte verte. B17 est publié dans #32 vers B16 : métier `238d5e9`, correctif de tests `8234470`, CI [37662853388](https://github.com/haas-projet/haas/actions/runs/37662853388) verte sous PHP 8.4/8.5, **671 tests / 6805 assertions par version**, Pint/PHPStan réussis. Le premier échec de CI est conservé dans le bilan ; aucun traitement de production assoupli. Lire [BRANCH_CLEANUP_20261007.md](../../../quality/BRANCH_CLEANUP_20261007.md), les PR et le suivi de Lamine. Prochain B18 après coordination des revues ; #24 et #31 attendent une approbation humaine. B23 modifié extérieurement à `93fafea`, préservé sans nouvelle validation. Aucun gate, frontend ou déploiement ; les entrées suivantes sont historiques.
+
 B01–B09, B12–B13 et B32 DONE (12 lots) après intégration autorisée. B10/B29/B30/B31 et B39–B42 IN_PROGRESS ; B43/B44 BLOCKED. S01/S02 restent partiels. Les dix PR du socle sont fusionnées dans main (a051e81, CI 37146178657 verte). Neuf branches temporaires supprimées, quatre branches permanentes conservées. Branche de reprise : `backend/socle-auth`. BACKEND_GATE NON REÇU, aucun GO_FRONTEND/GO_PRODUCTION. Lire docs/quality/MERGE_SOCLE.md et SYSTALINK_TASKS.md. Les entrées suivantes sont historiques.
 
 PostgreSQL temporaire 54693 arrêté à la fin de cette réception. Les prochains tests SQL exigent une nouvelle base locale/CI dédiée `haas_*_test`, rôle `haas_test`, et une connexion explicite. Ne pas réutiliser automatiquement le port de recette. Aucun secret applicatif enregistré.
@@ -151,3 +157,13 @@ La correction rejoint le bilan documentaire de PR #31 ; approbation humaine requ
 ### Publication distante bloquée — 7 octobre 2026
 
 Correction des README commitée localement dans 9605a4744d8462ac0abf325eb30a75d97e8bf601. Trois pushes refusés par GitHub avec Internal Server Error ; publication REST et GraphQL également en échec. Vérification finale : la PR #31 et sa branche distante restent sur 1642f4e63a3cb19a3c919d6ea85783cda675a2b8, sans la correction README. Aucun contrôle de protection contourné. Reprendre la publication depuis le worktree review-maadinaa lorsque le service GitHub accepte les écritures ; l'approbation humaine de #31 restera requise avant fusion. Le README du worktree initial B14 et son travail préexistant sont préservés.
+
+## 2026-10-07 — Reprise après publication et nettoyage des branches
+
+La publication des README et du suivi a repris avec succès : PR #31 sur le head distant a56fae1c90780dc3bff2c0b186e208782fd65073. Ne plus reprendre les tentatives de publication de l'instantané précédent. L'approbation humaine de cette PR reste requise avant fusion dans main.
+
+Main et les trois branches permanentes distantes portent f1f6238. Les branches temporaires B11-schema et B35 ont été supprimées après preuve de fusion et absence de PR ouverte dépendante ; le total distant est passé de 13 à 11. Sept branches non fusionnées et leurs PR sont conservées, notamment la chaîne B14 → B15 → B16 et les brouillons B22 → B23. Lire docs/quality/BRANCH_CLEANUP_20261007.md pour les pointes complètes et les preuves.
+
+Reprendre la partie communautaire de Lamine selon ses dépendances et préparer B17 séparément. Le retour à quatre branches exige l'intégration vérifiée des travaux restants ou une organisation décidée explicitement ; ne pas supprimer leurs références pour atteindre le nombre cible. B38 reste bloqué ; aucun nouveau test applicatif ni gate reçu par ce nettoyage. Travail préexistant du workspace initial préservé.
+
+Compte rendu prêt pour un commit local après pack 18/18, documentation de déploiement 7/7, 28 types API à jour sous PHP 8.5.10, UTF-8 strict et git diff --check vérifiés. Manifeste de 517 fichiers actualisé dans l'ordre existant. L'intégrateur publiera le commit ; aucune publication de ce complément ni nouvelle revue humaine présumée.

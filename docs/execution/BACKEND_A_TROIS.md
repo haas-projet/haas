@@ -16,6 +16,10 @@ Les trois tâches regroupent le travail ; elles ne doivent pas devenir trois gro
 
 Si l'utilisateur demande explicitement de continuer pendant une revue, préparer le lot suivant sur une branche dérivée séparée, sans modifier la PR en attente. Cas B03 : `backend/socle-auth-ci` depuis B02, PR ciblant temporairement `backend/socle-auth`. Fusionner les prérequis dans l'ordre, puis recibler vers main et revérifier le dernier commit. Aucune fusion, revue ou validation n'est implicite dans cette préparation.
 
+## Socle intégré — 3 octobre 2026
+
+Les PR #10/#11/#13–#20 sont fusionnées sur demande explicite dans main `a051e81`, CI post-fusion verte. B01–B09/B12/B13/B32 sont DONE ; les profils, notifications, modération et réception gardent leurs réserves détaillées dans [MERGE_SOCLE.md](../quality/MERGE_SOCLE.md). Les neuf branches temporaires sont supprimées ; les trois branches permanentes et main restent présentes. backend/socle-auth est synchronisée avec main. Les deux autres pilotes intègrent origin/main depuis leur propre branche en préservant leurs travaux ; leur contenu n'a pas été écrasé. La PR #12 reste ouverte.
+
 ## Démarrage parallèle après B01
 
 La PR #4 est fusionnée dans `main` depuis le 1er octobre 2026, sur demande explicite de l'utilisateur. Cette demande permet de commencer le code indépendant des trois domaines en parallèle dès B01. Les prérequis ci-dessous portent sur la fusion du code dépendant ; ils ne bloquent plus tout démarrage d'un domaine.

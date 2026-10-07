@@ -2,7 +2,7 @@
 
 Inspecter le dépôt, préserver les fichiers/commits/saisies existants, lire ADR-006. Appliquer F18 : projets ouverts, offres consenties, décision propriétaire, fil et projection publique contrôlés. Nouvelle recette avant GO_FRONTEND ; ne pas prendre un ancien gate pour un accord sur ce périmètre. Systalink/Vercel inchangé.
 
-État courant : B01–B06 DONE ; B07/B08/B09/B12/B13/B32 IN_REVIEW ; B10/B29/B30/B31 IN_PROGRESS (raccordements métier restants) ; B39–B42 IN_PROGRESS (preuves du socle seulement) ; B43/B44 BLOCKED (Qodana, domaines, réception et revue humaine). S01/S02 restent partiels. Branche active : `backend/socle-auth-reception`, PR #20 en brouillon, CI 37141557467 verte, dérivée de #19. Aucun BACKEND_GATE, GO_FRONTEND ou GO_PRODUCTION validé. Lire [la réception partielle](../quality/SOCLE_RECEPTION_PARTIELLE.md) et le tableau individuel SYSTALINK_TASKS.md. Les sections suivantes conservent l’historique ; elles ne remplacent pas cet état actif.
+État courant : B01–B09, B12–B13 et B32 DONE (12 lots) après intégration autorisée du socle. B11 préparé en revue sur `backend/communaute-entraide`, depuis main `7a8c672`, avec les commits B11 existants de mdev44-code préservés. Les 26 autres lots de la coordination #2 restent à faire. B10/B29/B30/B31 et B39–B42 IN_PROGRESS ; B43/B44 BLOCKED. S01/S02 restent partiels. BACKEND_GATE NON REÇU, aucun GO_FRONTEND/GO_PRODUCTION. Voir [la preuve B11](../quality/B11_COLLABORATION.md) et le [suivi de Lamine](participants/LamineGL/HANDOFF.md). Les entrées suivantes sont historiques.
 
 ## Reprise après préparation GitHub — 2026-10-01
 
@@ -179,3 +179,11 @@ Consolidation : B39–B42 IN_PROGRESS pour le périmètre disponible ; B43/B44 B
 PR #20 en brouillon contre backend/socle-auth-moderation, code 68b00f8d3fa865bc8995a6b43dda52b178d47ba0. Run 37141557467 réussi, journaux lus : PHP 8.4/8.5 avec PostgreSQL 17, chacun 384 tests / 3702 assertions (251/2452 sans base, 133/1250 SQL). Pint/PHPStan niveau 8/audit/documentation/types générés verts. Exercice local de restauration et refus documentés dans SOCLE_RECEPTION_PARTIELLE.md ; 463 empreintes contrôlées. Cluster temporaire 54693 arrêté, service existant inchangé.
 
 B01–B06 restent les seules cartes entières terminées ; B07/B08/B09/B12/B13/B32 prêts pour revue. Les autres cartes de la partie socle gardent les réserves explicites du tableau SYSTALINK_TASKS.md. Reprendre après publication des domaines métier/Qodana et revue réelle ; aucun gate ni frontend autorisé. Intégrer dans l'ordre des dépendances, recibler les PR avant de supprimer les branches temporaires fusionnées ; conserver les trois branches permanentes et main.
+
+## 2026-10-03 — Fusions autorisées et quatre branches conservées
+
+Demande explicite « faite ca » : intégration des PR #10, #11, #13–#20, dans cet ordre, sans revue humaine de collègue inventée. Heads synchronisés avec main par merges normaux, arbres inchangés, CI du SHA exact et journaux vérifiés avant chaque fusion. Résultat main a051e819cb923bc8e2755941cd494ec6d3f5cd81 ; CI post-fusion 37146178657 verte, chaque PHP 8.4/8.5 avec PostgreSQL : 384 tests / 3702 assertions, Pint/PHPStan/audit/documentation réussis. Preuve et tous les SHA : docs/quality/MERGE_SOCLE.md.
+
+Les neuf branches temporaires sont supprimées après vérification des 30 références de commits dans main et de l'absence de PR dépendante. Restent main et les trois branches permanentes ; backend/socle-auth synchronisée, branches des collègues et PR #12 conservées. Aucune réécriture, aucun contournement de protection, aucun déploiement.
+
+B07/B08/B09/B12/B13/B32 DONE ; le tableau Systalink comporte maintenant 12 lots terminés, 8 partiels et 2 bloqués. Contributions et autres raccordements attendent les pilotes ; Qodana et réception complète restent ouverts. Aucun GO_FRONTEND. Reprendre sur backend/socle-auth ; ne pas recréer les anciennes branches pour consulter leurs commits, tous conservés dans main.

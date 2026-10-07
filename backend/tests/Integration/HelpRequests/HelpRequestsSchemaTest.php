@@ -16,6 +16,7 @@ use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\PostgresTestCase;
 
 final class HelpRequestsSchemaTest extends PostgresTestCase
@@ -169,6 +170,60 @@ final class HelpRequestsSchemaTest extends PostgresTestCase
 
         DB::table('help_requests')->where('id', $request->id)->delete();
         $this->assertSame(0, DB::table('request_technologies')->where('request_id', $request->id)->count());
+    }
+
+    #[DataProvider('invalidVersions')]
+    public function test_versions_remain_positive_even_for_direct_sql(string $table, int $version): void
+    {
+        $request = HelpRequest::factory()->create();
+        Proposal::factory()->create(['request_id' => $request->id]);
+        Comment::factory()->create(['request_id' => $request->id]);
+
+        $this->assertSqlFailure(fn () => DB::table($table)->update(['lock_version' => $version]), '23514');
+        $this->assertSame(1, DB::table($table)->value('lock_version'));
+    }
+
+    /** @return iterable<string, array{string, int}> */
+    public static function invalidVersions(): iterable
+    {
+        foreach (['help_requests', 'comments', 'proposals'] as $table) {
+            foreach ([0, -1] as $version) {
+                yield $table.'.'.$version => [$table, $version];
+            }
+        }
+    }
+
+    public function test_factory_uses_the_request_author_as_acceptor_and_preserves_relationships(): void
+    {
+        $resolution = Resolution::factory()->create();
+        $request = $resolution->request()->firstOrFail();
+        $proposal = $resolution->proposal()->firstOrFail();
+        $comment = Comment::factory()->create(['request_id' => $request->id]);
+
+        $this->assertSame($request->author_id, $resolution->accepted_by);
+        $this->assertTrue($resolution->acceptor()->firstOrFail()->is($request->author()->firstOrFail()));
+        $this->assertTrue($proposal->request()->firstOrFail()->is($request));
+        $this->assertTrue($comment->request()->firstOrFail()->is($request));
+        $this->assertTrue($request->resolutions->sole()->is($resolution));
+        $this->assertTrue($proposal->resolutions->sole()->is($resolution));
+        $this->assertSame(1, $proposal->refresh()->lock_version);
+        $this->assertSame(1, $comment->refresh()->lock_version);
+    }
+
+    public function test_foreign_keys_preserve_a_conversation_and_its_history(): void
+    {
+        $resolution = Resolution::factory()->create();
+        $request = $resolution->request()->firstOrFail();
+        $comment = Comment::factory()->create(['request_id' => $request->id]);
+        $technology = Technology::factory()->create();
+        $request->technologies()->attach($technology);
+
+        foreach ([['users', $request->author_id], ['technologies', $technology->id], ['help_requests', $request->id], ['proposals', $resolution->proposal_id]] as [$table, $id]) {
+            $this->assertSqlFailure(fn () => DB::table($table)->where('id', $id)->delete(), '23503');
+        }
+
+        $this->assertModelExists($resolution);
+        $this->assertModelExists($comment);
     }
 
     /** @param Closure(): mixed $operation */

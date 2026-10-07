@@ -1,6 +1,6 @@
 # Suivi du dépôt HAAS
 
-**Statut actif :** B01–B06 DONE ; B07/B08/B09/B12/B13/B32 IN_REVIEW ; B10/B29/B30/B31 IN_PROGRESS (raccordements métier restants) ; B39–B42 IN_PROGRESS (preuves du socle seulement) ; B43/B44 BLOCKED (Qodana, domaines, réception et revue humaine). S01/S02 restent partiels. Branche active : `backend/socle-auth-reception`, PR #20 en brouillon, CI 37141557467 verte, dérivée de #19. Aucun BACKEND_GATE, GO_FRONTEND ou GO_PRODUCTION validé. Les 122 identifiants et les preuves antérieures sont conservés.
+**Statut actif :** B01–B09, B12–B13 et B32 DONE (12 lots) après intégration autorisée du socle. B11 préparé en revue sur `backend/communaute-entraide`, depuis main `7a8c672`, avec les commits B11 existants de mdev44-code préservés. Les 26 autres lots de la coordination #2 restent à faire. B10/B29/B30/B31 et B39–B42 IN_PROGRESS ; B43/B44 BLOCKED. S01/S02 restent partiels. BACKEND_GATE NON REÇU, aucun GO_FRONTEND/GO_PRODUCTION. Voir [la preuve B11](../quality/B11_COLLABORATION.md) et le [suivi de Lamine](participants/LamineGL/HANDOFF.md).
 
 À renseigner après commandes réelles : date / lot / responsable / fichiers / commandes / observé / commit ou raison de non-commit / blocage / prochaine action. Les contrôles documentaires de ce pack ne valident pas BACKEND_GATE, FRONTEND_GATE ou RELEASE_GATE.
 
@@ -218,3 +218,20 @@ Consolidation : B39–B42 IN_PROGRESS pour le périmètre disponible ; B43/B44 B
 PR #20 en brouillon contre backend/socle-auth-moderation, code 68b00f8d3fa865bc8995a6b43dda52b178d47ba0. Run 37141557467 réussi, journaux lus : PHP 8.4/8.5 avec PostgreSQL 17, chacun 384 tests / 3702 assertions (251/2452 sans base, 133/1250 SQL). Pint/PHPStan niveau 8/audit/documentation/types générés verts. Exercice local de restauration et refus documentés dans SOCLE_RECEPTION_PARTIELLE.md ; 463 empreintes contrôlées. Cluster temporaire 54693 arrêté, service existant inchangé.
 
 B01–B06 restent les seules cartes entières terminées ; B07/B08/B09/B12/B13/B32 prêts pour revue. Les autres cartes de la partie socle gardent les réserves explicites du tableau SYSTALINK_TASKS.md. Reprendre après publication des domaines métier/Qodana et revue réelle ; aucun gate ni frontend autorisé. Intégrer dans l'ordre des dépendances, recibler les PR avant de supprimer les branches temporaires fusionnées ; conserver les trois branches permanentes et main.
+
+## 2026-10-03 — Fusions autorisées et quatre branches conservées
+
+Demande explicite « faite ca » : intégration des PR #10, #11, #13–#20, dans cet ordre, sans revue humaine de collègue inventée. Heads synchronisés avec main par merges normaux, arbres inchangés, CI du SHA exact et journaux vérifiés avant chaque fusion. Résultat main a051e819cb923bc8e2755941cd494ec6d3f5cd81 ; CI post-fusion 37146178657 verte, chaque PHP 8.4/8.5 avec PostgreSQL : 384 tests / 3702 assertions, Pint/PHPStan/audit/documentation réussis. Preuve et tous les SHA : docs/quality/MERGE_SOCLE.md.
+
+Les neuf branches temporaires sont supprimées après vérification des 30 références de commits dans main et de l'absence de PR dépendante. Restent main et les trois branches permanentes ; backend/socle-auth synchronisée, branches des collègues et PR #12 conservées. Aucune réécriture, aucun contournement de protection, aucun déploiement.
+
+B07/B08/B09/B12/B13/B32 DONE ; le tableau Systalink comporte maintenant 12 lots terminés, 8 partiels et 2 bloqués. Contributions et autres raccordements attendent les pilotes ; Qodana et réception complète restent ouverts. Aucun GO_FRONTEND. Reprendre sur backend/socle-auth ; ne pas recréer les anciennes branches pour consulter leurs commits, tous conservés dans main.
+
+## 2026-10-03 — Reprise de la partie de Lamine, B11
+
+- Demande : « continuer avec ceux de Lamine ». Reprise sur sa branche permanente ; socle main `7a8c672` et travail B11 de mdev44-code `1c380c4` conservés par merge local `93009c3`, sans conflit ni réécriture d'auteur.
+- Compléments B11 : migration additive de versions positives pour les contenus éditables, protection de la date d'acceptation, factory de résolution attribuée à l'auteur, tests des FK/suppressions et annulation/réapplication des migrations, contrat des données.
+- Contrôles locaux : Pint/PHPStan réussis ; 282 tests / 2483 assertions unités-HTTP-architecture et 151 tests / 1316 assertions PostgreSQL. Tests B11 ciblés rejoués après les corrections : 18 tests / 66 assertions. Audit Composer sans alerte, validation stricte réussie avec dépréciations de Composer 2.8.5 sous PHP 8.5 ; 28 types API à jour.
+- Preuves : `docs/quality/B11_COLLABORATION.md` ; suivi et 27 cartes Systalink dans `participants/LamineGL/`. B11 préparé pour revue, sans fusion ni validation humaine présumée ; garder la carte Systalink En cours jusqu'à intégration.
+- Limites : aucun endpoint des demandes ni résolution concurrente livré, aucun autre lot de Lamine terminé. La branche B11 du collègue et la PR capsules #12 sont préservées. Prochain lot B14 après intégration de B11 ; coordonner HelpIntent avec BV201 avant BC07.
+- Référence réelle du commit final et CI à communiquer dans la PR et le bilan ; aucun SHA autoréférent écrit dans ce commit.

@@ -12,16 +12,16 @@ Utiliser le titre et le texte ci-dessous comme titre/description de la carte. Si
 | B04 | Normaliser le contrat HTTP | Terminé | Erreurs, corrélation, pagination et OpenAPI ; intégré. |
 | B05 | Créer identité et référentiels | Terminé | Utilisateurs UUID, rôles et technologies ; intégré. |
 | B06 | Créer l’inscription | Terminé | Validation, conditions versionnées, champs serveur refusés ; intégré. Conditions réelles à configurer avant ouverture. |
-| B07 | Sécuriser sessions et CORS | En cours — prêt pour revue | PR #10, CI verte ; fusion attendue. |
-| B08 | Vérifier le courriel et réinitialiser le mot de passe | En cours — prêt pour revue | PR #11, CI verte ; SMTP réel réservé à la livraison. |
-| B09 | Gérer le compte courant et ses permissions | En cours — prêt pour revue | PR #13, CI verte. |
+| B07 | Sécuriser sessions et CORS | Terminé | PR #10 fusionnée : sessions Sanctum, CSRF et CORS intégrés et testés. |
+| B08 | Vérifier le courriel et réinitialiser le mot de passe | Terminé | PR #11 fusionnée : vérification du courriel et reset intégrés ; SMTP réel à recevoir avant ouverture. |
+| B09 | Gérer le compte courant et ses permissions | Terminé | PR #13 fusionnée : compte courant et capacités intégrés et testés. |
 | B10 | Créer les profils et contributions | En cours — partiel | PR #14 : profils/édition/technologies prêts ; contributions métier restantes. |
-| B12 | Tracer audit et révisions | En cours — prêt pour revue | PR #15, CI verte ; consommateurs métier à raccorder dans leurs lots. |
-| B13 | Empêcher les doublons de commandes | En cours — prêt pour revue | PR #16, CI verte ; socle d’idempotence et premier usage profil. |
+| B12 | Tracer audit et révisions | Terminé | PR #15 fusionnée : audit et révisions intégrés ; consommateurs métier à raccorder dans leurs lots. |
+| B13 | Empêcher les doublons de commandes | Terminé | PR #16 fusionnée : socle d’idempotence et premier usage profil intégrés et testés. |
 | B29 | Livrer les notifications internes | En cours — partiel | PR #18 : boîte privée/outbox/lu/non lu prêts ; abonnements métier restants. |
 | B30 | Recueillir les signalements | En cours — partiel | PR #19 : profils, quotas, confidentialité et file admin prêts ; autres cibles restantes. |
 | B31 | Modérer et retirer les contenus | En cours — partiel | PR #19 : décisions et masquage de profil prêts ; versions/kits/recherche restants. |
-| B32 | Administrer rôles et suspensions | En cours — prêt pour revue | PR #17 : révocation globale, audit, concurrence et dernier admin testés. |
+| B32 | Administrer rôles et suspensions | Terminé | PR #17 fusionnée : rôles/suspensions, révocation, audit et dernier admin intégrés et testés. |
 | B39 | Vérifier la sécurité de toutes les API | En cours — partiel | Socle testé ; attendre projets/offres/demandes/capsules/lab et BH10. |
 | B40 | Compléter le contrat API et générer les types | En cours — partiel | Inventaire du socle et 28 types générés/compilés ; endpoints métier restants. |
 | B41 | Exécuter la recette backend complète | En cours — partiel | Parcours modération/notification vérifié ; demande → résolution → capsule → test/réutilisation absent. |
@@ -29,8 +29,6 @@ Utiliser le titre et le texte ci-dessous comme titre/description de la carte. Si
 | B43 | Exécuter Qodana backend | À faire — bloqué | Projet/token CI et paramètres réels manquants ; analyse non exécutée. |
 | B44 | Recevoir le backend P0 | À faire — bloqué | Domaines incomplets, revue humaine/gate/GO_FRONTEND manquants. |
 
-Sous-tâches développées et testées pendant cette session : administration B32 ; infrastructure/boîte privée de notifications ; signalement/modération du profil ; inventaire OpenAPI/types générés ; contrôle de santé console ; exercice local de sauvegarde/restauration. Elles peuvent être cochées comme réalisées dans leurs cartes, en conservant la revue et les raccordements restants visibles. **Aucune nouvelle carte de lot entier ne passe à Terminé avant sa réception/fusion vérifiée.**
+**Après intégration : 12 lots terminés, 8 partiels, 2 bloqués.** Déplacer maintenant B07, B08, B09, B12, B13 et B32 vers Terminé ; B01–B06 étaient déjà intégrés. Les livraisons partielles B10/B29/B30/B31/B39–B42 sont dans main, mais leurs raccordements et contrôles restants empêchent de clôturer ces cartes. B43/B44 restent bloqués.
 
-Preuves : [réception partielle](../../../quality/SOCLE_RECEPTION_PARTIELLE.md), [progression](PROGRESS.md), [blocages](../../../BLOCKERS.md). B01–B06 étaient déjà intégrés. Prochaine étape : revue des PR dans l'ordre des dépendances et livraison des domaines par les deux autres responsables ; pas de frontend avant BACKEND_GATE + GO_FRONTEND humain.
-
-Dernière livraison : [PR #20](https://github.com/haas-projet/haas/pull/20), code 68b00f8, CI 37141557467 verte (384 tests / 3702 assertions par PHP 8.4/8.5). Les cartes B39–B44 conservent leurs réserves.
+Preuve : [fusions du socle](../../../quality/MERGE_SOCLE.md), main `a051e81`, [CI 37146178657](https://github.com/haas-projet/haas/actions/runs/37146178657) verte : 384 tests / 3702 assertions par PHP 8.4/8.5. Neuf branches temporaires supprimées, les trois branches de l'équipe et main conservées. Reprendre sur backend/socle-auth.

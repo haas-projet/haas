@@ -2,7 +2,7 @@
 
 Inspecter le dépôt, préserver les fichiers/commits/saisies existants, lire ADR-006. Appliquer F18 : projets ouverts, offres consenties, décision propriétaire, fil et projection publique contrôlés. Nouvelle recette avant GO_FRONTEND ; ne pas prendre un ancien gate pour un accord sur ce périmètre. Systalink/Vercel inchangé.
 
-État courant : B01–B09, B12–B13 et B32 DONE (12 lots) après intégration autorisée. B10/B29/B30/B31 et B39–B42 IN_PROGRESS ; B43/B44 BLOCKED. S01/S02 restent partiels. Les dix PR du socle sont fusionnées dans main (a051e81, CI 37146178657 verte). Neuf branches temporaires supprimées, quatre branches permanentes conservées. Branche de reprise : `backend/socle-auth`. BACKEND_GATE NON REÇU, aucun GO_FRONTEND/GO_PRODUCTION. Voir ../quality/MERGE_SOCLE.md et le tableau individuel SYSTALINK_TASKS.md. Les entrées suivantes sont historiques.
+État courant : B01–B09, B11–B13 et B32 DONE (13 lots). Travail de Madina intégré : enums #12, B11 #23 avec compléments #22, brique interne B1 #27 corrigée. B35 reste IN_PROGRESS (connexion laboratoire/isolation et défaut pédagogique à livrer) ; B38 BLOCKED par deux probes HTTP ; B22/B23 IN_PROGRESS, PR #29/#30 en brouillon non fusionnées. Les 26 autres lots de la coordination #2 restent à faire. B10/B29/B30/B31 et B39–B42 IN_PROGRESS ; B43/B44 BLOCKED. S01/S02 restent partiels. BACKEND_GATE NON REÇU, aucun GO_FRONTEND/GO_PRODUCTION. Voir [la revue et les fusions](../quality/MERGE_MADINA.md), [la preuve B11](../quality/B11_COLLABORATION.md) et le [suivi de Lamine](participants/LamineGL/HANDOFF.md). Les entrées suivantes sont historiques.
 
 ## Reprise après préparation GitHub — 2026-10-01
 
@@ -187,3 +187,11 @@ Demande explicite « faite ca » : intégration des PR #10, #11, #13–#20, dans
 Les neuf branches temporaires sont supprimées après vérification des 30 références de commits dans main et de l'absence de PR dépendante. Restent main et les trois branches permanentes ; backend/socle-auth synchronisée, branches des collègues et PR #12 conservées. Aucune réécriture, aucun contournement de protection, aucun déploiement.
 
 B07/B08/B09/B12/B13/B32 DONE ; le tableau Systalink comporte maintenant 12 lots terminés, 8 partiels et 2 bloqués. Contributions et autres raccordements attendent les pilotes ; Qodana et réception complète restent ouverts. Aucun GO_FRONTEND. Reprendre sur backend/socle-auth ; ne pas recréer les anciennes branches pour consulter leurs commits, tous conservés dans main.
+
+## 2026-10-07 — Reprise après revue de Madina
+
+Fusions distantes vérifiées : #12 33eafa0, #22 957029b dans B11, #23 17c6daa et #27 f1f6238 dans main. Lire docs/quality/MERGE_MADINA.md pour les SHA complets, contrôles et limites. B11 DONE ; 13 lots backend entiers terminés. Correctif UTC B1 cdbe96f inclus. Head combiné 108aa7d : 488 tests / 3977 assertions locaux et sous les deux PHP de la CI 37637092346, contrôles verts.
+
+Reprendre B22 #29 (retrait avec date de publication conservée, champs serveur, versions/technologies), puis B23 #30 (source vraiment résolue, validations, verrouillage/rejeu et tests HTTP). Les PR restent en brouillon. B38 #28 reste BLOCKED : probes Origin démonstration=403 et Origin HAAS=deux cookies ; appliquer le patch inerte docs/quality/probes/B38_ISOLATION.patch sur la branche B2 pour reproduire, avec base locale dédiée. Corriger origine/routage sans session et isolation réelle base/runtime/configuration, puis revalider la concurrence.
+
+B35 IN_PROGRESS : service transactionnel et concurrence reçus, câblage haas_lab/isolation et module défectueux pédagogique à compléter avant B36. Le cluster PostgreSQL temporaire de revue est arrêté. Travail local initial B14 préservé ; ne pas écraser sa modification de routes. Toutes les branches distantes sont conservées. Aucun BACKEND_GATE, GO_FRONTEND ou GO_PRODUCTION.

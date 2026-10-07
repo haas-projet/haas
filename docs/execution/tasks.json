@@ -153,7 +153,8 @@
       "refs": "AC10 ; F02/F03/F04",
       "phase": "B",
       "execution_order": 13,
-      "status": "TODO"
+      "status": "DONE",
+      "evidence": ["docs/quality/B11_COLLABORATION.md", "docs/quality/MERGE_MADINA.md"]
     },
     {
       "id": "B12",
@@ -276,7 +277,8 @@
       "refs": "F05/F06 ; AC13",
       "phase": "B",
       "execution_order": 24,
-      "status": "TODO"
+      "status": "IN_PROGRESS",
+      "evidence": ["docs/quality/MERGE_MADINA.md"]
     },
     {
       "id": "B23",
@@ -287,7 +289,8 @@
       "refs": "F05 ; AC03/AC12",
       "phase": "B",
       "execution_order": 25,
-      "status": "TODO"
+      "status": "IN_PROGRESS",
+      "evidence": ["docs/quality/MERGE_MADINA.md"]
     },
     {
       "id": "B24",
@@ -423,7 +426,8 @@
       "refs": "AC16/AC21 ; B1-01–B1-05",
       "phase": "B",
       "execution_order": 37,
-      "status": "TODO"
+      "status": "IN_PROGRESS",
+      "evidence": ["docs/quality/MERGE_MADINA.md"]
     },
     {
       "id": "B36",
@@ -456,7 +460,8 @@
       "refs": "AC23 ; B2 backend ; ADR-004 / DEP",
       "phase": "B",
       "execution_order": 40,
-      "status": "TODO"
+      "status": "BLOCKED",
+      "evidence": ["docs/quality/MERGE_MADINA.md"]
     },
     {
       "id": "BC01",

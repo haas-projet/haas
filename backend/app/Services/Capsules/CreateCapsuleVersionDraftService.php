@@ -33,7 +33,7 @@ final class CreateCapsuleVersionDraftService
         private readonly WriteCapsuleAudit $audit,
     ) {}
 
-    /** @return array{version_id: string, replay: bool} */
+    /** @return array{version_id: string} */
     public function handle(User $actor, Capsule $capsule, VersionDraftData $draft, IdempotencyKey $key): array
     {
         $target = 'POST /api/v1/capsules/'.$capsule->id.'/versions';
@@ -53,7 +53,6 @@ final class CreateCapsuleVersionDraftService
 
         return [
             'version_id' => $result->references['version_id'],
-            'replay' => $result->status === 200,
         ];
     }
 

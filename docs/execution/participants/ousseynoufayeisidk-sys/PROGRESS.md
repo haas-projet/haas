@@ -149,3 +149,9 @@ Demande explicite « faite ca » : intégration des PR #10, #11, #13–#20, dans
 Les neuf branches temporaires sont supprimées après vérification des 30 références de commits dans main et de l'absence de PR dépendante. Restent main et les trois branches permanentes ; backend/socle-auth synchronisée, branches des collègues et PR #12 conservées. Aucune réécriture, aucun contournement de protection, aucun déploiement.
 
 B07/B08/B09/B12/B13/B32 DONE ; le tableau Systalink comporte maintenant 12 lots terminés, 8 partiels et 2 bloqués. Contributions et autres raccordements attendent les pilotes ; Qodana et réception complète restent ouverts. Aucun GO_FRONTEND. Reprendre sur backend/socle-auth ; ne pas recréer les anciennes branches pour consulter leurs commits, tous conservés dans main.
+
+## 2026-10-07 — Synchronisation B11 avant fusion
+
+Demande explicite : vérifier et fusionner le travail de Madina dans le dépôt distant. Le complément #22 approuvé par mdev44-code est fusionné dans la branche B11 (957029b), après la fusion des enums #12 dans main (33eafa0). Synchronisation locale de main : trois conflits documentaires résolus sans suppression des contributions B11 ; aucun changement des migrations initiales. Les huit fichiers applicatifs ajoutés par le merge sont exactement les enums et tests de #12.
+
+Contrôles PHP 8.5.10 / PostgreSQL 17 local isolé, base haas_b11_review_test sur 127.0.0.1:55447 : 312 tests / 2538 assertions sans SQL ; 151 tests / 1316 assertions SQL ; validate-pack 18/18 ; check-deployment-docs 7/7 ; diff --check propre. Publication de la synchronisation pour obtenir la CI du nouveau SHA avant fusion #23. Revue automatisée ; seule l'approbation humaine existante de #22 est constatée, aucune signature humaine inventée. Aucun gate ni frontend.

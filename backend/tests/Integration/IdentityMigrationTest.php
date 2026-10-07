@@ -18,6 +18,13 @@ final class IdentityMigrationTest extends PostgresTestCase
 
     private function runIdentityMigration(string $method): void
     {
+        if ($method === 'down') {
+            // Les tables des domaines consommateurs référencent `technologies` et `users` ;
+            // les retirer avant le down() de B05 pour que PostgreSQL puisse déposer la table parente.
+            foreach (['resolutions', 'comments', 'proposals', 'request_technologies', 'help_requests'] as $dependent) {
+                Schema::dropIfExists($dependent);
+            }
+        }
         $migration = require database_path('migrations/2026_10_02_000005_b05_create_identity_and_reference_tables.php');
         $this->assertInstanceOf(Migration::class, $migration);
         (new ReflectionMethod($migration, $method))->invoke($migration);

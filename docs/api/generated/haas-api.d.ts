@@ -33,6 +33,48 @@ export type capsules_lab_CapsuleVersionDraftInput = { readonly "version_label": 
 
 export type capsules_lab_CapsuleVersionDraftUpdate = { readonly "lock_version": number; readonly "body"?: string; readonly "limits"?: string; readonly "technologies"?: ReadonlyArray<{ readonly "technology_id": string; readonly "version_label"?: string; }>; };
 
+export type community_Comment = { readonly "id": string; readonly "request_id": string; readonly "author": { readonly "id": string; readonly "handle": string; }; readonly "body": string; readonly "body_html": string; readonly "lock_version": number; readonly "created_at": string | null; readonly "edited_at": string | null; };
+
+export type community_CommentCreateInput = { readonly "body": string; };
+
+export type community_CommentDetail = { readonly "data": community_Comment; };
+
+export type community_CommentPage = { readonly "data": ReadonlyArray<community_Comment>; readonly "meta": OPENAPI_PaginationMeta; };
+
+export type community_CommentRevision = { readonly "id": string; readonly "comment_version": number; readonly "action": "created" | "updated" | "before_edit"; readonly "body": string; readonly "body_html": string; readonly "occurred_at": string; };
+
+export type community_CommentRevisionPage = { readonly "data": ReadonlyArray<community_CommentRevision>; readonly "meta": OPENAPI_PaginationMeta; };
+
+export type community_CommentUpdateInput = { readonly "body": string; readonly "lock_version": number; };
+
+export type community_CreateHelpRequestInput = (community_HelpRequestDraftInput | community_HelpRequestPublicationInput | community_HelpRequestQuestionInput);
+
+export type community_HelpIntent = "unblock" | "review_solution" | "reproduce_behavior" | "ask_question";
+
+export type community_HelpRequest = { readonly "help_intent": "unblock" | "review_solution" | "reproduce_behavior" | "ask_question"; readonly "title": string; readonly "goal": string | null; readonly "expected": string | null; readonly "observed": string | null; readonly "attempts": string | null; readonly "environment": string | null; readonly "code": string | null; readonly "code_language": string | null; readonly "primary_language": string; readonly "reproduction_url": string | null; readonly "technologies": ReadonlyArray<{ readonly "id": string; readonly "slug": string; readonly "name": string; readonly "version_label": string | null; }>; readonly "id": string; readonly "author": { readonly "id": string; readonly "handle": string; }; readonly "state": "draft" | "open" | "in_progress" | "resolved" | "archived"; readonly "lock_version": number; readonly "created_at": string; readonly "updated_at": string; };
+
+export type community_HelpRequestCreated = { readonly "data": community_HelpRequest; };
+
+export type community_HelpRequestDetail = { readonly "data": community_HelpRequest; };
+
+export type community_HelpRequestDraftInput = (unknown) & { readonly "mode": "draft"; readonly "help_intent": "unblock" | "review_solution" | "reproduce_behavior" | "ask_question"; readonly "title": string; readonly "goal"?: string | null; readonly "expected"?: string | null; readonly "observed"?: string | null; readonly "attempts"?: string | null; readonly "environment"?: string | null; readonly "code"?: string | null; readonly "code_language"?: string | null; readonly "primary_language"?: string; readonly "reproduction_url"?: string | null; readonly "technologies"?: ReadonlyArray<community_RequestTechnologyInput>; };
+
+export type community_HelpRequestPage = { readonly "data": ReadonlyArray<community_HelpRequest>; readonly "meta": OPENAPI_PaginationMeta; };
+
+export type community_HelpRequestPublicationInput = (unknown) & { readonly "mode": "publish"; readonly "help_intent": "unblock" | "review_solution" | "reproduce_behavior"; readonly "title": string; readonly "goal": string; readonly "expected": string; readonly "observed": string; readonly "attempts": string; readonly "environment": string; readonly "code"?: string | null; readonly "code_language"?: string | null; readonly "primary_language"?: string; readonly "reproduction_url"?: string | null; readonly "technologies": ReadonlyArray<community_RequestTechnologyInput>; };
+
+export type community_HelpRequestPublishInput = { readonly "lock_version": number; };
+
+export type community_HelpRequestQuestionInput = (unknown) & { readonly "mode": "publish"; readonly "help_intent": "ask_question"; readonly "title": string; readonly "goal": string; readonly "expected"?: string | null; readonly "observed": string; readonly "attempts"?: string | null; readonly "environment"?: string | null; readonly "code"?: string | null; readonly "code_language"?: string | null; readonly "primary_language"?: string; readonly "reproduction_url"?: string | null; readonly "technologies": ReadonlyArray<community_RequestTechnologyInput>; };
+
+export type community_HelpRequestRevision = { readonly "id": string; readonly "request_version": number; readonly "action": "updated" | "published"; readonly "changed_fields": ReadonlyArray<"help_intent" | "title" | "goal" | "expected" | "observed" | "attempts" | "environment" | "code" | "code_language" | "primary_language" | "reproduction_url" | "technologies" | "state">; readonly "edit_note": string | null; readonly "occurred_at": string; };
+
+export type community_HelpRequestRevisionPage = { readonly "data": ReadonlyArray<community_HelpRequestRevision>; readonly "meta": OPENAPI_PaginationMeta; };
+
+export type community_HelpRequestUpdateInput = (unknown | unknown | unknown | unknown | unknown | unknown | unknown | unknown | unknown | unknown | unknown | unknown) & { readonly "lock_version": number; readonly "help_intent"?: "unblock" | "review_solution" | "reproduce_behavior" | "ask_question"; readonly "title"?: string; readonly "goal"?: string | null; readonly "expected"?: string | null; readonly "observed"?: string | null; readonly "attempts"?: string | null; readonly "environment"?: string | null; readonly "code"?: string | null; readonly "code_language"?: string | null; readonly "primary_language"?: string; readonly "reproduction_url"?: string | null; readonly "technologies"?: ReadonlyArray<community_RequestTechnologyInput>; readonly "edit_note"?: string | null; };
+
+export type community_RequestTechnologyInput = { readonly "id": string; readonly "version_label"?: string | null; };
+
 export type current_account_Me = { readonly "id": string; readonly "handle": identity_Handle; readonly "email": string; readonly "email_verified": boolean; readonly "role": identity_AccountRole; readonly "status": "active"; readonly "is_demo": boolean; readonly "can": { readonly "manage_account_mail": boolean; readonly "update_profile": boolean; readonly "participate": boolean; readonly "moderate": boolean; readonly "administer": boolean; }; };
 
 export type identity_AccountRole = "member" | "moderator" | "admin";
@@ -57,7 +99,7 @@ export type moderation_Receipt = (moderation_ReportFields);
 
 export type moderation_ReportFields = { readonly "id": string; readonly "resource_type": "profile"; readonly "resource_id": string; readonly "status": "new" | "in_review" | "resolved" | "dismissed"; readonly "lock_version": number; readonly "created_at": string; [key: string]: unknown; };
 
-export type notifications_Notification = { readonly "id": string; readonly "kind": "profile.moderated"; readonly "message": string; readonly "target_path": "\/me\/profile"; readonly "read_at": string | null; readonly "created_at": string; };
+export type notifications_Notification = { readonly "id": string; readonly "kind": "profile.moderated" | "comment.created"; readonly "message": string; readonly "target_path": string; readonly "read_at": string | null; readonly "created_at": string; };
 
 export type profiles_ProfileFields = { readonly "id": string; readonly "handle": identity_Handle; readonly "avatar_initials": string; readonly "bio": string; readonly "country": string | null; readonly "primary_language": string; readonly "github_url": string | null; readonly "technologies": ReadonlyArray<profiles_Technology>; readonly "is_demo": boolean; readonly "contributions": null; [key: string]: unknown; };
 

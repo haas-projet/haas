@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\HelpRequests\HelpIntent;
 use App\Enums\HelpRequests\HelpRequestState;
 use Database\Factories\HelpRequestFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -12,8 +13,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-/** @property HelpRequestState $state */
-#[Fillable(['title', 'goal', 'expected', 'observed', 'attempts', 'environment'])]
+/**
+ * @property HelpIntent $help_intent
+ * @property HelpRequestState $state
+ */
+#[Fillable(['title', 'goal', 'expected', 'observed', 'attempts', 'environment', 'code', 'code_language', 'primary_language', 'reproduction_url'])]
 class HelpRequest extends Model
 {
     /** @use HasFactory<HelpRequestFactory> */
@@ -60,6 +64,8 @@ class HelpRequest extends Model
     protected function casts(): array
     {
         return [
+            'help_intent' => HelpIntent::class,
+            'hidden_at' => 'immutable_datetime',
             'state' => HelpRequestState::class,
             'lock_version' => 'integer',
         ];

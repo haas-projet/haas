@@ -63,6 +63,21 @@ Codex, à la demande de l'utilisateur : reprise sans réécriture du travail B11
 
 Codex, à la demande de l'utilisateur : audit du travail `93fafea`, probes de défauts puis corrections de provenance, concurrence, validation, édition et idempotence sans modifier les décisions Q8/Q9. Contrôles locaux : 13 tests / 111 assertions PostgreSQL (six courses réelles), 323 tests / 2675 assertions hors SQL, Pint passé, PHPStan sans erreur, 18 + 7 contrôles documentaires, 33 types API à jour. Preuves, essais échoués et limites dans `docs/quality/B23_DRAFT_READINESS.md`. Synchronisation B22/main, suite combinée complète, CI distante et revue humaine en attente. Aucune validation humaine simulée ; aucun frontend ou déploiement.
 
+## B14 — Création des demandes, 4 octobre 2026
+
+| Outil / intervention | Périmètre | Contrôles | Revue humaine de l'équipe |
+|---|---|---|---|
+| Codex, suite de Lamine à la demande de l'utilisateur, après confirmation que Madina n'a pas commencé B14/HelpIntent | Endpoint de création, validation, DTO, Policy, service, Resource, enum partagé unique, migration additive, audit/idempotence, contrats et tests ; B11 et suivi de Madina conservés | Pint/PHPStan ; 284 tests / 2686 assertions et 192 tests PostgreSQL / 1732 assertions ; audit sans alerte, validation Composer, 36 types API à jour. Voir B14_CREATION.md ; CI finale à observer dans la PR | En attente ; aucune signature humaine simulée |
+
+
+## B15 — Lecture et recherche, 4 octobre 2026
+
+Codex, à la demande de continuer la partie de Lamine : Queries de visibilité, liste/détail, Request/DTO, collection paginée, contrat et tests. Travail B11 de Madina et PR #12 conservés ; modification locale des routes capsules préservée dans le répertoire principal, livraison isolée dans `.worktrees/b15`. 511 tests / 4834 assertions réussis (dont 227 / 2023 PostgreSQL), Pint/PHPStan, validation/prérequis/audit Composer et documentation verts. Preuves et limites dans B15_READING.md. Revue humaine en attente ; aucune identité ni validation d'un collègue simulée. CI du SHA final à observer dans la PR.
+
+## B16 — Édition, publication et historique, 4 octobre 2026
+
+Codex, à la demande de continuer la partie de Lamine : FormRequests/DTO/Policy/Service/Queries/Resources, migration additive, validation B14 partagée, audit/idempotence, contrat et tests. Branches/PR de Madina et fichier capsules local préservés. Tests HTTP, droits et versions, rollback et six courses PostgreSQL réelles ; commandes et résultats exacts dans `docs/quality/B16_EDITING.md`. Corrections des tests de retour B05/B11 pour respecter la nouvelle clé étrangère. Revue humaine en attente ; aucune identité ni validation d'un collègue simulée. SHA final et CI à observer dans la PR. Aucun frontend ni déploiement.
+
 ## Lot 2 B35 brique B1 — 5 octobre 2026
 
 | Outil / intervention | Périmètre | Contrôles | Revue humaine de l'équipe |
@@ -70,6 +85,18 @@ Codex, à la demande de l'utilisateur : audit du travail `93fafea`, probes de d�
 | Claude Code (Opus 4.7, `claude-opus-4-7`), participant `mdev44-code` sur `backend/capsules-laboratoire-b35-brique-b1` (dérivée de `origin/backend/capsules-laboratoire`) | B35 brique B1 : migrations `create_test_events_table`/`create_test_orders_table`, modèles `App\Models\Lab\{LabConnection,TestEvent,TestOrder}` (point de bascule applicatif vers `haas_lab` via `LabConnection::NAME`), factories jumelles, DTO `App\Data\Lab\{TestEventData,ProcessedTestEvent}`, service transactionnel `App\Services\Lab\ProcessTestEventService::handle` ciblant `DB::connection(LabConnection::NAME)->transaction(...)` et renvoyant un résultat typé `{order, duplicate}` avec validation stricte (regex `D`-ancrées) et idempotence via `insertOrIgnore` sur `(run_id, event_id)` ; tests Integration schéma, service B1-01..04 avec cas atomicité et rejeu divergent, concurrence réelle B1-05 pompée simultanément et chevauchement forcé par un trigger `pg_sleep(0.3)` posé via la connexion secondaire ; mise à jour `docs/execution/participants/mdev44-code/{PROGRESS,HANDOFF}.md` et `docs/AI_USAGE.md` | `composer lint` passed, `composer analyse` niveau 8 `[OK] No errors`, `composer test` 148 tests / 977 assertions OK, `composer test:integration` 59 tests / 417 assertions OK sous PostgreSQL 17 / `haas_capsules_test` / Laragon PHP 8.4.15 | En attente |
 
 Décisions explicites : migration sans préfixe de lot — dérogation assumée à `docs/execution/BACKEND_A_TROIS.md:110` (« une migration par table, nom descriptif, sans préfixe de lot »), à arbitrer par le relecteur ; `run_id` reste un identifiant logique sans FK vers `lab_runs` (bases `haas_app` et `haas_lab` distinctes, aucune FK inter-bases possible) ; aucune route HTTP exposée (consommation par le worker B36 à venir). Écart ouvert : les tables sont pour l'instant sur la connexion par défaut parce que `LabConnection::NAME = null` ; le câblage de `haas_lab` touchera `App\Models\Lab\LabConnection::NAME` côté domaine, `backend/config/database.php`, `backend/phpunit.xml` et la CI côté responsable 1, puis la connexion secondaire de nettoyage et la configuration `RefreshDatabase` côté tests (demande à soumettre à `ousseynoufayeisidk-sys` pour la part socle). PHP par défaut `C:\Program Files\php\php.exe` 8.4.3 n'enregistre ni `openssl`, ni `pdo_pgsql`, ni le transport `unix://` ; `C:\laragon\bin\php\php-8.4.15-Win32-vs17-x64\php.exe` corrige les deux premiers mais pas le troisième — l'étape B36 devra passer par la CI Linux `ubuntu-24.04` ou WSL2.
+
+## B17 — Commentaires historisés, 7 octobre 2026
+
+Codex, suite demandée de Lamine et publication : reprise de l'implémentation B17 non commitée existante, revue des droits/verrous/idempotence/Markdown, correction de fixtures et typage réel, ajout de tests de concurrence, migration et notifications ; contrat OpenAPI/types et suivi. Historiques B14/B15/B16 et B35 conservés lors du seul conflit documentaire de main. 671 tests / 6805 assertions distincts, Pint/PHPStan et contrôles Composer/documentaires réellement exécutés ; commandes dans B17_COMMENTS.md. Aucune nouvelle dépendance, aucune identité Git de collègue ou signature humaine inventée. CI du SHA final en attente d'observation après publication. Aucun frontend, Qodana ou déploiement annoncé.
+
+## B17 — Reproduction et correction d'un échec de CI de session
+
+Codex, poursuite de la publication autorisée : la CI 37657236028 échoue sous PHP 8.4 dans un ancien test Idempotency après 23 heures simulées ; PHP 8.5 réussit. Lecture du code Laravel installé et reproduction locale avec collecte forcée : 419, 1 test / 17 assertions avant correction. Le helper navigateur suit les échéances des cookies par nom/valeur et utilise l'horloge simulée ; le test du refus serveur d'un cookie périmé reste explicite. Aucune modification de production ou dépendance, aucune désactivation de CSRF. Revue indépendante des trois fichiers en lecture seule, sans défaut concret relevé. Contrôles ciblés 20 / 139, hors SQL 328 / 3563, Pint/PHPStan réussis ; preuve et contrôles finaux dans B17_COMMENTS.md. CI du nouveau head et revue humaine à constater, sans validation inventée.
+
+## Consolidation après fusions intermédiaires externes
+
+Codex, poursuite de la publication demandée : constat des fusions externes #32/#26/#25 vers B16/B15/B14, sans les attribuer à une revue humaine absente. Merge normal de B15 f346985 dans B14 61c4184 pour conserver B16/B17 dans la proposition #24 vers main, sans conflit ni réécriture. Backend identique au correctif B17 8234470, testé 671 / 6805 et CI verte PHP 8.4/8.5 (37662853388). Contrôles documentaires et empreintes relancés ; nouvelle CI à constater. Dernier inventaire 13 références après création externe de B24 ; travail extérieur et modification locale initiale préservés. Aucune intégration main, approbation humaine, gate ou production inventée.
 
 ## Revue et intégration du travail de Madina — 7 octobre 2026
 
@@ -97,3 +124,9 @@ Codex (GPT-6), sur demande de l’utilisateur : revue du schéma B22 conservant 
 ## Synchronisation B23 avec le schéma renforcé B22
 
 Merge normal du commit B22 testé2148322 dans B23 corrigé57f0727 ; historiques IA/participant conservés. Rollback capsules repris par chemins explicites, enfants avant parents ; pivot technologique dédoublonné dans le helper de migration. Contrôles réels avant commit : 327tests/2704assertions horsSQL, Pint, pack18/18, documentationdéploiement7/7, 33types àjour. Le codeSQL B22 a ses551tests/4157assertions avantintégration ; les suitesSQL combinées après réceptionmain doivent encore être exécutées. Aucune déclaration de readiness distante sur cette étape locale.
+
+## Préparation des PR avant approbation — 7 octobre 2026
+
+Codex, demande de l'utilisateur : réception de main e3bd34c après fusion réelle de #31 ; résolution des cinq conflits documentaires de #24 en conservant les historiques et les 122 lots. Aucun changement applicatif : seul backend/README.md rejoint main. Code identique à d9cba0b testé 671 / 6805 et CI verte ; contrôles documentaires relancés, nouveau head CI à observer. Revues parallèles et corrections séparées des PR B22/B23/B24 et B38, bases PostgreSQL locales distinctes ; aucun contrôle absent compté réussi et aucune approbation humaine inventée. Travail local initial, migrations et contributions préexistantes préservés.
+
+B23 avec main b76612d : conflits résolus en conservant les casts et champs B14–B17 et en retirant les enfants capsules et révisions avant les tables parentes. Contrôles réels : 343 tests / 3720 assertions hors SQL, pack 18/18, 54 types API à jour, PHPStan niveau 8 réussi par la revue parallèle. La suite SQL est interrompue avant correction de fixtures anciennes incompatibles avec le nouveau CHECK de publication et ajout du refus d’une demande source masquée ; aucun résultat SQL complet revendiqué. Cette synchronisation locale ne déclare pas la PR prête.

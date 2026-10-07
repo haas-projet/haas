@@ -65,3 +65,27 @@ La revue parallèle identifie aussi une perte de snapshot dans le down du journa
 | `php vendor/bin/phpunit --testsuite Integration --log-junit storage/logs/b24-q12-integration.xml` | Suite complète lancée sur `haas_b24_review_test`, résultat encore en attente |
 
 Journal SQL ignoré `backend/storage/logs/b24-q12-integration.log`. Aucune somme de ciblés qui se recouvrent n’est annoncée comme nombre de tests uniques. Le candidat est destiné à la CI en brouillon ; résultat SQL complet, CI du SHA exact, Qodana et revue humaine restent à recevoir. Aucun `DONE`, gate, frontend ni déploiement.
+
+## Réception finale — 7 octobre 2026, 22:06 UTC
+
+Code applicatif du candidat `994de150cfd7d0f140cdfb8d4336ace7969d253e`, puis merge documentaire `e01202fb4f89381c44d4ba5ed2a3fcf70cac47f3` du parent B23 final `11b9fec088cb1ecd11e074f1b8a3fe3a0805ef85`. Le diff intégral de `backend/` entre ces deux commits est vide ; la suite SQL a continué sur le même code sans interruption ni seconde suite sur sa base. Aucun code applicatif ou test n’est modifié dans ce bilan.
+
+| Contrôle final réellement terminé | Résultat |
+|---|---|
+| `php vendor/bin/phpunit --testsuite Unit,Feature,Architecture` | 350 tests / 3800 assertions, OK sur le candidat inchangé |
+| `php vendor/bin/phpunit --testsuite Integration --log-junit storage/logs/b24-q12-integration.xml` | 524 tests / 4037 assertions, OK ; exit 0, JUnit sans erreur, échec ou test ignoré ; durée 15:25.137 |
+| Total des suites disjointes | **874 tests / 7837 assertions uniques réussis** ; les ciblés précédents ne sont pas ajoutés |
+| Pint / PHPStan niveau 8 | `passed` / `[OK] No errors` sur le code figé |
+| `composer validate --strict --no-check-publish` | composer.json valide |
+| `composer check-platform-reqs --no-interaction` | Toutes les exigences satisfaites, exit 0 |
+| `composer audit --locked --no-interaction` | Aucun avis de vulnérabilité, exit 0 ; notices PHP 8.5 du PHAR externe distinctes du résultat |
+| `node scripts/validate-pack.mjs` / `node scripts/check-deployment-docs.mjs` | 18/18 et 7/7 contrôles documentaires réussis après le bilan |
+| `php scripts/generate-api-types.php --check` depuis la racine | 57 types API à jour |
+
+Réception locale sous PHP 8.5.10 et PostgreSQL 17, exclusivement sur `haas_b24_review_test` / `haas_test` à `127.0.0.1:55447`. Log et JUnit restent ignorés dans `backend/storage/logs/b24-q12-integration.*` ; aucune clé, donnée privée ou copie de vendor n’est publiée. Le schéma de test est remis à zéro par les helpers gardés ; cela ne prétend pas tester un downgrade de production.
+
+La soumission est réservée au propriétaire ou contributeur autorisé de cette version ; les corrections sont demandées par un reviewer habilité indépendant du propriétaire et des contributeurs de cette version. La notification vise le propriétaire de la capsule, qui peut être distinct de l’auteur du brouillon. L’observation SQL avant commit porte sur la revue et l’intention outbox invisibles ; les deux actions rejettent les verrous non entiers JSON avec 422, sans TypeError de DTO. Les pannes SQL réellement simulées et leur rollback sont une preuve distincte de cette validation.
+
+L’intégrateur a lu les checks et logs GitHub : [CI du candidat 994de150](https://github.com/haas-projet/haas/actions/runs/37692436571) et [CI exacte e01202f](https://github.com/haas-projet/haas/actions/runs/37693092990) réussies sur PHP 8.4, PHP 8.5 et backend-ci. Chaque version rapporte 350 / 3800 hors SQL et 524 / 4037 SQL, soit **874 / 7837**, 57 types API à jour et PHPStan sans erreur. Le parent B23 final est également contrôlé sur son SHA exact ; voir [l’état consolidé des PR](PR_READINESS_20261007.md).
+
+Statut : **prêt localement pour la revue humaine, avec CI du code final verte**. L’intégrateur publiera ce bilan documentaire et observera encore la CI de son nouveau SHA exact avant de passer #33 prête à revue. Q12 corrections demandées est livrée ; décision d’acceptation et publication demeurent le lot B25. Revue humaine et Qodana non reçus ; aucun `DONE`, BACKEND_GATE, GO_FRONTEND ou déploiement annoncé. Prochaine étape : revue #29 puis #30 puis #33, avec synchronisation et CI après toute fusion de prérequis.

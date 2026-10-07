@@ -14,14 +14,12 @@ B14–B17 DONE dans le catalogue du dépôt, avec leurs preuves antérieures con
 |---|---|---|---|
 | #29 | B22 : schéma, attribution et versions | main | Retrait sans réécriture, immutabilité SQL, champs serveur protégés, migrations et rollback. |
 | #30 | B23 : brouillons documentés | branche B22 de #29 | Source résolue cohérente, droits/version relus, champs bornés, conflits et concurrence réelle. |
-| #33 | B24 : revue indépendante | branche B23 de #30 | Idempotence/version, corrections et resoumission, audit atomique, historique conservé et notification après commit à l’auteur. Publication B25 future. |
+| #33 | B24 : revue indépendante | branche B23 de #30 | Idempotence/version, corrections et resoumission, audit atomique, historique conservé et notification après commit au propriétaire de la capsule. Publication B25 future. |
 | #28 | B38 : API B2 fictive | main | Runtime/origines/clés/DB séparés, aucun cookie HAAS, quotas/TTL, refus réel de connexion métier et concurrence. |
 
 Préparation parallèle dans quatre worktrees distincts, chaque suite SQL sur sa base locale dédiée à127.0.0.1:55447 ; rôle B2 dédié sans privilèges ni CONNECT vers la base métier de revue. Service PostgreSQL existant à5432 préservé. Les résultats finaux de chaque lot et incidents intermédiaires sont consignés dans ses preuves et dans les checks du head exact. Un ancien check vert ne valide pas une correction plus récente.
 
 Ordre d’approbation des capsules : #29, puis #30, puis #33 ; synchronisation et CI après toute fusion de prérequis. #28 est indépendante. Aucune fusion des quatre PR n’est effectuée par cette préparation ; aucune approbation simulée.
-
-## Branches après les fusions constatées
 
 ## Contrôles locaux de préparation
 
@@ -39,3 +37,18 @@ Le 7 octobre à 20:36 UTC, vérification fraîche de dix références et de l’
 ## Limites
 
 B35 reste partiel. Aucun BACKEND_GATE, GO_FRONTEND, GO_PRODUCTION, Qodana reçu ou déploiement. Aucun code utilisateur exécuté. Le fichier de routes modifié préexistant dans le répertoire principal est préservé. Les branches temporaires restent nécessaires tant que leurs PR ne sont pas intégrées.
+
+## État final de préparation — 7 octobre 2026, 22:06 UTC
+
+Constats de publication, statut des PR et logs CI transmis par l’intégrateur ; aucune approbation humaine enregistrée par cette préparation. Les étapes ci-dessus restent historiques.
+
+| PR | Head contrôlé | Réception locale unique | CI du head exact | État |
+|---|---|---|---|---|
+| #29 — B22 | `65bc08a0f0ed30eb9149cef8b74a9f7a14641660` | 734 tests / 6985 assertions | [37684871015](https://github.com/haas-projet/haas/actions/runs/37684871015), PHP 8.4/8.5 : 734 / 6985 chacune | Prête à revue, sans approbation |
+| #30 — B23 | `11b9fec088cb1ecd11e074f1b8a3fe3a0805ef85` | 821 / 7454 | [37692706328](https://github.com/haas-projet/haas/actions/runs/37692706328), PHP 8.4/8.5 : 821 / 7454 chacune | Prête à revue, sans approbation |
+| #28 — B38 | `0ad5a992d108b7d840fe19fca99da3a78366012c` | 770 / 7288 | [37690142490](https://github.com/haas-projet/haas/actions/runs/37690142490), PHP 8.4/8.5 : 770 / 7291 chacune | Prête à revue, indépendante des capsules |
+| #33 — B24 | `e01202fb4f89381c44d4ba5ed2a3fcf70cac47f3` | 350 / 3800 hors SQL + 524 / 4037 SQL = **874 / 7837** | [37693092990](https://github.com/haas-projet/haas/actions/runs/37693092990), PHP 8.4/8.5 : 874 / 7837 chacune | Code prêt localement ; publication de ce bilan et CI de son futur SHA avant ready |
+
+La suite PostgreSQL B24 complète est réellement terminée avec exit 0 et JUnit sans erreur, échec ou test ignoré. Le code `994de150` est identique à `e01202f` dans `backend/` ; les preuves B23 entrantes n’ont pas interrompu sa réception. Q12 corrections demandées, droits/visibilité courants, intention outbox transactionnelle, livraison après commit et historique de revue sont contrôlés ; aucune acceptation/publication B25 n’est ajoutée. Détails : [B24_REVIEW_READINESS.md](B24_REVIEW_READINESS.md).
+
+Main reste `b76612d1b6587119127fd364244f5248f05f1ff2`. Inventaire distant transmis par l’intégrateur : **huit références**, soit `main` et trois branches de domaine permanentes, plus quatre branches des PR restantes. Ordre de revue/fusion des capsules : **#29 → #30 → #33**, avec synchronisation et nouvelle CI après fusion d’un prérequis ; **#28 indépendante**. Ce bilan ne fusionne aucune de ces PR et ne change aucun gate ou statut DONE. Le SHA de son propre futur commit sera donné dans le bilan de session après création, puis sa CI observée séparément.

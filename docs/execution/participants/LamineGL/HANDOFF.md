@@ -1,5 +1,17 @@
 # Reprise — communauté et entraide
 
+## 7 octobre 2026 — B17 prêt pour revue
+
+Lot courant : **B17**, branche `backend/communaute-entraide-b17`, worktree `.worktrees/b17`, depuis B16 `8e9a60e` et main `f1f6238`. L'implémentation non commitée préexistante est préservée et complétée. Lire [COMMENTS.md](../../../api/COMMENTS.md), [B17_COMMENTS.md](../../../quality/B17_COMMENTS.md) et [SYSTALINK_TASKS.md](SYSTALINK_TASKS.md). Le SHA final et la CI exacte sont à consulter dans le bilan et la PR après publication.
+
+Commentaires et révisions sous version/verrou parent, droits courants avant rejeu, Markdown inerte et visibilité avant pagination/compteurs. Notifications internes après commit, sans auto-envoi ni texte privé ; sept cas couvrent aussi le retrait du parent et l'inéligibilité de l'auteur. Tests distincts : **671 / 6805 assertions**, dont **343 / 3242 PostgreSQL**, PHP 8.5.10 ; Pint/PHPStan, Composer, 49 types et contrôles documentaires réussis. Aucun contrôle absent n'est compté comme réussi.
+
+B11 DONE après les fusions #22 puis #23 réellement constatées. #24 est reciblée vers main ; B15/B16 gardent leurs bases de prérequis. Synchroniser les têtes, attendre la CI exacte et l'approbation humaine avant intégration, puis supprimer uniquement les temporaires intégrés sans PR dépendante. La correction README et la preuve du premier nettoyage sont publiées dans #31. B14/B15/B16/B17 restent En cours dans Systalink ; 22 lots À faire. Aucune carte distante modifiée ici.
+
+Prochain lot : **B18 — Propositions de solution**, après coordination des revues et prérequis ; une préparation séparée pendant revue reste possible dans le cadre de la demande de poursuivre. Les écrivains suivants doivent conserver l'ordre des verrous et la visibilité parent ; projets à raccorder lors de BC04/BC05. Le travail local des routes capsules reste dans le répertoire principal. Aucun BACKEND_GATE, frontend ni déploiement.
+
+## Reprise B16 antérieure conservée
+
 Lot courant : **B16**, branche `backend/communaute-entraide-b16`, worktree `.worktrees/b16`, depuis B15 `0cfcde1`. Contrat [HELP_REQUEST_EDITING.md](../../../api/HELP_REQUEST_EDITING.md), preuve [B16_EDITING.md](../../../quality/B16_EDITING.md), tableau [SYSTALINK_TASKS.md](SYSTALINK_TASKS.md). SHA final et CI vérifiés à communiquer après commit dans le bilan et la PR.
 
 Livraison : édition partielle avec revalidation du contenu final sous verrou, version incrémentée, note après contribution, publication explicite et historique paginé. Notes des brouillons privées même après publication ; audit sans texte/code, rollback atomique. Validation B14 mutualisée ; aucune migration de Madina ni dépendance modifiée. Les futures commandes B17/B18/B19 et modération devront respecter le verrou parent.

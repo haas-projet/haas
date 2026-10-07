@@ -2,7 +2,7 @@
 
 Inspecter le dépôt, préserver les fichiers/commits/saisies existants, lire ADR-006. Appliquer F18 : projets ouverts, offres consenties, décision propriétaire, fil et projection publique contrôlés. Nouvelle recette avant GO_FRONTEND ; ne pas prendre un ancien gate pour un accord sur ce périmètre. Systalink/Vercel inchangé.
 
-État courant : B01–B09, B12–B13 et B32 DONE (12 lots de socle). B11, B14, B15 et B16 IN_REVIEW : ordre #23 (Madina) → #22 (compléments) → #24 (B14) → #25 (B15) → PR B16 sur `backend/communaute-entraide-b16`. Les 23 autres lots de la coordination #2 restent à faire. B10/B29/B30/B31 et B39–B42 IN_PROGRESS ; B43/B44 BLOCKED. S01/S02 restent partiels. BACKEND_GATE NON REÇU, aucun GO_FRONTEND/GO_PRODUCTION. Voir [B16](../quality/B16_EDITING.md) et le [suivi de Lamine](participants/LamineGL/HANDOFF.md).
+État courant : B01–B09, B11–B13 et B32 DONE (13 lots entiers). B14/B15/B16/B17 IN_REVIEW : #24 vers main, #25 vers B14, #26 vers B15, B17 depuis B16 et main. Les 22 autres lots de la coordination #2 restent à faire. B10/B29/B30/B31 et B39–B42 IN_PROGRESS ; B43/B44 BLOCKED. Les limites B35/B38 et brouillons B22/B23 sont consignés dans [PR #31](https://github.com/haas-projet/haas/pull/31), avec les README corrigés en attente d'approbation humaine. S01/S02 restent partiels. BACKEND_GATE NON REÇU, aucun GO_FRONTEND/GO_PRODUCTION. Voir [B17](../quality/B17_COMMENTS.md) et le [suivi de Lamine](participants/LamineGL/HANDOFF.md).
 
 ## Reprise après préparation GitHub — 2026-10-01
 

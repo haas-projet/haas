@@ -72,3 +72,14 @@ Depuis la racine : `php scripts/generate-api-types.php` régénère les schémas
 Depuis backend, avec la configuration locale appropriée : `php artisan notifications:deliver` livre au plus 100 intentions et `php artisan ops:check` contrôle SQL, échecs et retards des files. Ce dernier retourne 1 en cas de problème, sans données privées ; ce n’est pas une preuve de délivrabilité SMTP ou de santé du lab.
 
 Sauvegarde/restauration : lire [OPERATIONS_RUNBOOK.md](deployment/OPERATIONS_RUNBOOK.md) avant d’utiliser scripts/ops/exercise-backup.php. Seules des bases locales dédiées de test sont admises ; cible de restauration neuve et vide, clés hors dépôt. L’outil ne se connecte pas à la production.
+
+## Commentaires B17 — contrôles ciblés
+
+Depuis backend, après avoir configuré et vérifié la base locale dédiée de test avec TestDatabaseGuard :
+
+```powershell
+php vendor/bin/phpunit tests/Unit/Collaboration/CommentMarkdownTest.php
+php vendor/bin/phpunit tests/Integration/Collaboration/CommentsTest.php tests/Integration/Collaboration/CommentsConcurrencyTest.php tests/Integration/Collaboration/CommentRevisionsMigrationTest.php tests/Integration/Collaboration/CommentNotificationsTest.php
+```
+
+Les contrôles généraux restent composer lint, composer analyse, composer test et composer test:integration. NotificationOutbox exige un appel de livraison hors transaction métier ; notifications:deliver reprend les intentions commitées. Les tests emploient seulement des fixtures fictives et des processus PHP du dépôt. Le rollback B17 refuse de supprimer des événements comment.created existants ; ne pas effacer des données applicatives pour contourner ce refus. Preuves et cible PostgreSQL réellement utilisées : docs/quality/B17_COMMENTS.md.

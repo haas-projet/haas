@@ -34,6 +34,7 @@ final class HelpRequestsMigrationTest extends PostgresTestCase
         // Les extensions dépendent de B11 : descendre les enfants avant le parent, puis remonter dans l'ordre.
         $paths[] = database_path('migrations/2026_10_04_000014_b14_extend_help_request_content.php');
         $paths[] = database_path('migrations/2026_10_04_000016_b16_create_help_request_revisions.php');
+        $paths[] = database_path('migrations/2026_10_04_000017_b17_comment_revisions_and_events.php');
         $migrations = array_map(function (string $path): Migration {
             $migration = require $path;
             $this->assertInstanceOf(Migration::class, $migration);

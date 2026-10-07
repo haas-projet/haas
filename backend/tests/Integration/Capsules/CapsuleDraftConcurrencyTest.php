@@ -27,7 +27,7 @@ final class CapsuleDraftConcurrencyTest extends PostgresTestCase
     /** @return iterable<string, array{string}> */
     public static function races(): iterable
     {
-        foreach (['create-replay', 'slug-collision', 'edit-version', 'suspension', 'owner-change', 'source-reopened'] as $case) {
+        foreach (['create-replay', 'slug-collision', 'edit-version', 'suspension', 'owner-change', 'source-reopened', 'source-hidden'] as $case) {
             yield $case => [$case];
         }
     }
@@ -41,7 +41,7 @@ final class CapsuleDraftConcurrencyTest extends PostgresTestCase
         $capsule = $edit ? Capsule::factory()->create(['owner_id' => $actor->id]) : null;
         $version = $capsule === null ? null : CapsuleVersion::factory()->create(['capsule_id' => $capsule->id]);
         $source = null;
-        if ($case === 'source-reopened') {
+        if (in_array($case, ['source-reopened', 'source-hidden'], true)) {
             $source = HelpRequest::factory()->create(['author_id' => $actor->id, 'state' => HelpRequestState::Resolved]);
             $proposal = Proposal::factory()->create(['request_id' => $source->id, 'state' => ProposalState::Accepted]);
             Resolution::factory()->create(['request_id' => $source->id, 'proposal_id' => $proposal->id, 'accepted_by' => $actor->id]);
@@ -90,6 +90,7 @@ final class CapsuleDraftConcurrencyTest extends PostgresTestCase
                 'suspension' => $actor->forceFill(['status' => 'suspended'])->save(),
                 'owner-change' => $capsule->forceFill(['owner_id' => User::factory()->verified()->create()->id])->save(),
                 'source-reopened' => $source?->forceFill(['state' => HelpRequestState::Open])->save(),
+                'source-hidden' => $source?->forceFill(['hidden_at' => now()->utc()])->save(),
                 default => null,
             };
             DB::commit();

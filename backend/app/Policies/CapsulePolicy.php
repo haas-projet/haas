@@ -21,8 +21,7 @@ use Illuminate\Support\Facades\DB;
  * - propose(help_request) : l'auteur de la demande résolue OU l'auteur de la proposition
  *   acceptée par la résolution active, décision Q9 fondée sur CAHIER_DES_CHARGES.md:265
  *   (« L'auteur d'une résolution ou un contributeur autorisé propose une capsule »).
- * - update(draft) : owner de la capsule uniquement en B23. La délégation à un
- *   contributeur habilité attend B24/B25.
+ * - update(draft/changes_requested) : owner ou contributeur de cette version.
  */
 final class CapsulePolicy
 {
@@ -45,7 +44,7 @@ final class CapsulePolicy
     public function proposeFromHelpRequest(?User $actor, HelpRequest $request): bool
     {
         $access = new MemberAccess;
-        if (! $access->verified($actor)) {
+        if ($request->hidden_at !== null || ! $access->verified($actor)) {
             return false;
         }
 

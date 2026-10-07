@@ -361,6 +361,10 @@ Le travail distant `93fafea`, notamment Q8/Q9, est conservé. Les défauts de pr
 
 Statut : correctif local préparé pour synchronisation B22/main, suite combinée complète et CI distante. Revue humaine en attente ; aucune approbation attribuée, aucun `DONE`, aucun frontend. L'intégrateur rapporte le SHA réel après commit.
 
+### Après synchronisation B22/main — parent `94aeae9`
+
+Refus de source masquée dans la Policy relue sous verrou, y compris au rejeu ; trois nouvelles régressions HTTP/service et une septième course réelle. Fixture publiée PATCH conforme aux contraintes B22 (date et reviewer fictif vérifié distinct). Ciblés **28 / 158**, Pint et PHPStan verts. Suite SQL complète initiale interrompue à la demande de l'intégrateur après un échec de fixture : aucune réussite globale attribuée ; relance complète requise après ce commit. Voir le complément de `B23_DRAFT_READINESS.md`.
+
 ## 2026-10-05 — Lot 2 B35 brique B1 (branche dérivée)
 
 Lot B35 livré sur une branche dérivée `backend/capsules-laboratoire-b35-brique-b1` créée depuis `origin/backend/capsules-laboratoire`. La branche parent porte le lot 1 enums ; la PR #12 y est ouverte sur `main` et sa fusion est attendue avant le reciblage de cette PR dérivée.

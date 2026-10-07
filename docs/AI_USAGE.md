@@ -63,6 +63,8 @@ Codex, à la demande de l'utilisateur : reprise sans réécriture du travail B11
 
 Codex, à la demande de l'utilisateur : audit du travail `93fafea`, probes de défauts puis corrections de provenance, concurrence, validation, édition et idempotence sans modifier les décisions Q8/Q9. Contrôles locaux : 13 tests / 111 assertions PostgreSQL (six courses réelles), 323 tests / 2675 assertions hors SQL, Pint passé, PHPStan sans erreur, 18 + 7 contrôles documentaires, 33 types API à jour. Preuves, essais échoués et limites dans `docs/quality/B23_DRAFT_READINESS.md`. Synchronisation B22/main, suite combinée complète, CI distante et revue humaine en attente. Aucune validation humaine simulée ; aucun frontend ou déploiement.
 
+Complément B23 après parent `94aeae9` : source masquée refusée sur création/service/rejeu, septième course réelle et fixture publiée conforme B22 ; ciblés 28 / 158 et Pint/PHPStan verts. Une suite SQL partielle interrompue n'est pas une réussite ; suites combinées complètes encore requises. Preuve actualisée dans `B23_DRAFT_READINESS.md`.
+
 ## B14 — Création des demandes, 4 octobre 2026
 
 | Outil / intervention | Périmètre | Contrôles | Revue humaine de l'équipe |

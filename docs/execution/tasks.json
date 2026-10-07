@@ -153,7 +153,8 @@
       "refs": "AC10 ; F02/F03/F04",
       "phase": "B",
       "execution_order": 13,
-      "status": "TODO"
+      "status": "IN_REVIEW",
+      "evidence": ["docs/quality/B11_COLLABORATION.md"]
     },
     {
       "id": "B12",

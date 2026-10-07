@@ -227,3 +227,73 @@ Questions ouvertes restantes :
 - Q7 — Table `capsule_technologies` : le cahier parle de technologies au contenu d'une capsule (`CAHIER:456`) mais sans table nommée dans le §24. Pas livrée dans B22, à trancher par le relecteur.
 
 B22 reste **préparé** et pointe vers une PR en brouillon ; `DONE` n'est pas prononcé avant revue humaine et fusion.
+
+## 2026-10-07 — Lot B23 · Brouillons de capsule
+
+Statut proposé : B23 **préparé, PR en brouillon**, aucun `DONE`. Branche `backend/capsules-laboratoire-b23-brouillons`, dérivée de `backend/capsules-laboratoire-b22-schema` (`58fe552`) et empilée sur la PR #29.
+
+### Décisions clefs
+
+- **Pas de PATCH en B23.** Le cahier §26 ne liste que `POST /capsules` et `POST /capsules/{id}/versions` ; aucune route d'édition `in-place` n'est documentée. Lecture restrictive : B23 n'expose pas de PATCH. Question ouverte Q8 : décision avant B24/B25.
+- **Source `help_request`** réservée à l'auteur de la demande, résolution active obligatoire (`revoked_at IS NULL`). L'alternative « auteur de la proposition acceptée » n'est pas documentée. Lecture restrictive : auteur seul. Question ouverte Q9.
+- **Source `editorial`** réservée aux `moderator`/`admin` (§07 CAHIER:220, §13 CAHIER:456 : « origine éditoriale clairement signalée pour les briques de démonstration »).
+- **Owner uniquement pour la version-brouillon** suivante (B23). Les contributeurs reviewer/maintainer sont habilités plus tard par B24/B25.
+- **IdempotencyService réutilisé.** Pas de header `X-Idempotent-Replay` : le status 201 est renvoyé aux deux appels (le second ne rejoue pas la closure `operation`). Documenté dans le fragment OpenAPI.
+- **Audit interne du domaine** : nouvelle classe `WriteCapsuleAudit` qui insère dans `content_revisions` sans toucher `AuditWriter.php` (fichier du socle, profilé pour Profile uniquement). Même contrat transactionnel : rollback annule l'écriture et l'audit.
+- **ApiExceptionRenderer non touché** (fichier du socle, interdit). `ValidationException` natif Laravel pour les 422 (source introuvable, pas de résolution active) ; `AuthorizationException` pour les 403.
+- **Pivot capsule_version_technologies** aligné sur `request_technologies` : clé primaire composite, pas d'UUID. Supporte « versions compatibles déclarées » (CAHIER:456).
+
+### Fichiers créés / modifiés
+
+- Enums : `App\Enums\Capsules\CapsuleSourceKind` (help_request/editorial).
+- Data : `App\Data\Capsules\{CapsuleDraftData, VersionDraftData, TechnologyAttachmentData}`.
+- Policy : `App\Policies\CapsulePolicy` (proposeEditorial, proposeFromHelpRequest, createVersionDraft, editDraft).
+- Services : `App\Services\Capsules\{CreateCapsuleDraftService, CreateCapsuleVersionDraftService, WriteCapsuleAudit}`.
+- HTTP : `StoreCapsuleDraftRequest`, `StoreCapsuleVersionDraftRequest`, `StoreCapsuleDraftController`, `StoreCapsuleVersionDraftController`, `CapsuleDraftResource`, `CapsuleVersionDraftResource`.
+- Migration : `2026_10_07_123901_create_capsule_version_technologies_table.php` + relation `CapsuleVersion::technologies()`.
+- Routes : `backend/routes/api/capsules-lab.php` (deux routes, `capsules.drafts.store` et `capsules.versions.drafts.store`).
+- Fragment OpenAPI : `docs/api/openapi/capsules-lab.yaml` (operationIds, schémas).
+- Support de test : `DomainTables::TABLES` étendu à `capsule_version_technologies` avant `capsule_versions`.
+- Tests : `CapsuleSourceKindTest`, `CapsuleDraftDataTest`, `CapsuleVersionTechnologiesSchemaTest`, `CreateCapsuleDraftServiceTest`, mise à jour `CapsulesMigrationTest`.
+
+### Fichiers hors de mon domaine modifiés
+
+- `docs/OPENAPI.yaml` : +4 lignes (deux entrées `$ref` pour les routes B23). Commit dédié `docs(api): référencer les routes de brouillon de capsule dans OPENAPI.yaml`.
+- `docs/api/generated/haas-api.d.ts` : régénéré par `scripts/generate-api-types.php` (quatre nouveaux types TypeScript correspondant aux schémas B23). Commit dédié `docs(api): régénérer les types générés depuis le fragment capsules-lab`.
+
+Aucun autre fichier du socle n'a été touché : `routes/api.php`, `bootstrap/`, `config/`, `composer.*`, `phpunit.xml`, `.github/`, `SHA256SUMS` sont intacts.
+
+### Contrôles exécutés et résultats réels
+
+| Commande | Résultat observé | Environnement |
+|---|---|---|
+| `composer lint` | `{"tool":"pint","result":"passed"}` | PHP 8.4.15 Laragon |
+| `composer analyse` | `[OK] No errors` (PHPStan niveau 8) | idem |
+| `composer test` | **323 tests / 2648 assertions, OK** en 5,697 s | idem |
+| `composer test:integration` (filtre `Capsules|Artifacts`) | 14 tests / 28 assertions, OK | PostgreSQL 17 `haas_capsules_test`, `TestDatabaseGuard` respecté |
+| `composer test:integration` (suite complète) | **199 tests / 1430 assertions, OK** en 1 min 57 s | idem |
+
+### Commits locaux (branche `backend/capsules-laboratoire-b23-brouillons`)
+
+1. `46db318` `feat(capsules): poser la table de liaison capsule_version_technologies`
+2. `7e8f180` `feat(capsules): poser le data pour les brouillons de capsule`
+3. `f9f7627` `feat(capsules): poser la Policy et les services de brouillon`
+4. `a849f9b` `feat(capsules): exposer les routes de brouillon et leur contrat OpenAPI`
+5. `5d84bf9` `docs(api): référencer les routes de brouillon de capsule dans OPENAPI.yaml`
+6. `60fceb0` `docs(api): régénérer les types générés depuis le fragment capsules-lab`
+7. `cd48b6a` `test(capsules): étendre le rollback de régression au pivot technologies`
+8. commit documentaire courant.
+
+### Questions ouvertes
+
+- Q8 — PATCH /capsules/{id}/versions/{version} pour éditer un brouillon : non documenté dans §26. Non livré en B23. Décision avant B24/B25.
+- Q9 — Source `help_request` : qui peut proposer, l'auteur de la demande seul (lecture restrictive) ou aussi l'auteur de la proposition acceptée ?
+- Q10 — Table `capsule_version_technologies` : non explicitement nommée dans §24 CAHIER:869-872. Décision de propriétaire du domaine attendue.
+- Q11 — Flag replay côté client : IdempotencyService ne distingue pas 201/200 au rejeu. Faut-il exposer un header `X-Idempotent-Replay` à partir d'une relecture de `api_idempotency.created_at`, ou laisser le client déduire de sa clé ?
+- Q2–Q7 de B22 restent ouvertes.
+
+### Limites et étapes suivantes
+
+- B23 est backend seul : aucun composant React livré.
+- Les transitions `CapsuleVersionState` autres que `draft` sont servies par B24/B25.
+- Aucun push, aucune PR ouverte à ce stade dans PROGRESS ; publication autorisée pour ce lot, consignée dans HANDOFF.

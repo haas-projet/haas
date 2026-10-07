@@ -7,6 +7,7 @@ use App\Data\Lab\TestEventData;
 use App\Models\Lab\LabConnection;
 use App\Models\Lab\TestEvent;
 use App\Models\Lab\TestOrder;
+use DateTimeZone;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -42,7 +43,7 @@ final class ProcessTestEventService
                 'order_ref' => $data->orderRef,
                 'amount_minor' => $data->amountMinor,
                 'currency' => $data->currency,
-                'received_at' => $data->receivedAt,
+                'received_at' => $data->receivedAt->setTimezone(new DateTimeZone('UTC')),
                 'processed_at' => $now,
                 'created_at' => $now,
                 'updated_at' => $now,

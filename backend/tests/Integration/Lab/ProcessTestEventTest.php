@@ -63,6 +63,17 @@ final class ProcessTestEventTest extends PostgresTestCase
         $this->assertDatabaseCount('test_orders', 1);
     }
 
+    public function test_received_at_preserves_the_instant_from_a_non_utc_timezone(): void
+    {
+        $receivedAt = new DateTimeImmutable('2026-10-05T12:00:00+02:00');
+
+        $result = $this->service->handle($this->canonicalData(['receivedAt' => $receivedAt]));
+
+        $storedTimestamp = $result->order->event?->getRawOriginal('received_at');
+        $this->assertIsString($storedTimestamp);
+        $this->assertSame($receivedAt->getTimestamp(), (new DateTimeImmutable($storedTimestamp))->getTimestamp());
+    }
+
     public function test_replay_with_different_payload_returns_original(): void
     {
         // Décision à arbitrer : un rejeu avec le même (run_id, event_id) mais un

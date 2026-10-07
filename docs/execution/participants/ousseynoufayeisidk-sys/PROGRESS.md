@@ -149,3 +149,9 @@ Demande explicite « faite ca » : intégration des PR #10, #11, #13–#20, dans
 Les neuf branches temporaires sont supprimées après vérification des 30 références de commits dans main et de l'absence de PR dépendante. Restent main et les trois branches permanentes ; backend/socle-auth synchronisée, branches des collègues et PR #12 conservées. Aucune réécriture, aucun contournement de protection, aucun déploiement.
 
 B07/B08/B09/B12/B13/B32 DONE ; le tableau Systalink comporte maintenant 12 lots terminés, 8 partiels et 2 bloqués. Contributions et autres raccordements attendent les pilotes ; Qodana et réception complète restent ouverts. Aucun GO_FRONTEND. Reprendre sur backend/socle-auth ; ne pas recréer les anciennes branches pour consulter leurs commits, tous conservés dans main.
+
+## 2026-10-07 — Correction de l'horodatage B1 après revue
+
+PR #27 inspectée sur 48fc475. Défaut reproduit sur PostgreSQL isolé : received_at à 12:00+02:00 était enregistré comme 12:00 UTC. Le test de régression échoue avant correction (une assertion) ; ProcessTestEventService normalise maintenant l'instant en UTC avant insertOrIgnore. Le test compare l'instant réellement stocké.
+
+Contrôles PHP 8.5.10 / PostgreSQL 17, base haas_maadinaa_test sur 127.0.0.1:55447 : Pint passé ; PHPStan niveau 8 sans erreur ; 281 tests / 2507 assertions hors SQL et 158 tests / 1373 assertions SQL réussis, dont la course B1-05 et le nouveau cas non UTC ; git diff --check propre. Publier le correctif sans réécrire les commits de Madina, recibler #27 vers main puis récupérer le main consolidé et observer sa CI avant fusion. B35 reste partiel : base haas_lab séparée et module pédagogique défectueux non livrés ; aucun BACKEND_GATE.

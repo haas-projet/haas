@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/** @property HelpRequestState $state */
 #[Fillable(['title', 'goal', 'expected', 'observed', 'attempts', 'environment'])]
 class HelpRequest extends Model
 {

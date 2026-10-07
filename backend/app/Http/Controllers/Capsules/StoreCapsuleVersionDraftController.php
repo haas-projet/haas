@@ -4,16 +4,17 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Capsules;
 
+use App\Exceptions\Capsules\CapsuleDraftConflict;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Capsules\StoreCapsuleVersionDraftRequest;
 use App\Http\Resources\Capsules\CapsuleVersionDraftResource;
 use App\Models\Capsules\Capsule;
-use App\Models\Capsules\CapsuleVersion;
 use App\Models\User;
 use App\Services\Capsules\CreateCapsuleVersionDraftService;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 
 final class StoreCapsuleVersionDraftController extends Controller
 {
@@ -27,15 +28,19 @@ final class StoreCapsuleVersionDraftController extends Controller
             throw new AuthenticationException;
         }
         $target = Capsule::whereKey($capsule)->firstOrFail();
-        $result = $service->handle(
-            actor: $actor,
-            capsule: $target,
-            draft: $request->toDraft(),
-            key: $request->idempotencyKey(),
-        );
-        $version = CapsuleVersion::whereKey($result['version_id'])->firstOrFail();
+        try {
+            $result = $service->handle(
+                actor: $actor,
+                capsule: $target,
+                draft: $request->toDraft(),
+                key: $request->idempotencyKey(),
+            );
+        } catch (CapsuleDraftConflict $exception) {
+            throw new ConflictHttpException($exception->getMessage(), $exception);
+        }
+        $version = $result['version'];
         $resource = new CapsuleVersionDraftResource($version);
 
-        return $resource->response()->setStatusCode(Response::HTTP_CREATED);
+        return $resource->response()->setStatusCode(Response::HTTP_CREATED)->header('Cache-Control', 'no-store, private');
     }
 }

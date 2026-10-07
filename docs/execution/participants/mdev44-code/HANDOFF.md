@@ -198,3 +198,11 @@ Aucun autre fichier du socle n'a été touché.
 1. Pousser les commits locaux restants vers `origin/backend/capsules-laboratoire-b23-brouillons`.
 2. `gh pr edit 30` pour mettre à jour le corps de la PR #30 (nouveaux commits, Q8/Q9 fermées, Q11 clarifiée, Q10 restante).
 3. Attendre revue humaine distincte.
+
+## 2026-10-07 — Correctif de préparation Codex
+
+Reprise de la PR #30 sans réécrire les décisions Q8/Q9 ni leurs suivis. Voir `docs/quality/B23_DRAFT_READINESS.md` : création depuis une résolution cohérente et verrouillée, conflits 409, présence de limites nulles conservée, droits actuels sous verrous, résultat idempotent limité à sa version, validation stricte et six courses réelles. Services compatibles avec les `Fillable` serveur restreints de B22 par `forceFill` explicite.
+
+Le socle commun reçoit seulement la règle `NoLikelySecret` existante, les trois correctifs de tests de cookies relus du B17 `8234470` et le PHPDoc du cast enum existant de `HelpRequest.state`. Les types API sont régénérés par script. Aucun secret ni vendor ajouté au suivi Git.
+
+Contrôles observés : ciblés **13 / 111**, suite capsules **92 / 290**, Unit/Feature/Architecture **323 / 2675**, PHPStan sans erreur, Pint passé, documents **18 + 7**, types **33**. Suite complète combinée après intégration B22/main, CI et revue humaine restent nécessaires. Aucun push ou merge effectué par cet agent ; publication gérée par l'intégrateur. SHA du commit local à consigner dans son bilan après création.

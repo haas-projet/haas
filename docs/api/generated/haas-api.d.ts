@@ -27,7 +27,7 @@ export type capsules_lab_CapsuleDraft = { readonly "id": string; readonly "slug"
 
 export type capsules_lab_CapsuleDraftInput = { readonly "slug": string; readonly "source": { readonly "kind": "help_request" | "editorial"; readonly "help_request_id"?: string; readonly "editorial_origin"?: string; }; readonly "version": capsules_lab_CapsuleVersionDraftInput; };
 
-export type capsules_lab_CapsuleVersionDraft = { readonly "id": string; readonly "capsule_id"?: string; readonly "version_label": string; readonly "state": "draft" | "in_review" | "changes_requested" | "published" | "withdrawn"; readonly "body": string; readonly "limits"?: string; readonly "lock_version"?: number; readonly "technologies"?: ReadonlyArray<{ readonly "id"?: string; readonly "slug"?: string; readonly "version_label"?: string; [key: string]: unknown; }>; [key: string]: unknown; };
+export type capsules_lab_CapsuleVersionDraft = { readonly "id": string; readonly "capsule_id": string; readonly "version_label": string; readonly "state": "draft" | "in_review" | "changes_requested" | "published" | "withdrawn"; readonly "body": string; readonly "limits": string; readonly "lock_version": number; readonly "technologies": ReadonlyArray<{ readonly "id"?: string; readonly "slug"?: string; readonly "version_label"?: string; [key: string]: unknown; }>; [key: string]: unknown; };
 
 export type capsules_lab_CapsuleVersionDraftInput = { readonly "version_label": string; readonly "body": string; readonly "limits"?: string; readonly "technologies"?: ReadonlyArray<{ readonly "technology_id": string; readonly "version_label"?: string; }>; };
 

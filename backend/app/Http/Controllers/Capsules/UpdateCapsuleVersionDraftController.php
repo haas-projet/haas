@@ -40,6 +40,6 @@ final class UpdateCapsuleVersionDraftController extends Controller
             throw new ConflictHttpException($e->getMessage(), $e);
         }
 
-        return (new CapsuleVersionDraftResource($updated))->response()->setStatusCode(200);
+        return (new CapsuleVersionDraftResource($updated))->response()->setStatusCode(200)->header('Cache-Control', 'no-store, private');
     }
 }

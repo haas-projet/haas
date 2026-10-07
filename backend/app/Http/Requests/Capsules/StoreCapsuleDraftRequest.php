@@ -9,6 +9,7 @@ use App\Data\Capsules\TechnologyAttachmentData;
 use App\Data\Capsules\VersionDraftData;
 use App\Data\Idempotency\IdempotencyKey;
 use App\Enums\Capsules\CapsuleSourceKind;
+use App\Rules\NoLikelySecret;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Validator;
@@ -27,24 +28,27 @@ final class StoreCapsuleDraftRequest extends FormRequest
 
         return [
             'slug' => ['required', 'string', 'min:3', 'max:120', 'regex:/\A[a-z0-9][a-z0-9-]{1,118}[a-z0-9]\z/'],
-            'source' => ['required', 'array'],
+            'source' => ['required', 'array:kind,help_request_id,editorial_origin'],
             'source.kind' => ['required', 'string', 'in:'.$allowedKinds],
             'source.help_request_id' => ['nullable', 'string', 'uuid'],
-            'source.editorial_origin' => ['nullable', 'string', 'min:3', 'max:100', 'regex:/\A\S(?:.*\S)?\z/u'],
-            'version' => ['required', 'array'],
+            'source.editorial_origin' => ['nullable', 'string', 'min:3', 'max:100', 'regex:/\A\S(?:.*\S)?\z/u', 'not_regex:/[[:cntrl:]]/u', new NoLikelySecret],
+            'version' => ['required', 'array:version_label,body,limits,technologies'],
             'version.version_label' => ['required', 'string', 'regex:/\A(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\z/', 'max:40'],
-            'version.body' => ['required', 'string', 'min:'.VersionDraftData::BODY_MIN, 'max:'.VersionDraftData::BODY_MAX],
-            'version.limits' => ['nullable', 'string', 'min:1', 'max:'.VersionDraftData::LIMITS_MAX],
-            'version.technologies' => ['sometimes', 'array', 'max:'.VersionDraftData::TECHS_MAX],
+            'version.body' => ['required', 'string', 'min:'.VersionDraftData::BODY_MIN, 'max:'.VersionDraftData::BODY_MAX, 'not_regex:/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/u', new NoLikelySecret],
+            'version.limits' => ['nullable', 'string', 'min:1', 'max:'.VersionDraftData::LIMITS_MAX, 'not_regex:/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/u', new NoLikelySecret],
+            'version.technologies' => ['sometimes', 'array', 'list', 'max:'.VersionDraftData::TECHS_MAX],
             'version.technologies.*' => ['array:technology_id,version_label'],
-            'version.technologies.*.technology_id' => ['required', 'string', 'uuid'],
-            'version.technologies.*.version_label' => ['nullable', 'string', 'max:40', 'regex:/\A\S(?:.*\S)?\z/u'],
+            'version.technologies.*.technology_id' => ['required', 'string', 'uuid', 'distinct:ignore_case', 'exists:technologies,id'],
+            'version.technologies.*.version_label' => ['nullable', 'string', 'max:40', 'regex:/\A\S(?:.*\S)?\z/u', 'not_regex:/[[:cntrl:]]/u', new NoLikelySecret],
         ];
     }
 
     public function withValidator(Validator $validator): void
     {
         $validator->after(function (Validator $validator): void {
+            foreach (array_diff(array_keys($this->all()), ['slug', 'source', 'version']) as $field) {
+                $validator->errors()->add($field, 'Ce champ ne peut pas être utilisé.');
+            }
             $raw = $this->header('Idempotency-Key');
             if ($raw === null || $raw === '') {
                 $validator->errors()->add('idempotency_key', 'La clé d’idempotence est requise.');

@@ -18,7 +18,7 @@ final class CapsuleVersionDraftResource extends JsonResource
     {
         /** @var CapsuleVersion $version */
         $version = $this->resource;
-        $technologies = $version->technologies()->get(['technologies.id', 'technologies.slug'])->map(static function (Technology $t): array {
+        $technologies = $version->technologies->map(static function (Technology $t): array {
             /** @var Pivot $pivot */
             $pivot = $t->getRelation('pivot');
 

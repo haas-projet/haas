@@ -106,7 +106,8 @@ final class MemberSessionTest extends PostgresTestCase
         $this->browserRequest('GET', '/sanctum/csrf-cookie')->assertNoContent();
         $this->browserRequest('POST', '/login', ['email' => $user->email, 'password' => 'nouveau-mot-de-passe-fictif'])->assertOk();
         $this->travel(121)->minutes();
-        $this->browserRequest('GET', '/api/v1/session-fixture')->assertUnauthorized();
+        // Un appel forgé transmet le cookie périmé : le serveur doit toujours le refuser.
+        $this->browserRequest('GET', '/api/v1/session-fixture', sendExpiredCookies: true)->assertUnauthorized();
     }
 
     public function test_invalid_origin_or_csrf_cannot_use_an_authenticated_session(): void

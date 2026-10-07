@@ -12,6 +12,9 @@ use App\Data\Idempotency\StoredCommandResult;
 use App\Enums\Capsules\CapsuleSourceKind;
 use App\Enums\Capsules\CapsuleVersionState;
 use App\Enums\Capsules\ContributionRole;
+use App\Enums\Collaboration\ProposalState;
+use App\Enums\HelpRequests\HelpRequestState;
+use App\Exceptions\Capsules\CapsuleDraftConflict;
 use App\Models\Capsules\Capsule;
 use App\Models\Capsules\CapsuleVersion;
 use App\Models\HelpRequest;
@@ -37,7 +40,7 @@ final class CreateCapsuleDraftService
         private readonly WriteCapsuleAudit $audit,
     ) {}
 
-    /** @return array{capsule_id: string, version_id: string} */
+    /** @return array{capsule_id: string, version_id: string, capsule: Capsule} */
     public function handle(User $actor, CapsuleDraftData $data, IdempotencyKey $key): array
     {
         $target = 'POST /api/v1/capsules';
@@ -48,12 +51,13 @@ final class CreateCapsuleDraftService
             $idempotent,
             fn (User $a) => $this->authorize($a, $data),
             fn (User $a) => $this->writeNewCapsule($a, $data),
-            fn (User $a, StoredCommandResult $stored) => $stored,
+            fn (User $a, StoredCommandResult $stored) => (new DraftResult)->check($a, $stored),
         );
 
         return [
-            'capsule_id' => $result->references['capsule_id'],
-            'version_id' => $result->references['version_id'],
+            'capsule_id' => $result['stored']->references['capsule_id'],
+            'version_id' => $result['stored']->references['version_id'],
+            'capsule' => $result['capsule'],
         ];
     }
 
@@ -66,37 +70,52 @@ final class CreateCapsuleDraftService
 
             return;
         }
-        $request = HelpRequest::whereKey($data->sourceRequestId)->first();
+        $request = HelpRequest::whereKey($data->sourceRequestId)->lockForUpdate()->first();
         if ($request === null) {
             throw ValidationException::withMessages(['source_request_id' => ['Demande source introuvable.']]);
         }
         if (! $this->policy->proposeFromHelpRequest($actor, $request)) {
             throw new AuthorizationException;
         }
-        $resolutionActive = DB::table('resolutions')
+        $resolution = DB::table('resolutions')
             ->where('request_id', $request->id)
             ->whereNull('revoked_at')
-            ->exists();
-        if (! $resolutionActive) {
+            ->lockForUpdate()->first();
+        if ($request->state !== HelpRequestState::Resolved || $resolution === null) {
             throw ValidationException::withMessages(['source_request_id' => ['La demande source doit porter une résolution active.']]);
+        }
+        $proposal = DB::table('proposals')->where('id', $resolution->proposal_id)->lockForUpdate()->first();
+        if ($resolution->accepted_by !== $request->author_id || $proposal === null || $proposal->request_id !== $request->id || $proposal->state !== ProposalState::Accepted->value) {
+            throw ValidationException::withMessages(['source_request_id' => ['La résolution source doit être cohérente avec la demande et sa proposition acceptée.']]);
+        }
+        if (! $this->policy->proposeFromHelpRequest($actor, $request)) {
+            throw new AuthorizationException;
         }
     }
 
     private function writeNewCapsule(User $actor, CapsuleDraftData $data): StoredCommandResult
     {
-        $capsule = Capsule::create([
+        (new CheckDraftTechnologies)->check($data->version->technologies);
+        // Le verrou de slug couvre aussi deux acteurs distincts avant la contrainte unique.
+        DB::select('SELECT pg_advisory_xact_lock(hashtextextended(?, 0))', ['capsule-slug:'.$data->slug]);
+        if (Capsule::whereRaw('lower(slug) = ?', [$data->slug])->exists()) {
+            throw new CapsuleDraftConflict('Ce slug de capsule est déjà utilisé.');
+        }
+        $capsule = (new Capsule)->forceFill([
             'slug' => $data->slug,
             'source_request_id' => $data->sourceRequestId,
             'owner_id' => $actor->id,
             'editorial_origin' => $data->editorialOrigin,
         ]);
-        $version = CapsuleVersion::create([
+        $capsule->save();
+        $version = (new CapsuleVersion)->forceFill([
             'capsule_id' => $capsule->id,
             'version_label' => $data->version->versionLabel,
             'body' => $data->version->body,
             'limits' => $data->version->limits,
             'state' => CapsuleVersionState::Draft,
         ]);
+        $version->save();
         $this->attachTechnologies($version, $data->version);
         $this->attachAuthor($version->id, $actor->id);
         $this->audit->capsuleVersion($actor, $version->id, 'capsule.draft.created', [

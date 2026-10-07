@@ -14,6 +14,9 @@ trait SpaHttpRequests
     /** @var array<string, string> */
     private array $browserCookies = [];
 
+    /** @var array<string, array<string, int>> */
+    private array $browserCookieExpirations = [];
+
     private function configureSpa(string $sessionDriver = 'array'): void
     {
         config([
@@ -35,8 +38,16 @@ trait SpaHttpRequests
      * @param  array<string, string>  $headers
      * @return TestResponse<Response>
      */
-    private function browserRequest(string $method, string $path, array $body = [], array $headers = [], bool $sendXsrf = true, bool $withoutOrigin = false): TestResponse
+    private function browserRequest(string $method, string $path, array $body = [], array $headers = [], bool $sendXsrf = true, bool $withoutOrigin = false, bool $sendExpiredCookies = false): TestResponse
     {
+        if (! $sendExpiredCookies) {
+            foreach ($this->browserCookies as $name => $value) {
+                $expires = $this->browserCookieExpirations[$name][$value] ?? 0;
+                if ($expires !== 0 && $expires <= now()->getTimestamp()) {
+                    unset($this->browserCookies[$name]);
+                }
+            }
+        }
         // Chaque appel recharge garde et session depuis les vrais cookies reçus.
         Auth::forgetGuards();
         app()->forgetInstance('auth.driver');
@@ -58,7 +69,16 @@ trait SpaHttpRequests
             array_merge($this->transformHeadersToServerVars($headers), ['CONTENT_TYPE' => 'application/json']),
             json_encode($body, JSON_THROW_ON_ERROR));
         foreach ($response->headers->getCookies() as $cookie) {
-            $this->browserCookies[$cookie->getName()] = (string) $cookie->getValue();
+            $name = $cookie->getName();
+            $value = (string) $cookie->getValue();
+            $expires = $cookie->getExpiresTime();
+            // Indexer aussi par valeur préserve les jars sauvegardés/restaurés par les tests d'attaque.
+            $this->browserCookieExpirations[$name][$value] = $expires;
+            if ($expires !== 0 && $expires <= now()->getTimestamp()) {
+                unset($this->browserCookies[$name]);
+            } else {
+                $this->browserCookies[$name] = $value;
+            }
         }
 
         return $response;

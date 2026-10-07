@@ -33,12 +33,10 @@ final class UpdateCapsuleVersionDraftService
         }
 
         return DB::transaction(function () use ($actor, $capsule, $version, $data): CapsuleVersion {
-            $locked = CapsuleVersion::whereKey($version->id)->lockForUpdate()->firstOrFail();
-            $sourceCapsule = Capsule::whereKey($locked->capsule_id)->lockForUpdate()->firstOrFail();
-            if ($sourceCapsule->id !== $capsule->id) {
-                throw new AuthorizationException;
-            }
-            if (! $this->policy->editDraft($actor, $sourceCapsule, $locked->state, $locked->id)) {
+            $currentActor = User::whereKey($actor->id)->lockForUpdate()->firstOrFail();
+            $sourceCapsule = Capsule::whereKey($capsule->id)->lockForUpdate()->firstOrFail();
+            $locked = CapsuleVersion::whereKey($version->id)->where('capsule_id', $sourceCapsule->id)->lockForUpdate()->firstOrFail();
+            if (! $this->policy->editDraft($currentActor, $sourceCapsule, $locked->state, $locked->id)) {
                 throw new AuthorizationException;
             }
             if ($locked->lock_version !== $data->lockVersion) {
@@ -49,13 +47,14 @@ final class UpdateCapsuleVersionDraftService
                 $locked->body = $data->body;
                 $changes[] = 'body';
             }
-            if ($data->limits !== null) {
+            if ($data->hasLimits || $data->limits !== null) {
                 $locked->limits = $data->limits;
                 $changes[] = 'limits';
             }
             $locked->lock_version = $locked->lock_version + 1;
             $locked->save();
             if ($data->technologies !== null) {
+                (new CheckDraftTechnologies)->check($data->technologies);
                 $sync = [];
                 foreach ($data->technologies as $attachment) {
                     $sync[$attachment->technologyId] = ['version_label' => $attachment->versionLabel];
@@ -63,13 +62,13 @@ final class UpdateCapsuleVersionDraftService
                 $locked->technologies()->sync($sync);
                 $changes[] = 'technologies';
             }
-            $this->audit->capsuleVersion($actor, $locked->id, 'capsule.version.draft.updated', [
+            $this->audit->capsuleVersion($currentActor, $locked->id, 'capsule.version.draft.updated', [
                 'capsule_id' => $capsule->id,
                 'lock_version' => $locked->lock_version,
                 'changed_fields' => $changes,
             ]);
 
-            return $locked->refresh();
+            return $locked->refresh()->load('technologies');
         });
     }
 }

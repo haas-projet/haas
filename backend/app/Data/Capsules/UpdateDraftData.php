@@ -19,19 +19,20 @@ final readonly class UpdateDraftData
         public ?string $limits,
         /** @var ?list<TechnologyAttachmentData> */
         public ?array $technologies,
+        public bool $hasLimits = false,
     ) {
-        if ($lockVersion < 1 || $lockVersion > 2147483647) {
+        if ($lockVersion < 1 || $lockVersion > 2147483646) {
             throw new InvalidArgumentException('lock_version hors bornes.');
         }
         if ($body !== null) {
             $bodyTrimmed = trim($body);
-            if (strlen($bodyTrimmed) < VersionDraftData::BODY_MIN || strlen($body) > VersionDraftData::BODY_MAX) {
+            if (mb_strlen($bodyTrimmed) < VersionDraftData::BODY_MIN || mb_strlen($body) > VersionDraftData::BODY_MAX) {
                 throw new InvalidArgumentException('body hors bornes de taille.');
             }
         }
         if ($limits !== null) {
             $limitsTrimmed = trim($limits);
-            if ($limitsTrimmed === '' || strlen($limits) > VersionDraftData::LIMITS_MAX) {
+            if ($limitsTrimmed === '' || mb_strlen($limits) > VersionDraftData::LIMITS_MAX) {
                 throw new InvalidArgumentException('limits hors bornes.');
             }
         }
@@ -51,6 +52,6 @@ final readonly class UpdateDraftData
 
     public function hasAnyChange(): bool
     {
-        return $this->body !== null || $this->limits !== null || $this->technologies !== null;
+        return $this->body !== null || $this->hasLimits || $this->limits !== null || $this->technologies !== null;
     }
 }

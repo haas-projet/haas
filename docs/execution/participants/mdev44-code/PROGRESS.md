@@ -348,3 +348,15 @@ Statut : B23 reste **préparé, PR en brouillon** sur la PR #30. Aucun `DONE`.
 - Q10 — Nom de la table pivot `capsule_version_technologies` : non explicitement cité dans §24. Décision de propriétaire du domaine, en attente de confirmation du relecteur.
 - Q11 — Header `X-Idempotent-Replay` à exposer ou non.
 - Q2–Q7 de B22 restent ouvertes.
+
+## 2026-10-07 — Préparation technique Codex de la PR #30
+
+Le travail distant `93fafea`, notamment Q8/Q9, est conservé. Les défauts de provenance, conflits, effacement des limites, droits actuels et rejeu sont corrigés ; la projection des réponses est attachée à la version autorisée. Les champs inconnus, technologies inconnues ou répétées, caractères de contrôle et secrets indicatifs sont refusés. Les détails, incidents et commandes réels sont dans `docs/quality/B23_DRAFT_READINESS.md`.
+
+- Readiness et six courses entre deux processus PostgreSQL : **13 tests / 111 assertions, OK** sur `haas_b23_review_test`.
+- Suite capsules complète avant synchronisation B22/main : **92 tests / 290 assertions, OK**.
+- Unit/Feature/Architecture : **323 tests / 2675 assertions, OK**.
+- PHPStan : `[OK] No errors`, après description du cast enum réel et de la Policy SQL impure ; aucune suppression d'erreur. Pint : `passed`.
+- Documents : 18 + 7 contrôles documentaires OK ; **33 types API à jour**.
+
+Statut : correctif local préparé pour synchronisation B22/main, suite combinée complète et CI distante. Revue humaine en attente ; aucune approbation attribuée, aucun `DONE`, aucun frontend. L'intégrateur rapporte le SHA réel après commit.

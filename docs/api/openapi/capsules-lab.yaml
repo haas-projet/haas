@@ -2,7 +2,7 @@
 openapi: 3.1.0
 info:
   title: HAAS — Capsules et laboratoire
-  version: 0.1.0
+  version: 0.1.1
 paths:
   /api/v1/capsules:
     post:
@@ -12,7 +12,9 @@ paths:
         Crée une capsule et sa première version-brouillon. Exactement une des deux
         sources est acceptée (demande résolue XOR origine éditoriale). L'origine
         éditoriale est réservée aux rôles moderator/admin. Compte actif et vérifié
-        obligatoire. L'en-tête `Idempotency-Key` est requis.
+        obligatoire. L'en-tête `Idempotency-Key` est requis. La demande doit être
+        réellement resolved, avec résolution active et proposition accepted cohérentes.
+        Le rejeu relit les droits et la version ; un brouillon modifié produit 409.
       security:
         - SessionCookie: []
       parameters:
@@ -31,7 +33,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/CapsuleDraft'
         '409':
-          description: Conflit d'idempotence (même clé, charge différente) ou de slug/version
+          description: Conflit d'idempotence, slug déjà utilisé ou brouillon modifié depuis sa création
         '403':
           description: Rôle insuffisant (origine éditoriale réservée à moderator/admin ; demande d'un autre auteur)
         '422':
@@ -85,7 +87,9 @@ paths:
         changes_requested. Réservé à l'owner de la capsule ou à un
         contributeur déclaré sur cette version. lock_version obligatoire ;
         périmé = 409 sans mutation. version_label, state, owner, reviewer
-        et published_at sont fixés par le serveur et refusés.
+        et published_at sont fixés par le serveur et refusés. limits null efface
+        les limites déclarées ; un champ absent les conserve. Tous les champs
+        inconnus et les technologies inconnues ou dupliquées sont refusés en 422.
       security:
         - SessionCookie: []
       parameters:
@@ -200,7 +204,7 @@ components:
           $ref: '#/components/schemas/CapsuleVersionDraft'
     CapsuleVersionDraft:
       type: object
-      required: [id, version_label, state, body]
+      required: [id, capsule_id, version_label, state, body, limits, lock_version, technologies]
       properties:
         id: { type: string, format: uuid }
         capsule_id: { type: string, format: uuid }
@@ -225,6 +229,7 @@ components:
         lock_version:
           type: integer
           minimum: 1
+          maximum: 2147483646
         body:
           type: string
           minLength: 20

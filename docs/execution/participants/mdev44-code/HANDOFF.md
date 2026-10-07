@@ -262,3 +262,9 @@ Prochaines actions, sur décision humaine : pousser `backend/capsules-laboratoir
 Preuves, commandes exactes, incidents de fixtures et limites : [B22_CAPSULE_SCHEMA.md](../../../quality/B22_CAPSULE_SCHEMA.md). Contrat : [CAPSULE_DATA.md](../../../architecture/CAPSULE_DATA.md). Hors SQL 319 / 2570 et SQL 232 / 1587 réussis, soit 551 tests / 4157 assertions uniques ; Pint, PHPStan 8 et Composer réussis. Base dédiée `haas_b22_review_test` sur PostgreSQL 17 local 55447 ; correctif de cookies simulés B17 repris sans assouplissement de production.
 
 Statut : prêt localement pour la revue humaine, CI du SHA publié et revue humaine en attente ; aucun DONE ou BACKEND_GATE. Après contrôles et publication par l’intégrateur, examiner B22 puis intégrer son schéma dans B23/B24 et refaire les tests des consommateurs. Aucun push effectué par cet agent.
+
+### Revalidation B22 avec main B14–B17 intégré
+
+Après le correctif local `2148322`, l’intégrateur prépare un merge normal de main `b76612d1b6587119127fd364244f5248f05f1ff2`. Tests du code combiné réellement exécutés sur la base dédiée `haas_b22_review_test` (PostgreSQL 17, 55447) : hors SQL **335 / 3595**, SQL **399 / 3390**, soit **734 tests / 6985 assertions uniques réussis** ; Pint et PHPStan niveau 8 réussis. Les anciens 551 / 4157 restent une preuve historique et ne s’ajoutent pas à ce total. Journaux/JUnit ignorés dans `backend/storage/logs/b22-main-integration.*`. Détails : [B22_CAPSULE_SCHEMA.md](../../../quality/B22_CAPSULE_SCHEMA.md).
+
+Le conflit du test de migration d’identité conserve les retraits des tables de capsules et des révisions communautaires. Aucun changement d’autorisation ou assouplissement de test. L’intégrateur consigne le SHA réel après création du merge puis publie la branche ; CI du SHA publié et revue humaine toujours à recevoir. Aucun DONE B22, frontend ou déploiement annoncé.

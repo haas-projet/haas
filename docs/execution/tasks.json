@@ -189,8 +189,8 @@
       "refs": "AC03–AC07 ; F02",
       "phase": "B",
       "execution_order": 16,
-      "status": "IN_REVIEW",
-      "evidence": ["docs/quality/B14_CREATION.md"]
+      "status": "DONE",
+      "evidence": ["docs/quality/B14_CREATION.md","docs/quality/PR_READINESS_20261007.md"]
     },
     {
       "id": "B15",
@@ -201,10 +201,8 @@
       "refs": "AC03/AC15/AC25 ; F12",
       "phase": "B",
       "execution_order": 17,
-      "status": "IN_REVIEW",
-      "evidence": [
-        "docs/quality/B15_READING.md"
-      ]
+      "status": "DONE",
+      "evidence": ["docs/quality/B15_READING.md","docs/quality/PR_READINESS_20261007.md"]
     },
     {
       "id": "B16",
@@ -215,10 +213,8 @@
       "refs": "AC03/AC05 ; F02",
       "phase": "B",
       "execution_order": 18,
-      "status": "IN_REVIEW",
-      "evidence": [
-        "docs/quality/B16_EDITING.md"
-      ]
+      "status": "DONE",
+      "evidence": ["docs/quality/B16_EDITING.md","docs/quality/PR_READINESS_20261007.md"]
     },
     {
       "id": "B17",
@@ -229,10 +225,8 @@
       "refs": "AC06/AC07 ; F03",
       "phase": "B",
       "execution_order": 19,
-      "status": "IN_REVIEW",
-      "evidence": [
-        "docs/quality/B17_COMMENTS.md"
-      ]
+      "status": "DONE",
+      "evidence": ["docs/quality/B17_COMMENTS.md","docs/quality/PR_READINESS_20261007.md"]
     },
     {
       "id": "B18",
@@ -1463,6 +1457,6 @@
   ],
   "deployment_decision": "ADR-004",
   "source_alignment": "Mail CADEV fourni ; décisions de conception ADR-005",
-  "updated_at": "2026-10-01",
+  "updated_at": "2026-10-07",
   "latest_decision": "ADR-006"
 }

@@ -125,8 +125,15 @@ Codex (GPT-6), sur demande de l’utilisateur : revue du schéma B22 conservant 
 
 Merge normal du commit B22 testé2148322 dans B23 corrigé57f0727 ; historiques IA/participant conservés. Rollback capsules repris par chemins explicites, enfants avant parents ; pivot technologique dédoublonné dans le helper de migration. Contrôles réels avant commit : 327tests/2704assertions horsSQL, Pint, pack18/18, documentationdéploiement7/7, 33types àjour. Le codeSQL B22 a ses551tests/4157assertions avantintégration ; les suitesSQL combinées après réceptionmain doivent encore être exécutées. Aucune déclaration de readiness distante sur cette étape locale.
 
+
 ## Préparation des PR avant approbation — 7 octobre 2026
 
 Codex, demande de l'utilisateur : réception de main e3bd34c après fusion réelle de #31 ; résolution des cinq conflits documentaires de #24 en conservant les historiques et les 122 lots. Aucun changement applicatif : seul backend/README.md rejoint main. Code identique à d9cba0b testé 671 / 6805 et CI verte ; contrôles documentaires relancés, nouveau head CI à observer. Revues parallèles et corrections séparées des PR B22/B23/B24 et B38, bases PostgreSQL locales distinctes ; aucun contrôle absent compté réussi et aucune approbation humaine inventée. Travail local initial, migrations et contributions préexistantes préservés.
 
 B23 avec main b76612d : conflits résolus en conservant les casts et champs B14–B17 et en retirant les enfants capsules et révisions avant les tables parentes. Contrôles réels : 343 tests / 3720 assertions hors SQL, pack 18/18, 54 types API à jour, PHPStan niveau 8 réussi par la revue parallèle. La suite SQL est interrompue avant correction de fixtures anciennes incompatibles avec le nouveau CHECK de publication et ajout du refus d’une demande source masquée ; aucun résultat SQL complet revendiqué. Cette synchronisation locale ne déclare pas la PR prête.
+
+## Constat de fusion et consolidation B22 — 7 octobre 2026
+
+À la demande de préparer les PR avant approbation, Codex constate la fusion externe de #24 dans main b76612d, sa CI verte et l’absence de revue enregistrée. Consolidation des statuts B14–B17 et des preuves, sans modifier les cartes externes ni inventer une approbation. Merge normal de main dans B22 : historiques conservés ; conflit du test de migration identité résolu en déposant enfants capsules puis révisions des demandes/commentaires avant les parents. Les suites combinées sont exécutées sur la base B22 dédiée avant publication. Aucun gate, frontend ou déploiement.
+
+B22 après intégration de main b76612d : suites effectivement terminées sur haas_b22_review_test, 335 tests / 3595 assertions hors SQL et 399 / 3390 PostgreSQL, soit 734 / 6985 uniques. Pint et PHPStan niveau 8 réussis. Les journaux/JUnit locaux de la suite SQL sont ignorés sous backend/storage/logs. Pack 18/18, déploiement 7/7 et 49 types relancés par l’intégrateur ; aucune CI du nouveau head n’est présumée avant publication et lecture des checks.

@@ -2,7 +2,7 @@
 
 ## Périmètre et statut
 
-Revue technique Codex du 7 octobre 2026, à partir de la PR #30 au commit source `93fafea`. Q8 (PATCH) et Q9 (auteur de la proposition acceptée) étaient déjà fermées ; leur travail est conservé. Cette préparation ne constitue ni une approbation humaine, ni B25, ni un BACKEND_GATE. Les protections B22 actualisées et le nouveau main doivent encore être intégrés et contrôlés ensemble avant publication du correctif.
+Revue technique Codex du 7 octobre 2026, initialement à partir de la PR #30 au commit source `93fafea`. Q8 (PATCH) et Q9 (auteur de la proposition acceptée) étaient déjà fermées ; leur travail est conservé. Les sections initiales gardent les essais et prérequis de cet état. La réception complète du code combiné définitif `d7ef6eb8c750987ddf509eba6647007162c1bec9` figure à la fin de cette preuve. Cette préparation ne constitue ni une approbation humaine, ni B25, ni un BACKEND_GATE.
 
 ## Défauts reproduits puis corrigés
 
@@ -36,9 +36,9 @@ PHP 8.5.10, PostgreSQL 17, base dédiée `haas_b23_review_test` sur `127.0.0.1:5
 
 Les premiers lancements avaient une configuration de test CORS/Sanctum incomplète, puis une URL locale doublée lors d’une écriture concurrente du fichier ignoré ; ils ont échoué avant les endpoints. Le rerun ci-dessus fixe explicitement les origines locales sans changer la configuration applicative. Un lancement intermédiaire de la suite capsules avait aussi un échec 422 au login du test Unicode ; les 13 tests ciblés, dont ce test, passent ensuite. La preuve ne transforme pas ces essais en succès.
 
-## Restant avant réception
+## Restant avant réception — état initial
 
-Intégrer B22 et le main actualisés, adapter les fixtures de publication aux contraintes réelles puis relancer les suites combinées complètes. CI distante du commit corrigé, Qodana et revue humaine : non exécutés ici. Aucun frontend, déploiement, achat ou GO_FRONTEND. L’intégrateur consigne le SHA réel après ce commit, sans essayer de l’inclure dans son propre contenu.
+À ce stade initial : intégrer B22 et le main actualisés, adapter les fixtures de publication aux contraintes réelles puis relancer les suites combinées complètes. CI distante du commit corrigé, Qodana et revue humaine : non exécutés ici. Aucun frontend, déploiement, achat ou GO_FRONTEND. L’intégrateur consigne le SHA réel après ce commit, sans essayer de l’inclure dans son propre contenu.
 
 ## Complément après synchronisation B22/main
 
@@ -57,3 +57,28 @@ Les trois Requests contrôlent désormais le minimum du texte après `trim` sans
 Trois courses supplémentaires entre deux processus contrôlent suspension de l’auteur tiers, retrait de sa vérification après attente et auteurs croisés. Les deux processus ont réellement obtenu leur verrou d’acteur et attendent sur les demandes avant libération ; au moins un conflit explicite empêche le deadlock. La suite SQL combinée précédente de 461 cas a été interrompue sur instruction de l’intégrateur après environ 448 cas, sans erreur visible à cet instant : **aucun résultat complet n’en est déduit**. La réception complète doit repartir du commit définitif avec la base B23 libre.
 
 Un premier rerun intermédiaire de 44 cas / 260 assertions échoue encore deux fois : PATCH blanc échappe aux règles non implicites de Laravel ; une assertion du test attend à tort le format `errors` alors que HAAS expose `error.fields`. Le Request ajoute `filled` au corps optionnel, et le test utilise le renderer réel. Ces essais ne sont pas présentés comme réussis. Rerun du code définitif : `php vendor/bin/phpunit --filter 'CapsuleDraftInputReadinessTest|CapsuleSourceAuthorReadinessTest|CapsuleDraftConcurrencyTest'` = **24 tests / 186 assertions, OK** ; Pint `passed`, PHPStan niveau 8 `[OK] No errors`, pack 18/18, déploiement 7/7 et **54 types API à jour**. La réception globale est confiée à une autre session sur le worktree et la base libérés ; CI et approbation humaine restent en attente.
+
+## Réception complète du candidat définitif — 7 octobre 2026
+
+Code applicatif reçu propre au commit `d7ef6eb8c750987ddf509eba6647007162c1bec9`, après les correctifs et probes ci-dessus. La réception indépendante relit les droits actuels et le rejeu, l’auteur de source sous `FOR SHARE NOWAIT`, la source résolue et visible, les verrous, les attributions et les validations du corps et de l’entier JSON. Aucun nouveau défaut concret bloquant relevé ; aucun code applicatif, test ou service changé pendant cette réception.
+
+Environnement explicite : PHP 8.5.10, PostgreSQL 17 `127.0.0.1:55447`, base dédiée `haas_b23_review_test`, rôle `haas_test`, `APP_ENV=testing`, `DB_CONNECTION=pgsql`, `DB_PASSWORD` et `DB_URL` vides. `APP_URL=http://localhost:8000`, `FRONTEND_URL` et `CORS_ALLOWED_ORIGINS=http://localhost:5173`, `SANCTUM_STATEFUL_DOMAINS=localhost:5173,localhost:8000`. La garde de base reste active ; APP_KEY et journaux locaux sont ignorés.
+
+| Commande réellement exécutée | Résultat |
+|---|---|
+| `php vendor/bin/phpunit --testsuite Unit,Feature,Architecture --log-junit storage/logs/b23-reception-unit.xml` | **343 tests / 3720 assertions, OK** |
+| `php vendor/bin/phpunit --testsuite Integration --log-junit storage/logs/b23-reception-integration.xml` | **478 tests / 3734 assertions, OK** ; 13 min 09,841 s |
+| `php vendor/bin/pint --test` | `passed` |
+| `php vendor/bin/phpstan analyse --memory-limit=512M --no-progress` | Niveau 8, `[OK] No errors` |
+| `php C:/ProgramData/ComposerSetup/bin/composer.phar validate --strict --no-check-publish` | `composer.json` valide |
+| `php C:/ProgramData/ComposerSetup/bin/composer.phar check-platform-reqs` | Toutes les exigences satisfaites |
+| `php C:/ProgramData/ComposerSetup/bin/composer.phar audit --locked --no-interaction --format=json` | Aucune alerte ni dépendance abandonnée |
+| `node scripts/validate-pack.mjs` | 18/18 contrôles documentaires réussis |
+| `node scripts/check-deployment-docs.mjs` | 7/7 contrôles documentaires réussis ; aucun serveur testé |
+| `php scripts/generate-api-types.php --check` | **54 types API à jour** |
+
+Total des deux suites complètes : **821 tests / 7454 assertions uniques**, zéro erreur, échec ou test ignoré dans les deux XML JUnit. Les 24 / 186 ciblés appartiennent à cette couverture et ne s’ajoutent pas au total ; les essais antérieurs restent historiques. XML locaux ignorés dans `backend/storage/logs/b23-reception-{unit,integration}.xml`. Composer 2.8 émet des dépréciations de son propre PHAR sous PHP 8.5 ; les trois contrôles terminent avec code 0.
+
+Le [run CI du candidat d7ef6eb](https://github.com/haas-projet/haas/actions/runs/37691657985) est entièrement vert, constat transmis par l’intégrateur après lecture des logs : PHP 8.4 et PHP 8.5 réussissent chacun 343 / 3720 hors SQL et 478 / 3734 SQL, soit **821 / 7454 uniques**, comme la réception locale ; le job `backend-ci` réussit également. La présente réception ajoute seulement cette preuve, les suivis participant/IA et les empreintes. La CI du futur commit documentaire doit encore être observée après sa publication par l’intégrateur ; aucune approbation humaine, réception Qodana, statut DONE, BACKEND_GATE ou mise en production n’est déduite de ces contrôles.
+
+Prochaine étape : publier le commit de preuve, lire ses checks exacts, puis présenter la PR #30 à une revue humaine distincte après ses prérequis. B24 doit reprendre ce parent et faire sa propre réception.

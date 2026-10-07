@@ -348,3 +348,59 @@ Statut : B23 reste **préparé, PR en brouillon** sur la PR #30. Aucun `DONE`.
 - Q10 — Nom de la table pivot `capsule_version_technologies` : non explicitement cité dans §24. Décision de propriétaire du domaine, en attente de confirmation du relecteur.
 - Q11 — Header `X-Idempotent-Replay` à exposer ou non.
 - Q2–Q7 de B22 restent ouvertes.
+
+## 2026-10-07 — Lot B24 · Soumettre à la revue
+
+Statut proposé : **préparé, PR en brouillon**, aucun `DONE`. Branche `backend/capsules-laboratoire-b24-revue`, dérivée de `backend/capsules-laboratoire-b23-brouillons` (`93fafea`).
+
+### Décisions clefs
+
+- **Deux transitions** : `draft → in_review` et `changes_requested → in_review` (CAHIER_DES_CHARGES.md:293). La transition `in_review → published` reste pour B25. Toute autre transition est refusée.
+- **Soumission** : owner ou contributeur de la version. Contenu minimal exigé (body ≥ 20 non blancs ET limits non vide) sinon 422 ciblé avec champs manquants.
+- **Revue « demander des corrections »** : moderator/admin qui N'EST NI owner NI contributeur de la version. Un admin auteur ou admin contributeur ne se relit pas, même avec les droits techniques (CAHIER_DES_CHARGES.md:462). Transition `in_review → changes_requested` ; `reviewer_id` posé sur `capsule_versions` ; note 20-2000 caractères non blancs enregistrée dans `capsule_version_reviews`.
+- **Table `capsule_version_reviews`** : décision du propriétaire du domaine, non nommée dans §24. Colonnes id/version_id/reviewer_id/decision/note/created_at. Immuable par Service (pas d'`updated_at`).
+- **Notification « Revue de capsule terminée »** : non livrée en B24. L'API `NotificationEvent` du socle n'accepte que `kind === 'profile.moderated'` (`backend/app/Data/Notifications/NotificationEvent.php`). Toute extension exige la modification d'un fichier du socle (interdit). Question ouverte Q12 : élargir l'enum `kind` ou poser un adaptateur local.
+
+### Fichiers créés
+
+- Enum : `App\Enums\Capsules\ReviewDecision` (request_changes).
+- Migration : `2026_10_07_174813_create_capsule_version_reviews_table.php` + CHECK note 20-2000.
+- Modèle `App\Models\Capsules\CapsuleVersionReview` + factory.
+- Exception de domaine : `App\Exceptions\Capsules\InsufficientDraftContent` (contenu minimal manquant) ; le Controller la transforme en 422.
+- Policy étendue : `submitForReview`, `reviewVersion`.
+- Services : `SubmitCapsuleVersionForReviewService`, `RequestChangesOnCapsuleVersionService` (transactions, audit atomique).
+- FormRequest `RequestChangesRequest` ; Controllers `SubmitCapsuleVersionForReviewController`, `RequestChangesController`.
+- Routes : `POST .../submit-review` et `POST /admin/capsules/.../request-changes`.
+- Fragment OpenAPI + 2 nouveaux schémas (`CapsuleVersionReviewInput`, `CapsuleVersionReview`).
+- Tests : `CapsuleVersionReviewsSchemaTest` (4 cas) + `CapsuleReviewHttpTest` (14 cas HTTP).
+- Support de test : `DomainTables` inclut `capsule_version_reviews` ; `CapsulesMigrationTest` incrémente son compteur à sept.
+
+### Fichiers hors de mon domaine modifiés
+
+- `docs/OPENAPI.yaml` : **+4 lignes** (deux routes B24). Commit `6831521`.
+- `docs/api/generated/haas-api.d.ts` : **régénéré** par `scripts/generate-api-types.php`. Commit `51370b8`.
+
+Aucun autre fichier du socle n'a été touché.
+
+### Contrôles finaux
+
+| Commande | Résultat observé |
+|---|---|
+| `composer lint` | `passed` |
+| `composer analyse` | `[OK] No errors` |
+| `composer test` | **323 tests / 2723 assertions, OK** en 10,975 s |
+| `vendor/bin/phpunit --testsuite Integration` (direct, composer time-out) | **248 tests / 1523 assertions, OK** en 5 min 25 s |
+
+### Commits locaux
+
+- `21fdf30` policy + services
+- `6831521` $ref OPENAPI
+- `51370b8` types régénérés
+- commits de schéma, routes et tests déjà poussés via le lot.
+
+### Questions ouvertes
+
+- Q12 — Notifier « Revue de capsule terminée » : l'API `NotificationEvent` restreint `kind` à `profile.moderated`. Options : élargir l'enum côté socle (hors de mon domaine) ou créer un canal local. Décision à prendre avant B25.
+- Q10 (B23) — Nom du pivot `capsule_version_technologies` reste ouvert.
+- Q11 (B23) — Header `X-Idempotent-Replay` reste ouvert.
+- Q2–Q7 de B22 restent ouvertes.

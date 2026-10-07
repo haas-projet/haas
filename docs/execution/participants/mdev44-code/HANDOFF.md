@@ -198,3 +198,26 @@ Aucun autre fichier du socle n'a été touché.
 1. Pousser les commits locaux restants vers `origin/backend/capsules-laboratoire-b23-brouillons`.
 2. `gh pr edit 30` pour mettre à jour le corps de la PR #30 (nouveaux commits, Q8/Q9 fermées, Q11 clarifiée, Q10 restante).
 3. Attendre revue humaine distincte.
+
+## 2026-10-07 — HANDOFF B24 Soumettre à la revue
+
+Branche : `backend/capsules-laboratoire-b24-revue`. Base : `backend/capsules-laboratoire-b23-brouillons` (`93fafea`). Statut proposé : **préparé, PR en brouillon**. Aucun `DONE`.
+
+### Nouvelles routes
+
+- `POST /api/v1/capsules/{capsule}/versions/{version}/submit-review`.
+- `POST /api/v1/admin/capsules/{capsule}/versions/{version}/request-changes`.
+
+### Fichiers hors de mon domaine modifiés (B24)
+
+- `docs/OPENAPI.yaml` : +4 lignes `$ref`.
+- `docs/api/generated/haas-api.d.ts` : régénéré.
+
+### Contrôles finaux
+
+- `composer lint` passed ; `composer analyse` OK ; `composer test` 323/2723 ; `vendor/bin/phpunit --testsuite Integration` 248/1523.
+- CI distante : à observer après push.
+
+### Question Q12 bloquante pour B25
+
+La notification « Revue de capsule terminée » (CAHIER_DES_CHARGES.md:355) nécessite d'étendre `App\Data\Notifications\NotificationEvent` qui limite `kind` à `profile.moderated` (fichier du socle, hors de mon domaine). Décision à prendre avant B25.

@@ -1,5 +1,11 @@
 # Suivi — communauté et entraide / LamineGL
 
+## 7 octobre 2026 — Reprise de la CI B17
+
+PR #32 publiée vers B16, métier `238d5e9`, synchronisation `6737081`. Première CI `37657236028` : PHP 8.5 réussi ; PHP 8.4 échoue dans l'ancien test Idempotency, reconnexion après 23 heures à 419. Échec reproduit localement avec collecte des sessions forcée, avant correction du navigateur simulé qui conservait les cookies expirés.
+
+Le helper de test suit maintenant les échéances par nom/valeur et retire les cookies expirés avant XSRF ; le refus serveur d'un cookie périmé reste testé explicitement. Aucun changement applicatif ou dépendance. Contrôles ciblés **20 / 139**, puis suites complètes hors SQL **328 / 3563** et PostgreSQL **343 / 3242**, soit **671 / 6805 distincts** ; Pint et PHPStan réussis. Commandes et limites consignées dans [B17_COMMENTS.md](../../../quality/B17_COMMENTS.md). B17 reste IN_REVIEW et la CI du nouveau head reste à constater avant intégration. Aucun statut DONE, revue humaine, gate ou déploiement ajouté.
+
 ## 3 octobre 2026 — Reprise B11
 
 Intervention Codex à la demande de l'utilisateur pour continuer la partie de Lamine ; aucune identité Git ni revue de Lamine n'est simulée. Les contributions B11 publiées par mdev44-code à `1c380c4` sont conservées, ainsi que son suivi individuel et sa branche source. Reprise sur la branche permanente `backend/communaute-entraide`, socle `main` `7a8c672`, merge local `93009c3` sans conflit.
@@ -31,6 +37,11 @@ Statut : en préparation de revue, pas encore fusionné. Les autres 26 lots de l
 - Validation locale : 551 tests / 5515 assertions distincts, dont 267 / 2444 PostgreSQL. Pint/PHPStan, validation/prérequis/audit Composer et documentation réussis ; cluster dédié arrêté.
 - B16 IN_REVIEW ; SHA final, PR et CI du commit testé à consulter dans le bilan après publication. Ordre #23 → #22 → #24 → #25 → B16 ; aucune revue humaine ou fusion présumée. B11/B14/B15/B16 En cours dans Systalink, 23 autres lots à faire. Prochain B17, commentaires sous verrou parent. Aucun BACKEND_GATE ni frontend/déploiement.
 
+## 7 octobre 2026 — B17, commentaires historisés
+
+Intervention Codex à la demande de continuer la partie de Lamine et la publication. Implémentation B17 non commitée déjà présente préservée, relue et complétée dans .worktrees/b17 ; main f1f6238 intégré sans réécriture de code. Cinq opérations, Markdown restreint, révisions, audit minimal et événement interne après commit. Sept courses PostgreSQL réelles et sept cas de notifications complètent les tests HTTP.
+
+Résultat distinct : 671 tests / 6805 assertions, dont 343 / 3242 PostgreSQL sous PHP 8.5.10 ; Pint/PHPStan niveau8, validation/prérequis/audit Composer, 49 types OpenAPI et contrôles documentaires réussis. Voir docs/quality/B17_COMMENTS.md pour les commandes et limites. B17 IN_REVIEW, aucune approbation humaine simulée. B11 DONE après #22/#23 réellement intégrées ; #24 reciblée main, #25/#26 conservent leurs prérequis. Branches déjà intégrées B11/B35 supprimées, les travaux non intégrés conservés. SHA final et CI exacte à observer dans la PR après commit. Travail initial des routes capsules préservé ; aucun frontend ou déploiement. Prochain lot B18 après coordination des revues.
 ## 7 octobre 2026 — Synchronisation B14 avec main
 
 - À la demande de l'utilisateur, récupération par merge normal de `origin/main` à `f1f6238` (B11 intégré et B35 présent), depuis B14 `6a0db1e`, dans un worktree isolé. Aucun historique réécrit.

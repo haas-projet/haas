@@ -23,6 +23,20 @@ export type account_mail_ResetPasswordInput = { readonly "email": account_mail_E
 
 export type administration_Account = { readonly "id": string; readonly "handle": string; readonly "role": "member" | "moderator" | "admin"; readonly "status": "active" | "suspended"; readonly "lock_version": number; };
 
+export type community_Comment = { readonly "id": string; readonly "request_id": string; readonly "author": { readonly "id": string; readonly "handle": string; }; readonly "body": string; readonly "body_html": string; readonly "lock_version": number; readonly "created_at": string | null; readonly "edited_at": string | null; };
+
+export type community_CommentCreateInput = { readonly "body": string; };
+
+export type community_CommentDetail = { readonly "data": community_Comment; };
+
+export type community_CommentPage = { readonly "data": ReadonlyArray<community_Comment>; readonly "meta": OPENAPI_PaginationMeta; };
+
+export type community_CommentRevision = { readonly "id": string; readonly "comment_version": number; readonly "action": "created" | "updated" | "before_edit"; readonly "body": string; readonly "body_html": string; readonly "occurred_at": string; };
+
+export type community_CommentRevisionPage = { readonly "data": ReadonlyArray<community_CommentRevision>; readonly "meta": OPENAPI_PaginationMeta; };
+
+export type community_CommentUpdateInput = { readonly "body": string; readonly "lock_version": number; };
+
 export type community_CreateHelpRequestInput = (community_HelpRequestDraftInput | community_HelpRequestPublicationInput | community_HelpRequestQuestionInput);
 
 export type community_HelpIntent = "unblock" | "review_solution" | "reproduce_behavior" | "ask_question";
@@ -75,7 +89,7 @@ export type moderation_Receipt = (moderation_ReportFields);
 
 export type moderation_ReportFields = { readonly "id": string; readonly "resource_type": "profile"; readonly "resource_id": string; readonly "status": "new" | "in_review" | "resolved" | "dismissed"; readonly "lock_version": number; readonly "created_at": string; [key: string]: unknown; };
 
-export type notifications_Notification = { readonly "id": string; readonly "kind": "profile.moderated"; readonly "message": string; readonly "target_path": "\/me\/profile"; readonly "read_at": string | null; readonly "created_at": string; };
+export type notifications_Notification = { readonly "id": string; readonly "kind": "profile.moderated" | "comment.created"; readonly "message": string; readonly "target_path": string; readonly "read_at": string | null; readonly "created_at": string; };
 
 export type profiles_ProfileFields = { readonly "id": string; readonly "handle": identity_Handle; readonly "avatar_initials": string; readonly "bio": string; readonly "country": string | null; readonly "primary_language": string; readonly "github_url": string | null; readonly "technologies": ReadonlyArray<profiles_Technology>; readonly "is_demo": boolean; readonly "contributions": null; [key: string]: unknown; };
 

@@ -9,7 +9,7 @@ final readonly class NotificationEvent
 {
     public function __construct(public string $eventId, public string $recipientId, public string $kind)
     {
-        if (! Str::isUuid($eventId) || ! Str::isUuid($recipientId) || $kind !== 'profile.moderated') {
+        if (! Str::isUuid($eventId) || ! Str::isUuid($recipientId) || ! in_array($kind, ['profile.moderated', 'comment.created'], true)) {
             throw new InvalidArgumentException('Événement de notification non pris en charge.');
         }
     }

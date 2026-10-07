@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace App\Services\Capsules;
 
 use App\Data\Capsules\UpdateDraftData;
+use App\Exceptions\Capsules\StaleCapsuleVersion;
 use App\Models\Capsules\Capsule;
 use App\Models\Capsules\CapsuleVersion;
 use App\Models\User;
 use App\Policies\CapsulePolicy;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\DB;
-use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 
 /**
  * Édition d'un brouillon de capsule : transaction PostgreSQL, lockForUpdate,
@@ -42,7 +42,7 @@ final class UpdateCapsuleVersionDraftService
                 throw new AuthorizationException;
             }
             if ($locked->lock_version !== $data->lockVersion) {
-                throw new ConflictHttpException('Cette version a été modifiée. Rechargez sa dernière forme.');
+                throw new StaleCapsuleVersion('Cette version a été modifiée. Rechargez sa dernière forme.');
             }
             $changes = [];
             if ($data->body !== null) {

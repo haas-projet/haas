@@ -1,5 +1,9 @@
 # Suivi — communauté et entraide / LamineGL
 
+## 7 octobre 2026 — Synchronisation de #24 avant approbation
+
+Main `e3bd34c` reçu après fusion documentaire #31. Merge normal dans la proposition consolidée B14–B17 #24, cinq conflits documentaires résolus avec historiques et 122 lots conservés ; aucune modification applicative. Backend README actualisé depuis main. Code correspondant aux 671 / 6805 déjà validés et CI `37666083469` verte ; contrôles documentaires relancés et CI du nouveau head à observer. Les PR #29/#30/#33/#28 reçoivent une revue et des corrections séparées ; aucune approbation humaine, intégration main de B14–B17 ni gate ajouté.
+
 ## 7 octobre 2026 — B14–B17 consolidés pour revue de main
 
 Fusions externes constatées : #32 → B16 `a3fd442`, #26 → B15 `f346985`, #25 → B14 `61c4184`. B14 ne contenait pas les deux derniers lots ; consolidation par merge normal de B15 `f346985` dans B14, sans conflit ni réécriture. Le backend résultant est identique à B17 `8234470` testé **671 / 6805** et CI verte sous PHP 8.4/8.5. Contrôles documentaires relancés ; CI du nouveau head à observer avant la revue #24 vers main. Aucun statut DONE ni approbation humaine inventée : ces fusions sont intermédiaires. Dernier inventaire 13 branches après B24 externe, quatre permanentes et neuf temporaires conservées. Voir B17_COMMENTS.md pour les preuves et limites ; prochain B18 après coordination.

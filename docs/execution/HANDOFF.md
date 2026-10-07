@@ -2,7 +2,7 @@
 
 Inspecter le dépôt, préserver les fichiers/commits/saisies existants, lire ADR-006. Appliquer F18 : projets ouverts, offres consenties, décision propriétaire, fil et projection publique contrôlés. Nouvelle recette avant GO_FRONTEND ; ne pas prendre un ancien gate pour un accord sur ce périmètre. Systalink/Vercel inchangé.
 
-État courant : B01–B09, B11–B13 et B32 DONE (13 lots entiers). B14/B15/B16/B17 IN_REVIEW : #24 vers main, #25 vers B14, #26 vers B15, B17 depuis B16 et main. Les 22 autres lots de la coordination #2 restent à faire. B10/B29/B30/B31 et B39–B42 IN_PROGRESS ; B43/B44 BLOCKED. Les limites B35/B38 et brouillons B22/B23 sont consignés dans [PR #31](https://github.com/haas-projet/haas/pull/31), avec les README corrigés en attente d'approbation humaine. S01/S02 restent partiels. BACKEND_GATE NON REÇU, aucun GO_FRONTEND/GO_PRODUCTION. Voir [B17](../quality/B17_COMMENTS.md) et le [suivi de Lamine](participants/LamineGL/HANDOFF.md).
+État courant : B01–B09, B11–B13 et B32 DONE (13 lots entiers). B14/B15/B16/B17 IN_REVIEW, consolidés dans #24 vers main ; #25/#26/#32 sont des fusions intermédiaires. #31 (README et bilan) est réellement fusionnée dans main e3bd34c. B22/B23/B24 restent en brouillon dans #29/#30/#33, corrections en cours ; B38 reste BLOCKED avant correction et preuve d'isolation. B35 partiel. Les 22 autres lots de Lamine restent à faire. B10/B29/B30/B31 et B39–B42 IN_PROGRESS ; B43/B44 BLOCKED. S01/S02 partiels. Aucun BACKEND_GATE, GO_FRONTEND ou GO_PRODUCTION. Voir MERGE_MADINA.md, B17_COMMENTS.md et le suivi de Lamine. Les entrées suivantes sont historiques.
 
 ## Reprise après préparation GitHub — 2026-10-01
 
@@ -202,3 +202,11 @@ Lot B16 préparé depuis B15 `0cfcde1` sur `backend/communaute-entraide-b16` dan
 La PR doit cibler `backend/communaute-entraide-b15` pendant sa revue. Ordre #23 → #22 → #24 → #25 → B16 ; après chaque fusion autorisée, recibler/synchroniser et vérifier la CI. SHA réel et CI du commit publié dans le bilan/PR. Aucun avis humain ni merge présumé. Routes capsules locales dans le répertoire principal non incluses.
 
 B17 est le prochain lot. Ses écritures devront verrouiller le parent avant de contribuer et préserver le contrat de notes B16. B11/B14/B15/B16 restent En cours dans Systalink jusqu'à intégration ; 23 autres lots de Lamine à faire. Aucun GO_FRONTEND/GO_PRODUCTION.
+
+## 2026-10-07 — Reprise après revue de Madina
+
+Fusions distantes vérifiées : #12 33eafa0, #22 957029b dans B11, #23 17c6daa et #27 f1f6238 dans main. Lire docs/quality/MERGE_MADINA.md pour les SHA complets, contrôles et limites. B11 DONE ; 13 lots backend entiers terminés. Correctif UTC B1 cdbe96f inclus. Head combiné 108aa7d : 488 tests / 3977 assertions locaux et sous les deux PHP de la CI 37637092346, contrôles verts.
+
+Reprendre B22 #29 (retrait avec date de publication conservée, champs serveur, versions/technologies), puis B23 #30 (source vraiment résolue, validations, verrouillage/rejeu et tests HTTP). Les PR restent en brouillon. B38 #28 reste BLOCKED : probes Origin démonstration=403 et Origin HAAS=deux cookies ; appliquer le patch inerte docs/quality/probes/B38_ISOLATION.patch sur la branche B2 pour reproduire, avec base locale dédiée. Corriger origine/routage sans session et isolation réelle base/runtime/configuration, puis revalider la concurrence.
+
+B35 IN_PROGRESS : service transactionnel et concurrence reçus, câblage haas_lab/isolation et module défectueux pédagogique à compléter avant B36. Le cluster PostgreSQL temporaire de revue est arrêté. Travail local initial B14 préservé ; ne pas écraser sa modification de routes. Toutes les branches distantes sont conservées. Aucun BACKEND_GATE, GO_FRONTEND ou GO_PRODUCTION.

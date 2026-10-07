@@ -1,5 +1,9 @@
 # Reprise — communauté et entraide
 
+## Préparation de l'approbation — 7 octobre 2026
+
+À la demande de gérer les PR restantes avant approbation : main `e3bd34c` contient désormais la fusion réelle de #31 (README et bilan). Intégration par merge normal dans #24 ; conflits seulement dans AI_USAGE, suivi racine, preuve B11 du catalogue et empreintes. Les histoires des deux domaines et les 122 lots sont préservés. Aucun code applicatif ne change par cette synchronisation ; seule la documentation backend README rejoint main. Les tests 671 / 6805 et la CI `37666083469` portent sur le même code ; la CI du nouveau head doit encore être constatée. Revue humaine de #24 toujours requise, aucun avis simulé. Les corrections des cinq PR ouvertes sont coordonnées séparément ; aucun gate, frontend ni déploiement.
+
 ## 7 octobre 2026 — Consolidation finale vers main
 
 Les fusions intermédiaires réalisées à distance pendant cette session sont constatées : #32 vers B16 (`a3fd442`), #26 vers B15 (`f346985`), #25 vers B14 (`61c4184`). #25 a précédé les suivantes et B14 ne contenait donc pas encore B16/B17. Merge normal de B15 `f346985` dans B14 pour présenter **B14–B17 dans #24 vers main**, sans réécriture ni conflit.

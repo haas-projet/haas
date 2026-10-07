@@ -33,3 +33,21 @@ Le 4 octobre, l'utilisateur confirme que Madina n'a pas commencé B14 ni HelpInt
 Prochain lot : **B15**, lectures/recherche avec visibilité avant filtres/pagination et compteurs ; réutiliser HelpRequestPolicy et HelpRequestResource. Ne pas ajouter B15 à la PR B14 pendant sa revue. B16 ajoutera les éditions/publications de brouillons existants sous version ; POST B14 crée une nouvelle ressource et n'est pas une route d'édition.
 
 B11/B14 restent En cours dans Systalink jusqu'à intégration vérifiée. Les 25 autres lots de la coordination #2 restent à faire ; les points `ask_question`/HelpIntent préparés ne valident pas l'intégralité BC07/BV201. Aucun BACKEND_GATE/GO_FRONTEND/GO_PRODUCTION. Tests PostgreSQL uniquement sur une base dédiée avec rôle haas_test.
+
+## Synchronisation du 7 octobre 2026
+
+B11 est intégré dans `main` (`f1f6238`). B14 récupère ce main par merge normal depuis `6a0db1e` ; l'unique conflit du registre IA est résolu en gardant B14 et B35. PR #24 reciblée vers main ; B15/#25 et B16/#26 restent dépendantes et doivent être synchronisées dans cet ordre.
+
+Preuves de cette synchronisation : contrôles documentaires 18/18 et 7/7 ; 36 types API à jour sous PHP 8.5.10 ; empreintes des fichiers versionnés actualisées ; whitespace contrôlé avant commit. SHA réel et CI du head publiés dans le bilan. Les suites Laravel et PostgreSQL de cette branche ne sont pas réexécutées ici ; les contrôles documentaires ne les remplacent pas. Revue humaine encore requise, sans BACKEND_GATE/GO_FRONTEND/GO_PRODUCTION.
+
+## Synchronisation B15 du 7 octobre 2026
+
+B15 récupère B14 synchronisé (`230b83b`) par merge normal depuis `0cfcde1`. Les conflits portent sur les documents et les empreintes ; les historiques B14/B15/B35 sont conservés, sans conflit de code. Contrôles : 18/18 documentaires, 7/7 déploiement documentaire, 38 types API à jour sous PHP 8.5.10 et whitespace avant commit. Suites Laravel/PostgreSQL non réexécutées sur B15 durant cette synchronisation.
+
+PR #25 dépend de B14/#24. Publier le SHA réel et observer ses checks PHP 8.4/8.5 ; revue humaine requise. Prochaine synchronisation : B16 depuis ce B15. Aucun BACKEND_GATE/GO_FRONTEND/GO_PRODUCTION.
+
+## Synchronisation B16 du 7 octobre 2026
+
+B16 récupère B15 synchronisé (`a3eb9b9`) par merge normal depuis `8e9a60e`. Les conflits sont documentaires ; les ajouts B14/B15/B16 et B35 sont conservés, sans conflit applicatif. Contrôles exécutés : 18/18 documentaires, 7/7 déploiement documentaire, 42 types API à jour sous PHP 8.5.10 et whitespace avant commit. Empreintes actualisées depuis les fichiers versionnés ; suites Laravel et PostgreSQL non réexécutées sur B16 durant cette synchronisation.
+
+PR #26 dépend de B15/#25, elle-même après B14/#24. SHA réel et CI PHP 8.4/8.5 du head à rapporter après publication ; revue humaine requise. B17 reste un lot séparé. Aucun BACKEND_GATE/GO_FRONTEND/GO_PRODUCTION.

@@ -30,6 +30,7 @@ class CapsuleVersion extends Model
     protected $casts = [
         'state' => CapsuleVersionState::class,
         'published_at' => 'datetime',
+        'lock_version' => 'integer',
     ];
 
     /** @return BelongsTo<Capsule, $this> */

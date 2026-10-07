@@ -70,3 +70,7 @@ Décisions explicites : migration sans préfixe de lot — dérogation assumée 
 ## Revue et intégration du travail de Madina — 7 octobre 2026
 
 Codex (GPT-6), à la demande explicite de l'utilisateur : revue automatisée des PR #12/#23/#27/#28 et brouillons #29/#30 ; réutilisation de l'approbation humaine réellement présente sur #22, sans signature simulée. Correction d'un instant B1 hors UTC après reproduction rouge, synchronisations par merges conservant les contributions, puis fusions distantes #12/#22/#23/#27 après vérification des CI. Le code combiné passe 488 tests / 3977 assertions localement et sous PHP 8.4/8.5 en CI. Deux probes B2 échouent réellement ; #28 non fusionnée. Constats B22/B23 statiques, aucun nouveau test HTTP exécuté pour ces brouillons. Suivi consolidé et détails dans docs/quality/MERGE_MADINA.md ; aucun gate, frontend, Qodana ou déploiement déclaré reçu.
+
+## Correction des README — 7 octobre 2026
+
+Codex (GPT-6), sur demande de l'utilisateur : actualisation du README principal et du README backend à partir du code, des commandes et des fusions vérifiées. Relecture automatisée des prérequis et limites ; commandes d'installation décrites mais non exécutées, aucun nouveau test applicatif ni serveur lancé. Les résultats de CI cités restent datés et attribués aux runs réels. Suivi de l'intégrateur et empreintes actualisés ; aucune approbation humaine simulée.

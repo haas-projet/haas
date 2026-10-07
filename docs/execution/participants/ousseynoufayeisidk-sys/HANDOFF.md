@@ -141,3 +141,9 @@ Fusions distantes vérifiées : #12 33eafa0, #22 957029b dans B11, #23 17c6daa e
 Reprendre B22 #29 (retrait avec date de publication conservée, champs serveur, versions/technologies), puis B23 #30 (source vraiment résolue, validations, verrouillage/rejeu et tests HTTP). Les PR restent en brouillon. B38 #28 reste BLOCKED : probes Origin démonstration=403 et Origin HAAS=deux cookies ; appliquer le patch inerte docs/quality/probes/B38_ISOLATION.patch sur la branche B2 pour reproduire, avec base locale dédiée. Corriger origine/routage sans session et isolation réelle base/runtime/configuration, puis revalider la concurrence.
 
 B35 IN_PROGRESS : service transactionnel et concurrence reçus, câblage haas_lab/isolation et module défectueux pédagogique à compléter avant B36. Le cluster PostgreSQL temporaire de revue est arrêté. Travail local initial B14 préservé ; ne pas écraser sa modification de routes. Toutes les branches distantes sont conservées. Aucun BACKEND_GATE, GO_FRONTEND ou GO_PRODUCTION.
+
+## 2026-10-07 — Reprise après correction des README
+
+README.md et backend/README.md présentent désormais les livraisons réellement intégrées, les limites B1/B2/capsules et le démarrage local documenté. Commandes et prérequis relus dans les sources du dépôt ; git diff --check propre. Aucun nouveau test applicatif ni serveur lancé. Les résultats 488 tests / 3977 assertions renvoient à la CI datée du 7 octobre, pas à une exécution de cette correction.
+
+La correction rejoint le bilan documentaire de PR #31 ; approbation humaine requise par la protection GitHub avant fusion dans main. Prochain travail : réception de cette documentation, puis corrections capsules/isolation B2 indiquées dans MERGE_MADINA. BACKEND_GATE reste non reçu. Travail local B14 conservé ; aucun frontend ni déploiement.

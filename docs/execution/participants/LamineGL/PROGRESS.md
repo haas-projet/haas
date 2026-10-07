@@ -1,5 +1,11 @@
 # Suivi — communauté et entraide / LamineGL
 
+## 7 octobre 2026 — Reprise de la CI B17
+
+PR #32 publiée vers B16, métier `238d5e9`, synchronisation `6737081`. Première CI `37657236028` : PHP 8.5 réussi ; PHP 8.4 échoue dans l'ancien test Idempotency, reconnexion après 23 heures à 419. Échec reproduit localement avec collecte des sessions forcée, avant correction du navigateur simulé qui conservait les cookies expirés.
+
+Le helper de test suit maintenant les échéances par nom/valeur et retire les cookies expirés avant XSRF ; le refus serveur d'un cookie périmé reste testé explicitement. Aucun changement applicatif ou dépendance. Contrôles ciblés **20 / 139**, puis suites complètes hors SQL **328 / 3563** et PostgreSQL **343 / 3242**, soit **671 / 6805 distincts** ; Pint et PHPStan réussis. Commandes et limites consignées dans [B17_COMMENTS.md](../../../quality/B17_COMMENTS.md). B17 reste IN_REVIEW et la CI du nouveau head reste à constater avant intégration. Aucun statut DONE, revue humaine, gate ou déploiement ajouté.
+
 ## 3 octobre 2026 — Reprise B11
 
 Intervention Codex à la demande de l'utilisateur pour continuer la partie de Lamine ; aucune identité Git ni revue de Lamine n'est simulée. Les contributions B11 publiées par mdev44-code à `1c380c4` sont conservées, ainsi que son suivi individuel et sa branche source. Reprise sur la branche permanente `backend/communaute-entraide`, socle `main` `7a8c672`, merge local `93009c3` sans conflit.

@@ -47,6 +47,16 @@ Le premier passage hors SQL a exécuté 298 tests / 3105 assertions, avec un éc
 
 ## Limites et reprise
 
+### Correction du navigateur simulé après la première CI B17
+
+PR [#32](https://github.com/haas-projet/haas/pull/32), premier head `6737081bd51e930a01a2001218d74cf418a11f5b` : la [CI 37657236028](https://github.com/haas-projet/haas/actions/runs/37657236028) réussit sous PHP 8.5, mais échoue sous PHP 8.4 dans l'ancien test `IdempotencyTest::test_http_retry_returns_same_profile_with_one_version_and_audit_and_no_private_snapshot`. La reconnexion après une avance de 23 heures reçoit 419 ; les nouveaux cas B17 ne sont pas la cause de cet échec.
+
+Le navigateur simulé conservait indéfiniment ses cookies, alors que la session expire après deux heures. Avec un cookie expiré encore envoyé, la lecture Laravel constate une ancienne ligne de session, puis la collecte peut la supprimer avant la sauvegarde ; le jeton CSRF de la réponse n'est alors pas persisté. Une collecte forcée à 100 % rend le défaut reproductible sous PHP 8.5 : le test ciblé échoue réellement à 419 (**1 test / 17 assertions**), avant correction.
+
+`SpaHttpRequests` conserve désormais l'échéance par nom et valeur de cookie, retire les cookies expirés avant de construire le header XSRF et utilise l'horloge simulée `now()`. Les cookies sans échéance et les sauvegardes/restaurations de jars restent pris en charge. Le cas de session expirée transmet toujours volontairement le cookie périmé (`sendExpiredCookies: true`) et vérifie son refus 401 par le serveur. La collecte forcée reste dans le test d'idempotence ; aucun contrôle CSRF, traitement applicatif, dépendance ou configuration de production n'est assoupli.
+
+Après correction, `php vendor/bin/phpunit tests/Integration/IdempotencyTest.php tests/Integration/MemberSessionTest.php` réussit : **20 tests / 139 assertions**. Les deux suites générales sont ensuite exécutées entièrement : Unit/Feature/Architecture **328 / 3563**, Integration **343 / 3242**, soit **671 tests distincts / 6805 assertions**, tous réussis sous PHP 8.5.10 et sur la base locale dédiée décrite plus haut. Pint et PHPStan niveau 8 réussissent. Le ciblage de 20 tests n'est pas additionné aux suites. La CI du prochain head sous PHP 8.4/8.5 doit encore être constatée avant intégration.
+
 Revue automatisée, aucune identité ou approbation humaine simulée. B14/B15/B16 restent dans les PR #24/#25/#26 ; B11 a réellement été intégré dans main via #23. B17 reste séparé pendant la revue des prérequis. Le SHA final, la PR et la CI du commit exact seront rapportés après commit.
 
 Les projets BC04/BC05 ne sont pas livrés par ce lot. Aucun navigateur/frontend, Qodana, BACKEND_GATE, GO_FRONTEND ou déploiement validé. PHP 8.4 local non exécuté ; la CI du SHA final devra couvrir PHP 8.4/8.5 et PostgreSQL 17. Le cluster local sera arrêté après les contrôles. Prochain lot communautaire : B18, propositions de solution.

@@ -83,3 +83,11 @@ php vendor/bin/phpunit tests/Integration/Collaboration/CommentsTest.php tests/In
 ```
 
 Les contrôles généraux restent composer lint, composer analyse, composer test et composer test:integration. NotificationOutbox exige un appel de livraison hors transaction métier ; notifications:deliver reprend les intentions commitées. Les tests emploient seulement des fixtures fictives et des processus PHP du dépôt. Le rollback B17 refuse de supprimer des événements comment.created existants ; ne pas effacer des données applicatives pour contourner ce refus. Preuves et cible PostgreSQL réellement utilisées : docs/quality/B17_COMMENTS.md.
+
+Pour reproduire le parcours de session et d'idempotence corrigé après la première CI B17, sur cette même base dédiée :
+
+```powershell
+php vendor/bin/phpunit tests/Integration/IdempotencyTest.php tests/Integration/MemberSessionTest.php
+```
+
+Le navigateur simulé retire les cookies expirés avec l'horloge des tests ; le cas de cookie périmé volontairement envoyé exige toujours un refus serveur. Le test Idempotency force la collecte des sessions pour rendre la reconnexion après 23 heures déterministe. La preuve B17 conserve l'échec réel avant correction.

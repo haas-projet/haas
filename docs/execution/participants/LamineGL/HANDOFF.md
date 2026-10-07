@@ -1,5 +1,11 @@
 # Reprise — communauté et entraide
 
+## 7 octobre 2026 — Correctif de simulation de session après publication B17
+
+B17 est publié dans [#32](https://github.com/haas-projet/haas/pull/32), base B16, lot métier `238d5e9`, synchronisation `6737081`. La CI `37657236028` réussit sous PHP 8.5 mais échoue sous PHP 8.4 dans un ancien test d'idempotence après 23 heures simulées. Le navigateur de test gardait ses cookies expirés ; la collecte forcée reproduit réellement le refus CSRF 419.
+
+Correctif limité aux tests : échéances de cookies par nom/valeur, purge avant XSRF avec l'horloge simulée, snapshots préservés. Le test de session expirée transmet encore volontairement l'ancien cookie et exige 401. Les 20 tests ciblés / 139 assertions passent, puis les suites générales complètes : hors SQL **328 / 3563**, PostgreSQL **343 / 3242**, soit **671 / 6805 distincts**. Pint et PHPStan réussissent. Preuves et commandes dans [B17_COMMENTS.md](../../../quality/B17_COMMENTS.md). La CI du nouveau head doit être observée ; aucune fusion ni approbation humaine présumée.
+
 ## 7 octobre 2026 — B17 prêt pour revue
 
 Lot courant : **B17**, branche `backend/communaute-entraide-b17`, worktree `.worktrees/b17`, depuis B16 `8e9a60e` et main `f1f6238`. L'implémentation non commitée préexistante est préservée et complétée. Lire [COMMENTS.md](../../../api/COMMENTS.md), [B17_COMMENTS.md](../../../quality/B17_COMMENTS.md) et [SYSTALINK_TASKS.md](SYSTALINK_TASKS.md). Le SHA final et la CI exacte sont à consulter dans le bilan et la PR après publication.

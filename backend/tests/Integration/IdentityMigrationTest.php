@@ -11,6 +11,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use ReflectionMethod;
 use RuntimeException;
 use Tests\PostgresTestCase;
+use Tests\Support\Mdev44\DomainTables;
 
 final class IdentityMigrationTest extends PostgresTestCase
 {
@@ -21,6 +22,7 @@ final class IdentityMigrationTest extends PostgresTestCase
         if ($method === 'down') {
             // Les tables des domaines consommateurs référencent `technologies` et `users` ;
             // les retirer avant le down() de B05 pour que PostgreSQL puisse déposer la table parente.
+            DomainTables::dropAll();
             foreach (['resolutions', 'comments', 'proposals', 'request_technologies', 'help_requests'] as $dependent) {
                 Schema::dropIfExists($dependent);
             }

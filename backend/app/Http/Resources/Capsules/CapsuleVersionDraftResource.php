@@ -36,6 +36,7 @@ final class CapsuleVersionDraftResource extends JsonResource
             'state' => $version->state->value,
             'body' => $version->body,
             'limits' => $version->limits,
+            'lock_version' => (int) $version->lock_version,
             'technologies' => $technologies,
         ];
     }

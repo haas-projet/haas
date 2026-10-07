@@ -76,6 +76,48 @@ paths:
           description: Conflit d'idempotence ou de version_label
         '422':
           description: Validation
+  /api/v1/capsules/{capsule}/versions/{version}:
+    patch:
+      operationId: updateCapsuleVersionDraft
+      summary: Modifier un brouillon de capsule
+      description: >
+        Édite body/limits/technologies d'une version en état draft ou
+        changes_requested. Réservé à l'owner de la capsule ou à un
+        contributeur déclaré sur cette version. lock_version obligatoire ;
+        périmé = 409 sans mutation. version_label, state, owner, reviewer
+        et published_at sont fixés par le serveur et refusés.
+      security:
+        - SessionCookie: []
+      parameters:
+        - name: capsule
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - name: version
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CapsuleVersionDraftUpdate'
+      responses:
+        '200':
+          description: Brouillon mis à jour, lock_version incrémenté
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CapsuleVersionDraft'
+        '403':
+          description: Non habilité (ni owner, ni contributeur) ou état non éditable
+        '404':
+          description: Version inexistante ou n'appartenant pas à la capsule
+        '409':
+          description: lock_version périmé
+        '422':
+          description: Validation
 components:
   schemas:
     CapsuleDraftInput:
@@ -166,6 +208,7 @@ components:
         state: { type: string, enum: [draft, in_review, changes_requested, published, withdrawn] }
         body: { type: string }
         limits: { type: string, nullable: true }
+        lock_version: { type: integer, minimum: 1 }
         technologies:
           type: array
           items:
@@ -174,3 +217,30 @@ components:
               id: { type: string, format: uuid }
               slug: { type: string }
               version_label: { type: string, nullable: true }
+    CapsuleVersionDraftUpdate:
+      type: object
+      additionalProperties: false
+      required: [lock_version]
+      properties:
+        lock_version:
+          type: integer
+          minimum: 1
+        body:
+          type: string
+          minLength: 20
+          maxLength: 24000
+        limits:
+          type: string
+          minLength: 1
+          maxLength: 4000
+          nullable: true
+        technologies:
+          type: array
+          maxItems: 8
+          items:
+            type: object
+            additionalProperties: false
+            required: [technology_id]
+            properties:
+              technology_id: { type: string, format: uuid }
+              version_label: { type: string, maxLength: 40, nullable: true }

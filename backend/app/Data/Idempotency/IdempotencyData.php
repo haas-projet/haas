@@ -21,7 +21,7 @@ final readonly class IdempotencyData
         } catch (JsonException) {
             throw new InvalidArgumentException('Charge idempotente hors contrat.');
         }
-        if (strlen($json) > 65536) {
+        if (strlen($json) > 131072) {
             throw new InvalidArgumentException('Charge idempotente trop volumineuse.');
         }
         $this->canonicalPayload = $json;

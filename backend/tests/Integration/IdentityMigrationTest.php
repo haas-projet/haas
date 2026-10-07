@@ -23,7 +23,7 @@ final class IdentityMigrationTest extends PostgresTestCase
             // Les tables des domaines consommateurs référencent `technologies` et `users` ;
             // les retirer avant le down() de B05 pour que PostgreSQL puisse déposer la table parente.
             DomainTables::dropAll();
-            foreach (['resolutions', 'comments', 'proposals', 'request_technologies', 'help_requests'] as $dependent) {
+            foreach (['comment_revisions', 'help_request_revisions', 'resolutions', 'comments', 'proposals', 'request_technologies', 'help_requests'] as $dependent) {
                 Schema::dropIfExists($dependent);
             }
         }

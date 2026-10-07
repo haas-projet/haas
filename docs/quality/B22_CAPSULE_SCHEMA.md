@@ -39,3 +39,16 @@ La suite SQL finale revalide ce correctif et toutes les protections du schéma. 
 ## Limites de réception
 
 Revue humaine et CI du futur SHA publié : en attente. PHP 8.4 n'est pas exécuté localement. Aucun Qodana, frontend, hébergement, déploiement, BACKEND_GATE ou GO_FRONTEND déclaré. AC12/AC13 complets attendent B24/B25 et les parcours API ; B22 est un lot de schéma prêt à examiner après contrôles, pas une publication de capsule déjà disponible.
+
+## Revalidation avec main intégrant B14–B17
+
+Après le correctif local `2148322`, le code de main `b76612d1b6587119127fd364244f5248f05f1ff2` est intégré normalement par l'intégrateur avant publication de B22. La combinaison est réellement vérifiée sur la même base dédiée `haas_b22_review_test` et le même PHP 8.5.10 :
+
+| Commande | Résultat combiné |
+|---|---|
+| `vendor/bin/phpunit --testsuite Unit,Feature,Architecture` | **335 tests / 3595 assertions réussis** |
+| `vendor/bin/phpunit --testsuite Integration` | **399 tests / 3390 assertions réussis**, 10 min 48 s |
+| `vendor/bin/pint --test` | Réussi |
+| `vendor/bin/phpstan analyse --memory-limit=512M --no-progress` | Niveau 8 : aucune erreur |
+
+Total unique du code combiné : **734 tests / 6985 assertions réussis**. Les résultats précédents de 551 / 4157 restent la preuve historique avant cette intégration ; ils ne sont pas ajoutés à ce total. Journaux et JUnit ignorés : `backend/storage/logs/b22-main-integration.*`. La résolution du conflit du test de migration d'identité garde le dépôt des tables consommatrices de capsules et le retrait des révisions de demandes/commentaires. Aucun test ou droit n'a été assoupli pour obtenir ce résultat. Le SHA de fusion doit être relevé après création par l'intégrateur ; revue humaine et CI du SHA publié restent distinctes de ces contrôles locaux.

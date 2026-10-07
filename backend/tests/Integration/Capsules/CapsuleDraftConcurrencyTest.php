@@ -27,7 +27,7 @@ final class CapsuleDraftConcurrencyTest extends PostgresTestCase
     /** @return iterable<string, array{string}> */
     public static function races(): iterable
     {
-        foreach (['create-replay', 'slug-collision', 'edit-version', 'suspension', 'owner-change', 'source-reopened', 'source-hidden'] as $case) {
+        foreach (['create-replay', 'slug-collision', 'edit-version', 'suspension', 'owner-change', 'source-reopened', 'source-hidden', 'source-author-suspended', 'source-author-unverified', 'source-author-cross-locks'] as $case) {
             yield $case => [$case];
         }
     }
@@ -36,15 +36,18 @@ final class CapsuleDraftConcurrencyTest extends PostgresTestCase
     public function test_two_real_processes_recheck_the_locked_state(string $case): void
     {
         $actor = User::factory()->verified()->create(['role' => Role::Moderator]);
-        $secondActor = $case === 'slug-collision' ? User::factory()->verified()->create(['role' => Role::Moderator]) : $actor;
+        $crossLocks = $case === 'source-author-cross-locks';
+        $secondActor = $case === 'slug-collision' || $crossLocks ? User::factory()->verified()->create(['role' => Role::Moderator]) : $actor;
         $edit = in_array($case, ['edit-version', 'suspension', 'owner-change'], true);
         $capsule = $edit ? Capsule::factory()->create(['owner_id' => $actor->id]) : null;
         $version = $capsule === null ? null : CapsuleVersion::factory()->create(['capsule_id' => $capsule->id]);
         $source = null;
-        if (in_array($case, ['source-reopened', 'source-hidden'], true)) {
-            $source = HelpRequest::factory()->create(['author_id' => $actor->id, 'state' => HelpRequestState::Resolved]);
-            $proposal = Proposal::factory()->create(['request_id' => $source->id, 'state' => ProposalState::Accepted]);
-            Resolution::factory()->create(['request_id' => $source->id, 'proposal_id' => $proposal->id, 'accepted_by' => $actor->id]);
+        $secondSource = null;
+        $sourceAuthor = null;
+        if (str_starts_with($case, 'source-')) {
+            $sourceAuthor = $crossLocks ? $secondActor : (str_starts_with($case, 'source-author-') ? User::factory()->verified()->create() : $actor);
+            $source = $this->resolvedSource($sourceAuthor, $actor);
+            $secondSource = $crossLocks ? $this->resolvedSource($actor, $secondActor) : $source;
         }
         $database = config('database.connections.pgsql');
         $environment = ['APP_KEY' => 'base64:'.base64_encode(random_bytes(32)), 'APP_ENV' => 'testing', 'APP_DEBUG' => 'false', 'DB_CONNECTION' => 'pgsql', 'DB_URL' => '',
@@ -65,10 +68,14 @@ final class CapsuleDraftConcurrencyTest extends PostgresTestCase
                 $this->assertStringContainsString('READY', $process->getOutput(), $process->getErrorOutput());
             }
             DB::beginTransaction();
-            User::whereIn('id', [$actor->id, $secondActor->id])->orderBy('id')->lockForUpdate()->get();
+            if ($crossLocks) {
+                HelpRequest::whereIn('id', [$source?->id, $secondSource?->id])->orderBy('id')->lockForUpdate()->get();
+            } else {
+                User::whereIn('id', [$actor->id, $secondActor->id])->orderBy('id')->lockForUpdate()->get();
+            }
             foreach ($streams as $index => $stream) {
                 $stream->write(json_encode(['actor_id' => $index === 0 ? $actor->id : $secondActor->id, 'capsule_id' => $capsule?->id, 'version_id' => $version?->id,
-                    'source_id' => $source?->id, 'command' => $edit ? 'edit' : ($source === null ? 'create' : 'source'),
+                    'source_id' => $index === 0 ? $source?->id : $secondSource?->id, 'command' => $edit ? 'edit' : ($source === null ? 'create' : 'source'),
                     'key' => $case === 'create-replay' || $index === 0 ? 'b2300000-3333-4444-8888-123456789abc' : 'b2300000-3333-4444-8888-123456789abd'], JSON_THROW_ON_ERROR)."\n");
                 $stream->close();
             }
@@ -91,6 +98,8 @@ final class CapsuleDraftConcurrencyTest extends PostgresTestCase
                 'owner-change' => $capsule->forceFill(['owner_id' => User::factory()->verified()->create()->id])->save(),
                 'source-reopened' => $source?->forceFill(['state' => HelpRequestState::Open])->save(),
                 'source-hidden' => $source?->forceFill(['hidden_at' => now()->utc()])->save(),
+                'source-author-suspended' => $sourceAuthor?->forceFill(['status' => 'suspended'])->save(),
+                'source-author-unverified' => $sourceAuthor?->forceFill(['email_verified_at' => null])->save(),
                 default => null,
             };
             DB::commit();
@@ -100,7 +109,12 @@ final class CapsuleDraftConcurrencyTest extends PostgresTestCase
                 $lines = explode("\n", trim($process->getOutput()));
                 $outcomes[] = end($lines);
             }
+            if ($crossLocks) {
+                $this->assertContains('CONFLICT', $outcomes, 'Les verrous croisés doivent être refusés sans deadlock.');
+                $this->assertSame([], array_values(array_diff($outcomes, ['APPLIED', 'CONFLICT'])));
+            }
             $expected = match ($case) {
+                'source-author-cross-locks' => $outcomes,
                 'create-replay' => ['APPLIED', 'APPLIED'],
                 'slug-collision', 'edit-version' => ['APPLIED', 'CONFLICT'],
                 'source-reopened' => ['INVALID', 'INVALID'],
@@ -128,5 +142,14 @@ final class CapsuleDraftConcurrencyTest extends PostgresTestCase
                 }
             }
         }
+    }
+
+    private function resolvedSource(User $author, User $proposer): HelpRequest
+    {
+        $source = HelpRequest::factory()->create(['author_id' => $author->id, 'state' => HelpRequestState::Resolved]);
+        $proposal = Proposal::factory()->create(['request_id' => $source->id, 'author_id' => $proposer->id, 'state' => ProposalState::Accepted]);
+        Resolution::factory()->create(['request_id' => $source->id, 'proposal_id' => $proposal->id, 'accepted_by' => $author->id]);
+
+        return $source;
     }
 }

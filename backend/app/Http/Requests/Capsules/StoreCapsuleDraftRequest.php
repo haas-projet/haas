@@ -10,6 +10,7 @@ use App\Data\Capsules\VersionDraftData;
 use App\Data\Idempotency\IdempotencyKey;
 use App\Enums\Capsules\CapsuleSourceKind;
 use App\Rules\NoLikelySecret;
+use App\Rules\TrimmedMinimumLength;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Validator;
@@ -34,7 +35,7 @@ final class StoreCapsuleDraftRequest extends FormRequest
             'source.editorial_origin' => ['nullable', 'string', 'min:3', 'max:100', 'regex:/\A\S(?:.*\S)?\z/u', 'not_regex:/[[:cntrl:]]/u', new NoLikelySecret],
             'version' => ['required', 'array:version_label,body,limits,technologies'],
             'version.version_label' => ['required', 'string', 'regex:/\A(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\z/', 'max:40'],
-            'version.body' => ['required', 'string', 'min:'.VersionDraftData::BODY_MIN, 'max:'.VersionDraftData::BODY_MAX, 'not_regex:/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/u', new NoLikelySecret],
+            'version.body' => ['required', 'string', 'min:'.VersionDraftData::BODY_MIN, 'max:'.VersionDraftData::BODY_MAX, new TrimmedMinimumLength(VersionDraftData::BODY_MIN), 'not_regex:/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/u', new NoLikelySecret],
             'version.limits' => ['nullable', 'string', 'min:1', 'max:'.VersionDraftData::LIMITS_MAX, 'not_regex:/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/u', new NoLikelySecret],
             'version.technologies' => ['sometimes', 'array', 'list', 'max:'.VersionDraftData::TECHS_MAX],
             'version.technologies.*' => ['array:technology_id,version_label'],

@@ -62,6 +62,73 @@ Limites : les transitions `in_review → published` et `published → withdrawn`
 
 Prochaine action : attendre le feu vert du relecteur pour pousser la branche et ouvrir une PR vers `main` avec `Refs #3`. Ensuite, démarrer sur une branche dérivée séparée les classes pures 100 % indépendantes des prérequis manquants : `ComparisonOutcomeCalculator` (BV208) et scénarios B1 fictifs purs (B35, partie unitaire). Les lots qui dépendent de B07 (session), B09 (droits), B11 (collaboration), B12 (audit) ou B13 (idempotence) attendront leurs prérequis.
 
+## 2026-10-03 — Lot B11 schéma collaboration (cession LamineGL)
+
+Cession actée par l'utilisateur le 2026-10-03 : `LamineGL` me cède ce qui est lié à capsules, laboratoire et atelier, y compris B11. Pour l'instant je ne reprends **que** B11 ; B14/B16/B20 ont une citation de rattachement (`tasks.json:180` et `PLAN_COMMITS.md:163` pour B14/B16 via « Atelier : intégrer help_intent » ; `tasks.json:246` et `PLAN_COMMITS.md:223` pour B20 via « marquer les capsules liées à revoir ») mais ne sont pas démarrés. Le reste (B15, B17, B18, B19, B21, BC01–BC08, BH01–BH10) reste à `LamineGL`.
+
+Branche créée depuis `origin/main` : `backend/communaute-entraide-b11-schema`, base `075e6eb`. Branche parente `backend/capsules-laboratoire` **non intégrée** (lots B22+ en attente de l'ouverture de PR #12). CLAUDE.md local reçoit la règle « migrations convention Laravel, une par table, sans numéro de lot » (écart assumé à `BACKEND_A_TROIS.md:110`).
+
+Fichiers livrés sur `backend/communaute-entraide-b11-schema` :
+
+- `backend/app/Enums/HelpRequests/HelpRequestState.php` (valeurs citées `ARCHITECTURE.md:255`, sans transition).
+- `backend/app/Enums/Collaboration/ProposalState.php` (valeurs citées `ARCHITECTURE.md:256`, sans transition).
+- `backend/database/migrations/2026_10_03_180000_create_help_requests_table.php` (colonnes `CAHIER_DES_CHARGES.md:825`, longueurs `CAHIER:378-384`, défaut `state=draft`, `expected`/`attempts` NOT NULL en B11, `environment` string sans limite citée, CHECK constraints `23514`).
+- `backend/database/migrations/2026_10_03_180100_create_request_technologies_table.php` (clé primaire composite `(request_id, technology_id)` alignée sur `user_technologies` de B05 ; `version_label` 40 cité `CAHIER:382`).
+- `backend/database/migrations/2026_10_03_180200_create_proposals_table.php` (colonnes `CAHIER:828`, longueurs 20–4 000 `CAHIER:418`, défaut `state=proposed`, UNIQUE `(request_id, id)` prérequis de la FK composite).
+- `backend/database/migrations/2026_10_03_180300_create_comments_table.php` (colonnes `CAHIER:827`, longueur 1–4 000 `CAHIER:418`).
+- `backend/database/migrations/2026_10_03_180400_create_resolutions_table.php` (colonnes `CAHIER:829`, FK composite `(request_id, proposal_id) → proposals (request_id, id)` demandée par `tasks.json:147` + `PLAN_COMMITS.md:133`, index unique partiel `resolutions_one_active_per_request` `ARCHITECTURE.md:316-320`).
+- `backend/app/Models/{HelpRequest,Proposal,Comment,Resolution}.php` (relations et casts enums).
+- `backend/database/factories/{HelpRequest,Proposal,Comment,Resolution}Factory.php`.
+- `backend/tests/Unit/Enums/HelpRequests/HelpRequestStateTest.php`, `backend/tests/Unit/Enums/Collaboration/ProposalStateTest.php`.
+- `backend/tests/Integration/HelpRequests/HelpRequestsSchemaTest.php` (6 tests PostgreSQL : graphe valide avec défauts, doublon de pivot refusé 23505, FK composite refusée 23503, unicité partielle de résolution active 23505, slot libéré après `revoked_at`, CHECK d'état et longueur 23514).
+- `backend/tests/Integration/IdentityMigrationTest.php` : ajout du nettoyage des tables consommatrices (`resolutions, comments, proposals, request_technologies, help_requests`) avant `runIdentityMigration('down')`, pour que PostgreSQL puisse déposer `technologies`. Modification cross-domain couverte par la cession LamineGL ; `LamineGL` reste informé.
+
+Pas de colonne `code`/`code_language` ajoutée : l'exigence 12 000 caractères est citée (`CAHIER:383`, `CAHIER:418`, `tasks.json:224`) mais aucun nom de colonne SQL n'est cité dans le dépôt ; non codée en B11.
+
+Convention de nommage des migrations : convention Laravel, une par table, sans numéro de lot. **Écart assumé à `BACKEND_A_TROIS.md:110`** (« nom unique avec identifiant du lot »). Décision de mdev44-code, à discuter avec le responsable 1 ; renommage trivial avant merge si refusé. Noté dans CLAUDE.md local.
+
+Contrôles exécutés localement sous PHP 8.4.15 :
+
+| Commande | Résultat observé |
+|---|---|
+| `composer lint` (Pint `--test`) | `{"tool":"pint","result":"passed"}` |
+| `composer analyse` (PHPStan niveau 8) | `[OK] No errors` |
+| `composer test` | **122 tests / 926 assertions, OK** en 1,98 s (+4 tests enums par rapport à `origin/main`) |
+| `composer test:integration` | **41 tests / 310 assertions, OK** en 11,034 s sous PostgreSQL 17 sur `haas_capsules_test` (+6 tests schéma vs `origin/main`) |
+| `composer audit --locked --no-interaction` | `No security vulnerability advisories found.` |
+| `composer validate --strict --no-check-publish` | `./composer.json is valid` |
+
+Limites : aucun DTO/FormRequest/Service/Controller/Resource/Policy/route livré en B11 ; ces couches sont portées par B14–B21. Aucun fichier interdit touché (`composer.json`, `composer.lock`, `bootstrap/`, `config/`, `.env.example`, `phpunit.xml`, `routes/api.php`, `.github/workflows/`). Fragment `docs/api/openapi/community.yaml` inchangé. Aucun push, PR ouverte ou merge. Revue humaine `LamineGL` ou `ousseynoufayeisidk-sys` en attente.
+
+Prochaine action : attendre le feu vert pour pousser `backend/communaute-entraide-b11-schema` et ouvrir une PR vers `main` avec `Refs #2` et la mention « Responsables consultés : LamineGL (accord de LamineGL du 2026-10-03) ».
+
+## 2026-10-03 — Fusion de main et corrections post-revue (B11)
+
+Fusion `git merge origin/main` sans conflit (commit `b152fc1`). `origin/main` a avancé de `075e6eb` à `a051e81` entre-temps : B07–B13 et B29/B30/B32 fusionnés par `ousseynoufayeisidk-sys`. Dépendances B07–B13 désormais disponibles. `IdentityMigrationTest.php` n'a pas été modifié côté main depuis B05 : mon ajout reste la seule différence sur ce fichier.
+
+Corrections appliquées sur demande de l'utilisateur (commit `12c0d50`) :
+
+- **Retrait des 10 CHECK de longueur** (help_requests ×5, proposals ×4, comments ×1). Motif cité : `CAHIER_DES_CHARGES.md:381` autorise explicitement `"aucune"` (6 caractères) pour `attempts`, incompatible avec un CHECK ≥ 20. Les règles conditionnelles de `help_intent=ask_question` (CAHIER:408) justifient aussi un report en FormRequest B14+/B17+/B18+. `title varchar(140)` et `version_label varchar(40)` conservés (strictement cités) ; CHECK d'énumération d'état conservés.
+- **Correction du commentaire d'en-tête `create_help_requests_table`** : la référence erronée à `users_technologies.technology_id->users` est remplacée par « RESTRICT par défaut : aucune suppression de demande dans le produit (CAHIER:394) ».
+- **Retrait de `state` des `#[Fillable]`** des modèles `HelpRequest` et `Proposal` : la transition d'état passe par les Services B14+/B18+ et n'est pas assignable depuis le corps JSON.
+- **ResolutionFactory** : plus de `create()` dans `definition()`. `proposal_id => Proposal::factory()` (résolu par Laravel au moment de l'écriture) ; `request_id` lu via closure sur la proposition résolue (via `DB::table` pour un typage strict PHPStan niveau 8).
+- **Factories simplifiées** : plus de `padRight` pour contourner les CHECK retirés.
+- **Tests enums simplifiés** : suppression de `test_default_state_is_draft` et `test_default_state_is_proposed`.
+- **HelpRequestsSchemaTest adapté** : renommage de `test_check_constraints_reject_invalid_state_and_short_body` en `test_check_constraints_reject_invalid_state_values` ; retrait de l'assertion sur `comments.body` ; test NOT NULL simplifié.
+
+Contrôles exécutés localement sous PHP 8.4.15 après fusion et corrections :
+
+| Commande | Résultat observé |
+|---|---|
+| `composer lint` (Pint `--test`) | `{"tool":"pint","result":"passed"}` |
+| `composer analyse` (PHPStan niveau 8) | `[OK] No errors` |
+| `composer test` | **253 tests / 2454 assertions, OK** en 4,95 s (ancien 122 → 253 avec B07–B32 de main) |
+| `composer test:integration` | **141 tests / 1266 assertions, OK** en 80,27 s sur PostgreSQL 17 sur `haas_capsules_test` (ancien 43 → 141 avec intégrations B07–B32) |
+| `composer audit --locked --no-interaction` | `No security vulnerability advisories found.` |
+| `composer validate --strict --no-check-publish` | `./composer.json is valid` |
+
+Nouveaux commits sur la branche : `b152fc1` (merge main) et `12c0d50` (corrections). HEAD à `12c0d50`, sept commits ahead of `origin/main` au total (dont le merge commit).
+
 ## 2026-10-05 — Lot 2 B35 brique B1 (branche dérivée)
 
 Lot B35 livré sur une branche dérivée `backend/capsules-laboratoire-b35-brique-b1` créée depuis `origin/backend/capsules-laboratoire`. La branche parent porte le lot 1 enums ; la PR #12 y est ouverte sur `main` et sa fusion est attendue avant le reciblage de cette PR dérivée.

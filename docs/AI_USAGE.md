@@ -155,3 +155,11 @@ B24 Q12, Codex GPT-6 : outbox de corrections demandées raccordée aux contrats 
 ## Dernières validations B23 reprises dans B24 — 7 octobre 2026
 
 Merge normal de d7ef6eb, en conservant les probes B24 séparément : auteur de la source relu sous FOR SHARE NOWAIT, format du corps préservé et minimum utile validé, lock_version HTTP entier strict. Historiques IA conservés. Contrôles combinés réellement exécutés : 350 tests / 3800 assertions Unit, Feature et Architecture ; Pint sur Policy et bootstrap fusionnés ; 57 types API à jour ; pack 18/18 et documentation déploiement 7/7. Les probes B24 de strictint sont restaurés après cette synchronisation ; ils attendent encore leur correction et Q12 avant toute readiness.
+
+## Réception indépendante B23 — 7 octobre 2026
+
+Codex (GPT-6), sur demande de préparer les PR avant approbation : relecture des correctifs finaux B23 et réception du code propre `d7ef6eb8c750987ddf509eba6647007162c1bec9`, sans changement applicatif ou de tests. Droits actuels de la source et de son auteur, rejeu, verrous NOWAIT, validation et attribution relus ; suites réelles sur `haas_b23_review_test` dédiée, PostgreSQL 17 local 55447 et PHP 8.5.10 : 343 / 3720 hors SQL et 478 / 3734 SQL, soit **821 tests / 7454 assertions uniques réussis**. Les probes et essais interrompus restent distincts. Pint, PHPStan 8, validation/plateforme/audit Composer, pack 18/18, déploiement documentaire 7/7 et 54 types réussis. Preuve, PROGRESS/HANDOFF participant et empreintes actualisés ; aucun journal, clé ou vendor suivi. CI candidat verte, run 37691657985 constaté par l’intégrateur ; CI du futur commit documentaire à observer. Revue humaine en attente, publication confiée à l’intégrateur, aucun DONE, gate, frontend ou déploiement.
+
+## Preuves finales B23 reçues pendant la suite B24 — 7 octobre 2026
+
+Merge normal du commit documentaire B23 11b9fec : réception locale complète 821 tests / 7454 assertions et CI du code d7ef6eb identique sur PHP 8.4/8.5, run37691657985. Les cinq fichiers entrants sont documentaires. Diff intégral de backend entre le candidat B24 994de150 et l’index de fusion vide : PHP, tests, configuration et routes strictement identiques. La suite SQL B24 continue sans interruption sur ce code figé ; aucun succès SQL complet B24 ni CI absente déclaré. Les historiques IA et participant des deux lots sont conservés.

@@ -69,12 +69,25 @@ final class CapsulePolicy
         return $capsule->owner_id === $actor->id;
     }
 
-    public function editDraft(?User $actor, Capsule $capsule, CapsuleVersionState $state): bool
+    public function editDraft(?User $actor, Capsule $capsule, CapsuleVersionState $state, string $versionId): bool
     {
-        if ($state !== CapsuleVersionState::Draft) {
+        if ($state !== CapsuleVersionState::Draft && $state !== CapsuleVersionState::ChangesRequested) {
+            return false;
+        }
+        $access = new MemberAccess;
+        if (! $access->verified($actor)) {
             return false;
         }
 
-        return $this->createVersionDraft($actor, $capsule);
+        /** @var User $actor */
+        if ($capsule->owner_id === $actor->id) {
+            return true;
+        }
+
+        // Contributeur de cette version-ci (owner d'origine ou co-contributeur habilité).
+        return DB::table('capsule_contributors')
+            ->where('version_id', $versionId)
+            ->where('user_id', $actor->id)
+            ->exists();
     }
 }

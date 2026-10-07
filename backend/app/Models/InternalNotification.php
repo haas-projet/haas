@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property string $id
@@ -19,6 +20,12 @@ final class InternalNotification extends Model
     public $timestamps = false;
 
     protected $keyType = 'string';
+
+    /** @return BelongsTo<Comment, $this> */
+    public function comment(): BelongsTo
+    {
+        return $this->belongsTo(Comment::class, 'event_id');
+    }
 
     /** @return array<string, string> */
     protected function casts(): array

@@ -104,6 +104,60 @@ paths:
         503:
           $ref: '../../OPENAPI.yaml#/components/responses/RetryableFailure'
   /api/v1/requests/{id}:
+    patch:
+      operationId: updateHelpRequest
+      summary: 'Modifier une demande sous version'
+      description: 'Auteur actif vérifié seulement, contenu visible non archivé. PATCH partiel, contenu final revalidé sous verrou selon état/intention. Note 20–1000 caractères obligatoire après commentaire/proposition/résolution, même masquée. État/auteur/résolution/projet/champs inconnus interdits, aucun bypass admin. Version périmée 409 sans mutation. Révision, audit sans contenu et idempotence atomiques ; même intention sans nouvelle écriture, ancienne version non rejouée après autre modification. Voir HELP_REQUEST_EDITING.md.'
+      security:
+        -
+          SessionCookie: {  }
+      parameters:
+        -
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        -
+          $ref: '../../OPENAPI.yaml#/components/parameters/IdempotencyKey'
+        -
+          name: X-XSRF-TOKEN
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HelpRequestUpdateInput'
+      responses:
+        200:
+          description: 'Demande courante et version mise à jour, ou résultat du rejeu autorisé ; Cache-Control no-store.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HelpRequestDetail'
+        401:
+          $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure'
+        403:
+          $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure'
+        404:
+          $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure'
+        409:
+          $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure'
+        419:
+          $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure'
+        422:
+          $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure'
+        429:
+          $ref: '../../OPENAPI.yaml#/components/responses/RetryableFailure'
+        500:
+          $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure'
+        503:
+          $ref: '../../OPENAPI.yaml#/components/responses/RetryableFailure'
     get:
       operationId: showHelpRequest
       summary: Lire une demande publique ou son propre brouillon
@@ -135,8 +189,588 @@ paths:
           $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure'
         503:
           $ref: '../../OPENAPI.yaml#/components/responses/RetryableFailure'
+  '/api/v1/requests/{id}/publish':
+    post:
+      operationId: publishHelpRequest
+      summary: 'Publier explicitement un brouillon complet'
+      description: 'Auteur actif vérifié, validation complète du brouillon relu sous verrou. Seule transition draft vers open ; version incrémentée, révision publique, audit atomique. Nouvelle intention sur demande déjà publiée = 409. Rejeu autorisé de la même publication = même version. Aucun champ de contenu dans cette commande.'
+      security:
+        -
+          SessionCookie: {  }
+      parameters:
+        -
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        -
+          $ref: '../../OPENAPI.yaml#/components/parameters/IdempotencyKey'
+        -
+          name: X-XSRF-TOKEN
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HelpRequestPublishInput'
+      responses:
+        200:
+          description: 'Demande courante et version mise à jour, ou résultat du rejeu autorisé ; Cache-Control no-store.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HelpRequestDetail'
+        401:
+          $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure'
+        403:
+          $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure'
+        404:
+          $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure'
+        409:
+          $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure'
+        419:
+          $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure'
+        422:
+          $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure'
+        429:
+          $ref: '../../OPENAPI.yaml#/components/responses/RetryableFailure'
+        500:
+          $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure'
+        503:
+          $ref: '../../OPENAPI.yaml#/components/responses/RetryableFailure'
+  '/api/v1/requests/{id}/revisions':
+    get:
+      operationId: listHelpRequestRevisions
+      summary: 'Lire les notes et champs modifiés accessibles'
+      description: 'Visibilité du parent B15. Anciennes révisions de brouillon toujours réservées à son auteur actif vérifié, même après publication. Aucun snapshot de texte/code ni audit technique. Parent masqué, auteur inéligible ou brouillon tiers : 404. Ordre request_version décroissant et total filtré, Cache-Control no-store.'
+      security:
+        - {  }
+        -
+          SessionCookie: {  }
+      parameters:
+        -
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        -
+          $ref: '../../OPENAPI.yaml#/components/parameters/Page'
+        -
+          $ref: '../../OPENAPI.yaml#/components/parameters/PerPage'
+      responses:
+        200:
+          description: 'Historique autorisé paginé.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HelpRequestRevisionPage'
+        401:
+          $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure'
+        403:
+          $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure'
+        404:
+          $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure'
+        422:
+          $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure'
+        500:
+          $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure'
+        503:
+          $ref: '../../OPENAPI.yaml#/components/responses/RetryableFailure'
+  /api/v1/requests/{id}/comments:
+    get:
+      operationId: listComments
+      summary: Lire les commentaires accessibles d'une demande
+      description: >-
+        Lecture publique suivant la visibilité du parent et de chaque auteur.
+        Demande masquée, brouillon tiers ou auteur du parent inéligible : 404.
+        Commentaires masqués et auteurs suspendus/non vérifiés exclus avant pagination et total.
+        Archives lisibles ; ordre created_at puis UUID croissant. Paramètres inconnus refusés.
+        Cache-Control no-store. Voir COMMENTS.md.
+      security:
+        - {}
+        - SessionCookie: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - $ref: '../../OPENAPI.yaml#/components/parameters/Page'
+        - $ref: '../../OPENAPI.yaml#/components/parameters/PerPage'
+      responses:
+        '200':
+          description: Commentaires visibles et total filtré, sans courriel d'auteur.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommentPage'
+        '401': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '403': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '404': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '422': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '500': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '503': { $ref: '../../OPENAPI.yaml#/components/responses/RetryableFailure' }
+    post:
+      operationId: createComment
+      summary: Ajouter un commentaire sans changer l'état de la demande
+      description: >-
+        Membre actif vérifié, session SPA et CSRF requis ; quota 30 requêtes/minute.
+        Parent visible en open/in_progress/resolved ; brouillon interdit même au propriétaire,
+        archive en lecture seule. Corps strict, Markdown restreint 1–4000 caractères et code inerte.
+        Espaces conservés ; blancs seuls, caractères de contrôle et motifs de secrets suspects refusés.
+        Auteur, parent, version et dates sont fixés par le serveur. Transaction commune avec historique,
+        audit sans texte, intention de notification et idempotence 24 h.
+        Même acteur/route-cible/clé/charge : même identifiant/version sans duplication ; droits actuels
+        avant rejeu, ancienne version après autre édition en conflit. Une édition ne renotifie pas.
+        L'événement comment.created prépare une notification interne pour l'auteur du parent, sans
+        auto-envoi ni extrait ; livraison après commit par l'outbox. Aucun courriel ni appel externe.
+        Aucun changement d'état ou de version de la demande. Cache-Control no-store. Voir COMMENTS.md.
+      security:
+        - SessionCookie: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - $ref: '../../OPENAPI.yaml#/components/parameters/IdempotencyKey'
+        - $ref: './identity.yaml#/components/parameters/XsrfToken'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommentCreateInput'
+      responses:
+        '201':
+          description: Commentaire créé ou projection courante d'un rejeu autorisé.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommentDetail'
+        '401': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '403': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '404': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '409':
+          $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure'
+          description: IDEMPOTENCY_CONFLICT si la charge diffère ; RESOURCE_CONFLICT si la version mémorisée a changé. Aucune mutation.
+        '419': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '422': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '429': { $ref: '../../OPENAPI.yaml#/components/responses/RetryableFailure' }
+        '500': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '503': { $ref: '../../OPENAPI.yaml#/components/responses/RetryableFailure' }
+  /api/v1/comments/{id}:
+    get:
+      operationId: showComment
+      summary: Lire un commentaire visible
+      description: >-
+        Même visibilité publique que la liste : parent, commentaire et auteur actuellement accessibles.
+        Commentaire masqué, parent privé/masqué ou auteur inéligible : 404, sans contenu historique.
+        Archives lisibles. body est une source textuelle ; body_html est le rendu restreint du serveur.
+        Cache-Control no-store. Voir COMMENTS.md.
+      security:
+        - {}
+        - SessionCookie: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Projection autorisée du commentaire, sans courriel d'auteur.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommentDetail'
+        '401': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '403': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '404': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '500': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '503': { $ref: '../../OPENAPI.yaml#/components/responses/RetryableFailure' }
+    patch:
+      operationId: updateComment
+      summary: Modifier son commentaire sous version et conserver l'historique
+      description: >-
+        Auteur actif vérifié seulement, sans bypass administrateur. Session SPA, CSRF,
+        Idempotency-Key UUID v4 et quota 30 requêtes/minute requis. Commentaire et parent visibles,
+        parent en open/in_progress/resolved ; archives et brouillons non modifiables.
+        Corps strict body/lock_version ; validation Markdown identique à la création.
+        Droits, visibilité et version relus sous verrou. Succès : version +1 et edited_at serveur,
+        historique et audit atomiques, aucune nouvelle notification ni transition du parent.
+        Même intention rejouée sans nouvelle écriture ; version périmée ou résultat déjà modifié :
+        409 sans mutation. Au premier changement d'un commentaire B11 sans historique, capture
+        before_edit de la version connue, datée de la capture ; aucune édition antérieure inventée.
+        Cache-Control no-store. Voir COMMENTS.md.
+      security:
+        - SessionCookie: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - $ref: '../../OPENAPI.yaml#/components/parameters/IdempotencyKey'
+        - $ref: './identity.yaml#/components/parameters/XsrfToken'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommentUpdateInput'
+      responses:
+        '200':
+          description: Commentaire courant après édition ou rejeu autorisé, même identifiant/version.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommentDetail'
+        '401': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '403': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '404': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '409':
+          $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure'
+          description: RESOURCE_CONFLICT si la version fournie/mémorisée diffère ; IDEMPOTENCY_CONFLICT si la clé porte une autre charge. Aucune mutation.
+        '419': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '422': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '429': { $ref: '../../OPENAPI.yaml#/components/responses/RetryableFailure' }
+        '500': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '503': { $ref: '../../OPENAPI.yaml#/components/responses/RetryableFailure' }
+  /api/v1/comments/{id}/revisions:
+    get:
+      operationId: listCommentRevisions
+      summary: Lire l'historique d'un commentaire accessible
+      description: >-
+        Même visibilité courante que le commentaire ; aucun historique de contenu masqué ou retiré.
+        Versions en ordre décroissant, pagination 20 par page, maximum 50 ; paramètres inconnus refusés.
+        before_edit conserve seulement la version connue d'un commentaire ancien, avec la date de capture.
+        Le rendu Markdown est restreint comme pour le commentaire courant. Cache-Control no-store.
+      security:
+        - {}
+        - SessionCookie: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - $ref: '../../OPENAPI.yaml#/components/parameters/Page'
+        - $ref: '../../OPENAPI.yaml#/components/parameters/PerPage'
+      responses:
+        '200':
+          description: Historique métier accessible, sans inventer des versions absentes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommentRevisionPage'
+        '401': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '403': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '404': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '422': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '500': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '503': { $ref: '../../OPENAPI.yaml#/components/responses/RetryableFailure' }
 components:
   schemas:
+    CommentCreateInput:
+      type: object
+      additionalProperties: false
+      required: [body]
+      properties:
+        body:
+          type: string
+          minLength: 1
+          maxLength: 4000
+          pattern: '\S'
+          description: Markdown restreint, espaces conservés ; blancs seuls, caractères de contrôle et motifs de secrets suspects refusés. Aucun HTML de confiance.
+    CommentUpdateInput:
+      type: object
+      additionalProperties: false
+      required: [body, lock_version]
+      properties:
+        body:
+          type: string
+          minLength: 1
+          maxLength: 4000
+          pattern: '\S'
+          description: Même validation que la création ; source textuelle, jamais du HTML de confiance.
+        lock_version:
+          type: integer
+          minimum: 1
+          maximum: 2147483646
+    Comment:
+      type: object
+      additionalProperties: false
+      required: [id, request_id, author, body, body_html, lock_version, created_at, edited_at]
+      properties:
+        id: { type: string, format: uuid }
+        request_id: { type: string, format: uuid }
+        author:
+          type: object
+          additionalProperties: false
+          required: [id, handle]
+          properties:
+            id: { type: string, format: uuid }
+            handle: { type: string }
+        body:
+          type: string
+          minLength: 1
+          maxLength: 4000
+          description: Source textuelle inerte ; ne pas la réinterpréter en HTML.
+        body_html:
+          type: string
+          description: >-
+            Rendu CommonMark serveur : HTML brut échappé, code inerte, liens HTTPS sans identifiants
+            avec rel nofollow/noopener/noreferrer ; images réduites au libellé sans requête réseau.
+            Aucune extension de mentions, pièces jointes ou attributs ; profondeur 20, 100 délimiteurs par ligne.
+        lock_version: { type: integer, minimum: 1, maximum: 2147483647 }
+        created_at: { type: [string, 'null'], format: date-time }
+        edited_at: { type: [string, 'null'], format: date-time }
+    CommentDetail:
+      type: object
+      additionalProperties: false
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/Comment'
+    CommentPage:
+      type: object
+      additionalProperties: false
+      required: [data, meta]
+      properties:
+        data:
+          type: array
+          maxItems: 50
+          items:
+            $ref: '#/components/schemas/Comment'
+        meta:
+          $ref: '../../OPENAPI.yaml#/components/schemas/PaginationMeta'
+    CommentRevision:
+      type: object
+      additionalProperties: false
+      required: [id, comment_version, action, body, body_html, occurred_at]
+      properties:
+        id: { type: string, format: uuid }
+        comment_version: { type: integer, minimum: 1, maximum: 2147483647 }
+        action: { type: string, enum: [created, updated, before_edit] }
+        body: { type: string, minLength: 1, maxLength: 4000 }
+        body_html:
+          type: string
+          description: Même rendu Markdown restreint que le commentaire courant.
+        occurred_at:
+          type: string
+          format: date-time
+          description: Date de création/édition ou, pour before_edit, date de capture de la version connue.
+    CommentRevisionPage:
+      type: object
+      additionalProperties: false
+      required: [data, meta]
+      properties:
+        data:
+          type: array
+          maxItems: 50
+          items:
+            $ref: '#/components/schemas/CommentRevision'
+        meta:
+          $ref: '../../OPENAPI.yaml#/components/schemas/PaginationMeta'
+    HelpRequestUpdateInput:
+      type: object
+      additionalProperties: false
+      required:
+        - lock_version
+      anyOf:
+        -
+          required:
+            - help_intent
+        -
+          required:
+            - title
+        -
+          required:
+            - goal
+        -
+          required:
+            - expected
+        -
+          required:
+            - observed
+        -
+          required:
+            - attempts
+        -
+          required:
+            - environment
+        -
+          required:
+            - code
+        -
+          required:
+            - code_language
+        -
+          required:
+            - primary_language
+        -
+          required:
+            - reproduction_url
+        -
+          required:
+            - technologies
+      properties:
+        lock_version:
+          type: integer
+          minimum: 1
+          maximum: 2147483646
+        help_intent:
+          type: string
+          enum:
+            - unblock
+            - review_solution
+            - reproduce_behavior
+            - ask_question
+        title:
+          type: string
+          maxLength: 140
+          minLength: 1
+        goal:
+          type:
+            - string
+            - 'null'
+          maxLength: 2000
+          minLength: 1
+        expected:
+          type:
+            - string
+            - 'null'
+          maxLength: 2000
+          minLength: 1
+        observed:
+          type:
+            - string
+            - 'null'
+          maxLength: 4000
+          minLength: 1
+        attempts:
+          type:
+            - string
+            - 'null'
+          maxLength: 3000
+        environment:
+          type:
+            - string
+            - 'null'
+          maxLength: 255
+        code:
+          type:
+            - string
+            - 'null'
+          maxLength: 12000
+          description: 'Texte inerte, espaces conservés. code_language requis si un code non vide est fourni. Motifs de secrets suspects refusés, sans garantie d’exhaustivité.'
+        code_language:
+          type:
+            - string
+            - 'null'
+          maxLength: 40
+          pattern: '^[a-z0-9][a-z0-9_+.#-]*$'
+        primary_language:
+          type: string
+          maxLength: 35
+          pattern: '^[a-zA-Z]{2,3}(?:-[a-zA-Z0-9]{2,8})*$'
+          default: fr
+        reproduction_url:
+          type:
+            - string
+            - 'null'
+          maxLength: 2048
+          format: uri
+          pattern: '^https://[^/@]+(?:/.*)?$'
+        technologies:
+          type: array
+          maxItems: 5
+          items:
+            $ref: '#/components/schemas/RequestTechnologyInput'
+        edit_note:
+          type:
+            - string
+            - 'null'
+          minLength: 20
+          maxLength: 1000
+          description: 'Note obligatoire après contribution ; reste privée pour une édition de brouillon.'
+    HelpRequestPublishInput:
+      type: object
+      additionalProperties: false
+      required:
+        - lock_version
+      properties:
+        lock_version:
+          type: integer
+          minimum: 1
+          maximum: 2147483646
+    HelpRequestRevision:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - request_version
+        - action
+        - changed_fields
+        - edit_note
+        - occurred_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        request_version:
+          type: integer
+          minimum: 1
+        action:
+          type: string
+          enum:
+            - updated
+            - published
+        changed_fields:
+          type: array
+          items:
+            type: string
+            enum:
+              - help_intent
+              - title
+              - goal
+              - expected
+              - observed
+              - attempts
+              - environment
+              - code
+              - code_language
+              - primary_language
+              - reproduction_url
+              - technologies
+              - state
+        edit_note:
+          type:
+            - string
+            - 'null'
+          minLength: 20
+          maxLength: 1000
+        occurred_at:
+          type: string
+          format: date-time
+    HelpRequestRevisionPage:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          type: array
+          maxItems: 50
+          items:
+            $ref: '#/components/schemas/HelpRequestRevision'
+        meta:
+          $ref: '../../OPENAPI.yaml#/components/schemas/PaginationMeta'
     HelpRequestDetail:
       type: object
       additionalProperties: false

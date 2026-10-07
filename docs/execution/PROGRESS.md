@@ -1,6 +1,6 @@
 # Suivi du dépôt HAAS
 
-**Statut actif :** B01–B09, B12–B13 et B32 DONE (12 lots de socle). B11, B14 et B15 IN_REVIEW : ordre #23 (Madina) → #22 (compléments) → #24 (B14) → PR B15 sur `backend/communaute-entraide-b15`. Les 24 autres lots de la coordination #2 restent à faire. B10/B29/B30/B31 et B39–B42 IN_PROGRESS ; B43/B44 BLOCKED. S01/S02 restent partiels. BACKEND_GATE NON REÇU, aucun GO_FRONTEND/GO_PRODUCTION. Voir [B15](../quality/B15_READING.md) et le [suivi de Lamine](participants/LamineGL/HANDOFF.md).
+**Statut actif :** B01–B09, B11–B13 et B32 DONE (13 lots entiers). B14/B15/B16/B17 IN_REVIEW : #24 vers main, #25 vers B14, #26 vers B15, B17 préparé depuis B16 et main. Les 22 autres lots de la coordination #2 restent à faire. B10/B29/B30/B31 et B39–B42 IN_PROGRESS ; B43/B44 BLOCKED. B35 partiel, B38 bloqué, B22/B23 en brouillon : bilan et correction des README dans [PR #31](https://github.com/haas-projet/haas/pull/31), en attente d'approbation humaine. S01/S02 restent partiels. BACKEND_GATE NON REÇU, aucun GO_FRONTEND/GO_PRODUCTION. Voir [B17](../quality/B17_COMMENTS.md) et le [suivi de Lamine](participants/LamineGL/HANDOFF.md).
 
 À renseigner après commandes réelles : date / lot / responsable / fichiers / commandes / observé / commit ou raison de non-commit / blocage / prochaine action. Les contrôles documentaires de ce pack ne valident pas BACKEND_GATE, FRONTEND_GATE ou RELEASE_GATE.
 
@@ -251,3 +251,10 @@ B07/B08/B09/B12/B13/B32 DONE ; le tableau Systalink comporte maintenant 12 lots 
 - GET liste/détail, visibilité commune avant recherche/pagination/total, brouillons réservés à leur auteur, vue mine explicite, filtres/tri bornés et chargement des relations sans N+1. Aucune migration ni dépendance ajoutée. Contrat [HELP_REQUEST_READING.md](../api/HELP_REQUEST_READING.md), preuve [B15_READING.md](../quality/B15_READING.md).
 - Résultats locaux : 284 tests / 2811 assertions hors SQL et 227 / 2023 sur PostgreSQL dédié (511 / 4834). Pint/PHPStan, Composer validation/prérequis/audit et documentation réussis, 38 types à jour. Quatre SELECT métier pour 5 comme pour 25 demandes. Cluster 54695/haas_b15_test arrêté après les tests.
 - B15 IN_REVIEW ; SHA final et CI à constater dans la PR et le bilan après publication. Ordre #23 → #22 → #24 → B15, sans fusion ni revue humaine simulée. B11/B14/B15 En cours dans Systalink, 24 autres lots à faire. Prochain B16, édition sous version. Aucun BACKEND_GATE ni frontend/déploiement.
+
+## 2026-10-04 — B16, modifier et publier une demande existante
+
+- Demande de continuer la partie de Lamine en préservant le travail de Madina. Livraison isolée dans `.worktrees/b16`, branche `backend/communaute-entraide-b16`, depuis B15 `0cfcde1`. PR #23/#22/#24/#25 inchangées ; PR #12 et modification locale des routes capsules préservées.
+- Édition auteur avec version, note après contribution et validation du contenu final ; publication des brouillons et historique respectant la confidentialité. Audit/version/pivots/révisions/idempotence atomiques. Migration additive, règles B14 mutualisées et tests de retour de migrations adaptés à la dépendance enfant.
+- Contrats et preuves : [HELP_REQUEST_EDITING.md](../api/HELP_REQUEST_EDITING.md), [B16_EDITING.md](../quality/B16_EDITING.md). Commandes réelles, résultats, courses PostgreSQL et limites consignés dans cette preuve ; aucun contrôle absent compté comme réussi.
+- B16 IN_REVIEW, aucune autre tâche modifiée dans les 122 lots. Ordre #23 → #22 → #24 → #25 → B16 ; SHA final et CI à reporter dans la PR et le bilan après commit. Aucune revue humaine ni fusion simulée. Prochain lot B17 ; aucune nouvelle carte Systalink Terminé avant intégration.

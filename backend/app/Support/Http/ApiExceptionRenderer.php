@@ -2,6 +2,7 @@
 
 namespace App\Support\Http;
 
+use App\Exceptions\Collaboration\CommentVersionConflict;
 use App\Exceptions\HelpRequests\HelpRequestCreationRejected;
 use App\Exceptions\HelpRequests\HelpRequestVersionConflict;
 use App\Exceptions\Idempotency\IdempotencyConflict;
@@ -38,7 +39,7 @@ final class ApiExceptionRenderer
             $exception instanceof ValidationException, $exception instanceof RegistrationRejected => 422,
             $exception instanceof InvalidCredentials, $exception instanceof InvalidResetToken => 422,
             $exception instanceof ProfileUpdateRejected, $exception instanceof HelpRequestCreationRejected => 422,
-            $exception instanceof HelpRequestVersionConflict => 409,
+            $exception instanceof HelpRequestVersionConflict, $exception instanceof CommentVersionConflict => 409,
             $exception instanceof ProfileVersionConflict, $exception instanceof IdempotencyConflict, $exception instanceof AccountVersionConflict, $exception instanceof ModerationRejected => 409,
             $exception instanceof InactiveAccount => 403,
             $exception instanceof RegistrationUnavailable => 503,

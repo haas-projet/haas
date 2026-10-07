@@ -297,3 +297,54 @@ Aucun autre fichier du socle n'a été touché : `routes/api.php`, `bootstrap/`,
 - B23 est backend seul : aucun composant React livré.
 - Les transitions `CapsuleVersionState` autres que `draft` sont servies par B24/B25.
 - Aucun push, aucune PR ouverte à ce stade dans PROGRESS ; publication autorisée pour ce lot, consignée dans HANDOFF.
+
+## 2026-10-07 — Suite B23 : PATCH, tests HTTP, décisions Q8/Q9
+
+Statut : B23 reste **préparé, PR en brouillon** sur la PR #30. Aucun `DONE`.
+
+### Décisions prises
+
+- **Q8 fermée** : PATCH `/api/v1/capsules/{capsule}/versions/{version}` livré en B23. Edition autorisée pour les états `draft` et `changes_requested` seulement (CAHIER_DES_CHARGES.md:293 pour la boucle de revue B24). `version_label`, `state`, `owner_id`, `reviewer_id`, `published_at`, `id`, `capsule_id` sont refusés en 422 par le FormRequest. Pas d'`Idempotency-Key` sur ce PATCH : patron B16 (`UpdateHelpRequestRequest` sur `backend/communaute-entraide-b16`) utilise `lock_version` comme unique mécanisme anti-doublon.
+- **Q9 fermée** : la Policy `proposeFromHelpRequest` autorise l'auteur de la demande **et** l'auteur de la proposition acceptée par la résolution active (`revoked_at IS NULL`). CAHIER_DES_CHARGES.md:265 « L'auteur d'une résolution ou un contributeur autorisé propose une capsule ». Le créateur devient `owner_id` (serveur). Trois tests HTTP distincts couvrent les trois cas.
+- **Q11 (clarification)** : au deuxième POST avec la même `Idempotency-Key` et la même charge, `IdempotencyService` relit `api_idempotency` et renvoie le même `StoredCommandResult` que la première écriture ; le `status` stocké est `201`, identique au premier appel. B23 ne distingue donc pas « création » et « rejeu » dans la réponse HTTP (pas de header `X-Idempotent-Replay`). Décision ouverte : exposer le header en relisant `api_idempotency.created_at` ou laisser le client déduire via sa clé.
+
+### Nouveaux fichiers
+
+- Migration `2026_10_07_172331_add_lock_version_to_capsule_versions_table.php` (additive, défaut `1`, down() tolérant au drop préalable pour cohabiter avec `DomainTablesTest`).
+- Data : `App\Data\Capsules\UpdateDraftData` (lock_version obligatoire, body/limits/technologies optionnels, aucun champ serveur).
+- Exception de domaine : `App\Exceptions\Capsules\StaleCapsuleVersion` (lock_version périmé) ; le Controller la transforme en 409 pour respecter `DomainBoundariesTest`.
+- Service : `App\Services\Capsules\UpdateCapsuleVersionDraftService` (transaction, lockForUpdate, vérifie appartenance capsule/version, Policy sur l'état verrouillé, incrémente lock_version, synchronise les technologies, audit dans la même transaction).
+- Policy `editDraft(?User, Capsule, CapsuleVersionState, string $versionId)` : autorise owner OU contributeur de la version précise, pour les états `draft`/`changes_requested`.
+- FormRequest `UpdateCapsuleVersionDraftRequest` : refuse les champs serveur et exige au moins un champ modifiable.
+- Controller `UpdateCapsuleVersionDraftController` (mince) : convertit `StaleCapsuleVersion` → 409.
+- Resource `CapsuleVersionDraftResource` : expose `lock_version` au client.
+- Route `PATCH /api/v1/capsules/{capsule}/versions/{version}` (name `capsules.versions.drafts.update`).
+- Fragment OpenAPI : opération `updateCapsuleVersionDraft` + schéma `CapsuleVersionDraftUpdate`.
+- Tests : `CapsuleDraftHttpTest` (20 cas HTTP sur POST), `CapsuleDraftUpdateHttpTest` (11 cas HTTP sur PATCH).
+
+### Contrôles finaux après la suite B23
+
+| Commande | Résultat observé |
+|---|---|
+| `composer lint` | `{"tool":"pint","result":"passed"}` |
+| `composer analyse` | `[OK] No errors` (PHPStan niveau 8) |
+| `composer test` | **323 tests / 2675 assertions, OK** en 11,832 s |
+| `composer test:integration` (suite complète) | **230 tests / 1495 assertions, OK** en 4 min 51 s |
+
+### Nouveaux commits locaux (suite B23)
+
+- `64b0cc0` `test(capsules): couvrir les routes de brouillon par HTTP et étendre la Policy`
+- `db8cab3` `feat(capsules): poser le verrou optimiste lock_version sur capsule_versions`
+- `f60fa14` `feat(capsules): poser le service d'édition de brouillon avec verrou optimiste`
+- `b96f808` `feat(capsules): exposer la route PATCH d'édition de brouillon`
+- `6fa306e` `docs(api): référencer la route PATCH d'édition de brouillon dans OPENAPI.yaml`
+- `5935fe6` `docs(api): régénérer les types générés pour inclure le PATCH de brouillon`
+- `d9cb216` `fix(capsules): isoler le service du domaine HTTP via StaleCapsuleVersion`
+- `c49044f` `fix(capsules): rendre le down() de lock_version tolérant au drop préalable`
+- commit documentaire courant.
+
+### Questions ouvertes restantes
+
+- Q10 — Nom de la table pivot `capsule_version_technologies` : non explicitement cité dans §24. Décision de propriétaire du domaine, en attente de confirmation du relecteur.
+- Q11 — Header `X-Idempotent-Replay` à exposer ou non.
+- Q2–Q7 de B22 restent ouvertes.

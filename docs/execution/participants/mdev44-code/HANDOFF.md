@@ -169,3 +169,32 @@ Un membre vérifié peut créer un brouillon de capsule à partir de sa demande 
 1. Observer la CI distante après `git push -u origin backend/capsules-laboratoire-b23-brouillons`.
 2. PR brouillon vers `backend/capsules-laboratoire-b22-schema` (empilée sur la PR #29).
 3. Discuter en revue les quatre questions ouvertes B23 (Q8 PATCH, Q9 auteur proposition, Q10 pivot technologies, Q11 header replay) et les cinq questions B22 (Q2 à Q7) encore ouvertes.
+
+## 2026-10-07 — Suite B23 : PATCH, tests HTTP, Q8/Q9 fermées
+
+B23 ajoute la route PATCH, 31 nouveaux tests HTTP (20 POST + 11 PATCH) et ferme Q8 (PATCH livré) et Q9 (auteur de la proposition acceptée autorisé).
+
+### Nouvelles routes exposées
+
+- `PATCH /api/v1/capsules/{capsule}/versions/{version}` (name `capsules.versions.drafts.update`). lock_version obligatoire ; 409 sans mutation si périmé.
+
+### Fichiers hors de mon domaine modifiés (cumul B23)
+
+- `docs/OPENAPI.yaml` : **+6 lignes** cumulées pour les trois routes B23 (POST x2 + PATCH). Commits `5d84bf9` et `6fa306e`.
+- `docs/api/generated/haas-api.d.ts` : **régénéré 2 fois** par `scripts/generate-api-types.php`. Commits `60fceb0` et `5935fe6`.
+
+Aucun autre fichier du socle n'a été touché.
+
+### Contrôles finaux
+
+- `composer lint` → `passed`.
+- `composer analyse` → `[OK] No errors`.
+- `composer test` → **323/2675 OK**.
+- `composer test:integration` (suite complète) → **230/1495 OK**.
+- CI distante : à observer après push.
+
+### Prochaines étapes
+
+1. Pousser les commits locaux restants vers `origin/backend/capsules-laboratoire-b23-brouillons`.
+2. `gh pr edit 30` pour mettre à jour le corps de la PR #30 (nouveaux commits, Q8/Q9 fermées, Q11 clarifiée, Q10 restante).
+3. Attendre revue humaine distincte.

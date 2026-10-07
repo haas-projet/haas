@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property CapsuleVisibility $visibility
@@ -38,5 +39,11 @@ class Capsule extends Model
     public function owner(): BelongsTo
     {
         return $this->belongsTo(User::class, 'owner_id');
+    }
+
+    /** @return HasMany<CapsuleVersion, $this> */
+    public function versions(): HasMany
+    {
+        return $this->hasMany(CapsuleVersion::class);
     }
 }

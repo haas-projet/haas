@@ -32,3 +32,47 @@ Procédure de PR (source : `docs/execution/BACKEND_A_TROIS.md:149-155`) :
 Déclaration IA : chaque session Codex/Claude Code qui touche du code applicatif ajoute une ligne dans `docs/AI_USAGE.md` (format de la table ligne 11 : *Outil / intervention | Périmètre | Contrôles | Revue humaine de l'équipe*), avec le modèle réel, le périmètre, les contrôles exécutés et la mention « revue humaine : en attente » tant qu'un collègue n'a pas relu. Les commits portent l'identité Git locale réelle, sans co-auteur IA et sans signature humaine simulée (source : `docs/execution/COMMIT_CONVENTION.md:17`, `docs/execution/BACKEND_A_TROIS.md:153`).
 
 Prochaine reprise : attendre le feu vert pour pousser la branche. En parallèle, sur une branche dérivée séparée si la PR est encore ouverte, préparer `ComparisonOutcomeCalculator` (classe pure, lot BV208) et les scénarios B1 fictifs purs (lot B35, partie unitaire). Les écritures métier dépendantes de B07/B09/B11/B12/B13 restent en attente de leurs prérequis.
+
+## 2026-10-07 — HANDOFF B22 Schéma des capsules
+
+Branche : `backend/capsules-laboratoire-b22-schema`. Base : `backend/capsules-laboratoire` (`71daddf`, qui a déjà fusionné `origin/main` `7a8c672`). Lot livré : **B22 — Schéma des capsules**. Statut proposé : `IN_REVIEW` à l'ouverture d'une PR brouillon ; aucune revue humaine effectuée à ce stade.
+
+### À quelle question ce lot répond
+
+Le schéma SQL des capsules est posé : quatre tables (`capsules`, `capsule_versions`, `capsule_contributors`, `artifacts`) sous les règles de `CAHIER_DES_CHARGES.md:869-872`. Une capsule a toujours exactement une origine (demande résolue XOR origine éditoriale) ; une version par capsule est unique ; un contributeur ne peut pas tenir deux fois le même rôle sur la même version ; un artefact approuvé est unique par (version, digest) sans empêcher l'historique inactif. Les trois objets (capsule, brique facultative, laboratoire facultatif) restent strictement distincts : aucune FK du domaine B22 ne pointe vers les tables `lab_*`, `test_*` ou `demo_*`.
+
+### Dépendances et contrat
+
+- Prérequis fusionné dans `main` : socle B01–B09, B12, B13, B32 ; identité `users` et trait `HasUuids` (User.php:14+32).
+- Prérequis fusionné dans la branche de base : enums PR #12 `App\Enums\Capsules\CapsuleVersionState`, `App\Enums\Lab\LabRunState`, `App\Enums\Comparisons\{ComparisonState,ComparisonOutcome}`.
+- Prérequis **absent de `main`** : table `help_requests` (branche `backend/communaute-entraide-b11-schema`, auteur `mamylahi`). `capsules.source_request_id` est donc UUID nullable sans FK ; migration de raccord à prévoir après fusion de B11.
+- Aucune route ni Service livré ; `docs/OPENAPI.yaml` n'est pas touché.
+
+### Fichiers livrés
+
+- 3 enums `App\Enums\Capsules\` (visibilité, rôle de contribution, statut de distribution).
+- 4 migrations `database/migrations/2026_10_07_01*_create_<table>_table.php`.
+- 4 modèles Eloquent `App\Models\Capsules\{Capsule,CapsuleVersion,CapsuleContributor,Artifact}`.
+- 4 factories `Database\Factories\Capsules\`.
+- 3 tests unitaires d'enum + 5 tests d'intégration PostgreSQL (31 tests / 70 assertions au total pour B22).
+
+### Prochaines étapes pour la propriétaire
+
+1. Attendre le feu vert utilisateur avant tout push : `git push -u origin backend/capsules-laboratoire-b22-schema`.
+2. Ouvrir une PR brouillon vers `backend/capsules-laboratoire` (branche de base de PR #12) ou directement vers `main` si PR #12 est fusionnée d'ici là. Discuter en revue les six questions ouvertes consignées dans PROGRESS.md (visibilité, rôle, statut, format editorial_origin, FK source_request_id, convention nommage).
+3. Observer la CI distante après le push.
+4. B23 démarre sur une branche dérivée séparée de B22, sans toucher la PR en revue.
+
+### Fichiers à ne pas toucher jusqu'à nouvel ordre
+
+- `backend/config/*`, `backend/bootstrap/app.php`, `backend/phpunit.xml`, `backend/.env.example`, `backend/composer.*`, `.github/workflows/*`.
+- `backend/routes/api.php`, `backend/routes/api/identity.php`, `backend/routes/console.php`.
+- `docs/OPENAPI.yaml` (fichier responsable 1 ; B22 n'ajoute aucune route).
+
+### Contrôles réellement exécutés
+
+- `composer lint` **passed**, `composer analyse` **[OK] No errors**.
+- `composer test` : **284 tests / 2510 assertions, OK**.
+- `composer test:integration` (filtre Capsules|Artifacts) : **31 tests / 70 assertions, OK**.
+- `composer test:integration` (suite complète) : **164 tests / 1320 assertions, OK**.
+- CI distante NON EXÉCUTÉE à ce stade (branche non poussée).

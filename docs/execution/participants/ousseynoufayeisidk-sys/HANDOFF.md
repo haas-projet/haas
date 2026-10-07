@@ -171,3 +171,8 @@ Main et les trois branches permanentes distantes portent f1f6238. Les branches t
 Reprendre la partie communautaire de Lamine selon ses dépendances et préparer B17 séparément. Le retour à quatre branches exige l'intégration vérifiée des travaux restants ou une organisation décidée explicitement ; ne pas supprimer leurs références pour atteindre le nombre cible. B38 reste bloqué ; aucun nouveau test applicatif ni gate reçu par ce nettoyage. Travail préexistant du workspace initial préservé.
 
 Compte rendu prêt pour un commit local après pack 18/18, documentation de déploiement 7/7, 28 types API à jour sous PHP 8.5.10, UTF-8 strict et git diff --check vérifiés. Manifeste de 517 fichiers actualisé dans l'ordre existant. L'intégrateur publiera le commit ; aucune publication de ce complément ni nouvelle revue humaine présumée.
+
+
+## 7 octobre 2026 ? correction B38 avant revue
+
+Codex (GPT-6), int?gration sur PR #28 : runtime B2 s?par?, configuration/caches/routes/base/r?le/cl? propres, rejet des cookies et de HAAS, JSON fictif strict, TTL24h/quota30/capacit?5000/purge born?e. Preuve : docs/quality/B38_ISOLATION_20261007.md. Ciblage local PHP8.5/PostgreSQL17 sur les deux bases d?di?es : 64 tests / 348 assertions OK avant quatre assertions CORS compl?mentaires. Deux processus r?ellement bloqu?s simultan?ment en PostgreSQL ; refus r?el de CONNECT ? la base application. Revue humaine, CI exacte et restrictions OS/VPS restent ? recevoir ; aucun frontend ou d?ploiement. Les suivis de l?autrice sont conserv?s comme historiques.

@@ -1,5 +1,7 @@
 # B38 — API de démonstration B2
 
+**Historique de la livraison initiale, non reçu.** Les points de bascule conceptuels et les affirmations d'isolation ci-dessous sont remplacés par la [correction réellement testée du 7 octobre](B38_ISOLATION_20261007.md), qui livre un runtime, une connexion et une clé distincts. Conserver ce bilan comme trace des défauts initiaux, sans reprendre ses limites comme état courant.
+
 ## Résumé
 
 Brique B2 isolée : `POST /api/v1/b2/demo-orders` enregistre une commande fictive de démonstration de façon idempotente par clé stable client (`Idempotency-Key`, UUID v4). Aucun paiement réel, aucune session HAAS, aucun cookie émis, aucune donnée métier HAAS lue ou écrite. Table dédiée `demo_orders` sur connexion conceptuellement isolée (point de bascule `App\Models\Demo\DemoConnection::NAME`, aligné sur le même protocole que `LabConnection` du lot B35).

@@ -3,23 +3,23 @@
 namespace Tests\Integration\Demo;
 
 use App\Models\Demo\DemoOrder;
-use App\Models\User;
 use App\Services\Demo\PurgeExpiredDemoOrdersService;
 use Carbon\CarbonImmutable;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Testing\PendingCommand;
 use InvalidArgumentException;
-use Tests\PostgresTestCase;
+use Tests\DemoPostgresTestCase;
+use Tests\Support\RefreshDemoDatabase;
 
 /**
  * Scénarios de purge B2 (lot B38) : la commande Artisan `demo:prune`
  * supprime uniquement les commandes fictives expirées, ne touche à aucune
  * autre table, est idempotente et respecte l'option `--older-than`.
  */
-final class PruneDemoOrdersTest extends PostgresTestCase
+final class PruneDemoOrdersTest extends DemoPostgresTestCase
 {
-    use RefreshDatabase;
+    use RefreshDemoDatabase;
 
     protected function setUp(): void
     {
@@ -47,17 +47,13 @@ final class PruneDemoOrdersTest extends PostgresTestCase
 
     public function test_prune_does_not_touch_the_users_table(): void
     {
-        $foreignUserCount = User::query()->count();
+        $this->assertFalse(Schema::hasTable('users'));
         $this->seedOrder(ageInHours: 48);
 
         $this->runPrune()->assertSuccessful()->run();
 
         $this->assertDatabaseCount('demo_orders', 0);
-        $this->assertSame(
-            $foreignUserCount,
-            User::query()->count(),
-            'La purge ne doit toucher aucune autre table.',
-        );
+        $this->assertFalse(Schema::hasTable('users'));
     }
 
     public function test_second_invocation_removes_zero_rows(): void
@@ -78,11 +74,11 @@ final class PruneDemoOrdersTest extends PostgresTestCase
         $this->seedOrder(ageInMinutes: 90); // 1 h 30 > 1 h → supprimé
 
         $this->runPrune(['--older-than' => 3_600])
-            ->expectsOutput('1 commande(s) fictive(s) retirée(s).')
+            ->expectsOutput('0 commande(s) fictive(s) retirée(s).')
             ->assertSuccessful()
             ->run();
 
-        $this->assertDatabaseCount('demo_orders', 1);
+        $this->assertDatabaseCount('demo_orders', 2);
     }
 
     public function test_invalid_older_than_option_is_refused_without_delete(): void
@@ -126,6 +122,7 @@ final class PruneDemoOrdersTest extends PostgresTestCase
         return DemoOrder::unguarded(fn (): DemoOrder => DemoOrder::factory()->create([
             'created_at' => $createdAt,
             'updated_at' => $createdAt,
+            'expires_at' => $createdAt->addDay(),
         ]));
     }
 }

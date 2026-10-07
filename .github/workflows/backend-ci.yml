@@ -61,6 +61,15 @@ jobs:
       SESSION_DRIVER: array
       QUEUE_CONNECTION: sync
       MAIL_MAILER: array
+      DEMO_ENV: testing
+      DEMO_API_URL: https://demo-api.example.com
+      DEMO_FRONTEND_ORIGIN: https://demo.example.com
+      DEMO_DB_HOST: 127.0.0.1
+      DEMO_DB_PORT: '5432'
+      DEMO_DB_DATABASE: haas_demo_ci_test
+      DEMO_DB_USERNAME: haas_demo_test
+      DEMO_DB_PASSWORD: haas_demo_ci_only
+      DEMO_CACHE_STORE: array
     steps:
       - name: Récupérer le code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -92,6 +101,22 @@ jobs:
         run: |
           cp .env.testing.example .env
           php artisan key:generate --no-interaction
+          b2_ephemeral_key=$(php -r 'echo bin2hex(random_bytes(32));')
+          echo "::add-mask::$b2_ephemeral_key"
+          echo "DEMO_IDEMPOTENCY_KEY=$b2_ephemeral_key" >> "$GITHUB_ENV"
+
+      - name: Isoler la base fictive B2 et son rôle PostgreSQL
+        env:
+          PGPASSWORD: haas_ci_only
+        run: |
+          psql -h 127.0.0.1 -U haas_test -d haas_ci_test -v ON_ERROR_STOP=1 <<'SQL'
+          CREATE ROLE haas_demo_test LOGIN PASSWORD 'haas_demo_ci_only' NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION;
+          CREATE DATABASE haas_demo_ci_test OWNER haas_demo_test;
+          REVOKE CONNECT ON DATABASE haas_ci_test FROM PUBLIC;
+          REVOKE CONNECT ON DATABASE haas_demo_ci_test FROM PUBLIC;
+          GRANT CONNECT ON DATABASE haas_ci_test TO haas_test;
+          GRANT CONNECT ON DATABASE haas_demo_ci_test TO haas_demo_test;
+          SQL
 
       - name: Vérifier le formatage
         run: composer lint

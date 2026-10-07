@@ -6,11 +6,11 @@ use App\Data\Demo\DemoOrderData;
 use App\Exceptions\Idempotency\IdempotencyConflict;
 use App\Models\Demo\DemoOrder;
 use App\Services\Demo\RecordDemoOrderService;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use PHPUnit\Framework\Attributes\DataProvider;
-use Tests\PostgresTestCase;
+use Tests\DemoPostgresTestCase;
+use Tests\Support\RefreshDemoDatabase;
 
 /**
  * Scénarios B2 (lot B38) sur le service d'enregistrement : création
@@ -18,9 +18,9 @@ use Tests\PostgresTestCase;
  * entrées invalides doivent être rejetées sans écriture (ceinture et
  * bretelles de la validation HTTP).
  */
-final class RecordDemoOrderServiceTest extends PostgresTestCase
+final class RecordDemoOrderServiceTest extends DemoPostgresTestCase
 {
-    use RefreshDatabase;
+    use RefreshDemoDatabase;
 
     private RecordDemoOrderService $service;
 
@@ -66,7 +66,7 @@ final class RecordDemoOrderServiceTest extends PostgresTestCase
         $this->service->handle($data, $key);
 
         $divergent = new DemoOrderData(
-            orderRef: $data->orderRef.'_changed',
+            orderRef: $data->orderRef,
             amountMinor: $data->amountMinor + 100,
             currency: $data->currency,
         );

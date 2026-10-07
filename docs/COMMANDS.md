@@ -72,3 +72,8 @@ Depuis la racine : `php scripts/generate-api-types.php` régénère les schémas
 Depuis backend, avec la configuration locale appropriée : `php artisan notifications:deliver` livre au plus 100 intentions et `php artisan ops:check` contrôle SQL, échecs et retards des files. Ce dernier retourne 1 en cas de problème, sans données privées ; ce n’est pas une preuve de délivrabilité SMTP ou de santé du lab.
 
 Sauvegarde/restauration : lire [OPERATIONS_RUNBOOK.md](deployment/OPERATIONS_RUNBOOK.md) avant d’utiliser scripts/ops/exercise-backup.php. Seules des bases locales dédiées de test sont admises ; cible de restauration neuve et vide, clés hors dépôt. L’outil ne se connecte pas à la production.
+
+
+## Runtime B2 s?par? ? B38
+
+Depuis backend : `php demo/artisan migrate --force`, `php demo/artisan demo:prune`, `php demo/artisan schedule:list` utilisent exclusivement la configuration et les migrations demo. Les tests SQL exigent deux bases locales d?di?es avec r?les distincts, CONNECT m?tier refus? au r?le fictif : `php vendor/bin/phpunit tests/Feature/Demo tests/Integration/Demo`. Variables DEMO_DB_* et DEMO_IDEMPOTENCY_KEY propres ; aucune copie de la cl? ou de l?environnement HAAS. R?sultats r?els et limites : docs/quality/B38_ISOLATION_20261007.md.

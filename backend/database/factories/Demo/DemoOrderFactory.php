@@ -20,13 +20,17 @@ class DemoOrderFactory extends Factory
     /** @return array<string, mixed> */
     public function definition(): array
     {
+        $createdAt = now();
+
         return [
             'idempotency_key_hash' => hash('sha256', (string) Str::uuid()),
             'payload_hash' => hash('sha256', (string) Str::uuid()),
-            'order_ref' => 'demo-'.$this->faker->numerify('######'),
-            'amount_minor' => $this->faker->numberBetween(100, 9_999_900),
-            'currency' => $this->faker->randomElement(['EUR', 'USD', 'GBP']),
+            'order_ref' => 'demo-'.$this->faker->numerify('####'),
+            'amount_minor' => $this->faker->numberBetween(100, 1_000_000),
+            'currency' => 'EUR',
             'state' => 'confirmed',
+            'created_at' => $createdAt,
+            'expires_at' => $createdAt->copy()->addDay(),
         ];
     }
 }

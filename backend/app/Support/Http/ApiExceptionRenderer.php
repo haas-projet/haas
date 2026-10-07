@@ -2,6 +2,7 @@
 
 namespace App\Support\Http;
 
+use App\Exceptions\Demo\DemoCapacityReached;
 use App\Exceptions\Idempotency\IdempotencyConflict;
 use App\Exceptions\Identity\AccountVersionConflict;
 use App\Exceptions\Identity\InactiveAccount;
@@ -33,6 +34,7 @@ final class ApiExceptionRenderer
         }
 
         $status = match (true) {
+            $exception instanceof DemoCapacityReached => 429,
             $exception instanceof ValidationException, $exception instanceof RegistrationRejected => 422,
             $exception instanceof InvalidCredentials, $exception instanceof InvalidResetToken => 422,
             $exception instanceof ProfileUpdateRejected => 422,
@@ -79,6 +81,13 @@ final class ApiExceptionRenderer
         $id = RequestId::get($request);
         $headers['X-Request-ID'] = $id;
         $headers['Cache-Control'] = 'no-store';
+        // Les refus B2 précèdent HandleCors : conserver CORS exact sans credentials sur leurs erreurs.
+        $demoOrigin = config('demo.frontend_origin');
+        if (is_string($demoOrigin) && $request->header('Origin') === $demoOrigin && config('cors.supports_credentials') === false) {
+            $headers['Access-Control-Allow-Origin'] = $demoOrigin;
+            $headers['Access-Control-Expose-Headers'] = 'Retry-After, X-Request-ID, X-Idempotent-Replay';
+            $headers['Vary'] = 'Origin';
+        }
 
         return new JsonResponse([
             'error' => [

@@ -6,7 +6,7 @@ use Illuminate\Support\Str;
 use Illuminate\Testing\TestResponse;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Component\HttpFoundation\Response;
-use Tests\TestCase;
+use Tests\DemoTestCase;
 
 /**
  * Validations HTTP de la brique B2 (lot B38).
@@ -20,13 +20,13 @@ use Tests\TestCase;
  * Les scénarios 201/200/409 vivent dans Integration/Demo pour utiliser
  * PostgreSQL réel.
  */
-final class RecordDemoOrderValidationTest extends TestCase
+final class RecordDemoOrderValidationTest extends DemoTestCase
 {
     protected function setUp(): void
     {
         parent::setUp();
         // Si une connexion est tentée malgré nous, le test échoue bruyamment.
-        config(['database.connections.pgsql.port' => 1]);
+        config(['database.connections.demo.port' => 1]);
     }
 
     public function test_missing_idempotency_key_header_is_rejected_before_any_database_access(): void
@@ -78,9 +78,15 @@ final class RecordDemoOrderValidationTest extends TestCase
         yield 'empty order_ref' => ['order_ref', ''];
         yield 'whitespace-only order_ref' => ['order_ref', '   '];
         yield 'order_ref too long' => ['order_ref', str_repeat('a', 65)];
+        yield 'order_ref personal text' => ['order_ref', 'Une vraie commande personnelle'];
+        yield 'order_ref border spaces' => ['order_ref', ' demo-0001 '];
         yield 'amount zero' => ['amount_minor', 0];
         yield 'amount negative' => ['amount_minor', -1];
         yield 'amount string' => ['amount_minor', '12.34'];
+        yield 'amount integer string' => ['amount_minor', '1299'];
+        yield 'amount boolean' => ['amount_minor', true];
+        yield 'amount upper bound' => ['amount_minor', 1000001];
+        yield 'currency outside fixture' => ['currency', 'USD'];
         yield 'currency lowercase' => ['currency', 'eur'];
         yield 'currency too short' => ['currency', 'EU'];
         yield 'currency four chars' => ['currency', 'EURO'];
@@ -102,7 +108,7 @@ final class RecordDemoOrderValidationTest extends TestCase
     {
         // Ancrage : la configuration de test force une connexion inatteignable.
         // Si le groupe B2 avait réveillé une session, cet appel bronche.
-        $this->get('/up')->assertOk()->assertExactJson(['status' => 'ok']);
+        $this->get('/api/v1/b2/health')->assertOk()->assertExactJson(['status' => 'ok']);
     }
 
     /** @return array<string, int|string> */

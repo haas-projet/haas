@@ -203,3 +203,8 @@ Après le nettoyage 13 → 11, publication de B17 dans #32 : **12 références**
 ### Consolidation et second nettoyage — 19:27 UTC
 
 Fusions externes #32/#26/#25 constatées ; B14–B17 consolidés dans #24 par `d9cba0b`, CI exacte `37666083469` verte PHP 8.4/8.5 et backend-ci, backend identique au code B17 validé 671 / 6805. Trois intermédiaires B15/B16/B17 supprimées après ascendance vers B14 publié et absence de PR ouverte dépendante ; références locales préservées. B24 créé extérieurement porte #33 ; dernier inventaire **10 branches : quatre permanentes et six temporaires**. #24 et #31 restent soumises à l'approbation humaine ; aucun nouveau lot déclaré DONE dans main. Voir BRANCH_CLEANUP_20261007.md. Prochain B18 après coordination ; aucun gate ni déploiement.
+
+
+## 7 octobre 2026 ? correction B38 avant revue
+
+Codex (GPT-6), int?gration sur PR #28 : runtime B2 s?par?, configuration/caches/routes/base/r?le/cl? propres, rejet des cookies et de HAAS, JSON fictif strict, TTL24h/quota30/capacit?5000/purge born?e. Preuve : docs/quality/B38_ISOLATION_20261007.md. Ciblage local PHP8.5/PostgreSQL17 sur les deux bases d?di?es : 64 tests / 348 assertions OK avant quatre assertions CORS compl?mentaires. Deux processus r?ellement bloqu?s simultan?ment en PostgreSQL ; refus r?el de CONNECT ? la base application. Revue humaine, CI exacte et restrictions OS/VPS restent ? recevoir ; aucun frontend ou d?ploiement. Les suivis de l?autrice sont conserv?s comme historiques.

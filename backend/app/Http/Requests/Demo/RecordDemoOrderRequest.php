@@ -34,9 +34,9 @@ final class RecordDemoOrderRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'order_ref' => ['required', 'string', 'max:64', 'regex:/^\S(.*\S)?$/D'],
-            'amount_minor' => ['required', 'integer', 'min:1'],
-            'currency' => ['required', 'string', 'regex:/^[A-Z]{3}$/D'],
+            'order_ref' => ['required', 'string', 'regex:/^demo-[0-9]{4}$/D'],
+            'amount_minor' => ['required', 'integer:strict', 'min:1', 'max:1000000'],
+            'currency' => ['required', 'string', 'in:EUR'],
         ];
     }
 
@@ -66,7 +66,7 @@ final class RecordDemoOrderRequest extends FormRequest
         return [
             'order_ref.required' => 'La référence de commande est requise.',
             'order_ref.max' => 'La référence de commande ne doit pas dépasser 64 caractères.',
-            'order_ref.regex' => 'La référence de commande ne doit pas contenir d’espaces en bordure.',
+            'order_ref.regex' => 'Utilisez une référence fictive demo- suivie de quatre chiffres.',
             'amount_minor.required' => 'Le montant est requis.',
             'amount_minor.integer' => 'Le montant doit être un entier.',
             'amount_minor.min' => 'Le montant doit être strictement positif.',

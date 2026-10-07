@@ -26,6 +26,7 @@ final class RecordDemoOrderController extends Controller
         return $resource
             ->response()
             ->setStatusCode($recorded->replay ? Response::HTTP_OK : Response::HTTP_CREATED)
-            ->header('X-Idempotent-Replay', $recorded->replay ? 'true' : 'false');
+            ->header('X-Idempotent-Replay', $recorded->replay ? 'true' : 'false')
+            ->header('Cache-Control', 'no-store');
     }
 }

@@ -3,20 +3,20 @@
 namespace Tests\Integration\Demo;
 
 use App\Models\Demo\DemoOrder;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use Illuminate\Testing\TestResponse;
 use Symfony\Component\HttpFoundation\Response;
-use Tests\PostgresTestCase;
+use Tests\DemoPostgresTestCase;
+use Tests\Support\RefreshDemoDatabase;
 
 /**
  * Parcours HTTP de la brique B2 (lot B38) : création nominale (201),
  * rejeu identique (200 + replay=true), conflit (409), et absence de
  * cookie HAAS/session dans les réponses.
  */
-final class RecordDemoOrderHttpTest extends PostgresTestCase
+final class RecordDemoOrderHttpTest extends DemoPostgresTestCase
 {
-    use RefreshDatabase;
+    use RefreshDemoDatabase;
 
     public function test_post_demo_order_creates_a_fictional_order_with_201(): void
     {
@@ -87,7 +87,7 @@ final class RecordDemoOrderHttpTest extends PostgresTestCase
             ->assertCreated();
 
         $this->assertSame([], $response->headers->getCookies(), 'B2 ne doit émettre aucun cookie.');
-        $this->assertFalse($this->app['session']->isStarted(), 'Aucune session HAAS ne doit être démarrée.');
+        $this->assertFalse($this->app->bound('session'), 'Le runtime B2 ne doit pas disposer du service session.');
     }
 
     /** @return array<string, int|string> */

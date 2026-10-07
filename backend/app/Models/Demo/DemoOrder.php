@@ -2,6 +2,7 @@
 
 namespace App\Models\Demo;
 
+use Carbon\CarbonImmutable;
 use Database\Factories\Demo\DemoOrderFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -14,6 +15,15 @@ use Illuminate\Database\Eloquent\Model;
  * Aucun paiement réel n'est manipulé. L'instance porte à la fois les
  * empreintes de la clé d'idempotence et de la charge canonique, puis
  * les champs métier figés par `RecordDemoOrderService`.
+ *
+ * @property string $id
+ * @property string $idempotency_key_hash
+ * @property string $payload_hash
+ * @property string $order_ref
+ * @property int $amount_minor
+ * @property string $currency
+ * @property string $state
+ * @property CarbonImmutable $expires_at
  */
 #[Fillable([
     'idempotency_key_hash',
@@ -33,6 +43,7 @@ class DemoOrder extends Model
     {
         return [
             'amount_minor' => 'integer',
+            'expires_at' => 'immutable_datetime',
         ];
     }
 

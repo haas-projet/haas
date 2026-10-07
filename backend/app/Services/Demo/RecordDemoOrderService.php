@@ -6,40 +6,16 @@ use App\Data\Demo\DemoOrderData;
 use App\Data\Demo\RecordedDemoOrder;
 use App\Data\Idempotency\IdempotencyData;
 use App\Data\Idempotency\IdempotencyKey;
+use App\Exceptions\Demo\DemoCapacityReached;
 use App\Exceptions\Idempotency\IdempotencyConflict;
 use App\Models\Demo\DemoConnection;
 use App\Models\Demo\DemoOrder;
-use Illuminate\Contracts\Encryption\Encrypter;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
-/**
- * Service transactionnel de la brique B2 (lot B38) : enregistre une commande
- * fictive de démonstration de façon idempotente, à partir d'une clé client
- * stable (en-tête `Idempotency-Key`) et d'une charge canonique bornée.
- *
- * Isolation : aucune lecture ni écriture sur la base métier HAAS, aucune
- * session, aucune Policy du socle. L'invariant « une clé = une commande »
- * est porté par la contrainte unique SQL `demo_orders_idempotency_key_unique`.
- * `insertOrIgnore` matérialise la décision atomique :
- *   - inserted=1 → commande nouvelle (replay=false)
- *   - inserted=0 → clé déjà vue : relecture et comparaison des empreintes de
- *     charge. Même empreinte → replay=true (rejeu identique attendu). Empreinte
- *     différente → `IdempotencyConflict` ; aucune écriture, aucune commande
- *     existante écrasée (rendu 409 `IDEMPOTENCY_CONFLICT` par le socle HTTP).
- *
- * Les value objects `IdempotencyKey` et `IdempotencyData` sont réutilisés pour
- * leur canonicalisation stricte (UUID v4, SHA-256 de la clé, tri récursif +
- * HMAC SHA-256 de la charge sous clé applicative) : ils ne dépendent ni du
- * `User` HAAS ni d'une table métier. Le `routeTarget` passé est la cible
- * canonique de B2 (`POST /api/v1/b2/demo-orders`), stable d'une version à
- * l'autre indépendamment du routage HTTP effectif.
- *
- * Aucun paiement réel n'est manipulé. Les données fictives sont bornées par
- * `guard()` avant toute écriture.
- */
+/** Enregistrement fictif atomique, cl? HMAC B2 propre, garantie 24 heures et stockage born?. */
 final class RecordDemoOrderService
 {
     /**
@@ -49,16 +25,20 @@ final class RecordDemoOrderService
      */
     public const ROUTE_TARGET = 'POST /api/v1/b2/demo-orders';
 
-    public function __construct(private readonly Encrypter $encrypter) {}
-
     public function handle(DemoOrderData $data, string $idempotencyKey): RecordedDemoOrder
     {
         $this->guard($data);
         $key = new IdempotencyKey($idempotencyKey);
         $fingerprint = (new IdempotencyData(self::ROUTE_TARGET, $key, $data->canonical()))
-            ->fingerprint($this->encrypter->getKey());
+            ->fingerprint($this->fingerprintKey());
 
         return DB::connection(DemoConnection::NAME)->transaction(function () use ($data, $key, $fingerprint): RecordedDemoOrder {
+            // La purge et l'enregistrement sérialisent leurs décisions, même entre processus.
+            DB::connection(DemoConnection::NAME)->select('SELECT pg_advisory_xact_lock(238038)');
+            DemoOrder::query()->where('idempotency_key_hash', $key->hash)->where('expires_at', '<=', now())->delete();
+            if (! DemoOrder::query()->where('idempotency_key_hash', $key->hash)->exists() && DemoOrder::query()->count() >= 5000) {
+                throw new DemoCapacityReached;
+            }
             $orderUuid = (string) Str::uuid();
             $now = now();
 
@@ -75,6 +55,7 @@ final class RecordDemoOrderService
                 'state' => 'confirmed',
                 'created_at' => $now,
                 'updated_at' => $now,
+                'expires_at' => $now->copy()->addDay(),
             ]);
 
             if ($inserted === 1) {
@@ -114,13 +95,23 @@ final class RecordDemoOrderService
             'amount_minor' => $data->amountMinor,
             'currency' => $data->currency,
         ], [
-            'order_ref' => ['required', 'string', 'max:64', 'regex:/^\S(.*\S)?$/D'],
-            'amount_minor' => ['required', 'integer', 'min:1'],
-            'currency' => ['required', 'string', 'regex:/^[A-Z]{3}$/D'],
+            'order_ref' => ['required', 'string', 'regex:/^demo-[0-9]{4}$/D'],
+            'amount_minor' => ['required', 'integer', 'min:1', 'max:1000000'],
+            'currency' => ['required', 'string', 'in:EUR'],
         ], [], [
             'order_ref' => 'référence de commande',
             'amount_minor' => 'montant',
             'currency' => 'devise',
         ])->validate();
+    }
+
+    private function fingerprintKey(): string
+    {
+        $key = config('demo.idempotency_key');
+        if (! is_string($key) || strlen($key) < 32) {
+            throw new \RuntimeException('Configurer une clé B2 indépendante de 32 caractères minimum.');
+        }
+
+        return $key;
     }
 }

@@ -1,0 +1,17 @@
+openapi: 3.1.0
+info:
+  title: HAAS B2 — commandes fictives isolées
+  version: 0.2.0
+servers:
+  - url: https://demo-api.example.com
+security: []
+paths:
+  /api/v1/b2/demo-orders:
+    $ref: './openapi/capsules-lab.yaml#/paths/~1api~1v1~1b2~1demo-orders'
+  /api/v1/b2/health:
+    get:
+      operationId: demoHealth
+      security: []
+      responses:
+        '200':
+          description: Runtime B2 disponible, sans cookie ni accès SQL.

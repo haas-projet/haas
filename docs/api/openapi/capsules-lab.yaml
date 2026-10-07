@@ -7,7 +7,7 @@ paths:
       description: >-
         Brique B2 (lot B38) : API isolée de démonstration, servie depuis une
         origine hors `.haas.example.com` et sans cookie de session HAAS. Chaque
-        intention est portée par un UUID v4 stable (`Idempotency-Key`) : deux
+        intention est portée par un UUID v4 stable (`Idempotency-Key`) pendant 24 heures : deux
         envois avec la même clé et la même charge renvoient la commande
         d'origine ; une charge différente avec la même clé est rejetée en 409
         `IDEMPOTENCY_CONFLICT`. Les données sont exclusivement fictives.
@@ -66,7 +66,15 @@ paths:
                     $ref: '#/components/schemas/DemoOrder'
         '409':
           $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure'
+        '403':
+          $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure'
+        '413':
+          $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure'
+        '415':
+          $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure'
         '422':
+          $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure'
+        '429':
           $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure'
         '500':
           $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure'
@@ -79,20 +87,19 @@ components:
       properties:
         order_ref:
           type: string
-          minLength: 1
-          maxLength: 64
-          description: Référence fictive de la commande ; sans espaces en bordure, aucune donnée personnelle.
+          pattern: '^demo-[0-9]{4}$'
+          description: Référence fictive demo-0000 à demo-9999 ; aucun texte libre ou renseignement personnel.
         amount_minor:
           type: integer
           minimum: 1
-          maximum: 9007199254740991
+          maximum: 1000000
           description: Montant en unité mineure, strictement positif. Aucun paiement réel associé.
         currency:
           type: string
           minLength: 3
           maxLength: 3
-          pattern: '^[A-Z]{3}$'
-          description: Code ISO 4217 alpha-3 majuscule.
+          enum: [EUR]
+          description: Devise fictive fixe de la démonstration.
     DemoOrder:
       type: object
       additionalProperties: false
@@ -104,14 +111,14 @@ components:
           description: Identifiant serveur de la commande fictive.
         order_ref:
           type: string
-          minLength: 1
-          maxLength: 64
+          pattern: '^demo-[0-9]{4}$'
         amount_minor:
           type: integer
           minimum: 1
+          maximum: 1000000
         currency:
           type: string
-          pattern: '^[A-Z]{3}$'
+          enum: [EUR]
         state:
           type: string
           enum: [confirmed]

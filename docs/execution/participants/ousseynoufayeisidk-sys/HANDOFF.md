@@ -133,3 +133,11 @@ Contrôles PHP 8.5.10 / PostgreSQL 17, base haas_maadinaa_test sur 127.0.0.1:554
 Main 17c6daa (#23 et son complément #22) intégré dans la branche B35 corrigée cdbe96f. Cinq conflits purement documentaires résolus en conservant les sections B11, B35 et les deux interventions de l'intégrateur ; l'ancien HANDOFF B35 est gardé comme instantané daté. Aucun code métier ni migration réécrits dans cette synchronisation.
 
 Suites locales PHP 8.5.10 / PostgreSQL 17, base haas_maadinaa_test dédiée : 312 tests / 2538 assertions hors SQL et 176 tests / 1439 assertions SQL réussis (488 / 3977 au total). Publier ce merge puis attendre la CI du SHA exact avant fusion #27. B2 #28 bloqué après deux tests HTTP ciblés en échec : Origin https://demo.example.com donne 403, Origin HAAS stateful émet deux cookies. #29/#30 restent en brouillon avec défauts statiques de provenance/validation documentés au bilan.
+
+## 2026-10-07 — Reprise après revue de Madina
+
+Fusions distantes vérifiées : #12 33eafa0, #22 957029b dans B11, #23 17c6daa et #27 f1f6238 dans main. Lire docs/quality/MERGE_MADINA.md pour les SHA complets, contrôles et limites. B11 DONE ; 13 lots backend entiers terminés. Correctif UTC B1 cdbe96f inclus. Head combiné 108aa7d : 488 tests / 3977 assertions locaux et sous les deux PHP de la CI 37637092346, contrôles verts.
+
+Reprendre B22 #29 (retrait avec date de publication conservée, champs serveur, versions/technologies), puis B23 #30 (source vraiment résolue, validations, verrouillage/rejeu et tests HTTP). Les PR restent en brouillon. B38 #28 reste BLOCKED : probes Origin démonstration=403 et Origin HAAS=deux cookies ; appliquer le patch inerte docs/quality/probes/B38_ISOLATION.patch sur la branche B2 pour reproduire, avec base locale dédiée. Corriger origine/routage sans session et isolation réelle base/runtime/configuration, puis revalider la concurrence.
+
+B35 IN_PROGRESS : service transactionnel et concurrence reçus, câblage haas_lab/isolation et module défectueux pédagogique à compléter avant B36. Le cluster PostgreSQL temporaire de revue est arrêté. Travail local initial B14 préservé ; ne pas écraser sa modification de routes. Toutes les branches distantes sont conservées. Aucun BACKEND_GATE, GO_FRONTEND ou GO_PRODUCTION.

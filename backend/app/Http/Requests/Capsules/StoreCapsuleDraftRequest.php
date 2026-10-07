@@ -57,6 +57,22 @@ final class StoreCapsuleDraftRequest extends FormRequest
                     $validator->errors()->add($forbidden, 'Ce champ est fixé par le serveur et ne peut pas être soumis.');
                 }
             }
+            // Contrainte XOR entre source.kind et le champ attendu : évaluée AVANT la Policy et le DTO.
+            $kind = $this->input('source.kind');
+            $hasHelp = $this->filled('source.help_request_id');
+            $hasEditorial = $this->filled('source.editorial_origin');
+            if ($kind === 'help_request' && ! $hasHelp) {
+                $validator->errors()->add('source.help_request_id', 'La source help_request exige un help_request_id.');
+            }
+            if ($kind === 'editorial' && ! $hasEditorial) {
+                $validator->errors()->add('source.editorial_origin', 'La source editorial exige un editorial_origin.');
+            }
+            if ($kind === 'help_request' && $hasEditorial) {
+                $validator->errors()->add('source.editorial_origin', 'editorial_origin ne doit pas être posé pour help_request.');
+            }
+            if ($kind === 'editorial' && $hasHelp) {
+                $validator->errors()->add('source.help_request_id', 'help_request_id ne doit pas être posé pour editorial.');
+            }
         });
     }
 

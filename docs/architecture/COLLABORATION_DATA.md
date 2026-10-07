@@ -28,7 +28,11 @@ Identifiants, auteurs, états, versions et dates serveur ne sont pas assignables
 
 Les migrations initiales déjà publiées par `mdev44-code` gardent leur nom et leur contenu. La migration additive `2026_10_03_180500_b11_add_collaboration_versions.php` ajoute les versions des commentaires/propositions et les CHECK de positivité des trois contenus éditables. Elle conserve les données existantes et la version des demandes. Elle s'annule avant les cinq migrations initiales ; ce cycle est testé sur PostgreSQL dédié.
 
-## Limites à traiter dans les lots suivants
+## Complément B14 en revue
+
+Le [contrat B14](../api/HELP_REQUEST_CREATION.md) ajoute la création de brouillons/publications, les champs de contenu inerte, l’enum HelpIntent unique et la nullabilité conditionnelle. Ses preuves sont distinctes de celles du schéma initial. B11 de Madina reste conservé.
+
+## Limites du schéma initial à traiter dans les lots suivants
 
 - B14/B16 : champs de code inerte, règles de brouillon/publication, validation des longueurs et rejet HTTP des champs serveur.
 - BV201 puis BC07 : enum `HelpIntent` unique et règles conditionnelles `ask_question`, notamment nullabilité des champs facultatifs. Aucun deuxième enum n'est introduit ici.

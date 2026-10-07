@@ -67,12 +67,13 @@ final class CapsulesMigrationTest extends PostgresTestCase
 
     public function test_down_rollback_removes_all_capsule_schema_tables(): void
     {
-        // Les migrations du domaine capsules sont les six dernières (B22 + pivot B23 +
-        // lock_version B23), exécutées dans l'ordre horaire croissant.
-        for ($step = 0; $step < 6; $step++) {
+        // Les migrations du domaine capsules sont les sept dernières (B22 + pivot B23 +
+        // lock_version B23 + reviews B24).
+        for ($step = 0; $step < 7; $step++) {
             $this->assertSame(0, Artisan::call('migrate:rollback', ['--step' => 1]));
         }
 
+        $this->assertFalse(Schema::hasTable('capsule_version_reviews'));
         $this->assertFalse(Schema::hasTable('capsule_version_technologies'));
         $this->assertFalse(Schema::hasTable('artifacts'));
         $this->assertFalse(Schema::hasTable('capsule_contributors'));

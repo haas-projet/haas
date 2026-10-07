@@ -17,6 +17,7 @@ final class DomainTables
     private const TABLES = [
         'artifacts',
         'capsule_contributors',
+        'capsule_version_reviews',
         'capsule_version_technologies',
         'capsule_versions',
         'capsules',

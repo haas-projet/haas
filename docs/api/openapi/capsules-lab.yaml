@@ -118,6 +118,78 @@ paths:
           description: lock_version périmé
         '422':
           description: Validation
+  /api/v1/capsules/{capsule}/versions/{version}/submit-review:
+    post:
+      operationId: submitCapsuleVersionForReview
+      summary: Soumettre une version-brouillon à la revue
+      description: >
+        Transition draft → in_review ou changes_requested → in_review. Réservée
+        à l'owner ou à un contributeur de la version. Les champs minimum
+        (body non vide ≥ 20, limits non vides) sont requis : contenu insuffisant
+        produit 422 avec les champs manquants.
+      security:
+        - SessionCookie: []
+      parameters:
+        - name: capsule
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - name: version
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Version soumise à la revue
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CapsuleVersionDraft'
+        '403':
+          description: Non habilité ou état non éligible
+        '404':
+          description: Version inexistante ou n'appartenant pas à la capsule
+        '422':
+          description: Contenu insuffisant
+  /api/v1/admin/capsules/{capsule}/versions/{version}/request-changes:
+    post:
+      operationId: requestChangesOnCapsuleVersion
+      summary: Demander des corrections sur une version en revue
+      description: >
+        Transition in_review → changes_requested. Réservée aux moderator/admin
+        qui ne sont NI owner NI contributeur de la version. Note obligatoire
+        entre 20 et 2000 caractères. Renseigne reviewer_id et enregistre la
+        note dans capsule_version_reviews.
+      security:
+        - SessionCookie: []
+      parameters:
+        - name: capsule
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - name: version
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CapsuleVersionReviewInput'
+      responses:
+        '201':
+          description: Décision de revue enregistrée
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CapsuleVersionReview'
+        '403':
+          description: Auto-revue refusée, rôle insuffisant, ou état non éligible
+        '404':
+          description: Version inexistante ou n'appartenant pas à la capsule
+        '422':
+          description: Note hors format
 components:
   schemas:
     CapsuleDraftInput:
@@ -217,6 +289,24 @@ components:
               id: { type: string, format: uuid }
               slug: { type: string }
               version_label: { type: string, nullable: true }
+    CapsuleVersionReviewInput:
+      type: object
+      additionalProperties: false
+      required: [note]
+      properties:
+        note:
+          type: string
+          minLength: 20
+          maxLength: 2000
+    CapsuleVersionReview:
+      type: object
+      required: [id, version_id, decision, note]
+      properties:
+        id: { type: string, format: uuid }
+        version_id: { type: string, format: uuid }
+        decision: { type: string, enum: [request_changes] }
+        note: { type: string }
+        created_at: { type: string, format: date-time, nullable: true }
     CapsuleVersionDraftUpdate:
       type: object
       additionalProperties: false

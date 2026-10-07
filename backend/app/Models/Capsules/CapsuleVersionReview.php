@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * @property ReviewDecision $decision
  */
-#[Fillable(['version_id', 'reviewer_id', 'decision', 'note'])]
+#[Fillable(['version_id', 'reviewer_id', 'decision', 'note', 'created_at'])]
 class CapsuleVersionReview extends Model
 {
     /** @use HasFactory<CapsuleVersionReviewFactory> */

@@ -201,7 +201,10 @@
       "refs": "AC03/AC15/AC25 ; F12",
       "phase": "B",
       "execution_order": 17,
-      "status": "TODO"
+      "status": "IN_REVIEW",
+      "evidence": [
+        "docs/quality/B15_READING.md"
+      ]
     },
     {
       "id": "B16",

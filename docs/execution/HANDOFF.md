@@ -2,7 +2,7 @@
 
 Inspecter le dépôt, préserver les fichiers/commits/saisies existants, lire ADR-006. Appliquer F18 : projets ouverts, offres consenties, décision propriétaire, fil et projection publique contrôlés. Nouvelle recette avant GO_FRONTEND ; ne pas prendre un ancien gate pour un accord sur ce périmètre. Systalink/Vercel inchangé.
 
-État courant : B01–B09, B12–B13 et B32 DONE (12 lots de socle). B11 et B14 IN_REVIEW : ordre #23 (Madina) → #22 (compléments) → B14 sur `backend/communaute-entraide-b14`. Les 25 autres lots de la coordination #2 restent à faire. B10/B29/B30/B31 et B39–B42 IN_PROGRESS ; B43/B44 BLOCKED. S01/S02 restent partiels. BACKEND_GATE NON REÇU, aucun GO_FRONTEND/GO_PRODUCTION. Voir [B14](../quality/B14_CREATION.md) et le [suivi de Lamine](participants/LamineGL/HANDOFF.md).
+État courant : B01–B09, B12–B13 et B32 DONE (12 lots de socle). B11, B14 et B15 IN_REVIEW : ordre #23 (Madina) → #22 (compléments) → #24 (B14) → PR B15 sur `backend/communaute-entraide-b15`. Les 24 autres lots de la coordination #2 restent à faire. B10/B29/B30/B31 et B39–B42 IN_PROGRESS ; B43/B44 BLOCKED. S01/S02 restent partiels. BACKEND_GATE NON REÇU, aucun GO_FRONTEND/GO_PRODUCTION. Voir [B15](../quality/B15_READING.md) et le [suivi de Lamine](participants/LamineGL/HANDOFF.md).
 
 ## Reprise après préparation GitHub — 2026-10-01
 
@@ -187,3 +187,10 @@ Demande explicite « faite ca » : intégration des PR #10, #11, #13–#20, dans
 Les neuf branches temporaires sont supprimées après vérification des 30 références de commits dans main et de l'absence de PR dépendante. Restent main et les trois branches permanentes ; backend/socle-auth synchronisée, branches des collègues et PR #12 conservées. Aucune réécriture, aucun contournement de protection, aucun déploiement.
 
 B07/B08/B09/B12/B13/B32 DONE ; le tableau Systalink comporte maintenant 12 lots terminés, 8 partiels et 2 bloqués. Contributions et autres raccordements attendent les pilotes ; Qodana et réception complète restent ouverts. Aucun GO_FRONTEND. Reprendre sur backend/socle-auth ; ne pas recréer les anciennes branches pour consulter leurs commits, tous conservés dans main.
+
+## 2026-10-04 — B15, lecture/recherche de la partie de Lamine
+
+- Demande de continuer après B14. Branche `backend/communaute-entraide-b15`, worktree `.worktrees/b15`, depuis `6a0db1e`. PR #23 de Madina, #22 et #24 inchangées, PR #12 préservée ; la modification préexistante des routes capsules dans le répertoire principal est exclue et conservée.
+- GET liste/détail, visibilité commune avant recherche/pagination/total, brouillons réservés à leur auteur, vue mine explicite, filtres/tri bornés et chargement des relations sans N+1. Aucune migration ni dépendance ajoutée. Contrat [HELP_REQUEST_READING.md](../api/HELP_REQUEST_READING.md), preuve [B15_READING.md](../quality/B15_READING.md).
+- Résultats locaux : 284 tests / 2811 assertions hors SQL et 227 / 2023 sur PostgreSQL dédié (511 / 4834). Pint/PHPStan, Composer validation/prérequis/audit et documentation réussis, 38 types à jour. Quatre SELECT métier pour 5 comme pour 25 demandes. Cluster 54695/haas_b15_test arrêté après les tests.
+- B15 IN_REVIEW ; SHA final et CI à constater dans la PR et le bilan après publication. Ordre #23 → #22 → #24 → B15, sans fusion ni revue humaine simulée. B11/B14/B15 En cours dans Systalink, 24 autres lots à faire. Prochain B16, édition sous version. Aucun BACKEND_GATE ni frontend/déploiement.

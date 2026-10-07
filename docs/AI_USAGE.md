@@ -65,6 +65,11 @@ Codex, à la demande de l'utilisateur : reprise sans réécriture du travail B11
 |---|---|---|---|
 | Codex, suite de Lamine à la demande de l'utilisateur, après confirmation que Madina n'a pas commencé B14/HelpIntent | Endpoint de création, validation, DTO, Policy, service, Resource, enum partagé unique, migration additive, audit/idempotence, contrats et tests ; B11 et suivi de Madina conservés | Pint/PHPStan ; 284 tests / 2686 assertions et 192 tests PostgreSQL / 1732 assertions ; audit sans alerte, validation Composer, 36 types API à jour. Voir B14_CREATION.md ; CI finale à observer dans la PR | En attente ; aucune signature humaine simulée |
 
+
+## B15 — Lecture et recherche, 4 octobre 2026
+
+Codex, à la demande de continuer la partie de Lamine : Queries de visibilité, liste/détail, Request/DTO, collection paginée, contrat et tests. Travail B11 de Madina et PR #12 conservés ; modification locale des routes capsules préservée dans le répertoire principal, livraison isolée dans `.worktrees/b15`. 511 tests / 4834 assertions réussis (dont 227 / 2023 PostgreSQL), Pint/PHPStan, validation/prérequis/audit Composer et documentation verts. Preuves et limites dans B15_READING.md. Revue humaine en attente ; aucune identité ni validation d'un collègue simulée. CI du SHA final à observer dans la PR.
+
 ## Lot 2 B35 brique B1 — 5 octobre 2026
 
 | Outil / intervention | Périmètre | Contrôles | Revue humaine de l'équipe |

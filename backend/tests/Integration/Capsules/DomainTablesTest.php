@@ -15,13 +15,13 @@ final class DomainTablesTest extends PostgresTestCase
 
     public function test_drop_all_removes_capsule_domain_tables_on_a_fresh_migrated_database(): void
     {
-        foreach (['capsules', 'capsule_versions', 'capsule_contributors', 'artifacts'] as $table) {
+        foreach (['capsules', 'capsule_versions', 'capsule_contributors', 'artifacts', 'capsule_version_technologies'] as $table) {
             $this->assertTrue(Schema::hasTable($table), "La table {$table} doit exister après migrate:fresh.");
         }
 
         DomainTables::dropAll();
 
-        foreach (['artifacts', 'capsule_contributors', 'capsule_versions', 'capsules'] as $table) {
+        foreach (['artifacts', 'capsule_contributors', 'capsule_version_technologies', 'capsule_versions', 'capsules'] as $table) {
             $this->assertFalse(Schema::hasTable($table), "La table {$table} doit avoir été déposée.");
         }
 

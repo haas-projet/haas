@@ -42,6 +42,8 @@ final class IdempotencyTest extends PostgresTestCase
     public function test_http_retry_returns_same_profile_with_one_version_and_audit_and_no_private_snapshot(): void
     {
         $this->freezeTime();
+        // Forcer la collecte pour vérifier la reconnexion après expiration réelle des cookies.
+        config(['session.lottery' => [100, 100]]);
         $owner = User::factory()->verified()->create();
         $ids = Technology::factory()->count(2)->create()->modelKeys();
         $this->login($owner);

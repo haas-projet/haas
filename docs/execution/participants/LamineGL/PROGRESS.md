@@ -22,3 +22,20 @@ Statut : en préparation de revue, pas encore fusionné. Les autres 26 lots de l
 - GET liste/détail, visibilité commune avant recherche/pagination/total, brouillons réservés à leur auteur, vue mine explicite, filtres/tri bornés et chargement des relations sans N+1. Aucune migration ni dépendance ajoutée. Contrat [HELP_REQUEST_READING.md](../../../api/HELP_REQUEST_READING.md), preuve [B15_READING.md](../../../quality/B15_READING.md).
 - Résultats locaux : 284 tests / 2811 assertions hors SQL et 227 / 2023 sur PostgreSQL dédié (511 / 4834). Pint/PHPStan, Composer validation/prérequis/audit et documentation réussis, 38 types à jour. Quatre SELECT métier pour 5 comme pour 25 demandes. Cluster 54695/haas_b15_test arrêté après les tests.
 - B15 IN_REVIEW ; SHA final et CI à constater dans la PR et le bilan après publication. Ordre #23 → #22 → #24 → B15, sans fusion ni revue humaine simulée. B11/B14/B15 En cours dans Systalink, 24 autres lots à faire. Prochain B16, édition sous version. Aucun BACKEND_GATE ni frontend/déploiement.
+
+## 7 octobre 2026 — Synchronisation B14 avec main
+
+- À la demande de l'utilisateur, récupération par merge normal de `origin/main` à `f1f6238` (B11 intégré et B35 présent), depuis B14 `6a0db1e`, dans un worktree isolé. Aucun historique réécrit.
+- Seul conflit : `docs/AI_USAGE.md`, résolu en conservant les entrées B14 et B35. Aucun conflit de code ; les fichiers applicatifs récupérés proviennent de main. Le travail préexistant du répertoire principal est préservé.
+- Contrôles réellement exécutés : `node scripts/validate-pack.mjs` 18/18 ; `node scripts/check-deployment-docs.mjs` 7/7 ; `php scripts/generate-api-types.php --check` avec PHP 8.5.10, 36 types à jour. Les premières tentatives de génération utilisaient un ancien chemin PHP absent puis PHP 8.3.12, refusé par la plateforme ; le contrôle final sous PHP 8.5 réussit.
+- `SHA256SUMS` régénéré depuis les fichiers Git versionnés, hors lui-même et chemins ignorés. Contrôle de whitespace avant commit ; SHA réel et CI du nouveau head à communiquer dans le bilan après publication.
+- Suites Laravel hors SQL et PostgreSQL non réexécutées sur cette branche pendant cette synchronisation. La CI PHP 8.4/8.5 du nouveau head reste à observer ; revue humaine requise. Aucun gate ni statut DONE ajouté par ce merge.
+- Prochaine action : synchroniser B15 depuis B14, puis B16 depuis B15, et poursuivre les revues des PR #24/#25/#26 dans l'ordre des prérequis.
+
+## 7 octobre 2026 — Synchronisation B15 avec B14
+
+- Merge normal de B14 synchronisé (`230b83b`) dans B15 depuis `0cfcde1`, sans réécriture d'historique. Le prérequis comprend `main` à `f1f6238` ; aucun conflit applicatif.
+- Conflits exclusivement documentaires : registre IA et suivi Lamine conservés des deux côtés ; `SHA256SUMS` régénéré depuis les fichiers Git versionnés hors lui-même et chemins ignorés. Les preuves B15 antérieures restent présentes.
+- Contrôles réellement exécutés : `node scripts/validate-pack.mjs` 18/18 ; `node scripts/check-deployment-docs.mjs` 7/7 ; génération de types `--check` sous PHP 8.5.10, 38 types à jour ; whitespace contrôlé avant commit.
+- Suites Laravel hors SQL et PostgreSQL non réexécutées par branche. SHA réel et CI PHP 8.4/8.5 du head à communiquer après publication ; revue humaine requise. B15 demeure IN_REVIEW, sans gate validé.
+- Prochaine étape : synchroniser B16 depuis ce B15, puis poursuivre #24 → #25 → #26 après prérequis et revue.

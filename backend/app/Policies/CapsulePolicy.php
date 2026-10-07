@@ -90,4 +90,41 @@ final class CapsulePolicy
             ->where('user_id', $actor->id)
             ->exists();
     }
+
+    /** Owner ou contributeur de la version peut soumettre à la revue (draft ou changes_requested). */
+    public function submitForReview(?User $actor, Capsule $capsule, CapsuleVersionState $state, string $versionId): bool
+    {
+        if ($state !== CapsuleVersionState::Draft && $state !== CapsuleVersionState::ChangesRequested) {
+            return false;
+        }
+
+        return $this->editDraft($actor, $capsule, $state, $versionId);
+    }
+
+    /**
+     * Moderator/admin qui n'est NI owner NI contributeur de la version peut la relire.
+     * CAHIER_DES_CHARGES.md:462 : « L'auteur ne valide pas seul sa propre revue
+     * éditoriale. Un administrateur conserve cette séparation même s'il détient tous
+     * les droits techniques. »
+     */
+    public function reviewVersion(?User $actor, Capsule $capsule, string $versionId): bool
+    {
+        $access = new MemberAccess;
+        if (! $access->verified($actor)) {
+            return false;
+        }
+
+        /** @var User $actor */
+        if ($actor->role !== Role::Moderator && $actor->role !== Role::Admin) {
+            return false;
+        }
+        if ($capsule->owner_id === $actor->id) {
+            return false;
+        }
+
+        return ! DB::table('capsule_contributors')
+            ->where('version_id', $versionId)
+            ->where('user_id', $actor->id)
+            ->exists();
+    }
 }

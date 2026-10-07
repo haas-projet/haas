@@ -36,3 +36,27 @@ Statut : en préparation de revue, pas encore fusionné. Les autres 26 lots de l
 Intervention Codex à la demande de continuer la partie de Lamine et la publication. Implémentation B17 non commitée déjà présente préservée, relue et complétée dans .worktrees/b17 ; main f1f6238 intégré sans réécriture de code. Cinq opérations, Markdown restreint, révisions, audit minimal et événement interne après commit. Sept courses PostgreSQL réelles et sept cas de notifications complètent les tests HTTP.
 
 Résultat distinct : 671 tests / 6805 assertions, dont 343 / 3242 PostgreSQL sous PHP 8.5.10 ; Pint/PHPStan niveau8, validation/prérequis/audit Composer, 49 types OpenAPI et contrôles documentaires réussis. Voir docs/quality/B17_COMMENTS.md pour les commandes et limites. B17 IN_REVIEW, aucune approbation humaine simulée. B11 DONE après #22/#23 réellement intégrées ; #24 reciblée main, #25/#26 conservent leurs prérequis. Branches déjà intégrées B11/B35 supprimées, les travaux non intégrés conservés. SHA final et CI exacte à observer dans la PR après commit. Travail initial des routes capsules préservé ; aucun frontend ou déploiement. Prochain lot B18 après coordination des revues.
+## 7 octobre 2026 — Synchronisation B14 avec main
+
+- À la demande de l'utilisateur, récupération par merge normal de `origin/main` à `f1f6238` (B11 intégré et B35 présent), depuis B14 `6a0db1e`, dans un worktree isolé. Aucun historique réécrit.
+- Seul conflit : `docs/AI_USAGE.md`, résolu en conservant les entrées B14 et B35. Aucun conflit de code ; les fichiers applicatifs récupérés proviennent de main. Le travail préexistant du répertoire principal est préservé.
+- Contrôles réellement exécutés : `node scripts/validate-pack.mjs` 18/18 ; `node scripts/check-deployment-docs.mjs` 7/7 ; `php scripts/generate-api-types.php --check` avec PHP 8.5.10, 36 types à jour. Les premières tentatives de génération utilisaient un ancien chemin PHP absent puis PHP 8.3.12, refusé par la plateforme ; le contrôle final sous PHP 8.5 réussit.
+- `SHA256SUMS` régénéré depuis les fichiers Git versionnés, hors lui-même et chemins ignorés. Contrôle de whitespace avant commit ; SHA réel et CI du nouveau head à communiquer dans le bilan après publication.
+- Suites Laravel hors SQL et PostgreSQL non réexécutées sur cette branche pendant cette synchronisation. La CI PHP 8.4/8.5 du nouveau head reste à observer ; revue humaine requise. Aucun gate ni statut DONE ajouté par ce merge.
+- Prochaine action : synchroniser B15 depuis B14, puis B16 depuis B15, et poursuivre les revues des PR #24/#25/#26 dans l'ordre des prérequis.
+
+## 7 octobre 2026 — Synchronisation B15 avec B14
+
+- Merge normal de B14 synchronisé (`230b83b`) dans B15 depuis `0cfcde1`, sans réécriture d'historique. Le prérequis comprend `main` à `f1f6238` ; aucun conflit applicatif.
+- Conflits exclusivement documentaires : registre IA et suivi Lamine conservés des deux côtés ; `SHA256SUMS` régénéré depuis les fichiers Git versionnés hors lui-même et chemins ignorés. Les preuves B15 antérieures restent présentes.
+- Contrôles réellement exécutés : `node scripts/validate-pack.mjs` 18/18 ; `node scripts/check-deployment-docs.mjs` 7/7 ; génération de types `--check` sous PHP 8.5.10, 38 types à jour ; whitespace contrôlé avant commit.
+- Suites Laravel hors SQL et PostgreSQL non réexécutées par branche. SHA réel et CI PHP 8.4/8.5 du head à communiquer après publication ; revue humaine requise. B15 demeure IN_REVIEW, sans gate validé.
+- Prochaine étape : synchroniser B16 depuis ce B15, puis poursuivre #24 → #25 → #26 après prérequis et revue.
+
+## 7 octobre 2026 — Synchronisation B16 avec B15
+
+- Merge normal de B15 synchronisé (`a3eb9b9`) dans B16 depuis `8e9a60e`. L'historique et les petits commits sont conservés ; le prérequis contient main/B14/B15 synchronisés. Aucun conflit de code.
+- Conflits documentaires du registre IA et de PROGRESS résolus en gardant B14/B15/B16 et B35 ainsi que leurs preuves ; `SHA256SUMS` régénéré depuis les fichiers Git versionnés hors lui-même et chemins ignorés.
+- Contrôles réellement exécutés : `node scripts/validate-pack.mjs` 18/18 ; `node scripts/check-deployment-docs.mjs` 7/7 ; génération de types `--check` sous PHP 8.5.10, 42 types à jour ; whitespace contrôlé avant commit.
+- Suites Laravel hors SQL et PostgreSQL non réexécutées par branche pendant cette synchronisation. SHA réel et CI PHP 8.4/8.5 à observer après publication. B16 IN_REVIEW ; revue humaine requise, aucun gate validé.
+- Suite : revues #24 → #25 → #26 selon les prérequis, puis reprise B17 séparée. Aucun frontend ni déploiement engagé.

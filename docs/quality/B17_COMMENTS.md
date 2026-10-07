@@ -50,3 +50,7 @@ Le premier passage hors SQL a exécuté 298 tests / 3105 assertions, avec un éc
 Revue automatisée, aucune identité ou approbation humaine simulée. B14/B15/B16 restent dans les PR #24/#25/#26 ; B11 a réellement été intégré dans main via #23. B17 reste séparé pendant la revue des prérequis. Le SHA final, la PR et la CI du commit exact seront rapportés après commit.
 
 Les projets BC04/BC05 ne sont pas livrés par ce lot. Aucun navigateur/frontend, Qodana, BACKEND_GATE, GO_FRONTEND ou déploiement validé. PHP 8.4 local non exécuté ; la CI du SHA final devra couvrir PHP 8.4/8.5 et PostgreSQL 17. Le cluster local sera arrêté après les contrôles. Prochain lot communautaire : B18, propositions de solution.
+
+## Reprise après synchronisation B14/B15/B16 — 7 octobre 2026
+
+B14 230b83b, B15 a3eb9b9 et B16 d3d8407 sont publiés dans leurs PR existantes. B17 métier 238d5e96593cb7dca32844b50d4077eee6f0adca est conservé ; B16 d3d84073b6b380b9ced2d8d9f68f6821636341a0 rejoint ensuite cette branche par merge normal. Les trois conflits concernent seulement AI_USAGE, PROGRESS de Lamine et les empreintes ; les historiques et notes B17 sont conservés. Aucun fichier backend ne change par cette synchronisation documentaire, selon git diff HEAD -- backend ; les tests671/6805 précédents correspondent au même code. Publier B17 vers B16 et constater sa CI exacte ; aucune fusion de PR ou revue humaine présumée.

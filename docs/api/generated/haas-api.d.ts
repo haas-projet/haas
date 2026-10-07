@@ -33,9 +33,11 @@ export type capsules_lab_CapsuleVersionDraftInput = { readonly "version_label": 
 
 export type capsules_lab_CapsuleVersionDraftUpdate = { readonly "lock_version": number; readonly "body"?: string; readonly "limits"?: string; readonly "technologies"?: ReadonlyArray<{ readonly "technology_id": string; readonly "version_label"?: string; }>; };
 
-export type capsules_lab_CapsuleVersionReview = { readonly "id": string; readonly "version_id": string; readonly "decision": "request_changes"; readonly "note": string; readonly "created_at"?: string; [key: string]: unknown; };
+export type capsules_lab_CapsuleVersionReview = { readonly "id": string; readonly "version_id": string; readonly "reviewed_lock_version": number; readonly "decision": "request_changes"; readonly "note": string; readonly "created_at"?: string; [key: string]: unknown; };
 
-export type capsules_lab_CapsuleVersionReviewInput = { readonly "note": string; };
+export type capsules_lab_CapsuleVersionReviewInput = { readonly "lock_version": number; readonly "note": string; };
+
+export type capsules_lab_CapsuleVersionSubmitReviewInput = { readonly "lock_version": number; };
 
 export type current_account_Me = { readonly "id": string; readonly "handle": identity_Handle; readonly "email": string; readonly "email_verified": boolean; readonly "role": identity_AccountRole; readonly "status": "active"; readonly "is_demo": boolean; readonly "can": { readonly "manage_account_mail": boolean; readonly "update_profile": boolean; readonly "participate": boolean; readonly "moderate": boolean; readonly "administer": boolean; }; };
 

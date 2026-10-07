@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Capsules;
 
 use App\Exceptions\Capsules\InsufficientDraftContent;
+use App\Exceptions\Capsules\StaleCapsuleVersion;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Capsules\SubmitCapsuleVersionForReviewRequest;
 use App\Http\Resources\Capsules\CapsuleVersionDraftResource;
 use App\Models\Capsules\Capsule;
 use App\Models\Capsules\CapsuleVersion;
@@ -13,8 +15,8 @@ use App\Models\User;
 use App\Services\Capsules\SubmitCapsuleVersionForReviewService;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 final class SubmitCapsuleVersionForReviewController extends Controller
@@ -22,7 +24,7 @@ final class SubmitCapsuleVersionForReviewController extends Controller
     /**
      * @throws AuthenticationException
      */
-    public function __invoke(Request $request, SubmitCapsuleVersionForReviewService $service, string $capsule, string $version): JsonResponse
+    public function __invoke(SubmitCapsuleVersionForReviewRequest $request, SubmitCapsuleVersionForReviewService $service, string $capsule, string $version): JsonResponse
     {
         $actor = $request->user();
         if (! $actor instanceof User) {
@@ -34,13 +36,15 @@ final class SubmitCapsuleVersionForReviewController extends Controller
             throw new NotFoundHttpException;
         }
         try {
-            $updated = $service->handle($actor, $target, $draft);
+            $updated = $service->handle($actor, $target, $draft, $request->command(), $request->idempotencyKey());
         } catch (InsufficientDraftContent $e) {
             throw ValidationException::withMessages([
                 'content' => explode('|', $e->getMessage()),
             ]);
+        } catch (StaleCapsuleVersion $exception) {
+            throw new ConflictHttpException($exception->getMessage(), $exception);
         }
 
-        return (new CapsuleVersionDraftResource($updated))->response()->setStatusCode(200);
+        return (new CapsuleVersionDraftResource($updated))->response()->setStatusCode(200)->header('Cache-Control', 'no-store, private');
     }
 }

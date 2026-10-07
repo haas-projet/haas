@@ -41,12 +41,12 @@ final class CapsuleVersionReviewsSchemaTest extends PostgresTestCase
         ]);
     }
 
-    public function test_version_deletion_cascades_to_reviews(): void
+    public function test_version_deletion_preserves_the_review_history(): void
     {
         $review = CapsuleVersionReview::factory()->create();
         $version = CapsuleVersion::findOrFail($review->version_id);
+        $this->expectException(QueryException::class);
         $version->delete();
-        $this->assertDatabaseMissing('capsule_version_reviews', ['id' => $review->id]);
     }
 
     public function test_reviewer_deletion_is_restricted(): void
@@ -55,5 +55,48 @@ final class CapsuleVersionReviewsSchemaTest extends PostgresTestCase
         $reviewer = User::findOrFail($review->reviewer_id);
         $this->expectException(QueryException::class);
         $reviewer->delete();
+    }
+
+    public function test_review_note_cannot_be_rewritten(): void
+    {
+        $review = CapsuleVersionReview::factory()->create();
+        $this->expectException(QueryException::class);
+        $this->expectExceptionMessageMatches('/capsule_review_history_immutable/i');
+        DB::table('capsule_version_reviews')->where('id', $review->id)->update(['note' => 'Note altérée après la revue indépendante.']);
+    }
+
+    public function test_review_record_cannot_be_deleted(): void
+    {
+        $review = CapsuleVersionReview::factory()->create();
+        $this->expectException(QueryException::class);
+        $this->expectExceptionMessageMatches('/capsule_review_history_immutable/i');
+        DB::table('capsule_version_reviews')->where('id', $review->id)->delete();
+    }
+
+    public function test_additive_upgrade_and_rollback_keep_existing_notes_and_attribution(): void
+    {
+        $migration = require base_path('database/migrations/2026_10_07_195000_b24_preserve_review_history.php');
+        $migration->down();
+        $version = CapsuleVersion::factory()->create();
+        $reviewer = User::factory()->verified()->create();
+        $id = (string) Str::uuid();
+        $note = 'Note historique conservée sans révision reconstituée.';
+        DB::table('capsule_version_reviews')->insert([
+            'id' => $id, 'version_id' => $version->id, 'reviewer_id' => $reviewer->id,
+            'decision' => ReviewDecision::RequestChanges->value, 'note' => $note, 'created_at' => now()->utc(),
+        ]);
+        $migration->up();
+        $this->assertDatabaseHas('capsule_version_reviews', ['id' => $id, 'version_id' => $version->id, 'reviewer_id' => $reviewer->id, 'note' => $note, 'reviewed_lock_version' => null]);
+        $migration->down();
+        $this->assertDatabaseHas('capsule_version_reviews', ['id' => $id, 'version_id' => $version->id, 'reviewer_id' => $reviewer->id, 'note' => $note]);
+        $migration->up();
+        $this->assertDatabaseCount('capsule_version_reviews', 1);
+    }
+
+    public function test_known_reviewed_version_must_be_positive(): void
+    {
+        $this->expectException(QueryException::class);
+        $this->expectExceptionMessageMatches('/capsule_reviews_positive_version/i');
+        CapsuleVersionReview::factory()->create(['reviewed_lock_version' => 0]);
     }
 }

@@ -58,3 +58,7 @@ Aucun commit poussé, aucune PR ouverte, aucune fusion effectuée.
 ## Reprise B11 sur la branche permanente de Lamine — 3 octobre 2026
 
 Codex, à la demande de l'utilisateur : reprise sans réécriture du travail B11 de mdev44-code, compléments de versions positives/protection des champs serveur/factory, tests de FK et migrations, contrat et suivi. Aucune identité Git de collègue ni revue humaine simulée. Vérifications : Pint/PHPStan, 282 tests / 2483 assertions hors SQL, 151 tests / 1316 assertions PostgreSQL ; B11 ciblé 18 / 66 après corrections ; audit sans alerte et validation Composer. Preuves et limites dans `docs/quality/B11_COLLABORATION.md`. La CI et le SHA final seront rapportés dans la PR ; aucun déploiement ni frontend.
+
+## Préparation de la PR #33 B24 — 7 octobre 2026
+
+Codex : audit et corrections versionnées de la soumission et des demandes de corrections, en préservant l'indépendance existante du reviewer et la séparation de publication B25. Preuves réelles dans `docs/quality/B24_REVIEW_READINESS.md` : 33 tests / 162 assertions PostgreSQL, compléments 23 / 90, contrôle PHPStan, documents et types. Préparation encore en cours : parent B23/B22/main, notification via outbox et suites combinées avant revue humaine. Aucune approbation simulée, aucun frontend ou déploiement.

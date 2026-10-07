@@ -404,3 +404,11 @@ Aucun autre fichier du socle n'a été touché.
 - Q10 (B23) — Nom du pivot `capsule_version_technologies` reste ouvert.
 - Q11 (B23) — Header `X-Idempotent-Replay` reste ouvert.
 - Q2–Q7 de B22 restent ouvertes.
+
+## 2026-10-07 — Préparation technique Codex de la PR #33
+
+Source `e5dabac` préservée. Soumission et corrections exigent intention idempotente et verrou, relisent les droits actuels et invalident un rejeu devenu périmé. Le journal capture `reviewed_lock_version`, conserve notes/reviewers et refuse leur modification ou suppression. Aucune acceptation/publication B25 ajoutée.
+
+Contrôles réels : HTTP/readiness **21 / 81**, puis HTTP/readiness/schema/six courses **33 / 162**, compléments SQL rollback/upgrade et DTO **23 / 90**, PHPStan sans erreur après les compléments, Pint passé, documents **18 + 7**, types **36**. Détails et limites dans `docs/quality/B24_REVIEW_READINESS.md`.
+
+Statut : préparation locale en cours, non `DONE`. Parent B23/B22/main et suites combinées à intégrer. Q12 doit être raccordée à l'outbox commune pour les corrections demandées avant présentation à la revue humaine ; publication/acceptation demeurent B25. CI et revue humaine finales en attente.

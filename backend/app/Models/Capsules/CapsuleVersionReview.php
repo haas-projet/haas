@@ -15,8 +15,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property ReviewDecision $decision
+ * @property int|null $reviewed_lock_version
  */
-#[Fillable(['version_id', 'reviewer_id', 'decision', 'note', 'created_at'])]
+#[Fillable([])]
 class CapsuleVersionReview extends Model
 {
     /** @use HasFactory<CapsuleVersionReviewFactory> */
@@ -27,6 +28,7 @@ class CapsuleVersionReview extends Model
     protected $casts = [
         'decision' => ReviewDecision::class,
         'created_at' => 'datetime',
+        'reviewed_lock_version' => 'integer',
     ];
 
     /** @return BelongsTo<CapsuleVersion, $this> */

@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Capsules;
 
+use App\Rules\NoLikelySecret;
 use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Validator;
 
-final class RequestChangesRequest extends FormRequest
+final class RequestChangesRequest extends CapsuleReviewCommandRequest
 {
     public function authorize(): bool
     {
@@ -18,18 +17,9 @@ final class RequestChangesRequest extends FormRequest
     /** @return array<string, ValidationRule|array<mixed>|string> */
     public function rules(): array
     {
-        return [
-            'note' => ['required', 'string', 'min:20', 'max:2000', 'regex:/\A\S(?:.*\S)?\z/u'],
+        return [...parent::rules(),
+            'note' => ['required', 'string', 'min:20', 'max:2000', 'not_regex:/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/u', new NoLikelySecret],
         ];
-    }
-
-    public function withValidator(Validator $validator): void
-    {
-        $validator->after(function (Validator $validator): void {
-            foreach (array_diff(array_keys($this->all()), ['note']) as $forbidden) {
-                $validator->errors()->add($forbidden, 'Ce champ ne peut pas être utilisé.');
-            }
-        });
     }
 
     public function note(): string

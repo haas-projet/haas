@@ -2,7 +2,7 @@
 openapi: 3.1.0
 info:
   title: HAAS — Capsules et laboratoire
-  version: 0.1.0
+  version: 0.2.0
 paths:
   /api/v1/capsules:
     post:
@@ -127,6 +127,9 @@ paths:
         à l'owner ou à un contributeur de la version. Les champs minimum
         (body non vide ≥ 20, limits non vides) sont requis : contenu insuffisant
         produit 422 avec les champs manquants.
+        lock_version et Idempotency-Key obligatoires. Le rejeu relit les droits
+        actuels et exige la même version en in_review ; toute édition ou décision
+        ultérieure produit 409. La soumission ne publie pas la capsule (B25).
       security:
         - SessionCookie: []
       parameters:
@@ -138,9 +141,16 @@ paths:
           in: path
           required: true
           schema: { type: string, format: uuid }
+        - $ref: '../../OPENAPI.yaml#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CapsuleVersionSubmitReviewInput'
       responses:
         '200':
-          description: Version soumise à la revue
+          description: Version soumise à la revue, ou même résultat rejoué sans nouvel audit
           content:
             application/json:
               schema:
@@ -150,7 +160,9 @@ paths:
         '404':
           description: Version inexistante ou n'appartenant pas à la capsule
         '422':
-          description: Contenu insuffisant
+          description: Validation, champ inconnu ou contenu insuffisant
+        '409':
+          description: lock_version périmé, état changé ou clé réutilisée avec une autre charge
   /api/v1/admin/capsules/{capsule}/versions/{version}/request-changes:
     post:
       operationId: requestChangesOnCapsuleVersion
@@ -159,7 +171,11 @@ paths:
         Transition in_review → changes_requested. Réservée aux moderator/admin
         qui ne sont NI owner NI contributeur de la version. Note obligatoire
         entre 20 et 2000 caractères. Renseigne reviewer_id et enregistre la
-        note dans capsule_version_reviews.
+        note dans capsule_version_reviews avec le lock_version du contenu relu.
+        lock_version et Idempotency-Key obligatoires ; champs inconnus refusés.
+        Le journal de décisions conserve notes et attributions sans modification
+        ni suppression. Cette décision demande une correction ; l'acceptation et
+        la publication restent du ressort de B25 avec revue indépendante.
       security:
         - SessionCookie: []
       parameters:
@@ -171,6 +187,7 @@ paths:
           in: path
           required: true
           schema: { type: string, format: uuid }
+        - $ref: '../../OPENAPI.yaml#/components/parameters/IdempotencyKey'
       requestBody:
         required: true
         content:
@@ -179,7 +196,7 @@ paths:
               $ref: '#/components/schemas/CapsuleVersionReviewInput'
       responses:
         '201':
-          description: Décision de revue enregistrée
+          description: Décision enregistrée, ou même décision rejouée sans doublon
           content:
             application/json:
               schema:
@@ -189,7 +206,9 @@ paths:
         '404':
           description: Version inexistante ou n'appartenant pas à la capsule
         '422':
-          description: Note hors format
+          description: Note hors format, secret indicatif, contrôle interdit ou validation de commande
+        '409':
+          description: lock_version périmé, état changé ou clé réutilisée avec une autre charge
 components:
   schemas:
     CapsuleDraftInput:
@@ -292,21 +311,29 @@ components:
     CapsuleVersionReviewInput:
       type: object
       additionalProperties: false
-      required: [note]
+      required: [lock_version, note]
       properties:
+        lock_version: { type: integer, minimum: 1, maximum: 2147483646 }
         note:
           type: string
           minLength: 20
           maxLength: 2000
     CapsuleVersionReview:
       type: object
-      required: [id, version_id, decision, note]
+      required: [id, version_id, reviewed_lock_version, decision, note]
       properties:
         id: { type: string, format: uuid }
         version_id: { type: string, format: uuid }
+        reviewed_lock_version: { type: integer, minimum: 1, nullable: true, description: 'Version relue ; null uniquement pour le journal antérieur à cette migration, sans attribution inventée.' }
         decision: { type: string, enum: [request_changes] }
         note: { type: string }
         created_at: { type: string, format: date-time, nullable: true }
+    CapsuleVersionSubmitReviewInput:
+      type: object
+      additionalProperties: false
+      required: [lock_version]
+      properties:
+        lock_version: { type: integer, minimum: 1, maximum: 2147483646 }
     CapsuleVersionDraftUpdate:
       type: object
       additionalProperties: false

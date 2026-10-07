@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Policies;
 
 use App\Enums\Capsules\CapsuleVersionState;
+use App\Enums\Capsules\CapsuleVisibility;
 use App\Enums\Identity\Role;
 use App\Models\Capsules\Capsule;
 use App\Models\HelpRequest;
@@ -109,6 +110,9 @@ final class CapsulePolicy
      */
     public function reviewVersion(?User $actor, Capsule $capsule, string $versionId): bool
     {
+        if ($capsule->visibility !== CapsuleVisibility::Visible) {
+            return false;
+        }
         $access = new MemberAccess;
         if (! $access->verified($actor)) {
             return false;

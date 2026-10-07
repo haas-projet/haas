@@ -221,3 +221,11 @@ Branche : `backend/capsules-laboratoire-b24-revue`. Base : `backend/capsules-lab
 ### Question Q12 bloquante pour B25
 
 La notification « Revue de capsule terminée » (CAHIER_DES_CHARGES.md:355) nécessite d'étendre `App\Data\Notifications\NotificationEvent` qui limite `kind` à `profile.moderated` (fichier du socle, hors de mon domaine). Décision à prendre avant B25.
+
+## 2026-10-07 — Correctif de préparation Codex
+
+Revue indépendante conservée, mêmes frontières B24/B25. Nouveaux verrous/intention/rejeu, refus des champs inconnus, notes Unicode/multilignes, projection privée, snapshot versionné et conservation SQL append-only des décisions. Une panne SQL d'audit réelle annule aussi bien la soumission que la demande de corrections ; upgrade/rollback conserve les notes antérieures. Six courses entre deux processus PostgreSQL réellement bloqués couvrent les conflits et les droits modifiés.
+
+Preuves locales : **33 tests / 162 assertions** domaine puis **23 / 90** compléments, types **36**, documents **18 + 7** ; voir `docs/quality/B24_REVIEW_READINESS.md`. Les trois correctifs de tests cookies B17 `8234470` sont repris ponctuellement et la règle de secrets existante est copiée sans dépendance nouvelle.
+
+Q12 concerne déjà les corrections B24 selon le cahier :355. Le contrat main B17 fournit maintenant `NotificationOutbox`; l'intégrateur a réservé ses fichiers communs pour le raccord B24. Après ce premier commit propre, intégrer B23/B22/main, raccorder la notification générique sans note, tester droits/visibilité et suites complètes. Aucun push/merge/ready effectué par cet agent, aucune attribution de revue humaine.

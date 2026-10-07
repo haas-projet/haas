@@ -13,6 +13,8 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Testing\TestResponse;
+use Symfony\Component\HttpFoundation\Response;
 use Tests\PostgresTestCase;
 use Tests\Support\SpaHttpRequests;
 
@@ -30,7 +32,7 @@ final class CapsuleReviewHttpTest extends PostgresTestCase
     {
         [$owner, $capsule, $version] = $this->seedDraft();
         $this->loginAs($owner);
-        $response = $this->browserRequest('POST', $this->submitUrl($capsule, $version));
+        $response = $this->reviewRequest('POST', $this->submitUrl($capsule, $version));
         $response->assertOk();
         $this->assertSame(CapsuleVersionState::InReview->value, $response->json('data.state'));
         $version->refresh();
@@ -50,7 +52,7 @@ final class CapsuleReviewHttpTest extends PostgresTestCase
             'updated_at' => now()->utc(),
         ]);
         $this->loginAs($contributor);
-        $response = $this->browserRequest('POST', $this->submitUrl($capsule, $version));
+        $response = $this->reviewRequest('POST', $this->submitUrl($capsule, $version));
         $response->assertOk();
     }
 
@@ -59,7 +61,7 @@ final class CapsuleReviewHttpTest extends PostgresTestCase
         [$owner, $capsule, $version] = $this->seedDraft();
         $stranger = User::factory()->verified()->create();
         $this->loginAs($stranger);
-        $response = $this->browserRequest('POST', $this->submitUrl($capsule, $version));
+        $response = $this->reviewRequest('POST', $this->submitUrl($capsule, $version));
         $response->assertStatus(403);
     }
 
@@ -69,7 +71,7 @@ final class CapsuleReviewHttpTest extends PostgresTestCase
         $version->state = CapsuleVersionState::Published;
         $version->save();
         $this->loginAs($owner);
-        $response = $this->browserRequest('POST', $this->submitUrl($capsule, $version));
+        $response = $this->reviewRequest('POST', $this->submitUrl($capsule, $version));
         $response->assertStatus(403);
     }
 
@@ -79,7 +81,7 @@ final class CapsuleReviewHttpTest extends PostgresTestCase
         $version->limits = null;
         $version->save();
         $this->loginAs($owner);
-        $response = $this->browserRequest('POST', $this->submitUrl($capsule, $version));
+        $response = $this->reviewRequest('POST', $this->submitUrl($capsule, $version));
         $response->assertStatus(422);
         $this->assertContains('limits', $response->json('error.fields.content'));
     }
@@ -89,7 +91,7 @@ final class CapsuleReviewHttpTest extends PostgresTestCase
         [$owner, $capsule, $version] = $this->seedDraft(state: CapsuleVersionState::InReview);
         $moderator = User::factory()->verified()->create(['role' => Role::Moderator]);
         $this->loginAs($moderator);
-        $response = $this->browserRequest('POST', $this->requestChangesUrl($capsule, $version), [
+        $response = $this->reviewRequest('POST', $this->requestChangesUrl($capsule, $version), [
             'note' => 'Veuillez clarifier la procédure et compléter la section limites avant resoumission.',
         ]);
         $response->assertCreated();
@@ -102,7 +104,7 @@ final class CapsuleReviewHttpTest extends PostgresTestCase
     {
         [$owner, $capsule, $version] = $this->seedDraft(state: CapsuleVersionState::InReview);
         $this->loginAs(User::factory()->verified()->create());
-        $response = $this->browserRequest('POST', $this->requestChangesUrl($capsule, $version), [
+        $response = $this->reviewRequest('POST', $this->requestChangesUrl($capsule, $version), [
             'note' => 'Un simple membre ne devrait pas pouvoir relire.',
         ]);
         $response->assertStatus(403);
@@ -118,7 +120,7 @@ final class CapsuleReviewHttpTest extends PostgresTestCase
             'lock_version' => 2,
         ]);
         $this->loginAs($admin);
-        $response = $this->browserRequest('POST', $this->requestChangesUrl($capsule, $version), [
+        $response = $this->reviewRequest('POST', $this->requestChangesUrl($capsule, $version), [
             'note' => "Même admin, l'auteur ne se relit pas (CAHIER:462).",
         ]);
         $response->assertStatus(403);
@@ -137,7 +139,7 @@ final class CapsuleReviewHttpTest extends PostgresTestCase
             'updated_at' => now()->utc(),
         ]);
         $this->loginAs($adminContributor);
-        $response = $this->browserRequest('POST', $this->requestChangesUrl($capsule, $version), [
+        $response = $this->reviewRequest('POST', $this->requestChangesUrl($capsule, $version), [
             'note' => 'Même admin, un contributeur de la version ne la relit pas.',
         ]);
         $response->assertStatus(403);
@@ -148,7 +150,7 @@ final class CapsuleReviewHttpTest extends PostgresTestCase
         [$owner, $capsule, $version] = $this->seedDraft(state: CapsuleVersionState::InReview);
         $moderator = User::factory()->verified()->create(['role' => Role::Moderator]);
         $this->loginAs($moderator);
-        $response = $this->browserRequest('POST', $this->requestChangesUrl($capsule, $version), [
+        $response = $this->reviewRequest('POST', $this->requestChangesUrl($capsule, $version), [
             'note' => 'trop court',
         ]);
         $response->assertStatus(422);
@@ -159,23 +161,20 @@ final class CapsuleReviewHttpTest extends PostgresTestCase
         [$owner, $capsule, $version] = $this->seedDraft(); // draft
         $moderator = User::factory()->verified()->create(['role' => Role::Moderator]);
         $this->loginAs($moderator);
-        $response = $this->browserRequest('POST', $this->requestChangesUrl($capsule, $version), [
+        $response = $this->reviewRequest('POST', $this->requestChangesUrl($capsule, $version), [
             'note' => 'Un draft doit d\'abord être soumis à la revue avant correction.',
         ]);
         $response->assertStatus(403);
     }
 
-    public function test_rollback_on_audit_failure_keeps_version_in_initial_state(): void
+    public function test_refused_submission_keeps_version_and_review_history_unchanged(): void
     {
         [$owner, $capsule, $version] = $this->seedDraft();
         $this->loginAs($owner);
-        // Simule un échec en forçant une mauvaise connexion après la mutation.
-        // Approche simple : couper l'enregistrement du review en levant depuis le service via
-        // une transaction fichier qui tombera à la validation Policy ; on vérifie seulement
-        // qu'après une tentative refusée, aucune ligne n'est écrite ni le state changé.
+        // Refus d’autorisation : aucun audit ni transition ne doit être écrit.
         $stranger = User::factory()->verified()->create();
         $this->loginAs($stranger);
-        $response = $this->browserRequest('POST', $this->submitUrl($capsule, $version));
+        $response = $this->reviewRequest('POST', $this->submitUrl($capsule, $version));
         $response->assertStatus(403);
         $version->refresh();
         $this->assertSame(CapsuleVersionState::Draft, $version->state);
@@ -185,8 +184,8 @@ final class CapsuleReviewHttpTest extends PostgresTestCase
     public function test_anonymous_cannot_submit(): void
     {
         [, $capsule, $version] = $this->seedDraft();
-        $this->browserRequest('GET', '/sanctum/csrf-cookie');
-        $response = $this->browserRequest('POST', $this->submitUrl($capsule, $version));
+        $this->reviewRequest('GET', '/sanctum/csrf-cookie');
+        $response = $this->reviewRequest('POST', $this->submitUrl($capsule, $version));
         $response->assertUnauthorized();
     }
 
@@ -195,7 +194,7 @@ final class CapsuleReviewHttpTest extends PostgresTestCase
         [$owner, $capsuleA, $versionA] = $this->seedDraft();
         [, $capsuleB] = $this->seedDraft(slug: 'autre-capsule-24');
         $this->loginAs($owner);
-        $response = $this->browserRequest('POST', "/api/v1/capsules/{$capsuleB->id}/versions/{$versionA->id}/submit-review");
+        $response = $this->reviewRequest('POST', "/api/v1/capsules/{$capsuleB->id}/versions/{$versionA->id}/submit-review");
         $response->assertStatus(404);
     }
 
@@ -226,10 +225,23 @@ final class CapsuleReviewHttpTest extends PostgresTestCase
         return "/api/v1/admin/capsules/{$capsule->id}/versions/{$version->id}/request-changes";
     }
 
+    /**
+     * @param  array<string, mixed>  $body
+     * @return TestResponse<Response>
+     */
+    private function reviewRequest(string $method, string $url, array $body = []): TestResponse
+    {
+        if ($method === 'POST' && str_contains($url, '/versions/')) {
+            return $this->browserRequest($method, $url, ['lock_version' => 1, ...$body], ['Idempotency-Key' => (string) Str::uuid()]);
+        }
+
+        return $this->browserRequest($method, $url, $body);
+    }
+
     private function loginAs(User $user): void
     {
         $this->browserCookies = [];
-        $this->browserRequest('GET', '/sanctum/csrf-cookie');
-        $this->browserRequest('POST', '/login', ['email' => $user->email, 'password' => 'mot-de-passe-de-test']);
+        $this->reviewRequest('GET', '/sanctum/csrf-cookie');
+        $this->reviewRequest('POST', '/login', ['email' => $user->email, 'password' => 'mot-de-passe-de-test']);
     }
 }

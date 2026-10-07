@@ -21,12 +21,27 @@ final class CapsuleContributorFactory extends Factory
         return [
             'version_id' => CapsuleVersion::factory(),
             'user_id' => User::factory(),
-            'contribution_role' => ContributionRole::Author,
+            'contribution_role' => ContributionRole::Diagnosis,
         ];
     }
 
-    public function reviewer(): self
+    public function fix(): self
     {
-        return $this->state(fn () => ['contribution_role' => ContributionRole::Reviewer]);
+        return $this->state(fn () => ['contribution_role' => ContributionRole::Fix]);
+    }
+
+    public function documentation(): self
+    {
+        return $this->state(fn () => ['contribution_role' => ContributionRole::Documentation]);
+    }
+
+    public function test(): self
+    {
+        return $this->state(fn () => ['contribution_role' => ContributionRole::Test]);
+    }
+
+    public function case(): self
+    {
+        return $this->state(fn () => ['contribution_role' => ContributionRole::Case]);
     }
 }

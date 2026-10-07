@@ -24,7 +24,7 @@ final class CapsuleContributorsSchemaTest extends PostgresTestCase
             'id' => $contributor->id,
             'version_id' => $contributor->version_id,
             'user_id' => $contributor->user_id,
-            'contribution_role' => 'author',
+            'contribution_role' => 'diagnosis',
         ]);
     }
 
@@ -36,7 +36,7 @@ final class CapsuleContributorsSchemaTest extends PostgresTestCase
         CapsuleContributor::factory()->create([
             'version_id' => $version->id,
             'user_id' => $user->id,
-            'contribution_role' => ContributionRole::Author,
+            'contribution_role' => ContributionRole::Diagnosis,
         ]);
 
         $this->expectException(QueryException::class);
@@ -45,7 +45,7 @@ final class CapsuleContributorsSchemaTest extends PostgresTestCase
         CapsuleContributor::factory()->create([
             'version_id' => $version->id,
             'user_id' => $user->id,
-            'contribution_role' => ContributionRole::Author,
+            'contribution_role' => ContributionRole::Diagnosis,
         ]);
     }
 
@@ -54,18 +54,18 @@ final class CapsuleContributorsSchemaTest extends PostgresTestCase
         $version = CapsuleVersion::factory()->create();
         $user = User::factory()->create();
 
-        $author = CapsuleContributor::factory()->create([
+        $diagnosis = CapsuleContributor::factory()->create([
             'version_id' => $version->id,
             'user_id' => $user->id,
-            'contribution_role' => ContributionRole::Author,
+            'contribution_role' => ContributionRole::Diagnosis,
         ]);
-        $reviewer = CapsuleContributor::factory()->create([
+        $fix = CapsuleContributor::factory()->create([
             'version_id' => $version->id,
             'user_id' => $user->id,
-            'contribution_role' => ContributionRole::Reviewer,
+            'contribution_role' => ContributionRole::Fix,
         ]);
 
-        $this->assertNotSame($author->id, $reviewer->id);
+        $this->assertNotSame($diagnosis->id, $fix->id);
     }
 
     public function test_version_deletion_cascades_to_contributors(): void

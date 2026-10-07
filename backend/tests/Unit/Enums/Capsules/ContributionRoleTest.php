@@ -8,10 +8,11 @@ use App\Enums\Capsules\ContributionRole;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Rôle de contribution : docs/product/CAHIER_DES_CHARGES.md:871 cite « contribution_role » sans
- * énumérer les valeurs. Choix retenu : author/reviewer/contributor/maintainer, à confirmer par
- * le relecteur. Le rôle « reviewer » est documentaire ici ; la revue indépendante (B24) sera
- * posée sur capsule_versions.reviewer_id, pas sur ce pivot.
+ * Rôle de contribution. Valeurs issues de l'union de deux citations littérales du cahier :
+ * - docs/product/CAHIER_DES_CHARGES.md:364 « cas, diagnostic, correctif, documentation »
+ * - docs/product/CAHIER_DES_CHARGES.md:508 « diagnostic, correction, documentation, test »
+ * Mapping ASCII : diagnosis/fix/documentation/test/case. La revue indépendante (B24) est
+ * portée par capsule_versions.reviewer_id, pas par ce pivot.
  */
 final class ContributionRoleTest extends TestCase
 {
@@ -19,6 +20,6 @@ final class ContributionRoleTest extends TestCase
     {
         $values = array_map(static fn (ContributionRole $case): string => $case->value, ContributionRole::cases());
 
-        $this->assertSame(['author', 'reviewer', 'contributor', 'maintainer'], $values);
+        $this->assertSame(['diagnosis', 'fix', 'documentation', 'test', 'case'], $values);
     }
 }

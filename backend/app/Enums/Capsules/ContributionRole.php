@@ -6,8 +6,9 @@ namespace App\Enums\Capsules;
 
 enum ContributionRole: string
 {
-    case Author = 'author';
-    case Reviewer = 'reviewer';
-    case Contributor = 'contributor';
-    case Maintainer = 'maintainer';
+    case Diagnosis = 'diagnosis';
+    case Fix = 'fix';
+    case Documentation = 'documentation';
+    case Test = 'test';
+    case Case = 'case';
 }

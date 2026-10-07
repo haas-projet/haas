@@ -1,8 +1,8 @@
 openapi: 3.1.0
 info:
   title: HAAS — Socle API
-  version: 0.14.0
-  description: Socle identité, profils, audit et idempotence ; création B14 et lecture/recherche B15 des demandes ; autres contributions à raccorder.
+  version: 0.16.0
+  description: Socle identité, profils, audit et idempotence ; création B14, lecture B15, édition/publication/historique B16 ; commentaires historisés et notifications internes B17 ; autres contributions à raccorder.
 servers:
   - url: http://localhost:8000
 x-haas-domain-fragments:
@@ -13,6 +13,16 @@ x-haas-domain-fragments:
   capsules-lab:
     $ref: './api/openapi/capsules-lab.yaml'
 paths:
+  '/api/v1/requests/{id}/comments':
+    $ref: './api/openapi/community.yaml#/paths/~1api~1v1~1requests~1{id}~1comments'
+  '/api/v1/comments/{id}':
+    $ref: './api/openapi/community.yaml#/paths/~1api~1v1~1comments~1{id}'
+  '/api/v1/comments/{id}/revisions':
+    $ref: './api/openapi/community.yaml#/paths/~1api~1v1~1comments~1{id}~1revisions'
+  '/api/v1/requests/{id}/publish':
+    $ref: './api/openapi/community.yaml#/paths/~1api~1v1~1requests~1{id}~1publish'
+  '/api/v1/requests/{id}/revisions':
+    $ref: './api/openapi/community.yaml#/paths/~1api~1v1~1requests~1{id}~1revisions'
   /api/v1/requests:
     $ref: './api/openapi/community.yaml#/paths/~1api~1v1~1requests'
   /api/v1/requests/{id}:

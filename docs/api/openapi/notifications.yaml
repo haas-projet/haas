@@ -6,7 +6,9 @@ paths:
       description: >-
         Session active requise, projection privée no-store. Ordre date/UUID décroissant.
         Aucun courriel, texte de contenu, code, motif de signalement ou lien public retiré.
-        Premier type pris en charge : profile.moderated, raccordé au lot de modération.
+        Types pris en charge : profile.moderated et comment.created.
+        Pour les commentaires, la visibilité courante du commentaire, de son auteur et du parent
+        filtre liste et compteur avant pagination ; aucun extrait n'est exposé.
       security: [{ SessionCookie: [] }]
       parameters:
         - $ref: '../../OPENAPI.yaml#/components/parameters/Page'
@@ -33,7 +35,7 @@ paths:
     patch:
       operationId: markOwnNotification
       summary: Marquer sa notification comme lue ou non lue
-      description: Session/CSRF, propriétaire actif, relecture sous verrou. Un tiers reçoit 404 même administrateur. Répéter read=true conserve la première date.
+      description: Session/CSRF, propriétaire actif, relecture sous verrou. Un tiers reçoit 404 même administrateur. La visibilité courante d'un commentaire et de son parent est recontrôlée ; une notification devenue inaccessible donne 404. Répéter read=true conserve la première date.
       security: [{ SessionCookie: [] }]
       parameters:
         - name: id
@@ -76,8 +78,11 @@ components:
       required: [id, kind, message, target_path, read_at, created_at]
       properties:
         id: { type: string, format: uuid }
-        kind: { type: string, enum: [profile.moderated] }
+        kind: { type: string, enum: [profile.moderated, comment.created] }
         message: { type: string }
-        target_path: { type: string, enum: [/me/profile] }
+        target_path:
+          type: string
+          pattern: '^/(?:me/profile|requests/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$'
+          description: Chemin interne /me/profile pour profile.moderated ou /requests/<UUID> pour comment.created ; aucune URL externe.
         read_at: { type: [string, 'null'], format: date-time }
         created_at: { type: string, format: date-time }

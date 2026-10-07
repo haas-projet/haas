@@ -2,8 +2,10 @@
 
 namespace App\Services\Audit;
 
+use App\Data\Audit\HelpRequestRevisionData;
 use App\Data\Audit\ProfileRevisionData;
 use App\Exceptions\Audit\AuditStorageFailed;
+use App\Models\Comment;
 use App\Models\HelpRequest;
 use App\Models\Profile;
 use App\Models\User;
@@ -34,6 +36,40 @@ final class AuditWriter
                 'metadata' => json_encode(['state' => $current->state->value, 'help_intent' => $current->help_intent->value,
                     'request_version' => $current->lock_version, 'technology_count' => $current->technologies()->count()], JSON_THROW_ON_ERROR),
                 'occurred_at' => now()->utc(),
+            ]);
+        } catch (QueryException) {
+            throw new AuditStorageFailed('Échec du stockage de la révision.');
+        }
+    }
+
+    public function helpRequestChanged(User $actor, HelpRequest $request, HelpRequestRevisionData $data): void
+    {
+        $this->requireTransaction($actor, $request);
+        try {
+            $owner = User::whereKey($actor->id)->lockForUpdate()->firstOrFail();
+            $current = HelpRequest::whereKey($request->id)->lockForUpdate()->firstOrFail();
+            Gate::forUser($owner)->authorize('update', $current);
+            $revision = (int) DB::table('content_revisions')->where('resource_type', 'help_request')->where('resource_id', $current->id)->max('revision') + 1;
+            DB::table('content_revisions')->insert([
+                'id' => (string) Str::uuid(), 'actor_id' => $owner->id, 'resource_type' => 'help_request', 'resource_id' => $current->id,
+                'revision' => $revision, 'action' => $data->published ? 'help_request.published' : 'help_request.updated',
+                'metadata' => json_encode(['changed_fields' => $data->changedFields, 'request_version' => $current->lock_version, 'has_note' => $data->hasNote], JSON_THROW_ON_ERROR),
+                'occurred_at' => now()->utc(),
+            ]);
+        } catch (QueryException) {
+            throw new AuditStorageFailed('Échec du stockage de la révision.');
+        }
+    }
+
+    public function commentChanged(User $actor, Comment $comment, bool $created): void
+    {
+        $this->requireTransaction($actor, $comment);
+        try {
+            Gate::forUser($actor)->authorize('update', $comment);
+            DB::table('content_revisions')->insert([
+                'id' => (string) Str::uuid(), 'actor_id' => $actor->id, 'resource_type' => 'comment', 'resource_id' => $comment->id,
+                'revision' => $comment->lock_version, 'action' => $created ? 'comment.created' : 'comment.updated',
+                'metadata' => json_encode(['request_id' => $comment->request_id, 'comment_version' => $comment->lock_version], JSON_THROW_ON_ERROR), 'occurred_at' => now()->utc(),
             ]);
         } catch (QueryException) {
             throw new AuditStorageFailed('Échec du stockage de la révision.');

@@ -34,3 +34,7 @@ Les corrections de types des tests n'ajoutent aucun ignore d'analyse. Aucun test
 B11 sera proposé en revue ; la CI du commit publié reste à observer dans la PR. Aucune validation humaine ni fusion de B11 n'est présumée. Ne pas déplacer la tâche Systalink vers Terminé avant son intégration vérifiée.
 
 B14–B21, BC01–BC08 et BH01–BH10 restent à réaliser. La création/publication de demandes, la résolution par son auteur, les filtres de visibilité et les règles de `ask_question` ne sont pas livrés par des tables seules. Prochain lot : B14 après intégration de B11, en coordonnant l'enum HelpIntent avec BV201. Aucun BACKEND_GATE, GO_FRONTEND, GO_PRODUCTION, contrôle Qodana ou déploiement n'est validé par cette livraison.
+
+## Réception réellement constatée — 7 octobre 2026
+
+L'instantané ci-dessus est conservé. Le complément #22 a été fusionné dans la branche B11 par `957029bfacb077c376e344bbb383a39ab5821988` après l'approbation réelle de mdev44-code ; #23 a ensuite intégré B11 dans main par `17c6daaa605ff36ed6513d57fd1393d8175e6c14`. Les commits sources sont conservés. `origin/main` à `f1f6238` contient ces deux fusions : B11 est désormais DONE. La suite combinée B1/B11 du head `108aa7d` a réellement passé 488 tests / 3977 assertions sous PHP 8.4/8.5 dans la CI [37637092346](https://github.com/haas-projet/haas/actions/runs/37637092346). Aucun gate global ou lot communautaire suivant n'est validé par la seule réception de B11.

@@ -16,6 +16,11 @@ final class HelpRequestPolicy
         return $this->access->verified($actor);
     }
 
+    public function update(User $actor, HelpRequest $request): bool
+    {
+        return $this->access->owns($actor, $request->author_id) && $request->hidden_at === null && $request->state !== HelpRequestState::Archived;
+    }
+
     public function view(?User $actor, HelpRequest $request): bool
     {
         return $request->hidden_at === null && $this->access->verified($request->author)

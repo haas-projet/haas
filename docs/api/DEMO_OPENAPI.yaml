@@ -15,3 +15,7 @@ paths:
       responses:
         '200':
           description: Runtime B2 disponible, sans cookie ni accès SQL.
+        '403':
+          $ref: '../OPENAPI.yaml#/components/responses/ApiFailure'
+        '503':
+          $ref: '../OPENAPI.yaml#/components/responses/ApiFailure'

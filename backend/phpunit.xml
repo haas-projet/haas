@@ -29,6 +29,7 @@
         <env name="DEMO_CACHE_STORE" value="array" force="true"/>
         <env name="DEMO_API_URL" value="https://demo-api.example.com"/>
         <env name="DEMO_FRONTEND_ORIGIN" value="https://demo.example.com"/>
+        <env name="DEMO_HAAS_DATABASE" value="haas_bootstrap_test"/>
         <env name="DEMO_DB_HOST" value="127.0.0.1"/>
         <env name="DEMO_DB_PORT" value="5432"/>
         <env name="DEMO_DB_DATABASE" value="haas_demo_bootstrap_test"/>

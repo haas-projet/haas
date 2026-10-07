@@ -76,6 +76,8 @@ paths:
           $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure'
         '429':
           $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure'
+        '503':
+          $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure'
         '500':
           $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure'
 components:

@@ -3,12 +3,16 @@
 namespace Tests\Feature\Demo;
 
 use App\Providers\AppServiceProvider;
+use App\Support\Demo\DemoRuntimeGuard;
 use Illuminate\Auth\AuthServiceProvider;
+use Illuminate\Database\PostgresConnection;
 use Illuminate\Encryption\EncryptionServiceProvider;
 use Illuminate\Session\SessionServiceProvider;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\SanctumServiceProvider;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Yaml\Yaml;
 use Tests\DemoTestCase;
@@ -96,6 +100,88 @@ final class DemoIsolationTest extends DemoTestCase
     {
         config(['demo.frontend_origin' => 'https://demo.haas.example.com']);
         $this->getJson('/api/v1/b2/health')->assertServiceUnavailable();
+    }
+
+    /** @param array<string,mixed> $configuration */
+    #[DataProvider('unsafeConfiguration')]
+    public function test_invalid_origin_parent_and_non_shared_production_cache_fail_closed(array $configuration): void
+    {
+        config($configuration + ['database.connections.demo.port' => 1]);
+        $this->getJson('/api/v1/b2/health')->assertServiceUnavailable();
+    }
+
+    /** @return iterable<string,array{array<string,mixed>}> */
+    public static function unsafeConfiguration(): iterable
+    {
+        yield 'parent vide' => [['demo.haas_cookie_parent' => '']];
+        yield 'parent invalide' => [['demo.haas_cookie_parent' => 'haas.example.com/']];
+        yield 'parent majuscule' => [['demo.haas_cookie_parent' => '.HAAS.EXAMPLE.COM', 'demo.frontend_origin' => 'https://DEMO.HAAS.EXAMPLE.COM']];
+        yield 'API majuscule HAAS' => [['app.url' => 'https://API.HAAS.EXAMPLE.COM']];
+        yield 'DNS point final' => [['demo.frontend_origin' => 'https://demo.haas.example.com.']];
+        yield 'URL avec credentials' => [['demo.frontend_origin' => 'https://user:secret@demo.example.com']];
+        yield 'URL avec chemin' => [['app.url' => 'https://demo-api.example.com/path']];
+        yield 'cache array production' => [['app.env' => 'production', 'cache.default' => 'array']];
+        yield 'cache file production' => [['app.env' => 'production', 'cache.default' => 'file']];
+        yield 'cache connecté HAAS' => [['cache.stores.database.connection' => 'pgsql']];
+    }
+
+    public function test_distinct_uppercase_dns_are_normalized_before_cors(): void
+    {
+        config(['demo.frontend_origin' => 'HTTPS://DEMO.EXAMPLE.COM', 'app.url' => 'HTTPS://DEMO-API.EXAMPLE.COM', 'demo.haas_cookie_parent' => '.HAAS.EXAMPLE.COM']);
+        $this->getJson('https://demo-api.example.com/api/v1/b2/health', ['Origin' => 'https://demo.example.com'])
+            ->assertOk()->assertHeader('Access-Control-Allow-Origin', 'https://demo.example.com');
+    }
+
+    /** @param array<string,mixed> $configuration */
+    #[DataProvider('unsafeDatabaseConfiguration')]
+    public function test_haas_and_unspecified_database_configurations_are_refused_before_connection(array $configuration): void
+    {
+        config($configuration + ['database.connections.demo.port' => 1]);
+        try {
+            app(DemoRuntimeGuard::class)->database();
+            $this->fail('Configuration HAAS interdite avant connexion.');
+        } catch (HttpException $exception) {
+            $this->assertSame(503, $exception->getStatusCode());
+        }
+    }
+
+    /** @return iterable<string,array{array<string,mixed>}> */
+    public static function unsafeDatabaseConfiguration(): iterable
+    {
+        yield 'base HAAS' => [['database.connections.demo.database' => 'haas_app']];
+        yield 'rôle HAAS' => [['database.connections.demo.username' => 'haas_test']];
+        yield 'superuser' => [['database.connections.demo.username' => 'postgres']];
+        yield 'référence HAAS absente' => [['demo.haas_database' => null]];
+        yield 'URL supplémentaire' => [['database.connections.demo.url' => 'pgsql://haas']];
+        yield 'lecture autre connexion' => [['database.connections.demo.read' => ['database' => 'haas_app']]];
+    }
+
+    #[DataProvider('privilegedRoles')]
+    public function test_real_role_flags_and_non_connect_proof_must_all_be_safe(string $flag, mixed $value): void
+    {
+        $row = (object) ['database' => config('database.connections.demo.database'), 'username' => config('database.connections.demo.username'),
+            'isolation' => 'read committed', 'rolsuper' => false, 'rolcreatedb' => false, 'rolcreaterole' => false,
+            'rolreplication' => false, 'rolbypassrls' => false, 'membership' => false, 'haas_connect' => false];
+        $row->$flag = $value;
+        $connection = \Mockery::mock(PostgresConnection::class);
+        $connection->shouldReceive('selectOne')->once()->andReturn($row);
+        DB::shouldReceive('connection')->with('demo')->andReturn($connection);
+        try {
+            app(DemoRuntimeGuard::class)->database();
+            $this->fail('Privilèges réels ou isolation transactionnelle interdits.');
+        } catch (HttpException $exception) {
+            $this->assertSame(503, $exception->getStatusCode());
+        }
+    }
+
+    /** @return iterable<string,array{string,mixed}> */
+    public static function privilegedRoles(): iterable
+    {
+        foreach (['rolsuper', 'rolcreatedb', 'rolcreaterole', 'rolreplication', 'rolbypassrls', 'membership', 'haas_connect'] as $flag) {
+            yield $flag => [$flag, true];
+        }
+        yield 'base HAAS inexistante' => ['haas_connect', null];
+        yield 'snapshot ancien' => ['isolation', 'repeatable read'];
     }
 
     public function test_large_bodies_and_non_json_are_refused_without_database(): void

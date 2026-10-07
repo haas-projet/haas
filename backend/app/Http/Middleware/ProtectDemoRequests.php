@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Support\Demo\DemoRuntimeGuard;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -13,15 +14,7 @@ final class ProtectDemoRequests
     /** @param Closure(Request): Response $next */
     public function handle(Request $request, Closure $next): Response
     {
-        $origin = config('demo.frontend_origin');
-        $api = config('app.url');
-        $parent = config('demo.haas_cookie_parent');
-        foreach ([$origin, $api] as $url) {
-            $host = is_string($url) ? parse_url($url, PHP_URL_HOST) : null;
-            if (! is_string($host) || ! is_string($parent) || $host === $parent || str_ends_with($host, '.'.$parent)) {
-                throw new HttpException(503);
-            }
-        }
+        ['origin' => $origin, 'api' => $api] = app(DemoRuntimeGuard::class)->configuration();
         if ($request->getSchemeAndHttpHost() !== $api
             || ($request->headers->has('Origin') && $request->header('Origin') !== $origin)
             || $request->headers->has('Cookie') || $request->cookies->count() > 0

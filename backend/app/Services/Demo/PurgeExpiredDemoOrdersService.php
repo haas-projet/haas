@@ -3,11 +3,12 @@
 namespace App\Services\Demo;
 
 use App\Models\Demo\DemoConnection;
+use App\Support\Demo\DemoRuntimeGuard;
 use DateTimeImmutable;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 
-/** Purge B2 born?e ? 1000 commandes, sous le m?me verrou que les enregistrements ; aucune intention vivante supprim?e. */
+/** Purge B2 bornée à 1000 commandes, sous le même verrou que les enregistrements ; aucune intention vivante supprimée. */
 final class PurgeExpiredDemoOrdersService
 {
     /**
@@ -29,9 +30,15 @@ final class PurgeExpiredDemoOrdersService
 
     public function purge(DateTimeImmutable $cutoff): int
     {
+        app(DemoRuntimeGuard::class)->database();
+
         return DB::connection(DemoConnection::NAME)->transaction(function () use ($cutoff): int {
             $connection = DB::connection(DemoConnection::NAME);
             $connection->select('SELECT pg_advisory_xact_lock(238038)');
+            $connection->select('SELECT pg_advisory_xact_lock(238039)');
+            foreach (['cache', 'cache_locks'] as $table) {
+                $connection->table($table)->where('expiration', '<=', time())->delete();
+            }
             $ids = $connection->table('demo_orders')
                 ->where('created_at', '<', $cutoff->format('Y-m-d H:i:s.uP'))
                 ->where('expires_at', '<=', now())

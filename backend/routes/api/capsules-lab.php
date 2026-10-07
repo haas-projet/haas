@@ -1,4 +1,4 @@
 <?php
 
-// Responsable : capsules/laboratoire. Aucune ex?cution de code utilisateur.
-// B2 est d?clar? exclusivement par le runtime backend/demo, jamais par HAAS.
+// Responsable : capsules/laboratoire. Aucune exécution de code utilisateur.
+// B2 est déclaré exclusivement par le runtime backend/demo, jamais par HAAS.

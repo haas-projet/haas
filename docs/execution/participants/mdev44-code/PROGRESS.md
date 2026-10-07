@@ -201,7 +201,7 @@ Limites :
 
 Prochaines actions : obtenir une relecture humaine du lot B35 par `ousseynoufayeisidk-sys` ; soumettre à `ousseynoufayeisidk-sys` la demande de câblage de la connexion `haas_lab` dans `config/`, `phpunit.xml` et la CI. Les lots suivants (B22 schéma capsules, B33 registre lab) attendent respectivement B11 (collaboration) et B22.
 
-## Historique de la branche B38 avant int?gration
+## Historique de la branche B38 avant intégration
 
 # Progression — capsules/laboratoire (branche B38)
 

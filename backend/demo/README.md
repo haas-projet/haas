@@ -32,3 +32,11 @@ Contrat séparé : [DEMO_OPENAPI.yaml](../../docs/api/DEMO_OPENAPI.yaml). L'API 
 Sur le même VPS prévu par ADR-004 : artefact et environnement propres, compte/pool PHP distinct, vhost dont la racine publique est exclusivement `demo/public`, rôle/base fictifs et stockage/cache séparés. Le compte/pool B2 ne doit pouvoir lire ni l'environnement ni les fichiers privés HAAS ; borner aussi les chemins PHP (`open_basedir`) et les droits du compte système. L'artefact B2 exclut l'environnement, caches, stockage privés, configuration et points d'entrée HAAS.
 
 Ces restrictions système et les domaines réels restent à vérifier sur l'environnement retenu après revue et GO_PRODUCTION. Les preuves locales PostgreSQL/processus ne déclarent pas un déploiement Systalink ou une isolation OS déjà reçue.
+
+## Gardes avant écriture
+
+`DEMO_HAAS_DATABASE` identifie explicitement la base HAAS du même cluster. Aucun repli sur DB_DATABASE : base absente, rôle privilégié, membership ou CONNECT HAAS autorisé entraînent un refus 503, avant quota et écriture. Les commandes CLI qui écrivent appliquent la même garde.
+
+En production, seul le cache PostgreSQL partagé est accepté ; array est réservé aux tests. Les triggers BEFORE INSERT prennent le verrou 238039, purgent les expirations et limitent atomiquement cache à 1 000 lignes et cache_locks à 100. Une clé existante peut être renouvelée à capacité pleine ; une nouvelle entrée saturée rend HTTP 429 (ou verrou non acquis pour le scheduler). Le quota peut laisser un timer valide seul si sa seconde entrée sature ; il expire normalement. La purge retire aussi les caches expirés. Ordre de verrouillage : commandes 238038 puis cache 238039 ; aucun chemin ne prend les deux dans l’ordre inverse.
+
+Le niveau transactionnel READ COMMITTED est obligatoire pour la borne atomique ; les anciens snapshots sont refusés. L’expiration est comparée après floor(epoch), sans arrondi anticipé. Les fonctions sont recréables avec migrate:fresh.

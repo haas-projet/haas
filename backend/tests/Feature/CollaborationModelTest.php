@@ -25,7 +25,7 @@ final class CollaborationModelTest extends TestCase
     public static function protectedFields(): iterable
     {
         $fields = [
-            HelpRequest::class => ['author_id', 'state', 'lock_version'],
+            HelpRequest::class => ['author_id', 'state', 'lock_version', 'help_intent', 'hidden_at'],
             Comment::class => ['request_id', 'author_id', 'lock_version', 'edited_at', 'hidden_at'],
             Proposal::class => ['request_id', 'author_id', 'state', 'lock_version'],
             Resolution::class => ['request_id', 'proposal_id', 'accepted_by', 'accepted_at', 'revoked_at'],

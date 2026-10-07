@@ -64,6 +64,7 @@ jobs:
       DEMO_ENV: testing
       DEMO_API_URL: https://demo-api.example.com
       DEMO_FRONTEND_ORIGIN: https://demo.example.com
+      DEMO_HAAS_DATABASE: haas_ci_test
       DEMO_DB_HOST: 127.0.0.1
       DEMO_DB_PORT: '5432'
       DEMO_DB_DATABASE: haas_demo_ci_test

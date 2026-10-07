@@ -94,7 +94,7 @@ Livrer la conservation des solutions et leurs vérifications honnêtes, sur des 
 
 **Première PR de code :** préparer B22 dès maintenant ; sa finalisation et sa fusion attendent le socle B01–B05 et le schéma B11 référencé. Commencer les éléments indépendants décrits plus haut, le contrat capsules et les scénarios fictifs B1 dans les fichiers de ce domaine. Les écritures utilisant identité/audit/rejeu attendent aussi les contrats B06–B09/B12–B13 ; les parcours issus d'une résolution attendent B18–B19.
 
-**Point de coordination :** BV201 pilote aussi l'ajout initial de HelpIntent. Faire relire cette partie par `LamineGL`, convenir d'un seul auteur pour les fichiers HelpRequests concernés et fusionner avant BC07. Ne pas créer deux enums ou validateurs concurrents.
+**Point de coordination actualisé le 4 octobre :** l'utilisateur confirme que Madina n'a pas commencé B14 ni HelpIntent/BV201 et demande de continuer B14. L'enum partagé `App\Enums\HelpRequests\HelpIntent` est donc introduit une seule fois par B14 ; BV201 et BC07 le réutilisent après intégration. Le schéma B11 de Madina est conservé, sans renommage de ses migrations. Voir [le contrat B14](../api/HELP_REQUEST_CREATION.md). Cette coordination ne vaut ni revue humaine ni réception de BV201/BC07.
 
 **Sortie attendue :** revue par une autre personne habilitée, version publiée immuable, tests PostgreSQL et concurrence réelle, rapports liés à un commit et une exécution. Un seul run actif global ; deux enfants séquentiels par comparaison. Aucun code utilisateur, shell ou URL arbitraire exécuté. Aucun résultat complet après interruption.
 

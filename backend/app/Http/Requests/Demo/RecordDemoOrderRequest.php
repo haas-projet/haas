@@ -70,7 +70,9 @@ final class RecordDemoOrderRequest extends FormRequest
             'amount_minor.required' => 'Le montant est requis.',
             'amount_minor.integer' => 'Le montant doit être un entier.',
             'amount_minor.min' => 'Le montant doit être strictement positif.',
+            'amount_minor.max' => 'Le montant fictif ne doit pas dépasser 1 000 000 unités.',
             'currency.required' => 'La devise est requise.',
+            'currency.in' => 'La démonstration utilise uniquement EUR fictifs.',
             'currency.regex' => 'La devise doit être un code ISO 4217 à trois lettres majuscules.',
         ];
     }

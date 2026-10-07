@@ -2,6 +2,7 @@
 
 use App\Console\Commands\PruneDemoOrders;
 use App\Http\Middleware\AssignRequestId;
+use App\Http\Middleware\GuardDemoCache;
 use App\Http\Middleware\ProtectDemoRequests;
 use App\Providers\DemoServiceProvider;
 use App\Support\Demo\DemoApplication;
@@ -21,7 +22,7 @@ $app = DemoApplication::configure(basePath: dirname(__DIR__))
     ->withCommands([PruneDemoOrders::class])
     ->withMiddleware(function (Middleware $middleware): void {
         // ProtectDemoRequests s'exécute avant CORS, y compris lors des prévols.
-        $middleware->prepend([AssignRequestId::class, ProtectDemoRequests::class]);
+        $middleware->prepend([AssignRequestId::class, ProtectDemoRequests::class, GuardDemoCache::class]);
         $middleware->remove([
             TrimStrings::class,
             ConvertEmptyStringsToNull::class,

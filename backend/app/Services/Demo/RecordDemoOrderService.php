@@ -10,12 +10,13 @@ use App\Exceptions\Demo\DemoCapacityReached;
 use App\Exceptions\Idempotency\IdempotencyConflict;
 use App\Models\Demo\DemoConnection;
 use App\Models\Demo\DemoOrder;
+use App\Support\Demo\DemoRuntimeGuard;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
-/** Enregistrement fictif atomique, cl? HMAC B2 propre, garantie 24 heures et stockage born?. */
+/** Enregistrement fictif atomique, clé HMAC B2 propre, garantie 24 heures et stockage borné. */
 final class RecordDemoOrderService
 {
     /**
@@ -28,6 +29,7 @@ final class RecordDemoOrderService
     public function handle(DemoOrderData $data, string $idempotencyKey): RecordedDemoOrder
     {
         $this->guard($data);
+        app(DemoRuntimeGuard::class)->database();
         $key = new IdempotencyKey($idempotencyKey);
         $fingerprint = (new IdempotencyData(self::ROUTE_TARGET, $key, $data->canonical()))
             ->fingerprint($this->fingerprintKey());

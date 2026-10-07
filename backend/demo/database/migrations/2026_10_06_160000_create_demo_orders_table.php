@@ -6,7 +6,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
-/* Sch?ma B2 exclusivement fictif, sur la connexion demo : commande, TTL et cache/quota partag?s. */
+/* Schéma B2 exclusivement fictif, sur la connexion demo : commande, TTL et cache/quota partagés. */
 return new class extends Migration
 {
     protected $connection = DemoConnection::NAME;
@@ -45,6 +45,27 @@ ALTER TABLE demo_orders
     ADD CONSTRAINT demo_orders_payload_hash_hex CHECK (payload_hash ~ '^[0-9a-f]{64}$'),
     ADD CONSTRAINT demo_orders_expiry CHECK (expires_at = created_at + interval '24 hours')
 SQL);
+        DB::connection($this->connection)->unprepared(<<<'SQL'
+CREATE OR REPLACE FUNCTION demo_bound_cache() RETURNS trigger LANGUAGE plpgsql VOLATILE AS $$
+DECLARE total bigint; maximum integer;
+BEGIN
+    IF current_setting('transaction_isolation') <> 'read committed' THEN
+        RAISE EXCEPTION USING ERRCODE = '25000', MESSAGE = 'B2_CACHE_ISOLATION';
+    END IF;
+    -- Verrou commun aux deux tables ; les requêtes suivantes voient les commits précédents.
+    PERFORM pg_advisory_xact_lock(238039);
+    maximum := CASE TG_TABLE_NAME WHEN 'cache' THEN 1000 ELSE 100 END;
+    EXECUTE format('DELETE FROM %I WHERE expiration <= floor(extract(epoch FROM clock_timestamp()))::bigint', TG_TABLE_NAME);
+    EXECUTE format('SELECT count(*) FROM %I WHERE key <> $1', TG_TABLE_NAME) INTO total USING NEW.key;
+    IF total >= maximum THEN
+        RAISE EXCEPTION USING ERRCODE = 'P0001', MESSAGE = 'B2_CACHE_CAPACITY';
+    END IF;
+    RETURN NEW;
+END;
+$$;
+CREATE TRIGGER demo_cache_capacity BEFORE INSERT ON cache FOR EACH ROW EXECUTE FUNCTION demo_bound_cache();
+CREATE TRIGGER demo_cache_locks_capacity BEFORE INSERT ON cache_locks FOR EACH ROW EXECUTE FUNCTION demo_bound_cache();
+SQL);
     }
 
     public function down(): void
@@ -52,5 +73,6 @@ SQL);
         Schema::connection($this->connection)->dropIfExists('demo_orders');
         Schema::connection($this->connection)->dropIfExists('cache_locks');
         Schema::connection($this->connection)->dropIfExists('cache');
+        DB::connection($this->connection)->statement('DROP FUNCTION IF EXISTS demo_bound_cache()');
     }
 };

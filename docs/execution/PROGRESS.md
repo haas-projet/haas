@@ -1,6 +1,6 @@
 # Suivi du dépôt HAAS
 
-**Statut actif :** B01–B09, B11–B13 et B32 DONE (13 lots). Travail de Madina intégré : enums #12, B11 #23 avec compléments #22, brique interne B1 #27 corrigée. B35 reste IN_PROGRESS (connexion laboratoire/isolation et défaut pédagogique à livrer) ; B38 BLOCKED par deux probes HTTP ; B22/B23 IN_PROGRESS, PR #29/#30 en brouillon non fusionnées. Les 26 autres lots de la coordination #2 restent à faire. B10/B29/B30/B31 et B39–B42 IN_PROGRESS ; B43/B44 BLOCKED. S01/S02 restent partiels. BACKEND_GATE NON REÇU, aucun GO_FRONTEND/GO_PRODUCTION. Voir [la revue et les fusions](../quality/MERGE_MADINA.md), [la preuve B11](../quality/B11_COLLABORATION.md) et le [suivi de Lamine](participants/LamineGL/HANDOFF.md). Les entrées suivantes sont historiques.
+**Statut actif :** B01–B09, B11–B13 et B32 DONE (13 lots entiers). B14/B15/B16/B17 IN_REVIEW, consolidés dans #24 vers main ; #25/#26/#32 sont des fusions intermédiaires. #31 (README et bilan) est réellement fusionnée dans main e3bd34c. B22/B23/B24 restent en brouillon dans #29/#30/#33, corrections en cours ; B38 IN_REVIEW localement après correction et preuves d’isolation ; CI exacte et revue humaine à recevoir. B35 partiel. Les 22 autres lots de Lamine restent à faire. B10/B29/B30/B31 et B39–B42 IN_PROGRESS ; B43/B44 BLOCKED. S01/S02 partiels. Aucun BACKEND_GATE, GO_FRONTEND ou GO_PRODUCTION. Voir MERGE_MADINA.md, B17_COMMENTS.md et le suivi de Lamine. Les entrées suivantes sont historiques.
 
 À renseigner après commandes réelles : date / lot / responsable / fichiers / commandes / observé / commit ou raison de non-commit / blocage / prochaine action. Les contrôles documentaires de ce pack ne valident pas BACKEND_GATE, FRONTEND_GATE ou RELEASE_GATE.
 
@@ -215,7 +215,7 @@ Consolidation : B39–B42 IN_PROGRESS pour le périmètre disponible ; B43/B44 B
 
 ## 2026-10-03 — Réception partielle publiée et CI verte
 
-PR #20 en brouillon contre backend/socle-auth-moderation, code 68b00f8d3fa865bc8995a6b43dda52b178d47ba0. Run 37141557467 réussi, journaux lus : PHP 8.4/8.5 avec PostgreSQL 17, chacun 384 tests / 3702 assertions (251/2452 sans base, 133/1250 SQL). Pint/PHPStan niveau 8/audit/documentation/types générés verts. Exercice local de restauration et refus documentés dans SOCLE_RECEPTION_PARTIELLE.md ; 463 empreintes contrôlées. Cluster temporaire 54693 arrêté, service existant inchangé.
+PR #20 en brouillon contre backend/socle-auth-moderation, code 68b00f8d3fa865bc8995a6b43dda52b178d47ba0. Run 37141557467 réussi, journaux lus : PHP 8.4/8.5 avec PostgreSQL 17, chacun 384 tests / 3702 assertions (251/ 2452 sans base, 133/ 1250 SQL). Pint/PHPStan niveau 8/audit/documentation/types générés verts. Exercice local de restauration et refus documentés dans SOCLE_RECEPTION_PARTIELLE.md ; 463 empreintes contrôlées. Cluster temporaire 54693 arrêté, service existant inchangé.
 
 B01–B06 restent les seules cartes entières terminées ; B07/B08/B09/B12/B13/B32 prêts pour revue. Les autres cartes de la partie socle gardent les réserves explicites du tableau SYSTALINK_TASKS.md. Reprendre après publication des domaines métier/Qodana et revue réelle ; aucun gate ni frontend autorisé. Intégrer dans l'ordre des dépendances, recibler les PR avant de supprimer les branches temporaires fusionnées ; conserver les trois branches permanentes et main.
 
@@ -236,6 +236,29 @@ B07/B08/B09/B12/B13/B32 DONE ; le tableau Systalink comporte maintenant 12 lots 
 - Limites : aucun endpoint des demandes ni résolution concurrente livré, aucun autre lot de Lamine terminé. La branche B11 du collègue et la PR capsules #12 sont préservées. Prochain lot B14 après intégration de B11 ; coordonner HelpIntent avec BV201 avant BC07.
 - Référence réelle du commit final et CI à communiquer dans la PR et le bilan ; aucun SHA autoréférent écrit dans ce commit.
 
+## 2026-10-04 — B14, suite de Lamine coordonnée avec Madina
+
+- Demande : continuer en tenant compte de Madina ; confirmation que B14 et HelpIntent/BV201 ne sont pas commencés de son côté.
+- Les cinq migrations B11 et les commits de Madina restent inchangés. PR #22 reciblée sur sa PR #23 comme complément ; B14 préparé sur branche dérivée depuis 5854e04, sans fusion ni revue humaine simulée.
+- POST /api/v1/requests : brouillon/publication/question, validation, droits, audit et idempotence communs, code inerte, champs serveur protégés, migrations additives et contrat complet. HelpIntent unique partagé avec BV201/BC07 ; décision dans BACKEND_A_TROIS.md.
+- Validations réelles : 284 tests / 2686 assertions hors SQL et 192 tests / 1732 assertions PostgreSQL, dont création à deux processus réellement concurrents. Pint/PHPStan et audit/validation Composer réussis ; 36 types API générés. Preuves : docs/quality/B14_CREATION.md.
+- Statuts : B14 en revue, B11 toujours non fusionné. Systalink conserve ces deux cartes En cours ; les 25 autres lots restent à faire. Prochain lot B15, après intégration du prérequis ou préparation isolée explicitement demandée. Aucun frontend ni déploiement.
+- Le SHA final et sa CI seront communiqués après commit dans la PR et le bilan, sans autoréférence dans le commit.
+
+## 2026-10-04 — B15, lecture/recherche de la partie de Lamine
+
+- Demande de continuer après B14. Branche `backend/communaute-entraide-b15`, worktree `.worktrees/b15`, depuis `6a0db1e`. PR #23 de Madina, #22 et #24 inchangées, PR #12 préservée ; la modification préexistante des routes capsules dans le répertoire principal est exclue et conservée.
+- GET liste/détail, visibilité commune avant recherche/pagination/total, brouillons réservés à leur auteur, vue mine explicite, filtres/tri bornés et chargement des relations sans N+1. Aucune migration ni dépendance ajoutée. Contrat [HELP_REQUEST_READING.md](../api/HELP_REQUEST_READING.md), preuve [B15_READING.md](../quality/B15_READING.md).
+- Résultats locaux : 284 tests / 2811 assertions hors SQL et 227 / 2023 sur PostgreSQL dédié (511 / 4834). Pint/PHPStan, Composer validation/prérequis/audit et documentation réussis, 38 types à jour. Quatre SELECT métier pour 5 comme pour 25 demandes. Cluster 54695/haas_b15_test arrêté après les tests.
+- B15 IN_REVIEW ; SHA final et CI à constater dans la PR et le bilan après publication. Ordre #23 → #22 → #24 → B15, sans fusion ni revue humaine simulée. B11/B14/B15 En cours dans Systalink, 24 autres lots à faire. Prochain B16, édition sous version. Aucun BACKEND_GATE ni frontend/déploiement.
+
+## 2026-10-04 — B16, modifier et publier une demande existante
+
+- Demande de continuer la partie de Lamine en préservant le travail de Madina. Livraison isolée dans `.worktrees/b16`, branche `backend/communaute-entraide-b16`, depuis B15 `0cfcde1`. PR #23/#22/#24/#25 inchangées ; PR #12 et modification locale des routes capsules préservées.
+- Édition auteur avec version, note après contribution et validation du contenu final ; publication des brouillons et historique respectant la confidentialité. Audit/version/pivots/révisions/idempotence atomiques. Migration additive, règles B14 mutualisées et tests de retour de migrations adaptés à la dépendance enfant.
+- Contrats et preuves : [HELP_REQUEST_EDITING.md](../api/HELP_REQUEST_EDITING.md), [B16_EDITING.md](../quality/B16_EDITING.md). Commandes réelles, résultats, courses PostgreSQL et limites consignés dans cette preuve ; aucun contrôle absent compté comme réussi.
+- B16 IN_REVIEW, aucune autre tâche modifiée dans les 122 lots. Ordre #23 → #22 → #24 → #25 → B16 ; SHA final et CI à reporter dans la PR et le bilan après commit. Aucune revue humaine ni fusion simulée. Prochain lot B17 ; aucune nouvelle carte Systalink Terminé avant intégration.
+
 ## 2026-10-07 — Revue et intégration du travail de Madina
 
 Demande explicite de vérification puis fusion dans le dépôt distant. PR #12 fusionnée dans main (33eafa0), complément #22 dans B11 (957029b), #23 dans main (17c6daa), puis #27 corrigée et synchronisée dans main (f1f6238). Les commits et historiques des participants sont conservés. Aucune approbation humaine inventée ; seule celle réellement présente sur #22 est constatée. Rapport : docs/quality/MERGE_MADINA.md.
@@ -243,3 +266,7 @@ Demande explicite de vérification puis fusion dans le dépôt distant. PR #12 f
 Défaut UTC B1 reproduit puis corrigé dans cdbe96f ; test de régression réellement rouge avant correction. Dernier head B1 108aa7d : 312 tests / 2538 assertions hors SQL et 176 / 1439 sur PostgreSQL local isolé, soit 488 / 3977. CI 37637092346 réussie, mêmes résultats sous PHP 8.4/8.5, Pint/PHPStan/audit verts. Pack 18/18, déploiement documentaire 7/7 et diff --check propres ; empreintes actualisées dans le bilan. Cluster PostgreSQL temporaire arrêté en fin de session.
 
 B11 DONE (13 lots backend entiers terminés). B35 IN_PROGRESS : isolation/connexion haas_lab et tests du défaut pédagogique absents. B38 BLOCKED : deux probes HTTP en échec sur #28 (origine démonstration 403 ; origine HAAS deux cookies), patch de reproduction livré dans le rapport. B22/B23 IN_PROGRESS, #29/#30 brouillons conservés avec défauts statiques détaillés, sans nouveaux tests HTTP exécutés. Prochain lot : corriger les capsules et l'isolation B2 ; B14 peut reprendre depuis B11. BACKEND_GATE non reçu ; aucun frontend ni déploiement.
+
+### B38 — correction terminée localement, revue à recevoir
+
+Runtime et données B2 séparés ; garde DNS/configuration et permissions PostgreSQL avant cache/écritures ; cache partagé obligatoire hors testing, bornes atomiques 1000 entrées / 100 verrous, TTL24h et purge complète. Synchronisation normale de main b76612d (B14–B17), historiques et statuts conservés. Suites finales : 391 / 3850 et 379 / 3438, soit 770 tests / 7288 assertions OK. PHPStan niveau 8, Pint, Composer et contrats/documents réussis ; preuve B38_ISOLATION_20261007.md. Statut local IN_REVIEW : CI du SHA exact et revue humaine restent nécessaires ; aucun DONE/gate ni frontend/déploiement. L’intégrateur publiera le commit réel après ce bilan.

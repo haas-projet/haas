@@ -59,7 +59,7 @@ final class IdempotencyDataTest extends TestCase
     {
         yield [['value' => 1.5]];
         yield [['value' => new stdClass]];
-        yield [['value' => str_repeat('é', 32769)]];
+        yield [['value' => str_repeat('é', 65537)]];
         yield [['value' => "\xFF"]];
         $nested = ['value' => 'fixture'];
         for ($i = 0; $i < 17; $i++) {

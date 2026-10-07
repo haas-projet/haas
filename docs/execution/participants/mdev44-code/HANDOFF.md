@@ -117,7 +117,7 @@ Prochaines actions, sur décision humaine : pousser `backend/capsules-laboratoir
 - BV201 (schéma cas + `help_intent`) : attend B11, coordination `LamineGL` obligatoire avant d'écrire sur `help_requests`.
 - B36 (worker canal Unix) : attend B33/B34 **et** une plateforme compatible — PHP Windows (bare 8.4.3 et Laragon 8.4.15 confirmés) n'enregistre pas le transport `unix://` ; les tests réels devront passer par la CI Linux `ubuntu-24.04` du workflow `backend-ci.yml` ou via WSL2 (décision humaine).
 
-## Historique de la branche B38 avant int?gration
+## Historique de la branche B38 avant intégration
 
 # HANDOFF — capsules/laboratoire (branche B38)
 

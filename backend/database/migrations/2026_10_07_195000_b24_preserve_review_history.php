@@ -29,15 +29,22 @@ SQL);
 
     public function down(): void
     {
-        if (Schema::hasTable('capsule_version_reviews')) {
-            DB::statement('DROP TRIGGER IF EXISTS capsule_review_history_immutable ON capsule_version_reviews');
-            DB::statement('ALTER TABLE capsule_version_reviews DROP CONSTRAINT IF EXISTS capsule_reviews_positive_version');
-            Schema::table('capsule_version_reviews', function (Blueprint $table): void {
-                $table->dropForeign(['version_id']);
-                $table->foreign('version_id')->references('id')->on('capsule_versions')->cascadeOnDelete();
-                $table->dropColumn('reviewed_lock_version');
-            });
-        }
-        DB::statement('DROP FUNCTION IF EXISTS preserve_capsule_review_history()');
+        DB::transaction(function (): void {
+            if (Schema::hasTable('capsule_version_reviews')) {
+                // Le verrou empêche une insertion entre le contrôle et le DDL.
+                DB::statement('LOCK TABLE capsule_version_reviews IN ACCESS EXCLUSIVE MODE');
+                if (DB::table('capsule_version_reviews')->whereNotNull('reviewed_lock_version')->exists()) {
+                    throw new RuntimeException('Rollback B24 refusé : les versions réellement relues doivent conserver leur attribution.');
+                }
+                DB::statement('DROP TRIGGER IF EXISTS capsule_review_history_immutable ON capsule_version_reviews');
+                DB::statement('ALTER TABLE capsule_version_reviews DROP CONSTRAINT IF EXISTS capsule_reviews_positive_version');
+                Schema::table('capsule_version_reviews', function (Blueprint $table): void {
+                    $table->dropForeign(['version_id']);
+                    $table->foreign('version_id')->references('id')->on('capsule_versions')->cascadeOnDelete();
+                    $table->dropColumn('reviewed_lock_version');
+                });
+            }
+            DB::statement('DROP FUNCTION IF EXISTS preserve_capsule_review_history()');
+        });
     }
 };

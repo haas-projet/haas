@@ -21,11 +21,12 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\PostgresTestCase;
+use Tests\Support\CapsuleReviewNotificationFixtures;
 use Tests\Support\SpaHttpRequests;
 
 final class CapsuleReviewReadinessTest extends PostgresTestCase
 {
-    use DatabaseMigrations, SpaHttpRequests;
+    use CapsuleReviewNotificationFixtures, DatabaseMigrations, SpaHttpRequests;
 
     protected function setUp(): void
     {
@@ -123,6 +124,30 @@ final class CapsuleReviewReadinessTest extends PostgresTestCase
     }
 
     #[DataProvider('auditCommands')]
+    public function test_numeric_string_lock_is_a_validation_error_for_both_review_actions(bool $review): void
+    {
+        [$owner, $capsule, $version] = $this->draft($review ? CapsuleVersionState::InReview : CapsuleVersionState::Draft);
+        $actor = $review ? User::factory()->verified()->create(['role' => Role::Moderator]) : $owner;
+        $this->login($actor);
+        $payload = ['lock_version' => '1'];
+        if ($review) {
+            $payload['note'] = 'Complétez les limites et les étapes manquantes.';
+        }
+        $this->browserRequest('POST', $this->url($capsule, $version, $review), $payload, $this->key())->assertUnprocessable();
+        $this->assertSame(1, $version->refresh()->lock_version);
+        $this->assertDatabaseCount('api_idempotency', 0);
+        $this->assertDatabaseCount('capsule_version_reviews', 0);
+    }
+
+    public function test_space_padding_cannot_satisfy_the_useful_review_note_minimum(): void
+    {
+        [, $capsule, $version] = $this->draft(CapsuleVersionState::InReview);
+        $this->login(User::factory()->verified()->create(['role' => Role::Moderator]));
+        $this->browserRequest('POST', $this->url($capsule, $version, true), ['lock_version' => 1, 'note' => 'x'.str_repeat(' ', 19)], $this->key())->assertUnprocessable();
+        $this->assertDatabaseCount('capsule_version_reviews', 0);
+    }
+
+    #[DataProvider('auditCommands')]
     public function test_a_real_audit_failure_rolls_back_the_transition_and_intention(bool $review): void
     {
         $state = $review ? CapsuleVersionState::InReview : CapsuleVersionState::Draft;
@@ -144,6 +169,7 @@ final class CapsuleReviewReadinessTest extends PostgresTestCase
             $this->assertDatabaseCount('capsule_version_reviews', 0);
             $this->assertDatabaseCount('content_revisions', 0);
             $this->assertDatabaseCount('api_idempotency', 0);
+            $this->assertDatabaseCount('notification_outbox', 0);
         } finally {
             DB::unprepared('DROP TRIGGER reject_capsule_audit_fixture ON content_revisions; DROP FUNCTION reject_capsule_audit_fixture()');
         }

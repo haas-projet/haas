@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Capsules;
 
+use App\Enums\Capsules\CapsuleVersionState;
 use App\Enums\Capsules\ReviewDecision;
 use App\Models\Capsules\CapsuleVersion;
 use App\Models\Capsules\CapsuleVersionReview;
@@ -11,12 +12,14 @@ use App\Models\User;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Tests\PostgresTestCase;
+use Tests\Support\CapsuleReviewNotificationFixtures;
 
 final class CapsuleVersionReviewsSchemaTest extends PostgresTestCase
 {
-    use DatabaseMigrations;
+    use CapsuleReviewNotificationFixtures, DatabaseMigrations;
 
     public function test_review_is_persisted(): void
     {
@@ -98,5 +101,26 @@ final class CapsuleVersionReviewsSchemaTest extends PostgresTestCase
         $this->expectException(QueryException::class);
         $this->expectExceptionMessageMatches('/capsule_reviews_positive_version/i');
         CapsuleVersionReview::factory()->create(['reviewed_lock_version' => 0]);
+    }
+
+    public function test_rollback_refuses_to_erase_a_real_reviewed_version(): void
+    {
+        $version = CapsuleVersion::factory()->create(['state' => CapsuleVersionState::InReview, 'lock_version' => 3]);
+        $review = CapsuleVersionReview::factory()->create(['version_id' => $version->id, 'reviewed_lock_version' => 3]);
+        $migration = require base_path('database/migrations/2026_10_07_195000_b24_preserve_review_history.php');
+        $failure = null;
+        try {
+            $migration->down();
+        } catch (\RuntimeException $error) {
+            $failure = $error;
+        } finally {
+            if (! Schema::hasColumn('capsule_version_reviews', 'reviewed_lock_version')) {
+                $migration->up();
+            }
+        }
+        $this->assertInstanceOf(\RuntimeException::class, $failure, 'Le downgrade ne doit pas effacer la version réellement relue.');
+        $this->assertStringContainsString('Rollback B24 refusé', $failure->getMessage());
+        $this->assertDatabaseHas('capsule_version_reviews', ['id' => $review->id, 'reviewed_lock_version' => 3,
+            'version_id' => $review->version_id, 'reviewer_id' => $review->reviewer_id, 'note' => $review->note]);
     }
 }

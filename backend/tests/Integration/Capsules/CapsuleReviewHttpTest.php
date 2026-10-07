@@ -16,11 +16,12 @@ use Illuminate\Support\Str;
 use Illuminate\Testing\TestResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\PostgresTestCase;
+use Tests\Support\CapsuleReviewNotificationFixtures;
 use Tests\Support\SpaHttpRequests;
 
 final class CapsuleReviewHttpTest extends PostgresTestCase
 {
-    use DatabaseMigrations, SpaHttpRequests;
+    use CapsuleReviewNotificationFixtures, DatabaseMigrations, SpaHttpRequests;
 
     protected function setUp(): void
     {
@@ -68,8 +69,8 @@ final class CapsuleReviewHttpTest extends PostgresTestCase
     public function test_published_version_cannot_be_submitted(): void
     {
         [$owner, $capsule, $version] = $this->seedDraft();
-        $version->state = CapsuleVersionState::Published;
-        $version->save();
+        $version->forceFill(['state' => CapsuleVersionState::Published, 'published_at' => now()->utc(),
+            'reviewer_id' => User::factory()->verified()->create(['role' => Role::Moderator])->id])->save();
         $this->loginAs($owner);
         $response = $this->reviewRequest('POST', $this->submitUrl($capsule, $version));
         $response->assertStatus(403);

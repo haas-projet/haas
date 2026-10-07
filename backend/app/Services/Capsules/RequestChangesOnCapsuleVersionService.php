@@ -8,6 +8,7 @@ use App\Data\Capsules\ReviewCommandData;
 use App\Data\Idempotency\IdempotencyData;
 use App\Data\Idempotency\IdempotencyKey;
 use App\Data\Idempotency\StoredCommandResult;
+use App\Data\Notifications\NotificationEvent;
 use App\Enums\Capsules\CapsuleVersionState;
 use App\Enums\Capsules\ReviewDecision;
 use App\Exceptions\Capsules\StaleCapsuleVersion;
@@ -17,6 +18,7 @@ use App\Models\Capsules\CapsuleVersionReview;
 use App\Models\User;
 use App\Policies\CapsulePolicy;
 use App\Services\Idempotency\IdempotencyService;
+use App\Services\Notifications\NotificationOutbox;
 use Illuminate\Auth\Access\AuthorizationException;
 
 /**
@@ -30,6 +32,7 @@ final class RequestChangesOnCapsuleVersionService
         private readonly CapsulePolicy $policy,
         private readonly WriteCapsuleAudit $audit,
         private readonly IdempotencyService $idempotency,
+        private readonly NotificationOutbox $outbox,
     ) {}
 
     public function handle(User $actor, Capsule $capsule, CapsuleVersion $version, ReviewCommandData $command, IdempotencyKey $key): CapsuleVersionReview
@@ -77,6 +80,7 @@ final class RequestChangesOnCapsuleVersionService
                     'review_id' => $review->id,
                     'lock_version' => $locked->lock_version,
                 ]);
+                $this->outbox->record(new NotificationEvent($review->id, $sourceCapsule->owner_id, 'capsule.review.changes_requested'));
 
                 return new StoredCommandResult(201, ['capsule_id' => $sourceCapsule->id, 'version_id' => $locked->id, 'review_id' => $review->id], $locked->lock_version);
             }, function (User $current, StoredCommandResult $stored): CapsuleVersionReview {

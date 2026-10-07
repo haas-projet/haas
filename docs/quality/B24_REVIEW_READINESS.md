@@ -36,10 +36,32 @@ PHP 8.5.10, PostgreSQL 17, base dédiée `haas_b24_review_test` sur `127.0.0.1:5
 
 L'upgrade/down/up de la migration additive conserve ID, note, version et reviewer d'une décision antérieure ; aucun rollback de production testé. Les premiers problèmes de configuration de test locaux rencontrés en B23 ne constituent pas des succès B24.
 
-## Travail encore requis dans cette même préparation
+## Travail restant après le premier correctif
 
 1. Intégrer le parent B23/B22/main corrigé, préserver ses gardes de visibilité, adapter les fixtures publiées aux contraintes B22 et relancer les suites combinées.
 2. Fermer Q12 : le cahier §15 exige la notification à l'auteur du brouillon pour publication **ou corrections demandées**. Raccordement à l'outbox commune main, dans la transaction de revue, puis livraison distincte après commit ; message/références seuls et visibilité courante avant liste/compteur/marquage. Cette notification n'est pas encore livrée par ce premier commit.
 3. CI distante, Qodana et revue humaine du commit final : non exécutés ici. Aucun `DONE`, frontend, GO_FRONTEND ou déploiement.
 
 L'intégrateur consigne les SHA après création des commits ; aucun SHA ne prétend se référencer dans son propre contenu.
+
+## Candidat après synchronisation et raccordement Q12
+
+Parent combiné `81ac242c1cb9e442aa2809715ebe24b2fc18ca98`, incluant le correctif B23 `d7ef6eb` et son schéma B22/main. Les gardes de visibilité B23 sont préservées. La fixture publiée de soumission ajoute date et reviewer fictif vérifié, modérateur et distinct du propriétaire ; son refus 403 est réellement contrôlé.
+
+Probes de validation avant correction, sur `08d89e3` : **3 tests / 13 assertions, 2 échecs**. Les deux actions de revue donnent TypeError 500 pour `lock_version="1"` ; elles exigent maintenant un entier JSON strict et rendent 422. La note utile `x` complétée par dix-neuf espaces est déjà rejetée 422 par le middleware, sans défaut supplémentaire de note observé.
+
+Q12 est raccordée dans ce lot pour **les corrections demandées seulement** : événement stable UUID du journal, destinataire propriétaire de la capsule relue sous verrou, intention écrite avec revue/transition/audit/idempotence, livraison séparée après commit. La notification ne copie ni note, corps, adresse ni titre. La Query filtre propriétaire actuel actif et vérifié et capsule visible avant liste, compteur, pagination et marquage. Les tests contrôlent observateur SQL indépendant avant commit, rollback, rejeu et livraison dédupliqués, panne réelle d’enregistrement/livraison, visibilité retirée, transfert et perte de vérification. Le cycle correction/édition/resoumission conserve l’attribution historique ; aucune acceptation ou publication B25 n’est ajoutée.
+
+La revue parallèle identifie aussi une perte de snapshot dans le down du journal : une régression propre exécutée avant fix échoue **1 test / 1 assertion** car aucun refus n’est levé. Le down prend désormais un verrou de table exclusif dans la transaction avant contrôle et DDL ; tout snapshot connu entraîne un refus sans perte de colonne, trigger ou attribution. L’additive des types notifications refuse de perdre ses événements stables, sous verrous outbox puis boîte interne. Les helpers Tests gardés par `TestDatabaseGuard` déposent seulement leurs fixtures avant le rollback automatique du schéma de test ; cette remise à zéro ne simule pas un downgrade de production. La première suite Q12 ciblée est interrompue pour ce correctif de journal, sans succès global revendiqué.
+
+| Contrôle du candidat | Résultat réel |
+|---|---|
+| Ciblés revue HTTP/readiness/concurrence/journal et notifications B17/Q12 | 53 tests / 496 assertions, OK |
+| Onze ciblés exacts après les dernières assertions (Q12, snapshots, integer, note et fixture publiée) | 11 tests / 116 assertions, OK ; ils recouvrent les précédents |
+| `php vendor/bin/phpunit --testsuite Unit,Feature,Architecture` | 350 tests / 3800 assertions, OK |
+| Pint / PHPStan niveau 8 | `passed` / `[OK] No errors` |
+| `composer validate --strict --no-check-publish` | composer.json valide ; notices de dépréciation PHP 8.5 du PHAR externe, aucun échec |
+| Pack / documentation déploiement / types API | 18/18, 7/7, 57 types à jour |
+| `php vendor/bin/phpunit --testsuite Integration --log-junit storage/logs/b24-q12-integration.xml` | Suite complète lancée sur `haas_b24_review_test`, résultat encore en attente |
+
+Journal SQL ignoré `backend/storage/logs/b24-q12-integration.log`. Aucune somme de ciblés qui se recouvrent n’est annoncée comme nombre de tests uniques. Le candidat est destiné à la CI en brouillon ; résultat SQL complet, CI du SHA exact, Qodana et revue humaine restent à recevoir. Aucun `DONE`, gate, frontend ni déploiement.

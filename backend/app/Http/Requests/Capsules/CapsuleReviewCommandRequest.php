@@ -20,7 +20,7 @@ abstract class CapsuleReviewCommandRequest extends FormRequest
     /** @return array<string, ValidationRule|array<mixed>|string> */
     public function rules(): array
     {
-        return ['lock_version' => ['required', 'integer', 'min:1', 'max:2147483646']];
+        return ['lock_version' => ['required', 'integer:strict', 'min:1', 'max:2147483646']];
     }
 
     public function withValidator(Validator $validator): void

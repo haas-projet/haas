@@ -6,9 +6,11 @@ paths:
       description: >-
         Session active requise, projection privée no-store. Ordre date/UUID décroissant.
         Aucun courriel, texte de contenu, code, motif de signalement ou lien public retiré.
-        Types pris en charge : profile.moderated et comment.created.
+        Types pris en charge : profile.moderated, comment.created et capsule.review.changes_requested.
         Pour les commentaires, la visibilité courante du commentaire, de son auteur et du parent
         filtre liste et compteur avant pagination ; aucun extrait n'est exposé.
+        Pour les corrections de capsule, le propriétaire courant actif et vérifié et la capsule visible
+        filtrent liste, compteur et marquage ; aucun corps ni note de revue n'est exposé.
       security: [{ SessionCookie: [] }]
       parameters:
         - $ref: '../../OPENAPI.yaml#/components/parameters/Page'
@@ -35,7 +37,7 @@ paths:
     patch:
       operationId: markOwnNotification
       summary: Marquer sa notification comme lue ou non lue
-      description: Session/CSRF, propriétaire actif, relecture sous verrou. Un tiers reçoit 404 même administrateur. La visibilité courante d'un commentaire et de son parent est recontrôlée ; une notification devenue inaccessible donne 404. Répéter read=true conserve la première date.
+      description: Session/CSRF, propriétaire actif, relecture sous verrou. Un tiers reçoit 404 même administrateur. La visibilité courante du commentaire et de son parent, ou la capsule visible et son propriétaire actuel actif et vérifié, sont recontrôlés ; une notification devenue inaccessible donne 404. Répéter read=true conserve la première date.
       security: [{ SessionCookie: [] }]
       parameters:
         - name: id
@@ -78,11 +80,11 @@ components:
       required: [id, kind, message, target_path, read_at, created_at]
       properties:
         id: { type: string, format: uuid }
-        kind: { type: string, enum: [profile.moderated, comment.created] }
+        kind: { type: string, enum: [profile.moderated, comment.created, capsule.review.changes_requested] }
         message: { type: string }
         target_path:
           type: string
-          pattern: '^/(?:me/profile|requests/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$'
-          description: Chemin interne /me/profile pour profile.moderated ou /requests/<UUID> pour comment.created ; aucune URL externe.
+          pattern: '^/(?:me/profile|requests/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}|capsules/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/versions/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/edition)$'
+          description: Chemin interne /me/profile, /requests/<UUID> ou /capsules/<UUID>/versions/<UUID>/edition selon le type autorisé ; aucune URL externe.
         read_at: { type: [string, 'null'], format: date-time }
         created_at: { type: string, format: date-time }

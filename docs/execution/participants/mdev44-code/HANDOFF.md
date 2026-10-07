@@ -305,3 +305,7 @@ Le conflit du test de migration d’identité conserve les retraits des tables d
 ### Transfert de réception B23
 
 Les trois défauts de dernière revue sont reproduits avant correction (13 / 55, dix échecs), puis corrigés. Ciblés définitifs : **24 / 186 réussis**, dont dix courses PostgreSQL réelles ; Pint, PHPStan niveau 8, documents 18/18 et 7/7, types API 54 à jour. Base dédiée `haas_b23_review_test`, PostgreSQL 17 local 55447. Réception globale à relancer du commit transmis par l’intégrateur, sans ajouter les essais précédents au total final. Details : [B23_DRAFT_READINESS.md](../../../quality/B23_DRAFT_READINESS.md). B24 doit reprendre ce parent avant sa réception ; aucun push, frontend ou revue humaine inventée.
+
+### Candidat B24 après reprise du parent B23
+
+Q12 corrections demandées et préservation de l’attribution raccordées, aucun B25. Hors SQL350/3800, ciblés53/496 puis onze ciblés exacts11/116 verts (recouvrement), Pint/PHPStan8/Composer/documents18+7/types57 verts. Suite complète Integration en cours sur `haas_b24_review_test`, journal/JUnit ignorés `backend/storage/logs/b24-q12-integration.*` ; aucun résultat complet encore acquis. L’intégrateur peut publier ce candidat en brouillon pour CI parallèle PHP8.4/8.5 ; réception SQL complète et CI du SHA final indispensables avant ready. Détails : [B24_REVIEW_READINESS.md](../../../quality/B24_REVIEW_READINESS.md). Revue humaine en attente.

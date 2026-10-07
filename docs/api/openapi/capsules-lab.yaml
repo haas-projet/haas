@@ -180,6 +180,10 @@ paths:
         Le journal de décisions conserve notes et attributions sans modification
         ni suppression. Cette décision demande une correction ; l'acceptation et
         la publication restent du ressort de B25 avec revue indépendante.
+        Une intention capsule.review.changes_requested destinée au propriétaire
+        est enregistrée dans la transaction de revue ; la livraison est distincte,
+        après commit. La notification contient uniquement message générique et
+        références, et respecte visibilité et droits courants avant lecture.
       security:
         - SessionCookie: []
       parameters:
@@ -318,7 +322,7 @@ components:
       additionalProperties: false
       required: [lock_version, note]
       properties:
-        lock_version: { type: integer, minimum: 1, maximum: 2147483646 }
+        lock_version: { type: integer, minimum: 1, maximum: 2147483646, description: 'Entier JSON strict ; les chaînes numériques sont refusées.' }
         note:
           type: string
           minLength: 20
@@ -338,7 +342,7 @@ components:
       additionalProperties: false
       required: [lock_version]
       properties:
-        lock_version: { type: integer, minimum: 1, maximum: 2147483646 }
+        lock_version: { type: integer, minimum: 1, maximum: 2147483646, description: 'Entier JSON strict ; les chaînes numériques sont refusées.' }
     CapsuleVersionDraftUpdate:
       type: object
       additionalProperties: false

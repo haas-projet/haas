@@ -16,10 +16,11 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Component\Process\InputStream;
 use Symfony\Component\Process\Process;
 use Tests\PostgresTestCase;
+use Tests\Support\CapsuleReviewNotificationFixtures;
 
 final class CapsuleReviewConcurrencyTest extends PostgresTestCase
 {
-    use DatabaseMigrations;
+    use CapsuleReviewNotificationFixtures, DatabaseMigrations;
 
     /** @return iterable<string, array{string}> */
     public static function races(): iterable
@@ -99,6 +100,7 @@ final class CapsuleReviewConcurrencyTest extends PostgresTestCase
             $applied = in_array('APPLIED', $expected, true);
             $this->assertDatabaseCount('capsule_versions', 1);
             $this->assertDatabaseCount('capsule_version_reviews', $applied && $review ? 1 : 0);
+            $this->assertDatabaseCount('notification_outbox', $applied && $review ? 1 : 0);
             $this->assertDatabaseCount('api_idempotency', $applied ? 1 : 0);
             $this->assertDatabaseCount('content_revisions', $applied ? 1 : 0);
             $this->assertSame($applied ? 2 : 1, $version->refresh()->lock_version);

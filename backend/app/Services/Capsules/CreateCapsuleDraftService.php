@@ -22,6 +22,7 @@ use App\Models\User;
 use App\Policies\CapsulePolicy;
 use App\Services\Idempotency\IdempotencyService;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -74,6 +75,18 @@ final class CreateCapsuleDraftService
         if ($request === null) {
             throw ValidationException::withMessages(['source_request_id' => ['Demande source introuvable.']]);
         }
+        try {
+            // L’acteur est déjà verrouillé par l’idempotence. NOWAIT empêche un
+            // cycle acteur A → auteur B / acteur B → auteur A ; le partage garde
+            // l’accès de l’auteur source stable jusqu’au commit ou au rollback.
+            $sourceAuthor = User::whereKey($request->author_id)->lock('FOR SHARE NOWAIT')->first();
+        } catch (QueryException $error) {
+            if (($error->errorInfo[0] ?? null) !== '55P03') {
+                throw $error;
+            }
+            throw new CapsuleDraftConflict('La demande source est en cours de modification. Réessayez.');
+        }
+        $request->setRelation('author', $sourceAuthor);
         if (! $this->policy->proposeFromHelpRequest($actor, $request)) {
             throw new AuthorizationException;
         }

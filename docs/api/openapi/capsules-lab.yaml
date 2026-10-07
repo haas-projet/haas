@@ -166,6 +166,7 @@ components:
           type: string
           minLength: 20
           maxLength: 24000
+          description: Au moins 20 caractères après retrait des espaces extérieurs pour la validation ; le corps valide est conservé exactement.
         limits:
           type: string
           minLength: 1
@@ -230,10 +231,12 @@ components:
           type: integer
           minimum: 1
           maximum: 2147483646
+          description: Entier JSON strict ; les chaînes numériques sont refusées.
         body:
           type: string
           minLength: 20
           maxLength: 24000
+          description: Au moins 20 caractères après retrait des espaces extérieurs pour la validation ; le corps valide est conservé exactement.
         limits:
           type: string
           minLength: 1

@@ -44,7 +44,7 @@ final class CapsulePolicy
     public function proposeFromHelpRequest(?User $actor, HelpRequest $request): bool
     {
         $access = new MemberAccess;
-        if ($request->hidden_at !== null || ! $access->verified($actor)) {
+        if ($request->hidden_at !== null || ! $access->verified($actor) || ! $access->verified($request->author)) {
             return false;
         }
 

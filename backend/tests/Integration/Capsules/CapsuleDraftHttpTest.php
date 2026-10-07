@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Tests\Integration\Capsules;
 
 use App\Enums\Capsules\CapsuleVersionState;
+use App\Enums\Collaboration\ProposalState;
+use App\Enums\HelpRequests\HelpRequestState;
 use App\Enums\Identity\AccountStatus;
 use App\Enums\Identity\Role;
 use App\Models\Capsules\Capsule;
@@ -187,12 +189,7 @@ final class CapsuleDraftHttpTest extends PostgresTestCase
         $first = $this->browserRequest('POST', '/api/v1/capsules', $this->helpRequestPayload($request->id), $this->keyHeader())->assertCreated();
         $capsuleId = $first->json('data.id');
         $this->assertDatabaseCount('capsule_versions', 1);
-        try {
-            $this->browserRequest('POST', "/api/v1/capsules/{$capsuleId}/versions", $this->versionBody('1.0.0'), $this->keyHeader());
-            $this->fail('Un doublon de version_label aurait dû être rejeté.');
-        } catch (\Throwable) {
-            // L'erreur est consommée : la contrainte unique PostgreSQL remonte via IdempotencyStorageFailed.
-        }
+        $this->browserRequest('POST', "/api/v1/capsules/{$capsuleId}/versions", $this->versionBody('1.0.0'), $this->keyHeader())->assertConflict();
         $this->assertDatabaseCount('capsule_versions', 1);
     }
 
@@ -237,8 +234,8 @@ final class CapsuleDraftHttpTest extends PostgresTestCase
     private function resolvedHelpRequest(): array
     {
         $author = User::factory()->verified()->create();
-        $request = HelpRequest::factory()->create(['author_id' => $author->id]);
-        $proposal = Proposal::factory()->create(['request_id' => $request->id, 'author_id' => $author->id]);
+        $request = HelpRequest::factory()->create(['author_id' => $author->id, 'state' => HelpRequestState::Resolved]);
+        $proposal = Proposal::factory()->create(['request_id' => $request->id, 'author_id' => $author->id, 'state' => ProposalState::Accepted]);
         Resolution::factory()->create(['request_id' => $request->id, 'proposal_id' => $proposal->id, 'accepted_by' => $author->id]);
 
         return [$author, $request];
@@ -249,8 +246,8 @@ final class CapsuleDraftHttpTest extends PostgresTestCase
     {
         $owner = User::factory()->verified()->create();
         $proposer = User::factory()->verified()->create();
-        $request = HelpRequest::factory()->create(['author_id' => $owner->id]);
-        $proposal = Proposal::factory()->create(['request_id' => $request->id, 'author_id' => $proposer->id]);
+        $request = HelpRequest::factory()->create(['author_id' => $owner->id, 'state' => HelpRequestState::Resolved]);
+        $proposal = Proposal::factory()->create(['request_id' => $request->id, 'author_id' => $proposer->id, 'state' => ProposalState::Accepted]);
         Resolution::factory()->create(['request_id' => $request->id, 'proposal_id' => $proposal->id, 'accepted_by' => $owner->id]);
 
         return [$owner, $request, $proposer];

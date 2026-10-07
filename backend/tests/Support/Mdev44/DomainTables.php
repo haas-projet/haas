@@ -15,10 +15,10 @@ final class DomainTables
 {
     /** @var list<string> */
     private const TABLES = [
-        'artifacts',
-        'capsule_contributors',
         'capsule_version_reviews',
         'capsule_version_technologies',
+        'artifacts',
+        'capsule_contributors',
         'capsule_versions',
         'capsules',
     ];

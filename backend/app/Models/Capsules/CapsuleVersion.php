@@ -19,8 +19,9 @@ use Illuminate\Support\Carbon;
 /**
  * @property CapsuleVersionState $state
  * @property Carbon|null $published_at
+ * @property int $lock_version
  */
-#[Fillable(['capsule_id', 'version_label', 'body', 'limits', 'state', 'reviewer_id', 'published_at'])]
+#[Fillable(['version_label', 'body', 'limits'])]
 class CapsuleVersion extends Model
 {
     /** @use HasFactory<CapsuleVersionFactory> */

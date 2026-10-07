@@ -11,6 +11,7 @@ use App\Data\Idempotency\IdempotencyKey;
 use App\Data\Idempotency\StoredCommandResult;
 use App\Enums\Capsules\CapsuleVersionState;
 use App\Enums\Capsules\ContributionRole;
+use App\Exceptions\Capsules\CapsuleDraftConflict;
 use App\Models\Capsules\Capsule;
 use App\Models\Capsules\CapsuleVersion;
 use App\Models\User;
@@ -23,7 +24,7 @@ use Illuminate\Support\Str;
 /**
  * Ajoute une nouvelle version-brouillon à une capsule existante. L'unicité
  * (capsule_id, version_label) est appliquée en base ; une collision remonte
- * en 409 via ApiExceptionRenderer après encapsulation ValidationException.
+ * en 409 via CapsuleDraftConflict et son traitement dans le contrôleur.
  */
 final class CreateCapsuleVersionDraftService
 {
@@ -33,7 +34,7 @@ final class CreateCapsuleVersionDraftService
         private readonly WriteCapsuleAudit $audit,
     ) {}
 
-    /** @return array{version_id: string} */
+    /** @return array{version_id: string, version: CapsuleVersion} */
     public function handle(User $actor, Capsule $capsule, VersionDraftData $draft, IdempotencyKey $key): array
     {
         $target = 'POST /api/v1/capsules/'.$capsule->id.'/versions';
@@ -43,28 +44,35 @@ final class CreateCapsuleVersionDraftService
             $actor,
             $idempotent,
             function (User $a) use ($capsule): void {
-                if (! $this->policy->createVersionDraft($a, $capsule)) {
+                $currentCapsule = Capsule::whereKey($capsule->id)->lockForUpdate()->firstOrFail();
+                if (! $this->policy->createVersionDraft($a, $currentCapsule)) {
                     throw new AuthorizationException;
                 }
             },
             fn (User $a) => $this->writeNewVersion($a, $capsule, $draft),
-            fn (User $a, StoredCommandResult $stored) => $stored,
+            fn (User $a, StoredCommandResult $stored) => (new DraftResult)->check($a, $stored),
         );
 
         return [
-            'version_id' => $result->references['version_id'],
+            'version_id' => $result['stored']->references['version_id'],
+            'version' => $result['version'],
         ];
     }
 
     private function writeNewVersion(User $actor, Capsule $capsule, VersionDraftData $draft): StoredCommandResult
     {
-        $version = CapsuleVersion::create([
+        (new CheckDraftTechnologies)->check($draft->technologies);
+        if (CapsuleVersion::where('capsule_id', $capsule->id)->where('version_label', $draft->versionLabel)->exists()) {
+            throw new CapsuleDraftConflict('Cette version existe déjà pour la capsule.');
+        }
+        $version = (new CapsuleVersion)->forceFill([
             'capsule_id' => $capsule->id,
             'version_label' => $draft->versionLabel,
             'body' => $draft->body,
             'limits' => $draft->limits,
             'state' => CapsuleVersionState::Draft,
         ]);
+        $version->save();
         $this->attachTechnologies($version, $draft);
         DB::table('capsule_contributors')->insert([
             'id' => (string) Str::uuid(),
@@ -81,7 +89,7 @@ final class CreateCapsuleVersionDraftService
 
         return new StoredCommandResult(
             status: 201,
-            references: ['version_id' => $version->id],
+            references: ['capsule_id' => $capsule->id, 'version_id' => $version->id],
             version: 1,
         );
     }

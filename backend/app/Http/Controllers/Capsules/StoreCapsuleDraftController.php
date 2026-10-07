@@ -4,15 +4,16 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Capsules;
 
+use App\Exceptions\Capsules\CapsuleDraftConflict;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Capsules\StoreCapsuleDraftRequest;
 use App\Http\Resources\Capsules\CapsuleDraftResource;
-use App\Models\Capsules\Capsule;
 use App\Models\User;
 use App\Services\Capsules\CreateCapsuleDraftService;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 
 final class StoreCapsuleDraftController extends Controller
 {
@@ -25,14 +26,18 @@ final class StoreCapsuleDraftController extends Controller
         if (! $actor instanceof User) {
             throw new AuthenticationException;
         }
-        $result = $service->handle(
-            actor: $actor,
-            data: $request->toCapsuleDraft(),
-            key: $request->idempotencyKey(),
-        );
-        $capsule = Capsule::whereKey($result['capsule_id'])->firstOrFail();
+        try {
+            $result = $service->handle(
+                actor: $actor,
+                data: $request->toCapsuleDraft(),
+                key: $request->idempotencyKey(),
+            );
+        } catch (CapsuleDraftConflict $exception) {
+            throw new ConflictHttpException($exception->getMessage(), $exception);
+        }
+        $capsule = $result['capsule'];
         $resource = new CapsuleDraftResource($capsule);
 
-        return $resource->response()->setStatusCode(Response::HTTP_CREATED);
+        return $resource->response()->setStatusCode(Response::HTTP_CREATED)->header('Cache-Control', 'no-store, private');
     }
 }

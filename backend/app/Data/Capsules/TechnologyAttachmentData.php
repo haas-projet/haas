@@ -17,7 +17,7 @@ final readonly class TechnologyAttachmentData
         }
         if ($versionLabel !== null) {
             $trimmed = trim($versionLabel);
-            if ($trimmed === '' || $trimmed !== $versionLabel || strlen($versionLabel) > 40 || preg_match('/[[:cntrl:]]/u', $versionLabel) === 1) {
+            if ($trimmed === '' || $trimmed !== $versionLabel || mb_strlen($versionLabel) > 40 || preg_match('/[[:cntrl:]]/u', $versionLabel) === 1) {
                 throw new InvalidArgumentException('version_label de technology hors contrat.');
             }
         }

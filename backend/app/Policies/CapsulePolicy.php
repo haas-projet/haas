@@ -37,6 +37,11 @@ final class CapsulePolicy
         return $actor->role === Role::Moderator || $actor->role === Role::Admin;
     }
 
+    /**
+     * La résolution active est relue en base à chaque contrôle.
+     *
+     * @phpstan-impure
+     */
     public function proposeFromHelpRequest(?User $actor, HelpRequest $request): bool
     {
         $access = new MemberAccess;
@@ -67,12 +72,12 @@ final class CapsulePolicy
         }
 
         /** @var User $actor */
-        return $capsule->owner_id === $actor->id;
+        return $capsule->visibility === CapsuleVisibility::Visible && $capsule->owner_id === $actor->id;
     }
 
     public function editDraft(?User $actor, Capsule $capsule, CapsuleVersionState $state, string $versionId): bool
     {
-        if ($state !== CapsuleVersionState::Draft && $state !== CapsuleVersionState::ChangesRequested) {
+        if ($capsule->visibility !== CapsuleVisibility::Visible || ($state !== CapsuleVersionState::Draft && $state !== CapsuleVersionState::ChangesRequested)) {
             return false;
         }
         $access = new MemberAccess;

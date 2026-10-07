@@ -153,8 +153,8 @@
       "refs": "AC10 ; F02/F03/F04",
       "phase": "B",
       "execution_order": 13,
-      "status": "IN_REVIEW",
-      "evidence": ["docs/quality/B11_COLLABORATION.md"]
+      "status": "DONE",
+      "evidence": ["docs/quality/B11_COLLABORATION.md", "docs/quality/MERGE_MADINA.md"]
     },
     {
       "id": "B12",
@@ -189,7 +189,8 @@
       "refs": "AC03–AC07 ; F02",
       "phase": "B",
       "execution_order": 16,
-      "status": "TODO"
+      "status": "DONE",
+      "evidence": ["docs/quality/B14_CREATION.md","docs/quality/PR_READINESS_20261007.md"]
     },
     {
       "id": "B15",
@@ -200,7 +201,8 @@
       "refs": "AC03/AC15/AC25 ; F12",
       "phase": "B",
       "execution_order": 17,
-      "status": "TODO"
+      "status": "DONE",
+      "evidence": ["docs/quality/B15_READING.md","docs/quality/PR_READINESS_20261007.md"]
     },
     {
       "id": "B16",
@@ -211,7 +213,8 @@
       "refs": "AC03/AC05 ; F02",
       "phase": "B",
       "execution_order": 18,
-      "status": "TODO"
+      "status": "DONE",
+      "evidence": ["docs/quality/B16_EDITING.md","docs/quality/PR_READINESS_20261007.md"]
     },
     {
       "id": "B17",
@@ -222,7 +225,8 @@
       "refs": "AC06/AC07 ; F03",
       "phase": "B",
       "execution_order": 19,
-      "status": "TODO"
+      "status": "DONE",
+      "evidence": ["docs/quality/B17_COMMENTS.md","docs/quality/PR_READINESS_20261007.md"]
     },
     {
       "id": "B18",
@@ -277,7 +281,8 @@
       "refs": "F05/F06 ; AC13",
       "phase": "B",
       "execution_order": 24,
-      "status": "TODO"
+      "status": "IN_PROGRESS",
+      "evidence": ["docs/quality/MERGE_MADINA.md"]
     },
     {
       "id": "B23",
@@ -288,7 +293,8 @@
       "refs": "F05 ; AC03/AC12",
       "phase": "B",
       "execution_order": 25,
-      "status": "TODO"
+      "status": "IN_PROGRESS",
+      "evidence": ["docs/quality/MERGE_MADINA.md"]
     },
     {
       "id": "B24",
@@ -424,7 +430,8 @@
       "refs": "AC16/AC21 ; B1-01–B1-05",
       "phase": "B",
       "execution_order": 37,
-      "status": "TODO"
+      "status": "IN_PROGRESS",
+      "evidence": ["docs/quality/MERGE_MADINA.md"]
     },
     {
       "id": "B36",
@@ -457,7 +464,8 @@
       "refs": "AC23 ; B2 backend ; ADR-004 / DEP",
       "phase": "B",
       "execution_order": 40,
-      "status": "TODO"
+      "status": "BLOCKED",
+      "evidence": ["docs/quality/MERGE_MADINA.md"]
     },
     {
       "id": "BC01",
@@ -1449,6 +1457,6 @@
   ],
   "deployment_decision": "ADR-004",
   "source_alignment": "Mail CADEV fourni ; décisions de conception ADR-005",
-  "updated_at": "2026-10-01",
+  "updated_at": "2026-10-07",
   "latest_decision": "ADR-006"
 }

@@ -59,17 +59,14 @@ final class CapsuleVersionsSchemaTest extends PostgresTestCase
         $this->assertDatabaseMissing('capsule_versions', ['id' => $version->id]);
     }
 
-    public function test_reviewer_deletion_nullifies_reviewer_without_deleting_version(): void
+    public function test_reviewer_deletion_preserves_attribution_by_refusing_the_delete(): void
     {
         $reviewer = User::factory()->create();
         $version = CapsuleVersion::factory()->inReview($reviewer)->create();
 
+        $this->expectException(QueryException::class);
+        $this->expectExceptionMessageMatches('/capsule_versions_reviewer_id_foreign/i');
         $reviewer->delete();
-
-        $this->assertDatabaseHas('capsule_versions', [
-            'id' => $version->id,
-            'reviewer_id' => null,
-        ]);
     }
 
     public function test_published_at_requires_published_state(): void

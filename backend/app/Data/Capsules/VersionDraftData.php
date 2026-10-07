@@ -27,12 +27,12 @@ final readonly class VersionDraftData
             throw new InvalidArgumentException('version_label doit être MAJOR.MINOR.PATCH, 40 car. max.');
         }
         $bodyTrimmed = trim($body);
-        if (strlen($bodyTrimmed) < self::BODY_MIN || strlen($body) > self::BODY_MAX) {
+        if (mb_strlen($bodyTrimmed) < self::BODY_MIN || mb_strlen($body) > self::BODY_MAX) {
             throw new InvalidArgumentException('body hors bornes de taille.');
         }
         if ($limits !== null) {
             $limitsTrimmed = trim($limits);
-            if ($limitsTrimmed === '' || strlen($limits) > self::LIMITS_MAX) {
+            if ($limitsTrimmed === '' || mb_strlen($limits) > self::LIMITS_MAX) {
                 throw new InvalidArgumentException('limits hors bornes de taille.');
             }
         }

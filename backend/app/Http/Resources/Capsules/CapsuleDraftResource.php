@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Resources\Capsules;
 
 use App\Models\Capsules\Capsule;
+use App\Models\Capsules\CapsuleVersion;
 use App\Models\Technology;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Http\Request;
@@ -24,8 +25,9 @@ final class CapsuleDraftResource extends JsonResource
     {
         /** @var Capsule $capsule */
         $capsule = $this->resource;
-        $version = $capsule->versions()->orderBy('created_at')->firstOrFail();
-        $technologies = $version->technologies()->get(['technologies.id', 'technologies.slug'])->map(static function (Technology $t): array {
+        /** @var CapsuleVersion $version */
+        $version = $capsule->getRelation('draftVersion');
+        $technologies = $version->technologies->map(static function (Technology $t): array {
             /** @var Pivot $pivot */
             $pivot = $t->getRelation('pivot');
 
@@ -47,8 +49,10 @@ final class CapsuleDraftResource extends JsonResource
             ],
             'version' => [
                 'id' => $version->id,
+                'capsule_id' => $version->capsule_id,
                 'version_label' => $version->version_label,
                 'state' => $version->state->value,
+                'lock_version' => $version->lock_version,
                 'body' => $version->body,
                 'limits' => $version->limits,
                 'technologies' => $technologies,

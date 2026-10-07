@@ -30,7 +30,7 @@ final readonly class CapsuleDraftData
         }
         if ($editorialOrigin !== null) {
             $trimmed = trim($editorialOrigin);
-            if (strlen($trimmed) < 3 || strlen($editorialOrigin) > 100 || preg_match('/[[:cntrl:]]/u', $editorialOrigin) === 1) {
+            if (mb_strlen($trimmed) < 3 || mb_strlen($editorialOrigin) > 100 || preg_match('/[[:cntrl:]]/u', $editorialOrigin) === 1) {
                 throw new InvalidArgumentException('editorial_origin hors contrat.');
             }
         }

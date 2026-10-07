@@ -10,6 +10,8 @@ use App\Data\Capsules\VersionDraftData;
 use App\Data\Idempotency\IdempotencyKey;
 use App\Enums\Capsules\CapsuleSourceKind;
 use App\Enums\Capsules\CapsuleVersionState;
+use App\Enums\Collaboration\ProposalState;
+use App\Enums\HelpRequests\HelpRequestState;
 use App\Enums\Identity\Role;
 use App\Models\Capsules\Capsule;
 use App\Models\HelpRequest;
@@ -198,8 +200,8 @@ final class CreateCapsuleDraftServiceTest extends PostgresTestCase
     private function resolvedHelpRequest(): array
     {
         $author = User::factory()->verified()->create();
-        $request = HelpRequest::factory()->create(['author_id' => $author->id]);
-        $proposal = Proposal::factory()->create(['request_id' => $request->id, 'author_id' => $author->id]);
+        $request = HelpRequest::factory()->create(['author_id' => $author->id, 'state' => HelpRequestState::Resolved]);
+        $proposal = Proposal::factory()->create(['request_id' => $request->id, 'author_id' => $author->id, 'state' => ProposalState::Accepted]);
         Resolution::factory()->create([
             'request_id' => $request->id,
             'proposal_id' => $proposal->id,

@@ -2,7 +2,7 @@
 
 Inspecter le dépôt, préserver les fichiers/commits/saisies existants, lire ADR-006. Appliquer F18 : projets ouverts, offres consenties, décision propriétaire, fil et projection publique contrôlés. Nouvelle recette avant GO_FRONTEND ; ne pas prendre un ancien gate pour un accord sur ce périmètre. Systalink/Vercel inchangé.
 
-État courant : B01–B09, B12–B13 et B32 DONE (12 lots) après intégration autorisée du socle. B11 préparé en revue sur `backend/communaute-entraide`, depuis main `7a8c672`, avec les commits B11 existants de mdev44-code préservés. Les 26 autres lots de la coordination #2 restent à faire. B10/B29/B30/B31 et B39–B42 IN_PROGRESS ; B43/B44 BLOCKED. S01/S02 restent partiels. BACKEND_GATE NON REÇU, aucun GO_FRONTEND/GO_PRODUCTION. Voir [la preuve B11](../quality/B11_COLLABORATION.md) et le [suivi de Lamine](participants/LamineGL/HANDOFF.md). Les entrées suivantes sont historiques.
+État courant : B01–B09, B11–B17 et B32 DONE (17 lots entiers). #24 est réellement fusionnée dans main b76612d le 7 octobre à 20:24:58 UTC ; CI du head 2addb4d et CI de main vertes (671 tests / 6805 assertions sur PHP 8.4 et 8.5). GitHub ne contient aucune revue enregistrée sur #24 ; aucune approbation humaine n’est inventée. #31 (README et bilan) est fusionnée dans main e3bd34c. B22/B23/B24 sont préparés dans #29/#30/#33, corrections et synchronisations en cours ; B38 #28 attend les preuves finales de son isolation corrigée. B35 reste partiel. Les 22 autres lots de Lamine restent à faire. B10/B29/B30/B31 et B39–B42 IN_PROGRESS ; B43/B44 BLOCKED. S01/S02 partiels. Aucun BACKEND_GATE, GO_FRONTEND ou GO_PRODUCTION. Voir PR_READINESS_20261007.md et les preuves métier. Les entrées suivantes sont historiques.
 
 ## Reprise après préparation GitHub — 2026-10-01
 
@@ -187,3 +187,26 @@ Demande explicite « faite ca » : intégration des PR #10, #11, #13–#20, dans
 Les neuf branches temporaires sont supprimées après vérification des 30 références de commits dans main et de l'absence de PR dépendante. Restent main et les trois branches permanentes ; backend/socle-auth synchronisée, branches des collègues et PR #12 conservées. Aucune réécriture, aucun contournement de protection, aucun déploiement.
 
 B07/B08/B09/B12/B13/B32 DONE ; le tableau Systalink comporte maintenant 12 lots terminés, 8 partiels et 2 bloqués. Contributions et autres raccordements attendent les pilotes ; Qodana et réception complète restent ouverts. Aucun GO_FRONTEND. Reprendre sur backend/socle-auth ; ne pas recréer les anciennes branches pour consulter leurs commits, tous conservés dans main.
+
+## 2026-10-04 — B15, lecture/recherche de la partie de Lamine
+
+- Demande de continuer après B14. Branche `backend/communaute-entraide-b15`, worktree `.worktrees/b15`, depuis `6a0db1e`. PR #23 de Madina, #22 et #24 inchangées, PR #12 préservée ; la modification préexistante des routes capsules dans le répertoire principal est exclue et conservée.
+- GET liste/détail, visibilité commune avant recherche/pagination/total, brouillons réservés à leur auteur, vue mine explicite, filtres/tri bornés et chargement des relations sans N+1. Aucune migration ni dépendance ajoutée. Contrat [HELP_REQUEST_READING.md](../api/HELP_REQUEST_READING.md), preuve [B15_READING.md](../quality/B15_READING.md).
+- Résultats locaux : 284 tests / 2811 assertions hors SQL et 227 / 2023 sur PostgreSQL dédié (511 / 4834). Pint/PHPStan, Composer validation/prérequis/audit et documentation réussis, 38 types à jour. Quatre SELECT métier pour 5 comme pour 25 demandes. Cluster 54695/haas_b15_test arrêté après les tests.
+- B15 IN_REVIEW ; SHA final et CI à constater dans la PR et le bilan après publication. Ordre #23 → #22 → #24 → B15, sans fusion ni revue humaine simulée. B11/B14/B15 En cours dans Systalink, 24 autres lots à faire. Prochain B16, édition sous version. Aucun BACKEND_GATE ni frontend/déploiement.
+
+## Reprise B16 — 2026-10-04
+
+Lot B16 préparé depuis B15 `0cfcde1` sur `backend/communaute-entraide-b16` dans `.worktrees/b16`. Contrat [HELP_REQUEST_EDITING.md](../api/HELP_REQUEST_EDITING.md), preuves [B16_EDITING.md](../quality/B16_EDITING.md) et suivi [LamineGL](participants/LamineGL/HANDOFF.md). Édition sous version, note après contribution, publication distincte et historique privé/public atomiques. Les migrations de Madina sont conservées ; les tests de retour B05/B11 connaissent désormais la nouvelle table enfant.
+
+La PR doit cibler `backend/communaute-entraide-b15` pendant sa revue. Ordre #23 → #22 → #24 → #25 → B16 ; après chaque fusion autorisée, recibler/synchroniser et vérifier la CI. SHA réel et CI du commit publié dans le bilan/PR. Aucun avis humain ni merge présumé. Routes capsules locales dans le répertoire principal non incluses.
+
+B17 est le prochain lot. Ses écritures devront verrouiller le parent avant de contribuer et préserver le contrat de notes B16. B11/B14/B15/B16 restent En cours dans Systalink jusqu'à intégration ; 23 autres lots de Lamine à faire. Aucun GO_FRONTEND/GO_PRODUCTION.
+
+## 2026-10-07 — Reprise après revue de Madina
+
+Fusions distantes vérifiées : #12 33eafa0, #22 957029b dans B11, #23 17c6daa et #27 f1f6238 dans main. Lire docs/quality/MERGE_MADINA.md pour les SHA complets, contrôles et limites. B11 DONE ; 13 lots backend entiers terminés. Correctif UTC B1 cdbe96f inclus. Head combiné 108aa7d : 488 tests / 3977 assertions locaux et sous les deux PHP de la CI 37637092346, contrôles verts.
+
+Reprendre B22 #29 (retrait avec date de publication conservée, champs serveur, versions/technologies), puis B23 #30 (source vraiment résolue, validations, verrouillage/rejeu et tests HTTP). Les PR restent en brouillon. B38 #28 reste BLOCKED : probes Origin démonstration=403 et Origin HAAS=deux cookies ; appliquer le patch inerte docs/quality/probes/B38_ISOLATION.patch sur la branche B2 pour reproduire, avec base locale dédiée. Corriger origine/routage sans session et isolation réelle base/runtime/configuration, puis revalider la concurrence.
+
+B35 IN_PROGRESS : service transactionnel et concurrence reçus, câblage haas_lab/isolation et module défectueux pédagogique à compléter avant B36. Le cluster PostgreSQL temporaire de revue est arrêté. Travail local initial B14 préservé ; ne pas écraser sa modification de routes. Toutes les branches distantes sont conservées. Aucun BACKEND_GATE, GO_FRONTEND ou GO_PRODUCTION.

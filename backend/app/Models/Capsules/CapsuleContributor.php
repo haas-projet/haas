@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * @property ContributionRole $contribution_role
  */
-#[Fillable(['version_id', 'user_id', 'contribution_role'])]
+#[Fillable([])]
 class CapsuleContributor extends Model
 {
     /** @use HasFactory<CapsuleContributorFactory> */

@@ -15,7 +15,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * @property ArtifactDistributionStatus $distribution_status
  */
-#[Fillable(['version_id', 'private_path', 'sha256', 'size', 'distribution_status', 'notices_path'])]
+#[Fillable([])]
 class Artifact extends Model
 {
     /** @use HasFactory<ArtifactFactory> */

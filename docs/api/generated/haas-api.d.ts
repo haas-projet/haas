@@ -27,9 +27,11 @@ export type capsules_lab_CapsuleDraft = { readonly "id": string; readonly "slug"
 
 export type capsules_lab_CapsuleDraftInput = { readonly "slug": string; readonly "source": { readonly "kind": "help_request" | "editorial"; readonly "help_request_id"?: string; readonly "editorial_origin"?: string; }; readonly "version": capsules_lab_CapsuleVersionDraftInput; };
 
-export type capsules_lab_CapsuleVersionDraft = { readonly "id": string; readonly "capsule_id"?: string; readonly "version_label": string; readonly "state": "draft" | "in_review" | "changes_requested" | "published" | "withdrawn"; readonly "body": string; readonly "limits"?: string; readonly "technologies"?: ReadonlyArray<{ readonly "id"?: string; readonly "slug"?: string; readonly "version_label"?: string; [key: string]: unknown; }>; [key: string]: unknown; };
+export type capsules_lab_CapsuleVersionDraft = { readonly "id": string; readonly "capsule_id"?: string; readonly "version_label": string; readonly "state": "draft" | "in_review" | "changes_requested" | "published" | "withdrawn"; readonly "body": string; readonly "limits"?: string; readonly "lock_version"?: number; readonly "technologies"?: ReadonlyArray<{ readonly "id"?: string; readonly "slug"?: string; readonly "version_label"?: string; [key: string]: unknown; }>; [key: string]: unknown; };
 
 export type capsules_lab_CapsuleVersionDraftInput = { readonly "version_label": string; readonly "body": string; readonly "limits"?: string; readonly "technologies"?: ReadonlyArray<{ readonly "technology_id": string; readonly "version_label"?: string; }>; };
+
+export type capsules_lab_CapsuleVersionDraftUpdate = { readonly "lock_version": number; readonly "body"?: string; readonly "limits"?: string; readonly "technologies"?: ReadonlyArray<{ readonly "technology_id": string; readonly "version_label"?: string; }>; };
 
 export type current_account_Me = { readonly "id": string; readonly "handle": identity_Handle; readonly "email": string; readonly "email_verified": boolean; readonly "role": identity_AccountRole; readonly "status": "active"; readonly "is_demo": boolean; readonly "can": { readonly "manage_account_mail": boolean; readonly "update_profile": boolean; readonly "participate": boolean; readonly "moderate": boolean; readonly "administer": boolean; }; };
 

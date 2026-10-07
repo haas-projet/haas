@@ -33,6 +33,8 @@ paths:
     $ref: './api/openapi/capsules-lab.yaml#/paths/~1api~1v1~1capsules'
   /api/v1/capsules/{capsule}/versions:
     $ref: './api/openapi/capsules-lab.yaml#/paths/~1api~1v1~1capsules~1{capsule}~1versions'
+  /api/v1/capsules/{capsule}/versions/{version}:
+    $ref: './api/openapi/capsules-lab.yaml#/paths/~1api~1v1~1capsules~1{capsule}~1versions~1{version}'
   /api/v1/members/{handle}:
     $ref: './api/openapi/identity.yaml#/paths/~1api~1v1~1members~1{handle}'
   /api/v1/me/profile:

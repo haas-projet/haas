@@ -18,7 +18,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 /**
  * @property CapsuleVisibility $visibility
  */
-#[Fillable(['slug', 'source_request_id', 'owner_id', 'editorial_origin', 'visibility'])]
+#[Fillable(['slug', 'editorial_origin'])]
 class Capsule extends Model
 {
     /** @use HasFactory<CapsuleFactory> */

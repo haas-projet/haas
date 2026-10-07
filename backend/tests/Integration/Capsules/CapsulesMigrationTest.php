@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Capsules;
 
+use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use ReflectionMethod;
 use Tests\PostgresTestCase;
 
 final class CapsulesMigrationTest extends PostgresTestCase
@@ -21,6 +22,7 @@ final class CapsulesMigrationTest extends PostgresTestCase
         $this->assertTrue(Schema::hasTable('capsule_versions'));
         $this->assertTrue(Schema::hasTable('capsule_contributors'));
         $this->assertTrue(Schema::hasTable('artifacts'));
+        $this->assertTrue(Schema::hasTable('capsule_version_technologies'));
     }
 
     public function test_capsules_schema_has_no_foreign_key_toward_lab_or_test_tables(): void
@@ -38,7 +40,7 @@ final class CapsulesMigrationTest extends PostgresTestCase
                 ON ccu.constraint_name = tc.constraint_name
                 AND ccu.table_schema = tc.table_schema
             WHERE tc.constraint_type = 'FOREIGN KEY'
-              AND tc.table_name IN ('capsules','capsule_versions','capsule_contributors','artifacts')
+              AND tc.table_name IN ('capsules','capsule_versions','capsule_contributors','artifacts','capsule_version_technologies')
             ORDER BY source_table, source_column
         SQL);
 
@@ -55,6 +57,8 @@ final class CapsulesMigrationTest extends PostgresTestCase
                 'artifacts.version_id',
                 'capsule_contributors.user_id',
                 'capsule_contributors.version_id',
+                'capsule_version_technologies.technology_id',
+                'capsule_version_technologies.version_id',
                 'capsule_versions.capsule_id',
                 'capsule_versions.reviewer_id',
                 'capsules.owner_id',
@@ -67,10 +71,20 @@ final class CapsulesMigrationTest extends PostgresTestCase
 
     public function test_down_rollback_removes_all_capsule_schema_tables(): void
     {
-        // Les migrations du domaine capsules sont les six dernières (B22 + pivot B23 +
-        // lock_version B23), exécutées dans l'ordre horaire croissant.
-        for ($step = 0; $step < 6; $step++) {
-            $this->assertSame(0, Artisan::call('migrate:rollback', ['--step' => 1]));
+        $paths = array_map(database_path(...), [
+            'migrations/2026_10_07_013053_create_capsules_table.php',
+            'migrations/2026_10_07_013654_create_capsule_versions_table.php',
+            'migrations/2026_10_07_014031_create_capsule_contributors_table.php',
+            'migrations/2026_10_07_014215_create_artifacts_table.php',
+            'migrations/2026_10_07_123901_create_capsule_version_technologies_table.php',
+            'migrations/2026_10_07_172331_add_lock_version_to_capsule_versions_table.php',
+            'migrations/2026_10_07_200000_b22_preserve_published_capsule_versions.php',
+        ]);
+        foreach (array_reverse($paths) as $path) {
+            $this->assertFileExists($path);
+            $migration = require $path;
+            $this->assertInstanceOf(Migration::class, $migration);
+            (new ReflectionMethod($migration, 'down'))->invoke($migration);
         }
 
         $this->assertFalse(Schema::hasTable('capsule_version_technologies'));

@@ -1,0 +1,24 @@
+diff --git a/backend/tests/Integration/Demo/RecordDemoOrderHttpTest.php b/backend/tests/Integration/Demo/RecordDemoOrderHttpTest.php
+index e830405..a34d46c 100644
+--- a/backend/tests/Integration/Demo/RecordDemoOrderHttpTest.php
++++ b/backend/tests/Integration/Demo/RecordDemoOrderHttpTest.php
+@@ -92,0 +93,19 @@ final class RecordDemoOrderHttpTest extends PostgresTestCase
++    public function test_review_b2_accepts_its_separate_browser_origin(): void
++    {
++        $this->postJson('/api/v1/b2/demo-orders', $this->validBody(), [
++            'Idempotency-Key' => (string) Str::uuid(),
++            'Origin' => 'https://demo.example.com',
++        ])->assertCreated();
++    }
++
++    public function test_review_b2_never_emits_cookies_with_a_stateful_haas_origin(): void
++    {
++        $response = $this->postJson('/api/v1/b2/demo-orders', $this->validBody(), [
++            'Idempotency-Key' => (string) Str::uuid(),
++            'Origin' => 'http://localhost:5173',
++        ])->assertCreated();
++
++        $this->assertCount(0, $response->headers->getCookies(), 'B2 doit rester hors des cookies HAAS.');
++        $this->assertFalse($this->app['session']->isStarted());
++    }
++

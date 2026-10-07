@@ -360,3 +360,84 @@ Le travail distant `93fafea`, notamment Q8/Q9, est conservé. Les défauts de pr
 - Documents : 18 + 7 contrôles documentaires OK ; **33 types API à jour**.
 
 Statut : correctif local préparé pour synchronisation B22/main, suite combinée complète et CI distante. Revue humaine en attente ; aucune approbation attribuée, aucun `DONE`, aucun frontend. L'intégrateur rapporte le SHA réel après commit.
+
+## 2026-10-05 — Lot 2 B35 brique B1 (branche dérivée)
+
+Lot B35 livré sur une branche dérivée `backend/capsules-laboratoire-b35-brique-b1` créée depuis `origin/backend/capsules-laboratoire`. La branche parent porte le lot 1 enums ; la PR #12 y est ouverte sur `main` et sa fusion est attendue avant le reciblage de cette PR dérivée.
+
+Portée livrée : la brique B1 complète du laboratoire (B35), c'est-à-dire tables `test_events`/`test_orders`, modèles `TestEvent`/`TestOrder`, DTO `TestEventData`, résultat typé `ProcessedTestEvent{order, duplicate}`, service transactionnel `ProcessTestEventService` et scénarios B1-01 à B1-05 réels sur PostgreSQL. Aucun paiement réel n'est manipulé.
+
+Décisions concrètes :
+
+- Migrations à la convention Laravel pure, nom descriptif sans préfixe de lot : `create_test_events_table.php` et `create_test_orders_table.php`. Dérogation assumée à `docs/execution/BACKEND_A_TROIS.md:110` (« une migration par table, nom descriptif, sans préfixe de lot »), à arbitrer par le relecteur. Nom des tables aligné sur la « Séparation des données de test » décrite au cahier des charges §24.
+- Namespaces `App\Models\Lab`, `App\Data\Lab`, `App\Services\Lab`, `Database\Factories\Lab` et sous-répertoire `tests/Integration/Lab/`.
+- `run_id` est un identifiant logique du run de laboratoire. Il n'y a pas de FK vers `lab_runs` : `lab_runs` (B33) vit dans la base `haas_app`, tandis que `test_events`/`test_orders` appartiennent conceptuellement à `haas_lab` (cahier des charges §15 et §33). Aucune FK ne peut être posée en travers de deux bases distinctes ; la documentation en en-tête des migrations l'énonce explicitement.
+- Idempotence portée côté base par la contrainte unique `(run_id, event_id)` sur `test_events` et par la contrainte unique sur `test_orders.source_event_id`. `ProcessTestEventService::handle` enveloppe l'insertion dans `DB::connection(LabConnection::NAME)->transaction(...)` via `TestEvent::query()->insertOrIgnore(...)` : aucune course SELECT-puis-INSERT, le rejeu renvoie exactement la même commande sans écriture additionnelle. Le résultat typé `ProcessedTestEvent{order, duplicate}` distingue B1-01 (duplicate=false) de B1-02 (duplicate=true).
+- Le point de bascule applicatif vers `haas_lab` est `App\Models\Lab\LabConnection::NAME`. Les modèles `TestEvent`/`TestOrder` lisent la constante via `getConnectionName()`, les migrations déclarent `$connection = LabConnection::NAME`, et le service passe par `DB::connection(LabConnection::NAME)` : aucune chaîne littérale de connexion n'est écrite ailleurs dans le domaine. Le service n'utilise plus `DB::table(...)`.
+- Aucune route HTTP exposée en B35 : la brique est appelée par le worker (B36) non encore livré. `routes/api/capsules-lab.php` reste inchangé.
+- Aucune donnée réelle manipulée : fixtures `evt_*`/`ord_*`/montants aléatoires bornés `[100, 100 000]` en centimes, trois devises fictives `EUR`/`USD`/`GBP`.
+
+Écart ouvert : les tables `test_events`/`test_orders` sont pour l'instant créées et testées sur la **connexion par défaut** (`haas_capsules_test` dans ma session) parce que `LabConnection::NAME = null`. Le câblage de `haas_lab` demandera à toucher plusieurs endroits de concert :
+
+- côté domaine capsules/laboratoire : changer la valeur de `App\Models\Lab\LabConnection::NAME` ;
+- côté socle (responsable 1, fichiers réservés par `docs/execution/BACKEND_A_TROIS.md:103`) : ajouter la connexion `lab` dans `backend/config/database.php`, étendre `backend/phpunit.xml` et la CI ;
+- côté tests : aligner la connexion secondaire utilisée pour le nettoyage hors transaction PHPUnit (`test_events_cleanup` dans `ConcurrentTestEventTest`) et la configuration `RefreshDatabase` dans `PostgresTestCase`.
+
+Au moment du câblage, les environnements déjà migrés devront **rejouer les migrations** ou **déplacer manuellement les tables** `test_events` et `test_orders` vers la base `haas_lab` : comme les migrations lisent `LabConnection::NAME`, un simple changement de constante n'importe pas les tables existantes de la connexion par défaut vers la nouvelle connexion.
+
+Demande à soumettre à `ousseynoufayeisidk-sys` pour la part socle.
+
+Fichiers créés dans ce lot (dans mon domaine uniquement, aucun fichier d'un autre pilote ni fichier racine modifié) :
+
+- `backend/database/migrations/2026_10_05_120000_create_test_events_table.php`
+- `backend/database/migrations/2026_10_05_120100_create_test_orders_table.php`
+- `backend/app/Models/Lab/{LabConnection,TestEvent,TestOrder}.php`
+- `backend/database/factories/Lab/{TestEventFactory,TestOrderFactory}.php`
+- `backend/app/Data/Lab/{TestEventData,ProcessedTestEvent}.php`
+- `backend/app/Services/Lab/ProcessTestEventService.php`
+- `backend/tests/Integration/Lab/{TestEventSchemaTest,ProcessTestEventTest,ConcurrentTestEventTest}.php`
+- `backend/tests/Fixtures/process-test-event-concurrently.php`
+
+Contrôles exécutés localement sous PHP 8.4.15 Laragon, sur `haas_capsules_test` :
+
+| Commande | Résultat observé |
+|---|---|
+| `composer lint` (Pint `--test`) | `{"tool":"pint","result":"passed"}` |
+| `composer analyse` (PHPStan niveau 8) | `[OK] No errors` |
+| `composer test` (Unit + Feature + Architecture) | **148 tests / 977 assertions, OK** |
+| `composer test:integration` | **59 tests / 417 assertions, OK** |
+
+Décomposition par classe B35 (mesurée séparément) :
+
+| Classe | Résultat |
+|---|---|
+| `tests/Integration/Lab/TestEventSchemaTest.php` | 6 tests / 26 assertions |
+| `tests/Integration/Lab/ProcessTestEventTest.php` | 17 tests / 85 assertions |
+| `tests/Integration/Lab/ConcurrentTestEventTest.php` | 1 test / 10 assertions |
+
+Scénarios B1-01 à B1-05 réellement couverts :
+
+- B1-01 nominal : un événement neuf crée exactement un `test_events` + un `test_orders` dans la même transaction, `processed_at` renseigné, résultat `duplicate=false`.
+- B1-02 doublon : deux appels successifs avec les mêmes `(run_id, event_id)` renvoient la même commande sans doubler les lignes. Résultat `duplicate=false` au premier appel, `duplicate=true` au rejeu. Un rejeu avec un payload divergent (même clé mais autre montant/référence/devise) renvoie la commande d'origine inchangée — décision épinglée par un test, à arbitrer par le relecteur.
+- B1-03 distincts : deux événements différents (même `run_id`) et le pendant inter-runs (`event_id` partagé, `run_id` distincts) produisent deux commandes.
+- B1-04 invalide : 11 cas de données malformées (montant ≤ 0, devise `eur`/`EURO`, `event_id` vide/blanc/non trimmé/avec saut de ligne final, `order_ref` vide/avec saut de ligne final, `run_id` non UUID) sont tous rejetés par `ValidationException` **sans aucune écriture partielle** (`test_events` et `test_orders` restent vides). Les regex `event_id`/`order_ref`/`currency` portent le modificateur `D` pour empêcher un saut de ligne final de passer la validation.
+- B1-05 concurrence : deux processus PHP indépendants lancés via `Symfony\Component\Process\Process`, synchronisés sur barrière `READY`/`GO`, soumettent le même `(run_id, event_id)`. Les deux processus sont pompés simultanément par une boucle `isRunning()` + `checkTimeout()` + `getIncrementalOutput()` : un `wait()` séquentiel ne pompe que son process et ferait disparaître la concurrence. Un trigger `pg_sleep(0.3)` restreint au `run_id` du test est posé via la connexion secondaire pour garantir un chevauchement reproductible (il est supprimé dans le `finally`). La contrainte unique PostgreSQL arbitre : exactement un `duplicate=false` (gagnant) et un `duplicate=true` (perdant), même `order_id` et même `source_event_id`, un seul événement et une seule commande en base. L'assertion `[false, true]` serait aussi vraie d'une exécution séquentielle ; la preuve de chevauchement est la sensibilité du test à une mutation du service en SELECT puis INSERT naïf, mesurée hors suite (17/20 échecs — 3/20 passent — sans trigger ; 20/20 échecs avec trigger — le trigger est donc nécessaire pour que la mesure soit reproductible).
+- Atomicité : un test dédié force un `TestOrder::creating` qui lève et vérifie que la transaction du service annule l'insertion de l'événement — aucune ligne orpheline ne subsiste dans `test_events`.
+
+Limites :
+
+- Aucune route HTTP B35 exposée ; le wiring par un worker viendra avec B36. La brique est pour l'instant appelable uniquement en interne par un service Laravel ou un script fixture.
+- Les tests B1-01 à B1-04 exécutent le service directement, sans passer par un contrôleur HTTP (B35 n'en a pas). Le test B1-05 lance de vrais processus PHP via `Symfony\Component\Process` : il s'appuie sur `PHP_BINARY` disponible dans la session, confirmé Laragon 8.4.15.
+- Connexion `haas_lab` non encore câblée : voir « écart ouvert » plus haut.
+- Les scénarios B22–B28 (capsules), B33–B34/B36–B38 (reste du lab), BV201–BV210 (vérifications) restent TODO.
+
+Prochaines actions : obtenir une relecture humaine du lot B35 par `ousseynoufayeisidk-sys` ; soumettre à `ousseynoufayeisidk-sys` la demande de câblage de la connexion `haas_lab` dans `config/`, `phpunit.xml` et la CI. Les lots suivants (B22 schéma capsules, B33 registre lab) attendent respectivement B11 (collaboration) et B22.
+
+
+## 2026-10-07 — B22 : corrections avant revue humaine
+
+À la demande de l’utilisateur, Codex prépare la PR #29 sans effacer les preuves antérieures. Main `e3bd34c` intégré par merge normal `39d923c` ; conflits documentaires résolus en conservant les historiques. Date de publication/retrait corrigée dans une migration additive ; versions publiées, provenance, attributions et technologies protégées en SQL ; relecteur indépendant et FK RESTRICT ; lock positif et technologies déclarées ; champs serveur non mass assignables. Les migrations B23 de pivot et de verrou sont reprises sous leurs noms existants, sans doublon. Aucune dépendance ni route B22.
+
+Preuves, commandes exactes, incidents de fixtures et limites : [B22_CAPSULE_SCHEMA.md](../../../quality/B22_CAPSULE_SCHEMA.md). Contrat : [CAPSULE_DATA.md](../../../architecture/CAPSULE_DATA.md). Hors SQL 319 / 2570 et SQL 232 / 1587 réussis, soit 551 tests / 4157 assertions uniques ; Pint, PHPStan 8 et Composer réussis. Base dédiée `haas_b22_review_test` sur PostgreSQL 17 local 55447 ; correctif de cookies simulés B17 repris sans assouplissement de production.
+
+Statut : prêt localement pour la revue humaine, CI du SHA publié et revue humaine en attente ; aucun DONE ou BACKEND_GATE. Après contrôles et publication par l’intégrateur, examiner B22 puis intégrer son schéma dans B23/B24 et refaire les tests des consommateurs. Aucun push effectué par cet agent.

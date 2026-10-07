@@ -1,5 +1,15 @@
 # Reprise — socle/auth
 
+## Dernier état — 7 octobre 2026, 19:27 UTC
+
+**10 branches distantes** : les trois permanentes et main à `f1f6238`, six temporaires portant les PR ouvertes #24/#28/#29/#30/#31/#33. Après les fusions externes #32/#26/#25 vers leurs bases, B14–B17 ont été consolidés dans #24 par `d9cba0b`, CI `37666083469` verte sous PHP 8.4/8.5 et backend-ci. Backend identique à B17 `8234470`, validé 671 / 6805. B15/B16/B17 supprimées après ascendance vers B14 publié et contrôle d'absence de PR dépendante ; code et branches locales préservés. B14–B17 restent hors main, #24/#31 requièrent une approbation humaine. README publiés dans #31, bilan [BRANCH_CLEANUP_20261007.md](../../../quality/BRANCH_CLEANUP_20261007.md). Prochain B18 après coordination ; aucun gate, frontend ni déploiement. Les états précédents ci-dessous sont historiques.
+
+## État du 7 octobre 2026 après publication communautaire
+
+Main `f1f6238` contient les fusions #12/#23/#27 ; **13 lots backend entiers intégrés**, B35 partiel. README principal et backend publiés dans #31, approbation humaine obligatoire avant fusion. Deux temporaires intégrés supprimés et trois branches permanentes synchronisées avec main ; le snapshot 13 → 11 devient **12 références** après création de B17 : quatre permanentes et huit temporaires conservées.
+
+B14 `230b83b`, B15 `a3eb9b9`, B16 `d3d8407` synchronisés, CI exacte verte. B17 est publié dans #32 vers B16 : métier `238d5e9`, correctif de tests `8234470`, CI [37662853388](https://github.com/haas-projet/haas/actions/runs/37662853388) verte sous PHP 8.4/8.5, **671 tests / 6805 assertions par version**, Pint/PHPStan réussis. Le premier échec de CI est conservé dans le bilan ; aucun traitement de production assoupli. Lire [BRANCH_CLEANUP_20261007.md](../../../quality/BRANCH_CLEANUP_20261007.md), les PR et le suivi de Lamine. Prochain B18 après coordination des revues ; #24 et #31 attendent une approbation humaine. B23 modifié extérieurement à `93fafea`, préservé sans nouvelle validation. Aucun gate, frontend ou déploiement ; les entrées suivantes sont historiques.
+
 B01–B09, B12–B13 et B32 DONE (12 lots) après intégration autorisée. B10/B29/B30/B31 et B39–B42 IN_PROGRESS ; B43/B44 BLOCKED. S01/S02 restent partiels. Les dix PR du socle sont fusionnées dans main (a051e81, CI 37146178657 verte). Neuf branches temporaires supprimées, quatre branches permanentes conservées. Branche de reprise : `backend/socle-auth`. BACKEND_GATE NON REÇU, aucun GO_FRONTEND/GO_PRODUCTION. Lire docs/quality/MERGE_SOCLE.md et SYSTALINK_TASKS.md. Les entrées suivantes sont historiques.
 
 PostgreSQL temporaire 54693 arrêté à la fin de cette réception. Les prochains tests SQL exigent une nouvelle base locale/CI dédiée `haas_*_test`, rôle `haas_test`, et une connexion explicite. Ne pas réutiliser automatiquement le port de recette. Aucun secret applicatif enregistré.
@@ -115,3 +125,49 @@ Demande explicite « faite ca » : intégration des PR #10, #11, #13–#20, dans
 Les neuf branches temporaires sont supprimées après vérification des 30 références de commits dans main et de l'absence de PR dépendante. Restent main et les trois branches permanentes ; backend/socle-auth synchronisée, branches des collègues et PR #12 conservées. Aucune réécriture, aucun contournement de protection, aucun déploiement.
 
 B07/B08/B09/B12/B13/B32 DONE ; le tableau Systalink comporte maintenant 12 lots terminés, 8 partiels et 2 bloqués. Contributions et autres raccordements attendent les pilotes ; Qodana et réception complète restent ouverts. Aucun GO_FRONTEND. Reprendre sur backend/socle-auth ; ne pas recréer les anciennes branches pour consulter leurs commits, tous conservés dans main.
+
+## 2026-10-07 — Synchronisation B11 avant fusion
+
+Demande explicite : vérifier et fusionner le travail de Madina dans le dépôt distant. Le complément #22 approuvé par mdev44-code est fusionné dans la branche B11 (957029b), après la fusion des enums #12 dans main (33eafa0). Synchronisation locale de main : trois conflits documentaires résolus sans suppression des contributions B11 ; aucun changement des migrations initiales. Les huit fichiers applicatifs ajoutés par le merge sont exactement les enums et tests de #12.
+
+Contrôles PHP 8.5.10 / PostgreSQL 17 local isolé, base haas_b11_review_test sur 127.0.0.1:55447 : 312 tests / 2538 assertions sans SQL ; 151 tests / 1316 assertions SQL ; validate-pack 18/18 ; check-deployment-docs 7/7 ; diff --check propre. Publication de la synchronisation pour obtenir la CI du nouveau SHA avant fusion #23. Revue automatisée ; seule l'approbation humaine existante de #22 est constatée, aucune signature humaine inventée. Aucun gate ni frontend.
+
+## 2026-10-07 — Correction de l'horodatage B1 après revue
+
+PR #27 inspectée sur 48fc475. Défaut reproduit sur PostgreSQL isolé : received_at à 12:00+02:00 était enregistré comme 12:00 UTC. Le test de régression échoue avant correction (une assertion) ; ProcessTestEventService normalise maintenant l'instant en UTC avant insertOrIgnore. Le test compare l'instant réellement stocké.
+
+Contrôles PHP 8.5.10 / PostgreSQL 17, base haas_maadinaa_test sur 127.0.0.1:55447 : Pint passé ; PHPStan niveau 8 sans erreur ; 281 tests / 2507 assertions hors SQL et 158 tests / 1373 assertions SQL réussis, dont la course B1-05 et le nouveau cas non UTC ; git diff --check propre. Publier le correctif sans réécrire les commits de Madina, recibler #27 vers main puis récupérer le main consolidé et observer sa CI avant fusion. B35 reste partiel : base haas_lab séparée et module pédagogique défectueux non livrés ; aucun BACKEND_GATE.
+
+## 2026-10-07 — B1 synchronisé avec B11 consolidé
+
+Main 17c6daa (#23 et son complément #22) intégré dans la branche B35 corrigée cdbe96f. Cinq conflits purement documentaires résolus en conservant les sections B11, B35 et les deux interventions de l'intégrateur ; l'ancien HANDOFF B35 est gardé comme instantané daté. Aucun code métier ni migration réécrits dans cette synchronisation.
+
+Suites locales PHP 8.5.10 / PostgreSQL 17, base haas_maadinaa_test dédiée : 312 tests / 2538 assertions hors SQL et 176 tests / 1439 assertions SQL réussis (488 / 3977 au total). Publier ce merge puis attendre la CI du SHA exact avant fusion #27. B2 #28 bloqué après deux tests HTTP ciblés en échec : Origin https://demo.example.com donne 403, Origin HAAS stateful émet deux cookies. #29/#30 restent en brouillon avec défauts statiques de provenance/validation documentés au bilan.
+
+## 2026-10-07 — Reprise après revue de Madina
+
+Fusions distantes vérifiées : #12 33eafa0, #22 957029b dans B11, #23 17c6daa et #27 f1f6238 dans main. Lire docs/quality/MERGE_MADINA.md pour les SHA complets, contrôles et limites. B11 DONE ; 13 lots backend entiers terminés. Correctif UTC B1 cdbe96f inclus. Head combiné 108aa7d : 488 tests / 3977 assertions locaux et sous les deux PHP de la CI 37637092346, contrôles verts.
+
+Reprendre B22 #29 (retrait avec date de publication conservée, champs serveur, versions/technologies), puis B23 #30 (source vraiment résolue, validations, verrouillage/rejeu et tests HTTP). Les PR restent en brouillon. B38 #28 reste BLOCKED : probes Origin démonstration=403 et Origin HAAS=deux cookies ; appliquer le patch inerte docs/quality/probes/B38_ISOLATION.patch sur la branche B2 pour reproduire, avec base locale dédiée. Corriger origine/routage sans session et isolation réelle base/runtime/configuration, puis revalider la concurrence.
+
+B35 IN_PROGRESS : service transactionnel et concurrence reçus, câblage haas_lab/isolation et module défectueux pédagogique à compléter avant B36. Le cluster PostgreSQL temporaire de revue est arrêté. Travail local initial B14 préservé ; ne pas écraser sa modification de routes. Toutes les branches distantes sont conservées. Aucun BACKEND_GATE, GO_FRONTEND ou GO_PRODUCTION.
+
+## 2026-10-07 — Reprise après correction des README
+
+README.md et backend/README.md présentent désormais les livraisons réellement intégrées, les limites B1/B2/capsules et le démarrage local documenté. Commandes et prérequis relus dans les sources du dépôt ; git diff --check propre. Aucun nouveau test applicatif ni serveur lancé. Les résultats 488 tests / 3977 assertions renvoient à la CI datée du 7 octobre, pas à une exécution de cette correction.
+
+La correction rejoint le bilan documentaire de PR #31 ; approbation humaine requise par la protection GitHub avant fusion dans main. Prochain travail : réception de cette documentation, puis corrections capsules/isolation B2 indiquées dans MERGE_MADINA. BACKEND_GATE reste non reçu. Travail local B14 conservé ; aucun frontend ni déploiement.
+
+### Publication distante bloquée — 7 octobre 2026
+
+Correction des README commitée localement dans 9605a4744d8462ac0abf325eb30a75d97e8bf601. Trois pushes refusés par GitHub avec Internal Server Error ; publication REST et GraphQL également en échec. Vérification finale : la PR #31 et sa branche distante restent sur 1642f4e63a3cb19a3c919d6ea85783cda675a2b8, sans la correction README. Aucun contrôle de protection contourné. Reprendre la publication depuis le worktree review-maadinaa lorsque le service GitHub accepte les écritures ; l'approbation humaine de #31 restera requise avant fusion. Le README du worktree initial B14 et son travail préexistant sont préservés.
+
+## 2026-10-07 — Reprise après publication et nettoyage des branches
+
+La publication des README et du suivi a repris avec succès : PR #31 sur le head distant a56fae1c90780dc3bff2c0b186e208782fd65073. Ne plus reprendre les tentatives de publication de l'instantané précédent. L'approbation humaine de cette PR reste requise avant fusion dans main.
+
+Main et les trois branches permanentes distantes portent f1f6238. Les branches temporaires B11-schema et B35 ont été supprimées après preuve de fusion et absence de PR ouverte dépendante ; le total distant est passé de 13 à 11. Sept branches non fusionnées et leurs PR sont conservées, notamment la chaîne B14 → B15 → B16 et les brouillons B22 → B23. Lire docs/quality/BRANCH_CLEANUP_20261007.md pour les pointes complètes et les preuves.
+
+Reprendre la partie communautaire de Lamine selon ses dépendances et préparer B17 séparément. Le retour à quatre branches exige l'intégration vérifiée des travaux restants ou une organisation décidée explicitement ; ne pas supprimer leurs références pour atteindre le nombre cible. B38 reste bloqué ; aucun nouveau test applicatif ni gate reçu par ce nettoyage. Travail préexistant du workspace initial préservé.
+
+Compte rendu prêt pour un commit local après pack 18/18, documentation de déploiement 7/7, 28 types API à jour sous PHP 8.5.10, UTF-8 strict et git diff --check vérifiés. Manifeste de 517 fichiers actualisé dans l'ordre existant. L'intégrateur publiera le commit ; aucune publication de ce complément ni nouvelle revue humaine présumée.

@@ -147,3 +147,7 @@ B35 IN_PROGRESS : service transactionnel et concurrence reçus, câblage haas_la
 README.md et backend/README.md présentent désormais les livraisons réellement intégrées, les limites B1/B2/capsules et le démarrage local documenté. Commandes et prérequis relus dans les sources du dépôt ; git diff --check propre. Aucun nouveau test applicatif ni serveur lancé. Les résultats 488 tests / 3977 assertions renvoient à la CI datée du 7 octobre, pas à une exécution de cette correction.
 
 La correction rejoint le bilan documentaire de PR #31 ; approbation humaine requise par la protection GitHub avant fusion dans main. Prochain travail : réception de cette documentation, puis corrections capsules/isolation B2 indiquées dans MERGE_MADINA. BACKEND_GATE reste non reçu. Travail local B14 conservé ; aucun frontend ni déploiement.
+
+### Publication distante bloquée — 7 octobre 2026
+
+Correction des README commitée localement dans 9605a4744d8462ac0abf325eb30a75d97e8bf601. Trois pushes refusés par GitHub avec Internal Server Error ; publication REST et GraphQL également en échec. Vérification finale : la PR #31 et sa branche distante restent sur 1642f4e63a3cb19a3c919d6ea85783cda675a2b8, sans la correction README. Aucun contrôle de protection contourné. Reprendre la publication depuis le worktree review-maadinaa lorsque le service GitHub accepte les écritures ; l'approbation humaine de #31 restera requise avant fusion. Le README du worktree initial B14 et son travail préexistant sont préservés.

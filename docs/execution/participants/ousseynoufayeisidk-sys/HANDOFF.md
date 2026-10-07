@@ -1,5 +1,9 @@
 # Reprise — socle/auth
 
+## Dernier état — 7 octobre 2026, 19:27 UTC
+
+**10 branches distantes** : les trois permanentes et main à `f1f6238`, six temporaires portant les PR ouvertes #24/#28/#29/#30/#31/#33. Après les fusions externes #32/#26/#25 vers leurs bases, B14–B17 ont été consolidés dans #24 par `d9cba0b`, CI `37666083469` verte sous PHP 8.4/8.5 et backend-ci. Backend identique à B17 `8234470`, validé 671 / 6805. B15/B16/B17 supprimées après ascendance vers B14 publié et contrôle d'absence de PR dépendante ; code et branches locales préservés. B14–B17 restent hors main, #24/#31 requièrent une approbation humaine. README publiés dans #31, bilan [BRANCH_CLEANUP_20261007.md](../../../quality/BRANCH_CLEANUP_20261007.md). Prochain B18 après coordination ; aucun gate, frontend ni déploiement. Les états précédents ci-dessous sont historiques.
+
 ## État du 7 octobre 2026 après publication communautaire
 
 Main `f1f6238` contient les fusions #12/#23/#27 ; **13 lots backend entiers intégrés**, B35 partiel. README principal et backend publiés dans #31, approbation humaine obligatoire avant fusion. Deux temporaires intégrés supprimés et trois branches permanentes synchronisées avec main ; le snapshot 13 → 11 devient **12 références** après création de B17 : quatre permanentes et huit temporaires conservées.

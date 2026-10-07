@@ -1,5 +1,21 @@
 # Nettoyage des branches distantes — 7 octobre 2026
 
+## État final constaté à 19:27:42 UTC
+
+**10 branches distantes : quatre permanentes et six temporaires liées aux PR ouvertes #24/#28/#29/#30/#31/#33.** Les trois permanentes et main restent à `f1f6238`. Les étapes précédentes ci-dessous sont historiques : 13 → 11, ajout B17 → 12, ajout externe B24 → 13, puis suppression des trois intermédiaires fusionnées → 10.
+
+Pendant cette session, les fusions externes #32 dans B16 (`a3fd442`), #26 dans B15 (`f346985`) et #25 dans B14 (`61c4184`) ont été constatées. #25 ayant précédé les autres, B15 `f346985` a ensuite été consolidé dans B14 par merge normal **`d9cba0b5eea334a05fce1acaed6be3936c692ef9`**, sans conflit ni réécriture. Son backend est identique à B17 `8234470`. La [CI 37666083469](https://github.com/haas-projet/haas/actions/runs/37666083469) est verte : PHP 8.4/8.5 et backend-ci. Les 671 tests / 6805 assertions et Pint/PHPStan déjà réussis concernent le même code ; les contrôles documentaires et 49 types ont été relancés.
+
+Les trois références intermédiaires ont ensuite été supprimées après contrôle frais de leurs pointes, de leur ascendance vers **B14 publié `d9cba0b`** et de l'absence de PR ouverte les utilisant comme head ou base :
+
+| Référence supprimée | Pointe conservée dans B14 |
+|---|---|
+| `backend/communaute-entraide-b15` | `f346985df99b65f022f7248243ac6ba605f46d16` |
+| `backend/communaute-entraide-b16` | `a3fd44213182215c28cd4ba9b7710ea389722a94` |
+| `backend/communaute-entraide-b17` | `82344704f690cc49d5ae73c67d7cbd5e71cf78b3` |
+
+Ces trois fusions sont intermédiaires : **B14–B17 ne sont pas encore intégrés dans main**. Le code demeure dans la PR #24 et les références locales sont conservées. Les PR #24 et #31 restent ouvertes, approbation humaine obligatoire avant fusion. Les six temporaires restantes sont B14, B22, B23, B24, B38 et la branche documentaire ; B24 externe `e5dabac` et B23 `93fafea` sont préservés sans validation nouvelle de contenu par ce nettoyage. Aucun gate, frontend ni déploiement.
+
 La demande de publication et de réduction des branches a été exécutée après un inventaire des références distantes, une vérification d'ascendance Git et une lecture des PR ouvertes. Le dépôt passe de **13 à 11 branches distantes**. Les branches portant du travail non fusionné sont conservées.
 
 ## Référence de l'inventaire

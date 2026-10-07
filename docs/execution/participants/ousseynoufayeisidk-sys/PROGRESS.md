@@ -167,3 +167,39 @@ Contrôles PHP 8.5.10 / PostgreSQL 17, base haas_maadinaa_test sur 127.0.0.1:554
 Main 17c6daa (#23 et son complément #22) intégré dans la branche B35 corrigée cdbe96f. Cinq conflits purement documentaires résolus en conservant les sections B11, B35 et les deux interventions de l'intégrateur ; l'ancien HANDOFF B35 est gardé comme instantané daté. Aucun code métier ni migration réécrits dans cette synchronisation.
 
 Suites locales PHP 8.5.10 / PostgreSQL 17, base haas_maadinaa_test dédiée : 312 tests / 2538 assertions hors SQL et 176 tests / 1439 assertions SQL réussis (488 / 3977 au total). Publier ce merge puis attendre la CI du SHA exact avant fusion #27. B2 #28 bloqué après deux tests HTTP ciblés en échec : Origin https://demo.example.com donne 403, Origin HAAS stateful émet deux cookies. #29/#30 restent en brouillon avec défauts statiques de provenance/validation documentés au bilan.
+
+## 2026-10-07 — Revue et intégration du travail de Madina
+
+Demande explicite de vérification puis fusion dans le dépôt distant. PR #12 fusionnée dans main (33eafa0), complément #22 dans B11 (957029b), #23 dans main (17c6daa), puis #27 corrigée et synchronisée dans main (f1f6238). Les commits et historiques des participants sont conservés. Aucune approbation humaine inventée ; seule celle réellement présente sur #22 est constatée. Rapport : docs/quality/MERGE_MADINA.md.
+
+Défaut UTC B1 reproduit puis corrigé dans cdbe96f ; test de régression réellement rouge avant correction. Dernier head B1 108aa7d : 312 tests / 2538 assertions hors SQL et 176 / 1439 sur PostgreSQL local isolé, soit 488 / 3977. CI 37637092346 réussie, mêmes résultats sous PHP 8.4/8.5, Pint/PHPStan/audit verts. Pack 18/18, déploiement documentaire 7/7 et diff --check propres ; empreintes actualisées dans le bilan. Cluster PostgreSQL temporaire arrêté en fin de session.
+
+B11 DONE (13 lots backend entiers terminés). B35 IN_PROGRESS : isolation/connexion haas_lab et tests du défaut pédagogique absents. B38 BLOCKED : deux probes HTTP en échec sur #28 (origine démonstration 403 ; origine HAAS deux cookies), patch de reproduction livré dans le rapport. B22/B23 IN_PROGRESS, #29/#30 brouillons conservés avec défauts statiques détaillés, sans nouveaux tests HTTP exécutés. Prochain lot : corriger les capsules et l'isolation B2 ; B14 peut reprendre depuis B11. BACKEND_GATE non reçu ; aucun frontend ni déploiement.
+
+## 2026-10-07 — README du projet corrigés
+
+Demande utilisateur : corriger le README du projet. README principal actualisé d'après les fusions réelles #12/#23/#27 et MERGE_MADINA : 13 lots backend entiers intégrés, B35 partiel, B38 bloqué et capsules en brouillon. Présentation communautaire, parcours consentis, installation PowerShell, contrôles disponibles, liens de reprise et hébergement cible clarifiés. README backend aligné : retrait des mentions périmées B07/B08 en revue et routes toutes vides.
+
+Relecture croisée automatisée des commandes depuis composer.json, COMMANDS et VERSIONS ; liens locaux relus et git diff --check propre. Aucun test applicatif ni serveur exécuté pour cette modification documentaire ; les chiffres de CI cités sont les preuves datées du lot précédent. Empreintes actualisées. Correction préparée sur la branche de PR #31, travail initial B14 préservé ; la fusion de cette PR nécessite l'approbation humaine exigée par GitHub. SHA réel à consulter dans le bilan de session.
+
+### Publication distante bloquée — 7 octobre 2026
+
+Correction des README commitée localement dans 9605a4744d8462ac0abf325eb30a75d97e8bf601. Trois pushes refusés par GitHub avec Internal Server Error ; publication REST et GraphQL également en échec. Vérification finale : la PR #31 et sa branche distante restent sur 1642f4e63a3cb19a3c919d6ea85783cda675a2b8, sans la correction README. Aucun contrôle de protection contourné. Reprendre la publication depuis le worktree review-maadinaa lorsque le service GitHub accepte les écritures ; l'approbation humaine de #31 restera requise avant fusion. Le README du worktree initial B14 et son travail préexistant sont préservés.
+
+## 2026-10-07 — Publication reprise et nettoyage sûr des branches
+
+La publication des README et du suivi a réussi : le head distant constaté de la PR #31 est a56fae1c90780dc3bff2c0b186e208782fd65073. Le blocage de publication décrit ci-dessus est donc levé. La PR reste ouverte et son approbation humaine demeure requise avant fusion ; aucune protection GitHub contournée.
+
+Inventaire distant réduit de 13 à 11 branches. Les temporaires backend/communaute-entraide-b11-schema (2771d301) et backend/capsules-laboratoire-b35-brique-b1 (108aa7d) ont été supprimées après preuve d'ascendance vers main et contrôle de l'absence de PR ouverte dépendante. Leurs commits demeurent dans main. Les trois branches permanentes ont avancé sans réécriture vers f1f6238, comme main.
+
+Sept branches non fusionnées conservées : B22, B23, B38, B14, B15, B16 et la branche documentaire #31. Leurs PR et bases restent disponibles. Preuves détaillées : docs/quality/BRANCH_CLEANUP_20261007.md. La suite communautaire de Lamine et la préparation indépendante de B17 restent à coordonner ; aucun lot supplémentaire déclaré terminé, aucun test applicatif lancé pour ce compte rendu, aucun BACKEND_GATE ni autorisation frontend/déploiement.
+
+Contrôles documentaires du compte rendu : rapport UTF-8 strict valide, manifeste de 517 fichiers conservant son ordre ; validate-pack 18/18, check-deployment-docs 7/7, 28 types API à jour avec PHP 8.5.10 Laragon et git diff --check sans erreur. L'appel initial du générateur sous le PHP 8.3.12 du PATH a été refusé, puis relancé avec succès sur le binaire adapté. Commit local uniquement pour ce lot ; référence réelle à communiquer dans le bilan, publication à effectuer par l'intégrateur.
+
+### Addendum — synchronisations et B17 publié
+
+Après le nettoyage 13 → 11, publication de B17 dans #32 : **12 références**, quatre permanentes à `f1f6238` et huit temporaires. B14/B15/B16 `230b83b`/`a3eb9b9`/`d3d8407` ont une CI verte sur leur head exact. B17 `8234470` corrige seulement l'expiration des cookies dans le navigateur simulé après reproduction d'un ancien échec 419 ; run `37662853388`, PHP 8.4/8.5 et backend-ci réussis, **671 tests / 6805 assertions par version**. Aucun lot B14–B17 déclaré intégré : ordre #24 → #25 → #26 → #32 ; #24 et #31 attendent une approbation humaine. B23 passé extérieurement à `93fafea`, préservé sans nouvelle revue de contenu. Références, contrôles et limites dans BRANCH_CLEANUP_20261007.md. Prochain B18 après coordination ; aucun gate, frontend ni déploiement.
+
+### Consolidation et second nettoyage — 19:27 UTC
+
+Fusions externes #32/#26/#25 constatées ; B14–B17 consolidés dans #24 par `d9cba0b`, CI exacte `37666083469` verte PHP 8.4/8.5 et backend-ci, backend identique au code B17 validé 671 / 6805. Trois intermédiaires B15/B16/B17 supprimées après ascendance vers B14 publié et absence de PR ouverte dépendante ; références locales préservées. B24 créé extérieurement porte #33 ; dernier inventaire **10 branches : quatre permanentes et six temporaires**. #24 et #31 restent soumises à l'approbation humaine ; aucun nouveau lot déclaré DONE dans main. Voir BRANCH_CLEANUP_20261007.md. Prochain B18 après coordination ; aucun gate ni déploiement.

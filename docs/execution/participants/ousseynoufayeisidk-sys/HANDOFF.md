@@ -2,7 +2,7 @@
 
 ## État du 7 octobre 2026 après publication communautaire
 
-Main `f1f6238` contient les fusions #12/#23/#27 ; **13 lots backend entiers intégrés**, B35 partiel. README principal et backend publiés dans #31, approbation humaine obligatoire avant fusion. Deux temporaires intégrés supprimés et trois branches permanentes synchronisées avec main ; le snapshot 13 → 11 devient **12 références** après création de B17 : quatre permanentes et huit temporaires en revue.
+Main `f1f6238` contient les fusions #12/#23/#27 ; **13 lots backend entiers intégrés**, B35 partiel. README principal et backend publiés dans #31, approbation humaine obligatoire avant fusion. Deux temporaires intégrés supprimés et trois branches permanentes synchronisées avec main ; le snapshot 13 → 11 devient **12 références** après création de B17 : quatre permanentes et huit temporaires conservées.
 
 B14 `230b83b`, B15 `a3eb9b9`, B16 `d3d8407` synchronisés, CI exacte verte. B17 est publié dans #32 vers B16 : métier `238d5e9`, correctif de tests `8234470`, CI [37662853388](https://github.com/haas-projet/haas/actions/runs/37662853388) verte sous PHP 8.4/8.5, **671 tests / 6805 assertions par version**, Pint/PHPStan réussis. Le premier échec de CI est conservé dans le bilan ; aucun traitement de production assoupli. Lire [BRANCH_CLEANUP_20261007.md](../../../quality/BRANCH_CLEANUP_20261007.md), les PR et le suivi de Lamine. Prochain B18 après coordination des revues ; #24 et #31 attendent une approbation humaine. B23 modifié extérieurement à `93fafea`, préservé sans nouvelle validation. Aucun gate, frontend ou déploiement ; les entrées suivantes sont historiques.
 

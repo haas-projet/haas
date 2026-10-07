@@ -113,3 +113,35 @@ Le schéma SQL des capsules est posé : quatre tables (`capsules`, `capsule_vers
 - `composer test:integration` (filtre Capsules|Artifacts) : **31 tests / 70 assertions, OK**.
 - `composer test:integration` (suite complète) : **164 tests / 1320 assertions, OK**.
 - CI distante NON EXÉCUTÉE à ce stade (branche non poussée).
+
+## 2026-10-07 — HANDOFF B22 (après reprise à l'étape 3)
+
+Branche : `backend/capsules-laboratoire-b22-schema`. Statut proposé à l'ouverture de la PR : **préparé, PR en brouillon**. Aucun `DONE` ne doit être prononcé avant revue humaine et fusion.
+
+Nouveaux faits depuis le premier HANDOFF B22 :
+
+- Merge local `--no-ff` de `origin/backend/communaute-entraide` dans `backend/capsules-laboratoire-b22-schema` (`478d1e0`). Trois fichiers documentaires résolus manuellement (`docs/AI_USAGE.md`, PROGRESS.md et HANDOFF.md du participant) sans reformulation, ordre chronologique préservé. Aucun autre fichier n'a dû être résolu à la main.
+- FK posée : `capsules.source_request_id → help_requests` (`restrictOnDelete`, nullable). La contrainte XOR `capsules_source_xor` reste intacte. Q1 fermée.
+- Enum `ContributionRole` reconstruit sur le vocabulaire du cahier (`diagnosis, fix, documentation, test, case`). Q4 fermée.
+- Nouveau helper `Tests\Support\Mdev44\DomainTables::dropAll()` pour que les tests de migration partagés (`HelpRequestsMigrationTest`, `IdentityMigrationTest`) puissent déposer la chaîne capsule avant les rollbacks B11/B05.
+
+### Fichiers hors de mon domaine modifiés (minimal)
+
+- `backend/tests/Integration/HelpRequests/HelpRequestsMigrationTest.php` : +2 lignes (import + appel `DomainTables::dropAll()`). Raison : la FK `capsules.source_request_id → help_requests` empêche le rollback de B11 sans ce dépôt préalable.
+- `backend/tests/Integration/IdentityMigrationTest.php` : +2 lignes (import + appel `DomainTables::dropAll()`). Raison : la même FK, propagée jusqu'à B05 via `help_requests → users`.
+
+### Contrôles finaux
+
+- `composer lint` → `{"tool":"pint","result":"passed"}`.
+- `composer analyse` → `[OK] No errors` (PHPStan niveau 8).
+- `composer test` → **315 tests / 2541 assertions, OK**.
+- `composer test:integration` (suite complète) → **185 tests / 1400 assertions, OK**.
+- CI distante : à observer après push.
+
+### Prochaines étapes
+
+1. Pousser la branche et ouvrir une PR brouillon, base `backend/capsules-laboratoire`.
+2. Mentionner dans le corps : « contient le merge du schéma B11 », cinq questions ouvertes restantes (Q2, Q3, Q5, Q6, Q7), et les deux fichiers hors de mon domaine modifiés.
+3. Attendre revue par un relecteur humain distinct de l'autrice.
+
+Aucun `DONE` prononcé.

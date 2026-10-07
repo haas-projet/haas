@@ -187,3 +187,43 @@ Branche `backend/capsules-laboratoire-b22-schema` dérivée de `backend/capsules
 - Aucun fichier interdit n'a été touché : `config/`, `bootstrap/`, `phpunit.xml`, `.env.example`, `composer.*`, `.github/workflows/`, `routes/api.php`, `docs/OPENAPI.yaml` sont intacts.
 - B22 ne livre aucune route API. Aucune ligne à ajouter dans `docs/OPENAPI.yaml`.
 - Aucun push, aucune PR ouverte, aucune revue humaine simulée.
+
+## 2026-10-07 — Reprise B22 : intégration B11, FK source, rôles cahier, support de test
+
+Statut proposé : B22 **préparé, PR en brouillon**, aucun `DONE`.
+
+- `git merge --no-ff origin/backend/communaute-entraide` fusionné localement (`478d1e0`) : B11 complet d'Ousseynou/mdev44 (6 migrations help_requests → request_technologies → proposals → comments → resolutions → b11_add_collaboration_versions, modèles, factories, enums `HelpRequestState`/`ProposalState`, SHA256SUMS mis à jour par Ousseynou, docs AI_USAGE et participants). Conflits textuels résolus manuellement sur les trois fichiers autorisés uniquement : `docs/AI_USAGE.md` (3 sections B11 conservées, 0 ligne HEAD apportée dans la zone), `PROGRESS.md` et `HANDOFF.md` de ce répertoire (sections B11 du 2026-10-03 remises AVANT la section B22 du 2026-10-07, aucune reformulation). `composer.lock`/`composer.json` inchangés par le merge.
+- `feat(capsules): poser la clé étrangère vers help_requests pour la source` (`f59b779`) : `capsules.source_request_id` devient `foreignUuid('help_requests')->restrictOnDelete`. La contrainte XOR `capsules_source_xor` reste inchangée. 4 tests FK ajoutés dans `CapsulesSchemaTest` (UUID réel accepté, UUID inexistant refusé, suppression de la demande source refusée, XOR dans les deux sens). `CapsulesMigrationTest::test_capsules_schema_has_no_foreign_key_toward_lab_or_test_tables` ajoute `capsules.source_request_id` à la liste attendue des 7 FK du schéma B22 (6 originelles + source). → **Q1 fermée** par la pose de la FK.
+- `fix(capsules): aligner contribution_role sur le vocabulaire du cahier` (`bc7b8ee`) : enum `ContributionRole` reconstruit avec `diagnosis|fix|documentation|test|case`, union littérale de `CAHIER_DES_CHARGES.md:364` (« cas, diagnostic, correctif, documentation ») et `CAHIER_DES_CHARGES.md:508` (« diagnostic, correction, documentation, test »). Facteurs et tests mis à jour. L'enum des states de la migration `create_capsule_contributors_table` itère `ContributionRole::cases()` : la nouvelle liste se propage sans édition de migration. → **Q4 fermée.**
+- `test(capsules): déposer les tables de capsules avant le rollback des migrations partagées` (`5a49dab`) : la FK `capsules.source_request_id` empêchait le rollback de `help_requests` (SQLSTATE 2BP01). Nouveau support `Tests\Support\Mdev44\DomainTables::dropAll()` qui drope `artifacts → capsule_contributors → capsule_versions → capsules` (enfants d'abord). Appelé en une ligne dans `HelpRequestsMigrationTest::test_b11_can_be_rolled_back_…` et dans `IdentityMigrationTest::runIdentityMigration('down')`. Modification cross-domain minimale (2 lignes par fichier : import + appel), sans toucher à aucune migration applicative. Un test `DomainTablesTest` vérifie que `dropAll()` fonctionne sur une base migrée à neuf et préserve `help_requests`/`users`.
+
+Vérifier §24 du cahier : les 4 tables (capsules, capsule_versions, capsule_contributors, artifacts) couvrent les colonnes citées dans `CAHIER_DES_CHARGES.md:869-872` sans écart. `state` utilise bien `CapsuleVersionState` du lot 1 (brouillon, en revue, à corriger, publiée, retirée).
+
+Technologies de capsule : `CAHIER_DES_CHARGES.md:456` cite « technologies, versions compatibles déclarées » mais aucune table `capsule_technologies` n'est nommée dans le dictionnaire §24. **Q7 reste ouverte**, aucune table de liaison inventée dans ce lot. Question posée au relecteur et consignée dans le corps de la PR.
+
+Contrôles exécutés après reprise :
+
+| Commande | Résultat observé | Environnement |
+|---|---|---|
+| `composer lint` | `{"tool":"pint","result":"passed"}` | PHP 8.4.15 Laragon |
+| `composer analyse` | `[OK] No errors` (PHPStan niveau 8) | idem |
+| `composer test` | **315 tests / 2541 assertions, OK** en 5,975 s | idem |
+| `composer test:integration` (filtre `Capsules|Artifacts`) | **33 tests / 74 assertions, OK** après la FK | PostgreSQL 17 `haas_capsules_test` |
+| `composer test:integration` (suite complète) | **185 tests / 1400 assertions, OK** en 1 min 50 s | idem |
+
+Nouveaux commits locaux (10 au total sur la branche) :
+
+8. `478d1e0` `chore(capsules): intégrer le schéma B11 pour la clé étrangère de source`
+9. `f59b779` `feat(capsules): poser la clé étrangère vers help_requests pour la source`
+10. `bc7b8ee` `fix(capsules): aligner contribution_role sur le vocabulaire du cahier`
+11. `5a49dab` `test(capsules): déposer les tables de capsules avant le rollback des migrations partagées`
+12. commit documentaire courant.
+
+Questions ouvertes restantes :
+- Q2 — `CapsuleVisibility` : valeurs `visible|hidden`, non littéralement citées. À confirmer.
+- Q3 — `editorial_origin` : type `string(100)` nullable sous CHECK, non littéralement cité. À confirmer.
+- Q5 — `ArtifactDistributionStatus` : valeurs `inactive|approved`, défaut `inactive` conforme à `tasks.json:329`. À confirmer.
+- Q6 — Convention nommage migrations : `create_<table>_table.php` sans préfixe de lot, cohérent B11/B35/B38 côté mdev44 mais écart avec `bXX_create_*` d'Ousseynou. À arbitrer par le responsable 1.
+- Q7 — Table `capsule_technologies` : le cahier parle de technologies au contenu d'une capsule (`CAHIER:456`) mais sans table nommée dans le §24. Pas livrée dans B22, à trancher par le relecteur.
+
+B22 reste **préparé** et pointe vers une PR en brouillon ; `DONE` n'est pas prononcé avant revue humaine et fusion.

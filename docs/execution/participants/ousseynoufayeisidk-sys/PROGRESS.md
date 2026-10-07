@@ -155,3 +155,15 @@ B07/B08/B09/B12/B13/B32 DONE ; le tableau Systalink comporte maintenant 12 lots 
 Demande explicite : vérifier et fusionner le travail de Madina dans le dépôt distant. Le complément #22 approuvé par mdev44-code est fusionné dans la branche B11 (957029b), après la fusion des enums #12 dans main (33eafa0). Synchronisation locale de main : trois conflits documentaires résolus sans suppression des contributions B11 ; aucun changement des migrations initiales. Les huit fichiers applicatifs ajoutés par le merge sont exactement les enums et tests de #12.
 
 Contrôles PHP 8.5.10 / PostgreSQL 17 local isolé, base haas_b11_review_test sur 127.0.0.1:55447 : 312 tests / 2538 assertions sans SQL ; 151 tests / 1316 assertions SQL ; validate-pack 18/18 ; check-deployment-docs 7/7 ; diff --check propre. Publication de la synchronisation pour obtenir la CI du nouveau SHA avant fusion #23. Revue automatisée ; seule l'approbation humaine existante de #22 est constatée, aucune signature humaine inventée. Aucun gate ni frontend.
+
+## 2026-10-07 — Correction de l'horodatage B1 après revue
+
+PR #27 inspectée sur 48fc475. Défaut reproduit sur PostgreSQL isolé : received_at à 12:00+02:00 était enregistré comme 12:00 UTC. Le test de régression échoue avant correction (une assertion) ; ProcessTestEventService normalise maintenant l'instant en UTC avant insertOrIgnore. Le test compare l'instant réellement stocké.
+
+Contrôles PHP 8.5.10 / PostgreSQL 17, base haas_maadinaa_test sur 127.0.0.1:55447 : Pint passé ; PHPStan niveau 8 sans erreur ; 281 tests / 2507 assertions hors SQL et 158 tests / 1373 assertions SQL réussis, dont la course B1-05 et le nouveau cas non UTC ; git diff --check propre. Publier le correctif sans réécrire les commits de Madina, recibler #27 vers main puis récupérer le main consolidé et observer sa CI avant fusion. B35 reste partiel : base haas_lab séparée et module pédagogique défectueux non livrés ; aucun BACKEND_GATE.
+
+## 2026-10-07 — B1 synchronisé avec B11 consolidé
+
+Main 17c6daa (#23 et son complément #22) intégré dans la branche B35 corrigée cdbe96f. Cinq conflits purement documentaires résolus en conservant les sections B11, B35 et les deux interventions de l'intégrateur ; l'ancien HANDOFF B35 est gardé comme instantané daté. Aucun code métier ni migration réécrits dans cette synchronisation.
+
+Suites locales PHP 8.5.10 / PostgreSQL 17, base haas_maadinaa_test dédiée : 312 tests / 2538 assertions hors SQL et 176 tests / 1439 assertions SQL réussis (488 / 3977 au total). Publier ce merge puis attendre la CI du SHA exact avant fusion #27. B2 #28 bloqué après deux tests HTTP ciblés en échec : Origin https://demo.example.com donne 403, Origin HAAS stateful émet deux cookies. #29/#30 restent en brouillon avec défauts statiques de provenance/validation documentés au bilan.

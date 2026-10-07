@@ -25,6 +25,8 @@ paths:
     $ref: './api/openapi/notifications.yaml#/paths/~1api~1v1~1notifications'
   /api/v1/notifications/{id}:
     $ref: './api/openapi/notifications.yaml#/paths/~1api~1v1~1notifications~1{id}'
+  /api/v1/b2/demo-orders:
+    $ref: './api/openapi/capsules-lab.yaml#/paths/~1api~1v1~1b2~1demo-orders'
   /api/v1/admin/members:
     $ref: './api/openapi/administration.yaml#/paths/~1api~1v1~1admin~1members'
   /api/v1/admin/members/{id}:

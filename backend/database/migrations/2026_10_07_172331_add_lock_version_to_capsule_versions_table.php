@@ -19,6 +19,9 @@ return new class extends Migration
 
     public function down(): void
     {
+        if (! Schema::hasTable('capsule_versions') || ! Schema::hasColumn('capsule_versions', 'lock_version')) {
+            return;
+        }
         Schema::table('capsule_versions', function (Blueprint $table): void {
             $table->dropColumn('lock_version');
         });

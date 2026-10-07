@@ -35,7 +35,7 @@ paths:
         '409':
           description: Conflit d'idempotence, slug déjà utilisé ou brouillon modifié depuis sa création
         '403':
-          description: Rôle insuffisant (origine éditoriale réservée à moderator/admin ; demande d'un autre auteur)
+          description: Rôle insuffisant, source masquée ou auteur/contributeur non autorisé ; contrôle actuel répété au rejeu
         '422':
           description: Validation ou source non résolue
   /api/v1/capsules/{capsule}/versions:

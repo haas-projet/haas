@@ -94,6 +94,8 @@ final class CapsuleDraftUpdateHttpTest extends PostgresTestCase
     {
         [$owner, $capsule, $version] = $this->seedDraft();
         $version->state = CapsuleVersionState::Published;
+        $version->published_at = now()->utc();
+        $version->reviewer_id = User::factory()->verified()->create(['role' => 'moderator'])->id;
         $version->save();
         $this->loginAs($owner);
         $response = $this->browserRequest('PATCH', "/api/v1/capsules/{$capsule->id}/versions/{$version->id}", [

@@ -4,6 +4,11 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Capsules;
 
+use App\Data\Capsules\CapsuleDraftData;
+use App\Data\Capsules\VersionDraftData;
+use App\Data\Idempotency\IdempotencyKey;
+use App\Enums\Capsules\CapsuleSourceKind;
+use App\Enums\Collaboration\ProposalState;
 use App\Enums\HelpRequests\HelpRequestState;
 use App\Enums\Identity\Role;
 use App\Models\Capsules\Capsule;
@@ -12,6 +17,8 @@ use App\Models\Proposal;
 use App\Models\Resolution;
 use App\Models\Technology;
 use App\Models\User;
+use App\Services\Capsules\CreateCapsuleDraftService;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Support\Str;
 use Tests\PostgresTestCase;
@@ -123,6 +130,61 @@ final class CapsuleDraftReadinessTest extends PostgresTestCase
     {
         $this->browserRequest('GET', '/sanctum/csrf-cookie')->assertNoContent();
         $this->browserRequest('POST', '/login', ['email' => $user->email, 'password' => 'mot-de-passe-de-test'])->assertOk();
+    }
+
+    public function test_hidden_source_is_forbidden_to_its_author(): void
+    {
+        [$author, $source] = $this->resolvedSource();
+        $source->forceFill(['hidden_at' => now()->utc()])->save();
+        $this->login($author);
+        $payload = $this->payload();
+        $payload['source'] = ['kind' => 'help_request', 'help_request_id' => $source->id];
+        $this->browserRequest('POST', '/api/v1/capsules', $payload, $this->key())->assertForbidden();
+        $this->assertDatabaseCount('capsules', 0);
+        $this->assertDatabaseCount('api_idempotency', 0);
+    }
+
+    public function test_source_hidden_after_creation_blocks_current_replay(): void
+    {
+        [$author, $source] = $this->resolvedSource();
+        $this->login($author);
+        $payload = $this->payload();
+        $payload['source'] = ['kind' => 'help_request', 'help_request_id' => $source->id];
+        $key = $this->key();
+        $this->browserRequest('POST', '/api/v1/capsules', $payload, $key)->assertCreated();
+        $source->forceFill(['hidden_at' => now()->utc()])->save();
+        $this->browserRequest('POST', '/api/v1/capsules', $payload, $key)->assertForbidden();
+        $this->browserRequest('POST', '/api/v1/capsules', $payload, $this->key())->assertForbidden();
+        $this->assertDatabaseCount('capsules', 1);
+        $this->assertDatabaseCount('api_idempotency', 1);
+        $this->assertDatabaseCount('content_revisions', 1);
+    }
+
+    public function test_service_reads_hidden_source_under_its_database_lock(): void
+    {
+        [$author, $source] = $this->resolvedSource();
+        HelpRequest::whereKey($source->id)->update(['hidden_at' => now()->utc()]);
+        $this->assertNull($source->hidden_at);
+        $data = new CapsuleDraftData('source-masquee', CapsuleSourceKind::HelpRequest, $source->id, null,
+            new VersionDraftData('1.0.0', 'Diagnostic documenté pour un scénario purement fictif.', 'Limites explicitement déclarées.', []));
+        try {
+            app(CreateCapsuleDraftService::class)->handle($author, $data, new IdempotencyKey((string) Str::uuid()));
+            $this->fail('La source masquée ne doit produire aucun brouillon.');
+        } catch (AuthorizationException) {
+            $this->assertDatabaseCount('capsules', 0);
+            $this->assertDatabaseCount('api_idempotency', 0);
+        }
+    }
+
+    /** @return array{User, HelpRequest} */
+    private function resolvedSource(): array
+    {
+        $author = User::factory()->verified()->create();
+        $source = HelpRequest::factory()->create(['author_id' => $author->id, 'state' => HelpRequestState::Resolved]);
+        $proposal = Proposal::factory()->create(['request_id' => $source->id, 'state' => ProposalState::Accepted]);
+        Resolution::factory()->create(['request_id' => $source->id, 'proposal_id' => $proposal->id, 'accepted_by' => $author->id]);
+
+        return [$author, $source];
     }
 
     /** @return array<string, string> */

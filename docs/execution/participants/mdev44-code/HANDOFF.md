@@ -238,6 +238,8 @@ Le socle commun reçoit seulement la règle `NoLikelySecret` existante, les troi
 
 Contrôles observés : ciblés **13 / 111**, suite capsules **92 / 290**, Unit/Feature/Architecture **323 / 2675**, PHPStan sans erreur, Pint passé, documents **18 + 7**, types **33**. Suite complète combinée après intégration B22/main, CI et revue humaine restent nécessaires. Aucun push ou merge effectué par cet agent ; publication gérée par l'intégrateur. SHA du commit local à consigner dans son bilan après création.
 
+Complément sur le parent combiné `94aeae9` : source masquée refusée sous verrou et au rejeu, trois régressions et septième course réelle ; fixture publiée conforme B22. Ciblés **28 tests / 158 assertions**, Pint/PHPStan verts. La suite SQL partielle a été interrompue et n'est pas déclarée réussie. Reprendre ce correctif dans B24 puis relancer les suites complètes avant CI et revue humaine.
+
 ## 2026-10-05 — Reprise B35 conservée avant intégration
 
 Instantané de la branche B35 ; les instructions ci-dessous décrivent son état historique. L'état d'intégration courant figure dans docs/execution/HANDOFF.md.

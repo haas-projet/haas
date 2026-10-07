@@ -39,3 +39,11 @@ Les premiers lancements avaient une configuration de test CORS/Sanctum incomplè
 ## Restant avant réception
 
 Intégrer B22 et le main actualisés, adapter les fixtures de publication aux contraintes réelles puis relancer les suites combinées complètes. CI distante du commit corrigé, Qodana et revue humaine : non exécutés ici. Aucun frontend, déploiement, achat ou GO_FRONTEND. L’intégrateur consigne le SHA réel après ce commit, sans essayer de l’inclure dans son propre contenu.
+
+## Complément après synchronisation B22/main
+
+Parent combiné `94aeae9836acf7c8ad3371604d388ef40d5fd3e3` : schéma B22 renforcé et main `b76612d`, suivis B22 repris. La première suite SQL complète a été interrompue sur instruction de l'intégrateur après des cas partiels et un `E` observé : fixture publiée définissant seulement son état, désormais invalide. Aucun résultat global n'est revendiqué pour cet essai.
+
+La fixture de PATCH d'une version publiée ajoute une date et un reviewer fictif vérifié, modérateur et distinct du propriétaire ; le refus HTTP 403 demeure attendu. La Policy refuse aussi `hidden_at` sur la source verrouillée avant création **et au rejeu**. Trois régressions couvrent auteur de source masquée, source devenue masquée après création et service relisant la base avec un ancien objet source. Une septième course réelle masque la source pendant l'attente des acteurs et vérifie deux refus sans brouillon/audit/intention.
+
+Commandes observées après ces corrections : ciblés `CapsuleDraftReadinessTest`, `CapsuleDraftConcurrencyTest`, `CapsuleDraftUpdateHttpTest` = **28 tests / 158 assertions, OK** ; Pint `passed` ; PHPStan `[OK] No errors`. Les 54 types générés du parent sont conservés. La suite SQL complète combinée reste à relancer après ce commit ; l'interruption précédente n'est pas un succès.

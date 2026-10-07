@@ -9,3 +9,9 @@ Le 4 octobre, l'utilisateur confirme que Madina n'a pas commencé B14 ni HelpInt
 Prochain lot : **B15**, lectures/recherche avec visibilité avant filtres/pagination et compteurs ; réutiliser HelpRequestPolicy et HelpRequestResource. Ne pas ajouter B15 à la PR B14 pendant sa revue. B16 ajoutera les éditions/publications de brouillons existants sous version ; POST B14 crée une nouvelle ressource et n'est pas une route d'édition.
 
 B11/B14 restent En cours dans Systalink jusqu'à intégration vérifiée. Les 25 autres lots de la coordination #2 restent à faire ; les points `ask_question`/HelpIntent préparés ne valident pas l'intégralité BC07/BV201. Aucun BACKEND_GATE/GO_FRONTEND/GO_PRODUCTION. Tests PostgreSQL uniquement sur une base dédiée avec rôle haas_test.
+
+## Synchronisation du 7 octobre 2026
+
+B11 est intégré dans `main` (`f1f6238`). B14 récupère ce main par merge normal depuis `6a0db1e` ; l'unique conflit du registre IA est résolu en gardant B14 et B35. PR #24 reciblée vers main ; B15/#25 et B16/#26 restent dépendantes et doivent être synchronisées dans cet ordre.
+
+Preuves de cette synchronisation : contrôles documentaires 18/18 et 7/7 ; 36 types API à jour sous PHP 8.5.10 ; empreintes des fichiers versionnés actualisées ; whitespace contrôlé avant commit. SHA réel et CI du head publiés dans le bilan. Les suites Laravel et PostgreSQL de cette branche ne sont pas réexécutées ici ; les contrôles documentaires ne les remplacent pas. Revue humaine encore requise, sans BACKEND_GATE/GO_FRONTEND/GO_PRODUCTION.

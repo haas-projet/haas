@@ -114,7 +114,7 @@ Consolidation : B39–B42 IN_PROGRESS pour le périmètre disponible ; B43/B44 B
 
 ## 2026-10-03 — Réception partielle publiée et CI verte
 
-PR #20 en brouillon contre backend/socle-auth-moderation, code 68b00f8d3fa865bc8995a6b43dda52b178d47ba0. Run 37141557467 réussi, journaux lus : PHP 8.4/8.5 avec PostgreSQL 17, chacun 384 tests / 3702 assertions (251/2452 sans base, 133/1250 SQL). Pint/PHPStan niveau 8/audit/documentation/types générés verts. Exercice local de restauration et refus documentés dans SOCLE_RECEPTION_PARTIELLE.md ; 463 empreintes contrôlées. Cluster temporaire 54693 arrêté, service existant inchangé.
+PR #20 en brouillon contre backend/socle-auth-moderation, code 68b00f8d3fa865bc8995a6b43dda52b178d47ba0. Run 37141557467 réussi, journaux lus : PHP 8.4/8.5 avec PostgreSQL 17, chacun 384 tests / 3702 assertions (251/ 2452 sans base, 133/ 1250 SQL). Pint/PHPStan niveau 8/audit/documentation/types générés verts. Exercice local de restauration et refus documentés dans SOCLE_RECEPTION_PARTIELLE.md ; 463 empreintes contrôlées. Cluster temporaire 54693 arrêté, service existant inchangé.
 
 B01–B06 restent les seules cartes entières terminées ; B07/B08/B09/B12/B13/B32 prêts pour revue. Les autres cartes de la partie socle gardent les réserves explicites du tableau SYSTALINK_TASKS.md. Reprendre après publication des domaines métier/Qodana et revue réelle ; aucun gate ni frontend autorisé. Intégrer dans l'ordre des dépendances, recibler les PR avant de supprimer les branches temporaires fusionnées ; conserver les trois branches permanentes et main.
 
@@ -171,3 +171,12 @@ Main et les trois branches permanentes distantes portent f1f6238. Les branches t
 Reprendre la partie communautaire de Lamine selon ses dépendances et préparer B17 séparément. Le retour à quatre branches exige l'intégration vérifiée des travaux restants ou une organisation décidée explicitement ; ne pas supprimer leurs références pour atteindre le nombre cible. B38 reste bloqué ; aucun nouveau test applicatif ni gate reçu par ce nettoyage. Travail préexistant du workspace initial préservé.
 
 Compte rendu prêt pour un commit local après pack 18/18, documentation de déploiement 7/7, 28 types API à jour sous PHP 8.5.10, UTF-8 strict et git diff --check vérifiés. Manifeste de 517 fichiers actualisé dans l'ordre existant. L'intégrateur publiera le commit ; aucune publication de ce complément ni nouvelle revue humaine présumée.
+
+
+## 7 octobre 2026 — correction B38 avant revue
+
+Codex (GPT-6), intégration sur PR #28 : runtime B2 séparé, configuration/caches/routes/base/rôle/clé propres, rejet des cookies et de HAAS, JSON fictif strict, TTL24h/quota30/capacité 5000/purge bornée. Preuve : docs/quality/B38_ISOLATION_20261007.md. Ciblage local PHP8.5/PostgreSQL17 sur les deux bases dédiées : 64 tests / 348 assertions OK avant quatre assertions CORS complémentaires. Deux processus réellement bloqués simultanément en PostgreSQL ; refus réel de CONNECT à la base application. Revue humaine, CI exacte et restrictions OS/VPS restent à recevoir ; aucun frontend ou déploiement. Les suivis de l’autrice sont conservés comme historiques.
+
+### B38 — correction terminée localement, revue à recevoir
+
+Runtime et données B2 séparés ; garde DNS/configuration et permissions PostgreSQL avant cache/écritures ; cache partagé obligatoire hors testing, bornes atomiques 1000 entrées / 100 verrous, TTL24h et purge complète. Synchronisation normale de main b76612d (B14–B17), historiques et statuts conservés. Suites finales : 391 / 3850 et 379 / 3438, soit 770 tests / 7288 assertions OK. PHPStan niveau 8, Pint, Composer et contrats/documents réussis ; preuve B38_ISOLATION_20261007.md. Statut local IN_REVIEW : CI du SHA exact et revue humaine restent nécessaires ; aucun DONE/gate ni frontend/déploiement. L’intégrateur publiera le commit réel après ce bilan.

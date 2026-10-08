@@ -2,6 +2,7 @@
 
 // Responsable : capsules/laboratoire. Aucune exécution de code utilisateur.
 
+use App\Http\Controllers\Capsules\PublishCapsuleVersionController;
 use App\Http\Controllers\Capsules\RequestChangesController;
 use App\Http\Controllers\Capsules\StoreCapsuleDraftController;
 use App\Http\Controllers\Capsules\StoreCapsuleVersionDraftController;
@@ -24,9 +25,12 @@ Route::prefix('capsules')->group(function (): void {
         ->name('capsules.versions.submit-review');
 });
 
-// Action admin : demander des corrections sur une version en revue (B24).
+// Actions admin : demande de corrections (B24) et publication (B25).
 Route::prefix('admin/capsules')->group(function (): void {
     Route::post('{capsule}/versions/{version}/request-changes', RequestChangesController::class)
         ->whereUuid(['capsule', 'version'])
         ->name('admin.capsules.versions.request-changes');
+    Route::post('{capsule}/versions/{version}/publish', PublishCapsuleVersionController::class)
+        ->whereUuid(['capsule', 'version'])
+        ->name('admin.capsules.versions.publish');
 });

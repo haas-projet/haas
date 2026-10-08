@@ -328,3 +328,45 @@ Réception locale complète sur le code `994de150`, identique dans `backend/` au
 Ajout `backend/tests/Fixtures/write-capsule-concurrently.php` + `backend/tests/Integration/Capsules/CapsuleWritesConcurrencyTest.php` empilés sur la PR #33. Patron Symfony Process + barrière PostgreSQL (`application_name = 'haas_b24_capsule_worker'`) comme `IdempotencyConcurrencyTest` et `ModerationConcurrencyTest` ; `pcntl` non utilisé (Windows). Scénarios : POST idempotent, PATCH `lock_version` périmé, soumission concurrente (acteur unique, clés différentes) et `request-changes` concurrente (modérateur unique, clés différentes). Les deux processus enfants attendent réellement un verrou PostgreSQL que le parent détient avant de libérer la course ; aucun scénario n'a mis au jour une double écriture ou un défaut dans les Services courants. Trait `CapsuleReviewNotificationFixtures` repris pour que `migrate:rollback` passe malgré le downgrade protecteur du lot B24. `composer lint`/`composer analyse`/`composer test` verts (350 / 3800) ; `Integration` complète réelle : **528 tests / 4073 assertions** en 12 min 51 s. CI du commit publié à inscrire dans la revue après observation.
 
 Fichiers hors de mon domaine modifiés : aucun. Aucun test, Service, migration ou document du socle touché. Prochaines étapes : vérifier le résultat réel de la suite Integration en cours, pousser la branche `backend/capsules-laboratoire-b24-revue`, actualiser le corps de la PR #33 et attendre la CI complète avant d'ouvrir la PR B25 depuis cette branche.
+
+
+## 2026-10-08 — HANDOFF B25 Publier une version immuable
+
+Branche `backend/capsules-laboratoire-b25-publication` dérivée de B24 (`686a093`). Préparé, PR en brouillon, aucun DONE.
+
+### Résumé du comportement livré
+
+- `POST /api/v1/admin/capsules/{capsule}/versions/{version}/publish` : `in_review → published` par un modérateur/admin ni owner ni contributeur (AC12). `lock_version` + `Idempotency-Key` obligatoires ; champs inconnus refusés en 422.
+- Contrôles atomiques dans la transaction : documentation complète (body ≥ 20 non blancs + limits non vide), résolution source toujours active (si demande d'aide), chaque artefact `approved` → `notices_path` renseigné (`distribution_status` jamais modifié).
+- Écrit `state=published`, `reviewer_id`, `published_at` serveur, `content_digest` SHA-256 d'un payload canonique (`version_label`, `body`, `limits`, `technologies[trié par id]`), décision `approved` dans `capsule_version_reviews` sans note, audit. Pas de notification (Q12 encore ouverte pour `approved`).
+- Trigger SQL `b22_guard_capsule_version` étendu à `content_digest` : toute mutation d'une version publiée est refusée par la base (AC13, RM03).
+
+### Fichiers hors de mon domaine modifiés (B25)
+
+- `docs/OPENAPI.yaml` : **+2 lignes** (`$ref` publish). Commit `55b0287`.
+- `docs/api/generated/haas-api.d.ts` : **régénéré** par le script (`cbb1f05`).
+
+Aucun autre fichier du socle n'a été touché.
+
+### Preuves locales exactes (PHP 8.4.15 Laragon, base dédiée `haas_capsules_test`/`haas_test`)
+
+| Commande | Résultat observé |
+|---|---|
+| `composer lint` | `{"tool":"pint","result":"passed"}` |
+| `composer analyse` | `[OK] No errors` |
+| `composer test` | `OK (350 tests, 3839 assertions)` |
+| `vendor/bin/phpunit --testsuite Integration --filter CapsulePublishHttpTest` | `OK (22 tests, 53 assertions)` |
+| `vendor/bin/phpunit --testsuite Integration --filter CapsuleWritesConcurrencyTest` | `OK (5 tests, 47 assertions)` |
+| `vendor/bin/phpunit --testsuite Integration` (suite entière) | en cours à l'écriture du HANDOFF ; sera inscrite dans la PR après vérification |
+
+### Décisions du propriétaire du domaine à relire
+
+- Format canonique du `content_digest` : JSON `{version_label, body, limits, technologies[trié]}` SHA-256. Alternatives possibles : inclure `editorial_origin`/`slug`. **Q13** ouverte.
+- « Procédure de vérification présente » (§13) interprétée comme `limits` non vide. Si une colonne dédiée est voulue, l'ajouter dans un futur lot. **Q14** ouverte.
+- Trigger SQL livré en étendant `b22_guard_capsule_version` (CREATE OR REPLACE), **pas** de nouveau trigger. La suite PostgreSQL de tests passe sous `DomainTables::dropAll()` en tearDown (`CapsulePublishHttpTest`) pour laisser `migrate:rollback` passer malgré les downgrades protecteurs B22/B24/B25.
+
+### À reprendre
+
+- Observer la CI distante sur le SHA de la PR brouillon ; mettre à jour cette entrée après résultat.
+- Décider en revue : Q13 (digest), Q14 (procédure), Q12 (notification `approved`).
+- B26 commence depuis cette branche seulement si la CI B25 est verte.

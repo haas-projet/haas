@@ -540,3 +540,68 @@ Code `994de150` inchangé par le merge documentaire `e01202f` du parent B23 fina
 Patron NotificationConcurrencyTest/IdempotencyConcurrencyTest (Symfony Process + barrière PostgreSQL via `application_name = 'haas_b24_capsule_worker'`) étendu aux écritures des brouillons/revues. `backend/tests/Fixtures/write-capsule-concurrently.php` et `backend/tests/Integration/Capsules/CapsuleWritesConcurrencyTest.php` couvrent quatre scénarios réellement concurrents : (i) deux `POST /capsules` avec la même `Idempotency-Key` écrivent une seule capsule (rejeu via `api_idempotency`) ; (ii) deux PATCH simultanés avec le même `lock_version` → un `UPDATED`, un `409 StaleCapsuleVersion` ; (iii) deux `submit-review` simultanés (acteur unique, clés distinctes) → un seul passage `draft → in_review`, un `AuthorizationException` ; (iv) deux `request-changes` simultanés (même modérateur, clés distinctes) → une seule décision écrite en `capsule_version_reviews`, un `AuthorizationException`. Chaque enfant termine sa transaction propre ; aucun test n'a révélé un double effet ou un défaut dans les Services courants. Trait `CapsuleReviewNotificationFixtures` ajouté pour laisser `migrate:rollback` purger les événements de revue (le downgrade B24 refuse de perdre un événement stable).
 
 Contrôles exécutés depuis la racine `backend/` sous PHP Laragon 8.4.15, base `haas_capsules_test`/`haas_test`, `COMPOSER_PROCESS_TIMEOUT=0` : `composer lint` → `{"tool":"pint","result":"passed"}` ; `composer analyse` → `[OK] No errors` ; `composer test` → `OK (350 tests, 3800 assertions)` en 15,258 s ; `vendor/bin/phpunit --testsuite Integration --filter CapsuleWritesConcurrencyTest` → `OK (4 tests, 36 assertions)` en 12,011 s ; `vendor/bin/phpunit --testsuite Integration` complète → `OK (528 tests, 4073 assertions)` en 12 min 51,171 s. Les mêmes totaux sont attendus côté CI distante, à constater sur le SHA du commit publié. Aucune donnée hors domaine modifiée. Aucun DONE, gate, frontend ou déploiement annoncé.
+
+
+## 2026-10-08 — Lot B25 · Publier une version immuable
+
+Statut proposé : B25 **préparé, PR en brouillon**, aucun `DONE`. Branche `backend/capsules-laboratoire-b25-publication`, dérivée de `backend/capsules-laboratoire-b24-revue` (`686a093`).
+
+### Décisions clefs (propriétaire du domaine)
+
+- **`content_digest` : nullable `char(64)`** sur `capsule_versions` avec CHECK format hex 64 et CHECK `state IN ('published','withdrawn')`. Le cahier §09 et §13 citent une « empreinte » sans nommer la colonne : lecture restrictive consignée, la colonne n'est jamais écrite hors du Service de publication (RM03).
+- **Sérialisation canonique** du digest : SHA-256 d'un JSON `{version_label, body, limits, technologies[trié par technology_id]}` (`JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES`). Décision consignée Q13 à relire par l'intégrateur.
+- **Décision `approved`** ajoutée à `ReviewDecision` + migration : enum étendu et `note` devient nullable, CHECK conditionnel (`approved ⇒ note NULL`, autre ⇒ 20-2000 caractères).
+- **Immuabilité SQL** : étend `b22_guard_capsule_version` (CREATE OR REPLACE) pour inclure `content_digest` dans la liste des colonnes refusées sur une version publiée/retirée. Pas de nouveau trigger : la garde B22 existait déjà pour `version_label`/`body`/`limits`/`capsule_id`/`reviewer_id`/`published_at`.
+- **Pas de notification** sur `approved` (Q12 encore ouverte). **Pas de copie automatique** d'artefacts ou de définitions de laboratoire vers une nouvelle version (RM03 ; AC13 couvert par tests).
+- **« Procédure de vérification présente »** (§13) : lu restrictivement comme « limits non vide » (c'est où la portée/procédure est déclarée). Pas de nouvelle colonne dédiée. Question ouverte Q14 pour une colonne distincte si le cahier le réclame plus tard.
+- **Resource de publication** : whitelist stricte, aucun `reviewer_id`, aucune note, aucun chemin privé d'artefact.
+
+### Fichiers créés / modifiés
+
+- Enum : `App\Enums\Capsules\ReviewDecision` (ajout de `Approved`).
+- Data : `App\Data\Capsules\PublishCommandData` (lock_version seul).
+- Policy étendue : `CapsulePolicy::publishVersion` (délègue à `reviewVersion`).
+- Service : `App\Services\Capsules\PublishCapsuleVersionService` (transaction, verrou, documentation complète, provenance active, artefact `approved` → `notices_path` obligatoire, calcul du digest, décision `approved`, audit).
+- Migrations : `add_content_digest_to_capsule_versions_table`, `allow_approved_review_decision`, `b25_protect_content_digest_on_published_versions`.
+- Controller/Request/Resource : `PublishCapsuleVersionController`, `PublishCapsuleVersionRequest`, `CapsuleVersionPublishedResource`.
+- Route : `POST /api/v1/admin/capsules/{capsule}/versions/{version}/publish` dans `routes/api/capsules-lab.php`.
+- Fragment OpenAPI : nouveau chemin + `CapsuleVersionPublishInput`/`CapsuleVersionPublished`.
+- Tests : `CapsulePublishHttpTest` (22 cas) + extension du fixture `write-capsule-concurrently.php` et `CapsuleWritesConcurrencyTest` (+1 cas de publication concurrente).
+
+### Fichiers hors de mon domaine modifiés
+
+- `docs/OPENAPI.yaml` : **+2 lignes** (ajout `$ref` publish). Commit `55b0287`.
+- `docs/api/generated/haas-api.d.ts` : **régénéré** par `scripts/generate-api-types.php` (59 types au total, +2). Commit `cbb1f05`.
+
+Aucun autre fichier du socle n'a été touché.
+
+### Contrôles finaux (PHP 8.4.15 Laragon, base `haas_capsules_test`/`haas_test`, `COMPOSER_PROCESS_TIMEOUT=0`)
+
+| Commande | Résultat observé |
+|---|---|
+| `composer lint` | `{"tool":"pint","result":"passed"}` |
+| `composer analyse` | `[OK] No errors` |
+| `composer test` | `OK (350 tests, 3839 assertions)` |
+| `vendor/bin/phpunit --testsuite Integration --filter CapsulePublishHttpTest` | `OK (22 tests, 53 assertions)` |
+| `vendor/bin/phpunit --testsuite Integration --filter CapsuleWritesConcurrencyTest` | `OK (5 tests, 47 assertions)` |
+| `vendor/bin/phpunit --testsuite Integration` (suite complète) | en cours à la rédaction ; sera inscrit dans la PR après vérification |
+
+### Commits locaux
+
+- `781be66` schema (digest + approved + note nullable)
+- `c49ef3e` trigger (content_digest immuable)
+- `04415a7` service + Policy + DTO
+- `c266953` route + Controller + Resource + Request
+- `589df82` fragment OpenAPI
+- `55b0287` `$ref` OPENAPI racine
+- `cbb1f05` types régénérés
+- `fac3ead` style Pint migration
+- `6717f96` fix StoredCommandResult (UUID uniquement)
+- `b3c3d71` tests (HTTP + concurrence)
+
+### Questions ouvertes
+
+- **Q13** — Format canonique de `content_digest` : décision du propriétaire du domaine (sérialisation JSON triée par `technology_id`). Lectures alternatives possibles : inclure l'`editorial_origin` ou `slug` dans le payload. À confirmer en revue.
+- **Q14** — « Procédure de vérification présente » traitée comme `limits` non vide. Si le cahier exige une colonne distincte, prévoir une migration dédiée.
+- Q12 (B24) — Notification « Revue de capsule terminée » reste ouverte pour la décision `approved`.
+- Q10, Q11 (B23) et Q2–Q7 (B22) restent ouvertes.

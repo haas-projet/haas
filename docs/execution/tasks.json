@@ -470,8 +470,8 @@
       "refs": "AC23 ; B2 backend ; ADR-004 / DEP",
       "phase": "B",
       "execution_order": 40,
-      "status": "BLOCKED",
-      "evidence": ["docs/quality/MERGE_MADINA.md"]
+      "status": "IN_REVIEW",
+      "evidence": ["docs/quality/MERGE_MADINA.md", "docs/quality/B38_ISOLATION_20261007.md"]
     },
     {
       "id": "BC01",

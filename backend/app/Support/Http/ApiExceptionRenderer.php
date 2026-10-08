@@ -3,6 +3,7 @@
 namespace App\Support\Http;
 
 use App\Exceptions\Collaboration\CommentVersionConflict;
+use App\Exceptions\Demo\DemoCapacityReached;
 use App\Exceptions\HelpRequests\HelpRequestCreationRejected;
 use App\Exceptions\HelpRequests\HelpRequestVersionConflict;
 use App\Exceptions\Idempotency\IdempotencyConflict;
@@ -16,6 +17,7 @@ use App\Exceptions\Identity\RegistrationRejected;
 use App\Exceptions\Identity\RegistrationUnavailable;
 use App\Exceptions\ModerationRejected;
 use Illuminate\Auth\AuthenticationException;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -36,6 +38,9 @@ final class ApiExceptionRenderer
         }
 
         $status = match (true) {
+            $exception instanceof QueryException && ($exception->errorInfo[0] ?? null) === 'P0001'
+                && str_contains((string) ($exception->errorInfo[2] ?? ''), 'B2_CACHE_CAPACITY') => 429,
+            $exception instanceof DemoCapacityReached => 429,
             $exception instanceof ValidationException, $exception instanceof RegistrationRejected => 422,
             $exception instanceof InvalidCredentials, $exception instanceof InvalidResetToken => 422,
             $exception instanceof ProfileUpdateRejected, $exception instanceof HelpRequestCreationRejected => 422,
@@ -83,6 +88,13 @@ final class ApiExceptionRenderer
         $id = RequestId::get($request);
         $headers['X-Request-ID'] = $id;
         $headers['Cache-Control'] = 'no-store';
+        // Les refus B2 précèdent HandleCors : conserver CORS exact sans credentials sur leurs erreurs.
+        $demoOrigin = config('demo.frontend_origin');
+        if (is_string($demoOrigin) && $request->header('Origin') === $demoOrigin && config('cors.supports_credentials') === false) {
+            $headers['Access-Control-Allow-Origin'] = $demoOrigin;
+            $headers['Access-Control-Expose-Headers'] = 'Retry-After, X-Request-ID, X-Idempotent-Replay';
+            $headers['Vary'] = 'Origin';
+        }
 
         return new JsonResponse([
             'error' => [

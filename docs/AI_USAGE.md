@@ -2,7 +2,7 @@
 
 | Date | Outil / usage | Périmètre | Vérification humaine | Tests |
 |---|---|---|---|---|
-| 30/09/2026 | ChatGPT — préparation du pack d’instructions | Plan Codex, skills HAAS, spécifications et script de contraste | À relire par l’équipe | Vérification documentaire et script consignés dans le rapport de validation de la version concernée ; aucun test de l’application |
+| 30/09/ 2026 | ChatGPT — préparation du pack d’instructions | Plan Codex, skills HAAS, spécifications et script de contraste | À relire par l’équipe | Vérification documentaire et script consignés dans le rapport de validation de la version concernée ; aucun test de l’application |
 
 Pour le code futur : outil effectivement utilisé, date, lot, fichiers, relecteur réel, tests réellement exécutés et limites. Ne pas qualifier automatiquement une sortie d’IA de libre de droits ou de sûre.
 
@@ -115,3 +115,20 @@ Second nettoyage après fusions externes : #32/#26/#25 constatées vers leurs ba
 ## Préparation des PR avant approbation — 7 octobre 2026
 
 Codex, demande de l'utilisateur : réception de main e3bd34c après fusion réelle de #31 ; résolution des cinq conflits documentaires de #24 en conservant les historiques et les 122 lots. Aucun changement applicatif : seul backend/README.md rejoint main. Code identique à d9cba0b testé 671 / 6805 et CI verte ; contrôles documentaires relancés, nouveau head CI à observer. Revues parallèles et corrections séparées des PR B22/B23/B24 et B38, bases PostgreSQL locales distinctes ; aucun contrôle absent compté réussi et aucune approbation humaine inventée. Travail local initial, migrations et contributions préexistantes préservés.
+
+## Historique de la branche B38 avant intégration
+
+## Lot B38 — API de démonstration B2 — 2026-10-06
+
+Outil : assistant conversationnel IA en séance de pair programming sur la branche `backend/capsules-laboratoire-b38-api-demo-b2`. Tâche : implémenter la brique B2 isolée (route `POST /api/v1/b2/demo-orders`, modèle, service, migration, tests Feature + Integration, fragment OpenAPI, puis commande Artisan `demo:prune` avec rétention 24 h et tests d'intégration associés). L’assistant a proposé le plan, écrit les fichiers, exécuté `composer lint`, `composer analyse`, `composer test` (Unit + Feature + Architecture) et `composer test:integration` sur la base de test dédiée `haas_capsules_test`, et consigné les résultats réels (267 / 2594 avec un seul échec attendu `ApiInventoryTest` ; **154 / 1332 OK en intégration**) sans retouche. Aucune donnée privée, aucun secret, aucun jeton n’a été lu ou journalisé pendant la session. Aucun composant React/service worker B2 n’a été produit (hors périmètre pré-`GO_FRONTEND`). Les sept arbitrages ouverts (nom de migration, câblage de la base `demo`, stripage des middlewares SPA, réutilisation des value objects B13, ligne manquante dans `docs/OPENAPI.yaml` racine, valeur de rétention 24 h de `demo:prune`, planification de la purge dans `routes/console.php`) sont consignés dans `docs/quality/B38_B2_API.md` et attendent un relecteur humain distinct de l’autrice.
+
+
+## 7 octobre 2026 — correction B38 avant revue
+
+Codex (GPT-6), intégration sur PR #28 : runtime B2 séparé, configuration/caches/routes/base/rôle/clé propres, rejet des cookies et de HAAS, JSON fictif strict, TTL24h/quota30/capacité 5000/purge bornée. Preuve : docs/quality/B38_ISOLATION_20261007.md. Ciblage local PHP8.5/PostgreSQL17 sur les deux bases dédiées : 64 tests / 348 assertions OK avant quatre assertions CORS complémentaires. Deux processus réellement bloqués simultanément en PostgreSQL ; refus réel de CONNECT à la base application. Revue humaine, CI exacte et restrictions OS/VPS restent à recevoir ; aucun frontend ou déploiement. Les suivis de l’autrice sont conservés comme historiques.
+
+## B38 — seconde revue et synchronisation des prérequis
+
+Codex (GPT-6) : synchronisation normale de main b76612d (B14–B17), résolution conservant les deux historiques, puis quatre défauts de la seconde revue corrigés (cache partagé obligatoire, expiration/capacité atomique, normalisation des domaines, permissions PostgreSQL réellement fermées avant écritures). Une lecture indépendante du vendor Laravel/PostgreSQL a identifié la traduction des erreurs dans Pipeline, les vieux snapshots et l’arrondi fractionnel ; corrections et tests réels consignés dans B38_ISOLATION_20261007.md. Aucune dépendance/baseline, identité Git inventée, session HAAS, donnée métier ou frontend ; pas de push ni approbation humaine par cet agent.
+
+Contrôles définitifs B38 synchronisé : 391 tests / 3850 assertions hors SQL et 379 / 3438 en intégration, total disjoint 770 / 7288 OK ; la lecture des JUnit isole 99 cas Demo / 432 assertions inclus dans le total. PHPStan, Pint, Composer, contrats et contrôles documentaires réussis. Les relances interrompues sont conservées comme NON TERMINÉES, la lecture indépendante n’est pas un test.

@@ -1,4 +1,127 @@
 # Pilote : mdev44-code. Ajouter uniquement les contrats implémentés.
-paths: {}
+paths:
+  /api/v1/b2/demo-orders:
+    post:
+      operationId: recordDemoOrder
+      summary: Enregistrer une commande fictive de démonstration (B2)
+      description: >-
+        Brique B2 (lot B38) : API isolée de démonstration, servie depuis une
+        origine hors `.haas.example.com` et sans cookie de session HAAS. Chaque
+        intention est portée par un UUID v4 stable (`Idempotency-Key`) pendant 24 heures : deux
+        envois avec la même clé et la même charge renvoient la commande
+        d'origine ; une charge différente avec la même clé est rejetée en 409
+        `IDEMPOTENCY_CONFLICT`. Les données sont exclusivement fictives.
+      security: []
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: true
+          description: UUID v4 créé par intention. Même clé + même charge = rejeu identique ; même clé + autre charge = 409.
+          schema:
+            $ref: '../../OPENAPI.yaml#/components/schemas/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DemoOrderInput'
+      responses:
+        '200':
+          description: Rejeu identique ; la commande d'origine est renvoyée sans nouvelle écriture.
+          headers:
+            X-Request-ID:
+              $ref: '../../OPENAPI.yaml#/components/headers/RequestId'
+            X-Idempotent-Replay:
+              description: Vaut "true" lorsqu'une commande identique a déjà été enregistrée pour cette clé.
+              schema:
+                type: string
+                const: 'true'
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [data]
+                properties:
+                  data:
+                    $ref: '#/components/schemas/DemoOrder'
+        '201':
+          description: Commande fictive créée atomiquement.
+          headers:
+            X-Request-ID:
+              $ref: '../../OPENAPI.yaml#/components/headers/RequestId'
+            X-Idempotent-Replay:
+              description: Vaut toujours "false" pour une première création.
+              schema:
+                type: string
+                const: 'false'
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [data]
+                properties:
+                  data:
+                    $ref: '#/components/schemas/DemoOrder'
+        '409':
+          $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure'
+        '403':
+          $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure'
+        '413':
+          $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure'
+        '415':
+          $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure'
+        '422':
+          $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure'
+        '429':
+          $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure'
+        '503':
+          $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure'
+        '500':
+          $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure'
 components:
-  schemas: {}
+  schemas:
+    DemoOrderInput:
+      type: object
+      additionalProperties: false
+      required: [order_ref, amount_minor, currency]
+      properties:
+        order_ref:
+          type: string
+          pattern: '^demo-[0-9]{4}$'
+          description: Référence fictive demo-0000 à demo-9999 ; aucun texte libre ou renseignement personnel.
+        amount_minor:
+          type: integer
+          minimum: 1
+          maximum: 1000000
+          description: Montant en unité mineure, strictement positif. Aucun paiement réel associé.
+        currency:
+          type: string
+          minLength: 3
+          maxLength: 3
+          enum: [EUR]
+          description: Devise fictive fixe de la démonstration.
+    DemoOrder:
+      type: object
+      additionalProperties: false
+      required: [id, order_ref, amount_minor, currency, state]
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Identifiant serveur de la commande fictive.
+        order_ref:
+          type: string
+          pattern: '^demo-[0-9]{4}$'
+        amount_minor:
+          type: integer
+          minimum: 1
+          maximum: 1000000
+        currency:
+          type: string
+          enum: [EUR]
+        state:
+          type: string
+          enum: [confirmed]
+          description: Les commandes de démonstration sont confirmées à l'écriture ; aucun autre état n'existe pour B2.

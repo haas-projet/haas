@@ -360,7 +360,7 @@ Aucun autre fichier du socle n'a été touché.
 ### Décisions du propriétaire du domaine à relire
 
 - Format canonique du `content_digest` : JSON `{version_label, body, limits, technologies[trié]}` SHA-256. Alternatives possibles : inclure `editorial_origin`/`slug`. **Q13** ouverte.
-- « Procédure de vérification présente » (§13) interprétée comme `limits` non vide. Si une colonne dédiée est voulue, l'ajouter dans un futur lot. **Q14** ouverte.
+- Contrôle de présence de la procédure NON implémenté : le schéma n'a pas de champ dédié (corps libre et limites). Le Service exige un corps d'au moins 20 caractères non blancs et des limites non vides ; la présence de la procédure dans le corps est jugée par le relecteur humain. **Q14** ouverte.
 - Trigger SQL livré en étendant `b22_guard_capsule_version` (CREATE OR REPLACE), **pas** de nouveau trigger. La suite PostgreSQL de tests passe sous `DomainTables::dropAll()` en tearDown (`CapsulePublishHttpTest`) pour laisser `migrate:rollback` passer malgré les downgrades protecteurs B22/B24/B25.
 
 ### À reprendre
@@ -426,3 +426,5 @@ Deux envois d’un formulaire B2 avec la même clé stable (`Idempotency-Key`, U
 ## 2026-10-08 - B23 : reprise de b22 par merge local 53ed6d1. Suite Integration (hors Demo) : OK 476 tests / 3724 assertions. Pint, PHPStan 8 et composer test (406 / 4010) verts.
 
 ## 2026-10-08 - B24 : reprise de B23 par merge local 1ce4f1a. Suite Integration (hors Demo) : OK 526 tests / 4063 assertions. Pint, PHPStan 8 et composer test (413 / 4090) verts.
+
+## 2026-10-08 - B25 : reprise de B24 par merge local 83bd71a. Suite Integration (hors Demo) : OK 549 tests / 4127 assertions. Pint, PHPStan 8 et composer test (413 / 4129) verts.

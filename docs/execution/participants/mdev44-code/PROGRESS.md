@@ -551,7 +551,7 @@ Statut proposé : B25 **préparé, PR en brouillon**, aucun `DONE`. Branche `bac
 - **Décision `approved`** ajoutée à `ReviewDecision` + migration : enum étendu et `note` devient nullable, CHECK conditionnel (`approved ⇒ note NULL`, autre ⇒ 20-2000 caractères).
 - **Immuabilité SQL** : étend `b22_guard_capsule_version` (CREATE OR REPLACE) pour inclure `content_digest` dans la liste des colonnes refusées sur une version publiée/retirée. Pas de nouveau trigger : la garde B22 existait déjà pour `version_label`/`body`/`limits`/`capsule_id`/`reviewer_id`/`published_at`.
 - **Pas de notification** sur `approved` (Q12 encore ouverte). **Pas de copie automatique** d'artefacts ou de définitions de laboratoire vers une nouvelle version (RM03 ; AC13 couvert par tests).
-- **« Procédure de vérification présente »** (§13) : lu restrictivement comme « limits non vide » (c'est où la portée/procédure est déclarée). Pas de nouvelle colonne dédiée. Question ouverte Q14 pour une colonne distincte si le cahier le réclame plus tard.
+- Contrôle de présence de la procédure NON implémenté : le schéma n'a pas de champ dédié (corps libre et limites). Le Service exige un corps d'au moins 20 caractères non blancs et des limites non vides ; la présence de la procédure dans le corps est jugée par le relecteur humain. Question ouverte Q14 pour une colonne distincte si le cahier le réclame plus tard.
 - **Resource de publication** : whitelist stricte, aucun `reviewer_id`, aucune note, aucun chemin privé d'artefact.
 
 ### Fichiers créés / modifiés
@@ -600,7 +600,7 @@ Aucun autre fichier du socle n'a été touché.
 ### Questions ouvertes
 
 - **Q13** — Format canonique de `content_digest` : décision du propriétaire du domaine (sérialisation JSON triée par `technology_id`). Lectures alternatives possibles : inclure l'`editorial_origin` ou `slug` dans le payload. À confirmer en revue.
-- **Q14** — « Procédure de vérification présente » traitée comme `limits` non vide. Si le cahier exige une colonne distincte, prévoir une migration dédiée.
+- **Q14** — Contrôle de présence de la procédure NON implémenté : le schéma n'a pas de champ dédié (corps libre et limites). Le Service exige un corps d'au moins 20 caractères non blancs et des limites non vides ; la présence de la procédure dans le corps est jugée par le relecteur humain. Prévoir une colonne distincte si le cahier le réclame plus tard.
 - Q12 (B24) — Notification « Revue de capsule terminée » reste ouverte pour la décision `approved`.
 - Q10, Q11 (B23) et Q2–Q7 (B22) restent ouvertes.
 
@@ -670,3 +670,5 @@ Dernier élément manquant du verify B38 (« Aucune session HAAS utilisée et do
 ## 2026-10-08 - B23 : reprise de b22 par merge local 53ed6d1. Suite Integration (hors Demo) : OK 476 tests / 3724 assertions. Pint, PHPStan 8 et composer test (406 / 4010) verts.
 
 ## 2026-10-08 - B24 : reprise de B23 par merge local 1ce4f1a. Suite Integration (hors Demo) : OK 526 tests / 4063 assertions. Pint, PHPStan 8 et composer test (413 / 4090) verts.
+
+## 2026-10-08 - B25 : reprise de B24 par merge local 83bd71a. Suite Integration (hors Demo) : OK 549 tests / 4127 assertions. Pint, PHPStan 8 et composer test (413 / 4129) verts.

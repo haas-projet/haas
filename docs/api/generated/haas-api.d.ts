@@ -23,6 +23,8 @@ export type account_mail_ResetPasswordInput = { readonly "email": account_mail_E
 
 export type administration_Account = { readonly "id": string; readonly "handle": string; readonly "role": "member" | "moderator" | "admin"; readonly "status": "active" | "suspended"; readonly "lock_version": number; };
 
+export type capsules_lab_ArtifactDownload = { readonly "id": string; readonly "sha256": string; readonly "size": number; readonly "notices_path": string; readonly "download_url": string; readonly "expires_at": string; [key: string]: unknown; };
+
 export type capsules_lab_CapsuleCatalogueDetail = { readonly "slug": string; readonly "source": { readonly "kind": "help_request" | "editorial"; readonly "editorial_origin"?: string; [key: string]: unknown; }; readonly "version": { readonly "version_label": string; readonly "body": string; readonly "limits": string; readonly "content_digest": string; readonly "published_at": string; readonly "technologies": ReadonlyArray<{ readonly "id"?: string; readonly "slug"?: string; readonly "version_label"?: string; [key: string]: unknown; }>; readonly "contributors": ReadonlyArray<{ readonly "handle"?: string; readonly "role"?: "diagnosis" | "fix" | "documentation" | "test" | "case"; [key: string]: unknown; }>; [key: string]: unknown; }; readonly "history": ReadonlyArray<{ readonly "version_label"?: string; readonly "published_at"?: string; [key: string]: unknown; }>; [key: string]: unknown; };
 
 export type capsules_lab_CapsuleCataloguePage = { readonly "data": ReadonlyArray<capsules_lab_CapsuleCataloguePreview>; readonly "meta": capsules_lab_PaginationMeta; [key: string]: unknown; };

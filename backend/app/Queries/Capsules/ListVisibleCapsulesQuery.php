@@ -7,8 +7,10 @@ namespace App\Queries\Capsules;
 use App\Data\Capsules\CapsuleCatalogueFilterData;
 use App\Enums\Capsules\CapsuleVersionState;
 use App\Models\Capsules\Capsule;
+use App\Models\Capsules\CapsuleVersion;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Liste paginée du catalogue public (B26, §14).
@@ -45,14 +47,12 @@ final class ListVisibleCapsulesQuery
                         }));
             });
         }
-        $query->with(['latestPublished' => fn ($relation) => $relation->with('technologies')]);
-
         if ($filter->sort === 'relevance') {
             $slugPattern = '%'.str_replace(['!', '%', '_'], ['!!', '!%', '!_'], (string) $filter->search).'%';
             $query->orderByRaw("CASE WHEN slug ILIKE ? ESCAPE '!' THEN 0 WHEN editorial_origin ILIKE ? ESCAPE '!' THEN 1 ELSE 2 END", [$slugPattern, $slugPattern]);
         }
         $query->leftJoinSub(
-            fn ($sub) => $sub->from('capsule_versions')->select('capsule_id')
+            DB::table('capsule_versions')->select('capsule_id')
                 ->selectRaw('max(published_at) as last_published_at')
                 ->where('state', CapsuleVersionState::Published->value)
                 ->groupBy('capsule_id'),
@@ -62,7 +62,35 @@ final class ListVisibleCapsulesQuery
             'capsules.id',
         );
         $query->orderByDesc('last_pub.last_published_at')->orderBy('capsules.id');
+        /** @var LengthAwarePaginator<int, Capsule> $page */
+        $page = $query->select('capsules.*')->paginate($filter->page->perPage, ['*'], 'page', $filter->page->page);
+        $this->hydrateLatestPublished(array_values($page->getCollection()->all()));
 
-        return $query->select('capsules.*')->paginate($filter->page->perPage, ['*'], 'page', $filter->page->page);
+        return $page;
+    }
+
+    /** @param list<Capsule> $capsules */
+    private function hydrateLatestPublished(array $capsules): void
+    {
+        if ($capsules === []) {
+            return;
+        }
+        $ids = array_map(static fn (Capsule $c): string => $c->id, $capsules);
+        $latest = CapsuleVersion::query()
+            ->whereIn('capsule_id', $ids)
+            ->where('state', CapsuleVersionState::Published)
+            ->orderByDesc('published_at')
+            ->orderBy('id')
+            ->with('technologies')
+            ->get();
+        $byCapsule = [];
+        foreach ($latest as $version) {
+            if (! isset($byCapsule[$version->capsule_id])) {
+                $byCapsule[$version->capsule_id] = $version;
+            }
+        }
+        foreach ($capsules as $capsule) {
+            $capsule->setRelation('latestPublished', $byCapsule[$capsule->id] ?? null);
+        }
     }
 }

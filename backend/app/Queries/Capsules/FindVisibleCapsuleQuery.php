@@ -42,7 +42,7 @@ final class FindVisibleCapsuleQuery
         if ($version === null) {
             throw new NotFoundHttpException;
         }
-        $version->load(['technologies']);
+        $version->load(['technologies', 'contributors.user']);
 
         /** @var list<CapsuleVersion> $history */
         $history = (clone $publishedQuery)

@@ -55,14 +55,14 @@ class Capsule extends Model
     }
 
     /**
-     * Dernière version publiée (B26) : point d'ancrage de la carte catalogue.
+     * Dernière version publiée (B26) : relation hasOne non-contrainte, hydratée
+     * explicitement par `ListVisibleCapsulesQuery`. Laravel `ofMany()` sur une
+     * clé UUID échoue car PostgreSQL n'a pas de `max(uuid)` pour le tie-break.
      *
      * @return HasOne<CapsuleVersion, $this>
      */
     public function latestPublished(): HasOne
     {
-        return $this->hasOne(CapsuleVersion::class)->ofMany(['published_at' => 'max'], function ($query): void {
-            $query->where('state', CapsuleVersionState::Published);
-        });
+        return $this->hasOne(CapsuleVersion::class)->where('state', CapsuleVersionState::Published);
     }
 }

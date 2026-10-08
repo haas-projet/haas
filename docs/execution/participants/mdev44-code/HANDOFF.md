@@ -467,3 +467,5 @@ Deux envois d’un formulaire B2 avec la même clé stable (`Idempotency-Key`, U
 ## 2026-10-08 - B24 : reprise de B23 par merge local 1ce4f1a. Suite Integration (hors Demo) : OK 526 tests / 4063 assertions. Pint, PHPStan 8 et composer test (413 / 4090) verts.
 
 ## 2026-10-08 - B25 : reprise de B24 par merge local 83bd71a. Suite Integration (hors Demo) : OK 549 tests / 4127 assertions. Pint, PHPStan 8 et composer test (413 / 4129) verts.
+
+## 2026-10-08 - B26 : reprise de B25 par merge local 1c81ae4. Suite Integration (hors Demo) : OK 564 tests / 4192 assertions. Pint, PHPStan 8 et composer test (413 / 4203) verts.

@@ -397,7 +397,7 @@ Aucun autre fichier du socle n'a été touché.
 | `composer analyse` | `[OK] No errors` |
 | `composer test` | `OK (350 tests, 3913 assertions)` |
 | `vendor/bin/phpunit --testsuite Integration --filter CapsuleCatalogueHttpTest` | `OK (15 tests, 65 assertions)` |
-| `vendor/bin/phpunit --testsuite Integration` (suite entière) | à inscrire après vérification |
+| `vendor/bin/phpunit --testsuite Integration` (suite entière) | `OK (566 tests, 4202 assertions)` en 16 min 50 s |
 
 ### Décisions à relire
 

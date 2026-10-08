@@ -90,3 +90,11 @@ Le rapport est décodable en UTF-8 strict sans caractère de remplacement. `SHA2
 | `git diff --check` | Sans erreur. |
 
 L'appel initial du générateur avec le `php` du PATH a été refusé parce qu'il exécutait PHP 8.3.12 ; la relance explicite avec le PHP 8.5.10 existant a réussi. Aucun test applicatif, serveur, Qodana ni contrôle de déploiement réel exécuté pour ce compte rendu documentaire.
+
+## Nettoyage après fusion réelle de #24 et #31 — 20:36 UTC
+
+GitHub constate #31 MERGED vers main e3bd34c à20:02:57UTC et #24 MERGED vers main b76612d à20:24:58UTC ; head #24 2addb4d et main passent les CI 37681430317/37681824151, PHP8.4/8.5/backend-ci. Aucun avis absent n’est inventé.
+
+Avant mutation : dix références réellement lues, quatre permanentes et six temporaires ; contrôle des SHA exacts et des PR ouvertes. Les heads 2addb4d et0575552 et l’ancien socle f1f6238 sont tous ancêtres de main b76612d. Aucune PR ouverte ne cible ni ne porte les références B14 ou review/maadinaa.
+
+Push atomique sans réécriture : trois branches permanentes avancées de f1f6238 àb76612d ; seules backend/communaute-entraide-b14 et review/maadinaa-20261007 supprimées. Branches locales et worktrees conservés. Inventaire distant après opération : **8 références** : main, backend/socle-auth, backend/communaute-entraide, backend/capsules-laboratoire (toutes b76612d), plus les quatre branches des PR #28/#29/#30/#33. Ces dernières restent nécessaires jusqu’à leur intégration vérifiée.

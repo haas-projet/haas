@@ -1,4 +1,4 @@
-# Progression — capsules/laboratoire
+﻿# Progression — capsules/laboratoire
 
 ## 2026-10-02 — Prise en main et phase 0
 
@@ -584,7 +584,7 @@ Aucun autre fichier du socle n'a été touché.
 | `composer test` | `OK (350 tests, 3839 assertions)` |
 | `vendor/bin/phpunit --testsuite Integration --filter CapsulePublishHttpTest` | `OK (22 tests, 53 assertions)` |
 | `vendor/bin/phpunit --testsuite Integration --filter CapsuleWritesConcurrencyTest` | `OK (5 tests, 47 assertions)` |
-| `vendor/bin/phpunit --testsuite Integration` (suite complète) | en cours à la rédaction ; sera inscrit dans la PR après vérification |
+| `vendor/bin/phpunit --testsuite Integration` (suite complète) | `OK (551 tests, 4137 assertions)` en 8 min 00,023 s |
 
 ### Commits locaux
 

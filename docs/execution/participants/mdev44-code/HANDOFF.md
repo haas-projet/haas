@@ -1,4 +1,4 @@
-# Reprise — capsules/laboratoire
+﻿# Reprise — capsules/laboratoire
 
 Branche active : `backend/capsules-laboratoire`. HEAD local après Lot 1 : commit documentaire courant, précédé de `14c4579` (comparisons), `db1ed8d` (lab), `db30cf6` (capsules) et du merge `5e8fc46` de `origin/main`. Rien n'est poussé ni fusionné. Laravel 13.34.0, PHP de session 8.4.15 depuis `C:\laragon\bin\php\php-8.4.15-Win32-vs17-x64` ; le PHP natif 8.4 du PATH `C:\Program Files\php\php.exe` 8.4.3 ne charge pas `openssl` et doit être évité jusqu'à correction. PostgreSQL cible : 17 sur `127.0.0.1:5432`, aligné avec `phpunit.xml`, la CI `backend-ci.yml` et les preuves B01–B06.
 
@@ -357,7 +357,7 @@ Aucun autre fichier du socle n'a été touché.
 | `composer test` | `OK (350 tests, 3839 assertions)` |
 | `vendor/bin/phpunit --testsuite Integration --filter CapsulePublishHttpTest` | `OK (22 tests, 53 assertions)` |
 | `vendor/bin/phpunit --testsuite Integration --filter CapsuleWritesConcurrencyTest` | `OK (5 tests, 47 assertions)` |
-| `vendor/bin/phpunit --testsuite Integration` (suite entière) | en cours à l'écriture du HANDOFF ; sera inscrite dans la PR après vérification |
+| `vendor/bin/phpunit --testsuite Integration` (suite entière) | `OK (551 tests, 4137 assertions)` en 8 min 00 s |
 
 ### Décisions du propriétaire du domaine à relire
 

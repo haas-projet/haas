@@ -49,6 +49,10 @@ export type capsules_lab_CapsuleVersionReviewInput = { readonly "lock_version": 
 
 export type capsules_lab_CapsuleVersionSubmitReviewInput = { readonly "lock_version": number; };
 
+export type capsules_lab_DemoOrder = { readonly "id": string; readonly "order_ref": string; readonly "amount_minor": number; readonly "currency": "EUR"; readonly "state": "confirmed"; };
+
+export type capsules_lab_DemoOrderInput = { readonly "order_ref": string; readonly "amount_minor": number; readonly "currency": "EUR"; };
+
 export type capsules_lab_PaginationMeta = { readonly "current_page"?: number; readonly "per_page"?: number; readonly "last_page"?: number; readonly "total"?: number; readonly "from"?: number; readonly "to"?: number; [key: string]: unknown; };
 
 export type community_Comment = { readonly "id": string; readonly "request_id": string; readonly "author": { readonly "id": string; readonly "handle": string; }; readonly "body": string; readonly "body_html": string; readonly "lock_version": number; readonly "created_at": string | null; readonly "edited_at": string | null; };

@@ -118,7 +118,7 @@ final class PublishCapsuleVersionService
 
                 return new StoredCommandResult(
                     200,
-                    ['capsule_id' => $sourceCapsule->id, 'version_id' => $locked->id, 'review_id' => $review->id, 'content_digest' => $digest],
+                    ['capsule_id' => $sourceCapsule->id, 'version_id' => $locked->id, 'review_id' => $review->id],
                     $locked->lock_version,
                 );
             },

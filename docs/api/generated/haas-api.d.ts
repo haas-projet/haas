@@ -33,6 +33,12 @@ export type capsules_lab_CapsuleVersionDraftInput = { readonly "version_label": 
 
 export type capsules_lab_CapsuleVersionDraftUpdate = { readonly "lock_version": number; readonly "body"?: string; readonly "limits"?: string; readonly "technologies"?: ReadonlyArray<{ readonly "technology_id": string; readonly "version_label"?: string; }>; };
 
+export type capsules_lab_CapsuleVersionReview = { readonly "id": string; readonly "version_id": string; readonly "reviewed_lock_version": number; readonly "decision": "request_changes"; readonly "note": string; readonly "created_at"?: string; [key: string]: unknown; };
+
+export type capsules_lab_CapsuleVersionReviewInput = { readonly "lock_version": number; readonly "note": string; };
+
+export type capsules_lab_CapsuleVersionSubmitReviewInput = { readonly "lock_version": number; };
+
 export type capsules_lab_DemoOrder = { readonly "id": string; readonly "order_ref": string; readonly "amount_minor": number; readonly "currency": "EUR"; readonly "state": "confirmed"; };
 
 export type capsules_lab_DemoOrderInput = { readonly "order_ref": string; readonly "amount_minor": number; readonly "currency": "EUR"; };
@@ -103,7 +109,7 @@ export type moderation_Receipt = (moderation_ReportFields);
 
 export type moderation_ReportFields = { readonly "id": string; readonly "resource_type": "profile"; readonly "resource_id": string; readonly "status": "new" | "in_review" | "resolved" | "dismissed"; readonly "lock_version": number; readonly "created_at": string; [key: string]: unknown; };
 
-export type notifications_Notification = { readonly "id": string; readonly "kind": "profile.moderated" | "comment.created"; readonly "message": string; readonly "target_path": string; readonly "read_at": string | null; readonly "created_at": string; };
+export type notifications_Notification = { readonly "id": string; readonly "kind": "profile.moderated" | "comment.created" | "capsule.review.changes_requested"; readonly "message": string; readonly "target_path": string; readonly "read_at": string | null; readonly "created_at": string; };
 
 export type profiles_ProfileFields = { readonly "id": string; readonly "handle": identity_Handle; readonly "avatar_initials": string; readonly "bio": string; readonly "country": string | null; readonly "primary_language": string; readonly "github_url": string | null; readonly "technologies": ReadonlyArray<profiles_Technology>; readonly "is_demo": boolean; readonly "contributions": null; [key: string]: unknown; };
 

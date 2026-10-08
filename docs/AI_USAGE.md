@@ -59,6 +59,10 @@ Aucun commit poussé, aucune PR ouverte, aucune fusion effectuée.
 
 Codex, à la demande de l'utilisateur : reprise sans réécriture du travail B11 de mdev44-code, compléments de versions positives/protection des champs serveur/factory, tests de FK et migrations, contrat et suivi. Aucune identité Git de collègue ni revue humaine simulée. Vérifications : Pint/PHPStan, 282 tests / 2483 assertions hors SQL, 151 tests / 1316 assertions PostgreSQL ; B11 ciblé 18 / 66 après corrections ; audit sans alerte et validation Composer. Preuves et limites dans `docs/quality/B11_COLLABORATION.md`. La CI et le SHA final seront rapportés dans la PR ; aucun déploiement ni frontend.
 
+## Préparation de la PR #33 B24 — 7 octobre 2026
+
+Codex : audit et corrections versionnées de la soumission et des demandes de corrections, en préservant l'indépendance existante du reviewer et la séparation de publication B25. Preuves réelles dans `docs/quality/B24_REVIEW_READINESS.md` : 33 tests / 162 assertions PostgreSQL, compléments 23 / 90, contrôle PHPStan, documents et types. Préparation encore en cours : parent B23/B22/main, notification via outbox et suites combinées avant revue humaine. Aucune approbation simulée, aucun frontend ou déploiement.
+
 ## Préparation de la PR #30 B23 — 7 octobre 2026
 
 Codex, à la demande de l'utilisateur : audit du travail `93fafea`, probes de défauts puis corrections de provenance, concurrence, validation, édition et idempotence sans modifier les décisions Q8/Q9. Contrôles locaux : 13 tests / 111 assertions PostgreSQL (six courses réelles), 323 tests / 2675 assertions hors SQL, Pint passé, PHPStan sans erreur, 18 + 7 contrôles documentaires, 33 types API à jour. Preuves, essais échoués et limites dans `docs/quality/B23_DRAFT_READINESS.md`. Synchronisation B22/main, suite combinée complète, CI distante et revue humaine en attente. Aucune validation humaine simulée ; aucun frontend ou déploiement.
@@ -140,11 +144,29 @@ B23 avec main b76612d : conflits résolus en conservant les casts et champs B14�
 
 B22 après intégration de main b76612d : suites effectivement terminées sur haas_b22_review_test, 335 tests / 3595 assertions hors SQL et 399 / 3390 PostgreSQL, soit 734 / 6985 uniques. Pint et PHPStan niveau 8 réussis. Les journaux/JUnit locaux de la suite SQL sont ignorés sous backend/storage/logs. Pack 18/18, déploiement 7/7 et 49 types relancés par l’intégrateur ; aucune CI du nouveau head n’est présumée avant publication et lecture des checks.
 
+## Synchronisation B24 avant Q12 — 7 octobre 2026
+
+Merge normal du parent B23 94aeae9 (incluant B22 65bc08a et main b76612d), sans réécrire les historiques. Rollback capsules par neuf chemins explicites, historique de revue et liens technologiques retirés avant les versions ; contrat de revue 0.2.0 conservé. Contrôles exécutés : 350 tests / 3800 assertions Unit, Feature et Architecture ; Pint réussi ; pack documentaire 18/18, déploiement documentaire 7/7, 57 types API à jour. Cette étape ne vaut pas réception SQL complète : Q12 notifications et la fixture de soumission publiée restent à corriger avant readiness.
+
 B23 dernière revue, Codex GPT-6 : probes réels avant correction 13 / 55 avec dix échecs ; contrôle du texte utile et conservation du corps, entier JSON strict, droits actuels de l’auteur source et verrous croisés sans deadlock. Ciblés définitifs 24 / 186 réussis sur base B23 dédiée, Pint, PHPStan 8, documents 18/18 et 7/7 et 54 types API à jour. Essai intermédiaire 44 / 260 avec deux échecs corrigés et suites SQL interrompues déclarés distinctement. Réception globale déléguée ; revue humaine en attente.
+
+B24 Q12, Codex GPT-6 : outbox de corrections demandées raccordée aux contrats communs et six tests réels, contrôles de droits/visibilité avant projections, integer strict et fixture publiée B22. Perte de snapshot au downgrade reproduite avant guard transactionnel. Revue parallèle automatisée en lecture seule, sans attribution humaine. Ciblés53/496 et onze exacts11/116 se recouvrent ; horsSQL350/3800, Pint/PHPStan8/Composer, documents18/7 et types57 verts. SQL complet lancé sur base B24 dédiée et encore en cours ; CI du candidat et revue humaine en attente. Aucun frontend, acceptation/publication B25 ou déploiement.
+
+## Dernières validations B23 reprises dans B24 — 7 octobre 2026
+
+Merge normal de d7ef6eb, en conservant les probes B24 séparément : auteur de la source relu sous FOR SHARE NOWAIT, format du corps préservé et minimum utile validé, lock_version HTTP entier strict. Historiques IA conservés. Contrôles combinés réellement exécutés : 350 tests / 3800 assertions Unit, Feature et Architecture ; Pint sur Policy et bootstrap fusionnés ; 57 types API à jour ; pack 18/18 et documentation déploiement 7/7. Les probes B24 de strictint sont restaurés après cette synchronisation ; ils attendent encore leur correction et Q12 avant toute readiness.
 
 ## Réception indépendante B23 — 7 octobre 2026
 
 Codex (GPT-6), sur demande de préparer les PR avant approbation : relecture des correctifs finaux B23 et réception du code propre `d7ef6eb8c750987ddf509eba6647007162c1bec9`, sans changement applicatif ou de tests. Droits actuels de la source et de son auteur, rejeu, verrous NOWAIT, validation et attribution relus ; suites réelles sur `haas_b23_review_test` dédiée, PostgreSQL 17 local 55447 et PHP 8.5.10 : 343 / 3720 hors SQL et 478 / 3734 SQL, soit **821 tests / 7454 assertions uniques réussis**. Les probes et essais interrompus restent distincts. Pint, PHPStan 8, validation/plateforme/audit Composer, pack 18/18, déploiement documentaire 7/7 et 54 types réussis. Preuve, PROGRESS/HANDOFF participant et empreintes actualisés ; aucun journal, clé ou vendor suivi. CI candidat verte, run 37691657985 constaté par l’intégrateur ; CI du futur commit documentaire à observer. Revue humaine en attente, publication confiée à l’intégrateur, aucun DONE, gate, frontend ou déploiement.
+
+## Preuves finales B23 reçues pendant la suite B24 — 7 octobre 2026
+
+Merge normal du commit documentaire B23 11b9fec : réception locale complète 821 tests / 7454 assertions et CI du code d7ef6eb identique sur PHP 8.4/8.5, run37691657985. Les cinq fichiers entrants sont documentaires. Diff intégral de backend entre le candidat B24 994de150 et l’index de fusion vide : PHP, tests, configuration et routes strictement identiques. La suite SQL B24 continue sans interruption sur ce code figé ; aucun succès SQL complet B24 ni CI absente déclaré. Les historiques IA et participant des deux lots sont conservés.
+
+## Réception finale B24 et état des PR — 7 octobre 2026
+
+Codex (GPT-6), demande de préparation avant approbation : réception SQL B24 complète terminée sur code figé `994de150`, identique au merge documentaire `e01202f`, sans modification applicative ou de tests. Local PHP 8.5.10 / PostgreSQL 17, base dédiée `haas_b24_review_test` : 350 / 3800 hors SQL et 524 / 4037 SQL, soit **874 tests / 7837 assertions uniques réussis** ; JUnit SQL sans erreur, échec ou skip, aucun ciblé ajouté. Pint, PHPStan 8, validation/plateforme/audit Composer réussis ; notices du PHAR Composer externe distinctes. CI candidate 37692436571 et CI exacte e01202f 37693092990 réellement lues par l’intégrateur : PHP 8.4/8.5 chacune 874 / 7837, 57 types API à jour et PHPStan sans erreur. Preuves, PROGRESS/HANDOFF, état consolidé des quatre PR et empreintes actualisés ; aucune clé, log ou vendor suivi. L’intégrateur publiera le bilan et observera la CI de son SHA exact ; revue humaine en attente. Aucun push par cet agent, approbation, DONE, gate, frontend, publication B25 ou déploiement.
 
 ## Historique de la branche B38 avant intégration
 

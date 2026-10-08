@@ -2,7 +2,7 @@
 openapi: 3.1.0
 info:
   title: HAAS — Capsules et laboratoire
-  version: 0.1.1
+  version: 0.2.0
 paths:
   /api/v1/capsules:
     post:
@@ -122,6 +122,101 @@ paths:
           description: lock_version périmé
         '422':
           description: Validation
+  /api/v1/capsules/{capsule}/versions/{version}/submit-review:
+    post:
+      operationId: submitCapsuleVersionForReview
+      summary: Soumettre une version-brouillon à la revue
+      description: >
+        Transition draft → in_review ou changes_requested → in_review. Réservée
+        à l'owner ou à un contributeur de la version. Les champs minimum
+        (body non vide ≥ 20, limits non vides) sont requis : contenu insuffisant
+        produit 422 avec les champs manquants.
+        lock_version et Idempotency-Key obligatoires. Le rejeu relit les droits
+        actuels et exige la même version en in_review ; toute édition ou décision
+        ultérieure produit 409. La soumission ne publie pas la capsule (B25).
+      security:
+        - SessionCookie: []
+      parameters:
+        - name: capsule
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - name: version
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - $ref: '../../OPENAPI.yaml#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CapsuleVersionSubmitReviewInput'
+      responses:
+        '200':
+          description: Version soumise à la revue, ou même résultat rejoué sans nouvel audit
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CapsuleVersionDraft'
+        '403':
+          description: Non habilité ou état non éligible
+        '404':
+          description: Version inexistante ou n'appartenant pas à la capsule
+        '422':
+          description: Validation, champ inconnu ou contenu insuffisant
+        '409':
+          description: lock_version périmé, état changé ou clé réutilisée avec une autre charge
+  /api/v1/admin/capsules/{capsule}/versions/{version}/request-changes:
+    post:
+      operationId: requestChangesOnCapsuleVersion
+      summary: Demander des corrections sur une version en revue
+      description: >
+        Transition in_review → changes_requested. Réservée aux moderator/admin
+        qui ne sont NI owner NI contributeur de la version. Note obligatoire
+        entre 20 et 2000 caractères. Renseigne reviewer_id et enregistre la
+        note dans capsule_version_reviews avec le lock_version du contenu relu.
+        lock_version et Idempotency-Key obligatoires ; champs inconnus refusés.
+        Le journal de décisions conserve notes et attributions sans modification
+        ni suppression. Cette décision demande une correction ; l'acceptation et
+        la publication restent du ressort de B25 avec revue indépendante.
+        Une intention capsule.review.changes_requested destinée au propriétaire
+        est enregistrée dans la transaction de revue ; la livraison est distincte,
+        après commit. La notification contient uniquement message générique et
+        références, et respecte visibilité et droits courants avant lecture.
+      security:
+        - SessionCookie: []
+      parameters:
+        - name: capsule
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - name: version
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - $ref: '../../OPENAPI.yaml#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CapsuleVersionReviewInput'
+      responses:
+        '201':
+          description: Décision enregistrée, ou même décision rejouée sans doublon
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CapsuleVersionReview'
+        '403':
+          description: Auto-revue refusée, rôle insuffisant, ou état non éligible
+        '404':
+          description: Version inexistante ou n'appartenant pas à la capsule
+        '422':
+          description: Note hors format, secret indicatif, contrôle interdit ou validation de commande
+        '409':
+          description: lock_version périmé, état changé ou clé réutilisée avec une autre charge
   /api/v1/b2/demo-orders:
     post:
       operationId: recordDemoOrder
@@ -302,6 +397,32 @@ components:
               id: { type: string, format: uuid }
               slug: { type: string }
               version_label: { type: string, nullable: true }
+    CapsuleVersionReviewInput:
+      type: object
+      additionalProperties: false
+      required: [lock_version, note]
+      properties:
+        lock_version: { type: integer, minimum: 1, maximum: 2147483646, description: 'Entier JSON strict ; les chaînes numériques sont refusées.' }
+        note:
+          type: string
+          minLength: 20
+          maxLength: 2000
+    CapsuleVersionReview:
+      type: object
+      required: [id, version_id, reviewed_lock_version, decision, note]
+      properties:
+        id: { type: string, format: uuid }
+        version_id: { type: string, format: uuid }
+        reviewed_lock_version: { type: integer, minimum: 1, nullable: true, description: 'Version relue ; null uniquement pour le journal antérieur à cette migration, sans attribution inventée.' }
+        decision: { type: string, enum: [request_changes] }
+        note: { type: string }
+        created_at: { type: string, format: date-time, nullable: true }
+    CapsuleVersionSubmitReviewInput:
+      type: object
+      additionalProperties: false
+      required: [lock_version]
+      properties:
+        lock_version: { type: integer, minimum: 1, maximum: 2147483646, description: 'Entier JSON strict ; les chaînes numériques sont refusées.' }
     CapsuleVersionDraftUpdate:
       type: object
       additionalProperties: false

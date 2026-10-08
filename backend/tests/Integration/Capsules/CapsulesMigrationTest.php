@@ -78,6 +78,8 @@ final class CapsulesMigrationTest extends PostgresTestCase
             'migrations/2026_10_07_014215_create_artifacts_table.php',
             'migrations/2026_10_07_123901_create_capsule_version_technologies_table.php',
             'migrations/2026_10_07_172331_add_lock_version_to_capsule_versions_table.php',
+            'migrations/2026_10_07_174813_create_capsule_version_reviews_table.php',
+            'migrations/2026_10_07_195000_b24_preserve_review_history.php',
             'migrations/2026_10_07_200000_b22_preserve_published_capsule_versions.php',
         ]);
         foreach (array_reverse($paths) as $path) {
@@ -87,6 +89,7 @@ final class CapsulesMigrationTest extends PostgresTestCase
             (new ReflectionMethod($migration, 'down'))->invoke($migration);
         }
 
+        $this->assertFalse(Schema::hasTable('capsule_version_reviews'));
         $this->assertFalse(Schema::hasTable('capsule_version_technologies'));
         $this->assertFalse(Schema::hasTable('artifacts'));
         $this->assertFalse(Schema::hasTable('capsule_contributors'));

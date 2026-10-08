@@ -15,6 +15,7 @@ final class DomainTables
 {
     /** @var list<string> */
     private const TABLES = [
+        'capsule_version_reviews',
         'capsule_version_technologies',
         'artifacts',
         'capsule_contributors',

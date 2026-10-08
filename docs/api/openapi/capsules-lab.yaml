@@ -217,6 +217,60 @@ paths:
           description: Note hors format, secret indicatif, contrôle interdit ou validation de commande
         '409':
           description: lock_version périmé, état changé ou clé réutilisée avec une autre charge
+  /api/v1/admin/capsules/{capsule}/versions/{version}/publish:
+    post:
+      operationId: publishCapsuleVersion
+      summary: Publier une version en revue
+      description: >
+        Transition `in_review → published`. Réservée aux moderator/admin
+        qui ne sont NI owner NI contributeur de cette version (AC12,
+        CAHIER_DES_CHARGES.md:462 et :955). La publication exige un
+        `lock_version` courant et une `Idempotency-Key` ; champs inconnus
+        refusés. Contrôles atomiques : documentation complète (body ≥ 20
+        caractères non blancs, limits non vide), résolution source toujours
+        active (si demande d'aide), et pour chaque artefact `approved` un
+        `notices_path` renseigné. La publication ne change JAMAIS
+        `distribution_status`. Pose `state=published`, `reviewer_id`,
+        `published_at` serveur et un `content_digest` SHA-256 des
+        champs canoniques (`version_label`, `body`, `limits`,
+        `technologies` triées). Une décision `approved` est écrite dans
+        `capsule_version_reviews` ; aucune note. Une version publiée
+        devient immuable par trigger SQL (B22 étendu). AC13 appliqué :
+        la publication n'hérite d'aucune preuve ni définition de
+        laboratoire ; une correction ultérieure est une nouvelle version.
+      security:
+        - SessionCookie: []
+      parameters:
+        - name: capsule
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - name: version
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - $ref: '../../OPENAPI.yaml#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CapsuleVersionPublishInput'
+      responses:
+        '200':
+          description: Version publiée, ou même publication rejouée sans nouvelle écriture
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CapsuleVersionPublished'
+        '403':
+          description: Auto-publication refusée, rôle insuffisant ou droits perdus
+        '404':
+          description: Version inexistante ou n'appartenant pas à la capsule
+        '422':
+          description: Documentation incomplète, provenance révoquée, artefact approuvé sans notices, ou validation de commande
+        '409':
+          description: lock_version périmé, état hors `in_review` ou clé réutilisée avec une autre charge
 components:
   schemas:
     CapsuleDraftInput:
@@ -343,6 +397,33 @@ components:
       required: [lock_version]
       properties:
         lock_version: { type: integer, minimum: 1, maximum: 2147483646, description: 'Entier JSON strict ; les chaînes numériques sont refusées.' }
+    CapsuleVersionPublishInput:
+      type: object
+      additionalProperties: false
+      required: [lock_version]
+      properties:
+        lock_version: { type: integer, minimum: 1, maximum: 2147483646, description: 'Entier JSON strict ; les chaînes numériques sont refusées.' }
+    CapsuleVersionPublished:
+      type: object
+      required: [id, capsule_id, version_label, state, body, limits, content_digest, lock_version, published_at, technologies]
+      properties:
+        id: { type: string, format: uuid }
+        capsule_id: { type: string, format: uuid }
+        version_label: { type: string }
+        state: { type: string, enum: [published] }
+        body: { type: string }
+        limits: { type: string, nullable: true }
+        content_digest: { type: string, pattern: '^[0-9a-f]{64}$', description: 'SHA-256 figé au moment de la publication. Jamais modifié après.' }
+        lock_version: { type: integer, minimum: 1 }
+        published_at: { type: string, format: date-time, nullable: true, description: 'Posé par le serveur. Nullable uniquement si la lecture précède la commande, jamais inventé.' }
+        technologies:
+          type: array
+          items:
+            type: object
+            properties:
+              id: { type: string, format: uuid }
+              slug: { type: string }
+              version_label: { type: string, nullable: true }
     CapsuleVersionDraftUpdate:
       type: object
       additionalProperties: false

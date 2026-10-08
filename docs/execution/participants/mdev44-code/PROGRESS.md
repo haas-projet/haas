@@ -373,3 +373,5 @@ Dernier élément manquant du verify B38 (« Aucune session HAAS utilisée et do
 - Aucun fichier interdit n’a été touché : `config/`, `bootstrap/`, `phpunit.xml`, `.env.example`, `composer.json/lock`, `.github/workflows/`, `routes/api.php`, `routes/api/identity.php`, `routes/console.php`, `docs/OPENAPI.yaml` sont intacts.
 - La connexion `demo` n’est pas câblée : les tables vivent sur la base par défaut. Trois fichiers du socle à étendre lors du câblage (voir `docs/quality/B38_B2_API.md` §Écarts).
 - PR brouillon **#28** publiée ; CI distante rouge uniquement sur `ApiInventoryTest` (attendu). Les deux commits locaux de purge ne sont pas encore poussés.
+
+## 2026-10-08 — B22 : reprise de main b76612d par merge local 285f91c. Suite Integration (hors Demo) : OK 397 tests / 3380 assertions. Pint, PHPStan 8 et composer test (398 / 3885) verts. Prerequis local a prevoir : role haas_demo_test + base haas_demo_bootstrap_test + DEMO_DB_PASSWORD pour Integration/Demo (non lancees localement, couvertes par la CI distante).

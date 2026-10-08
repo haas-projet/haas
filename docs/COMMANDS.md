@@ -91,3 +91,12 @@ php vendor/bin/phpunit tests/Integration/IdempotencyTest.php tests/Integration/M
 ```
 
 Le navigateur simulé retire les cookies expirés avec l'horloge des tests ; le cas de cookie périmé volontairement envoyé exige toujours un refus serveur. Le test Idempotency force la collecte des sessions pour rendre la reconnexion après 23 heures déterministe. La preuve B17 conserve l'échec réel avant correction.
+
+
+## Runtime B2 séparé — B38
+
+Depuis backend : `php demo/artisan migrate --force`, `php demo/artisan demo:prune`, `php demo/artisan schedule:list` utilisent exclusivement la configuration et les migrations demo. Les tests SQL exigent deux bases locales dédiées avec rôles distincts, CONNECT métier refusé au rôle fictif : `php vendor/bin/phpunit tests/Feature/Demo tests/Integration/Demo`. Variables DEMO_DB_* et DEMO_IDEMPOTENCY_KEY propres ; aucune copie de la clé ou de l’environnement HAAS. Résultats réels et limites : docs/quality/B38_ISOLATION_20261007.md.
+
+Pour B38 : renseigner DEMO_HAAS_DATABASE explicitement, indépendamment de DB_DATABASE. Les suites finales utilisent les deux DB dédiées haas_b38_review_test/haas_demo_b38_review_test sur 127.0.0.1:55447 et des clés éphémères non affichées. Commandes : php vendor/bin/phpunit --testsuite Unit,Feature,Architecture ; php vendor/bin/phpunit --testsuite Integration ; php vendor/bin/phpstan analyse --memory-limit=1G --no-progress ; php vendor/bin/pint --test ; php ../scripts/generate-api-types.php --check ; node scripts/validate-pack.mjs ; node scripts/check-deployment-docs.mjs depuis la racine pour les deux derniers. Les preuves distinguent les relances interrompues des suites achevées.
+
+Résultat final B38 synchronisé avec main b76612d : Unit/Feature/Architecture 391 / 3850 et Integration 379 / 3438, total 770 / 7288 OK. PHPStan, Pint, Composer, 51 types API, pack 18/18 et déploiement documentaire 7/7 réussis. Les preuves exactes et les limites sont dans B38_ISOLATION_20261007.md ; CI et revue restent à recevoir.

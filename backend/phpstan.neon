@@ -5,6 +5,9 @@ includes:
 parameters:
     level: 8
     phpVersion: 80400
+    configDirectories:
+        - config
+        - demo/config
     paths:
         - app
         - bootstrap/app.php
@@ -13,5 +16,11 @@ parameters:
         - database
         - routes
         - tests
+        - demo/bootstrap
+        - demo/config
+        - demo/database
+        - demo/routes
+        - demo/public
+        - demo/artisan
     tmpDir: .phpstan.cache
     reportUnmatchedIgnoredErrors: true

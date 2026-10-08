@@ -1,0 +1,6 @@
+/.env
+/.env.testing
+/bootstrap/cache/*.php
+/storage/**
+!/storage/**/
+!/storage/**/.gitignore

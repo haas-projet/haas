@@ -730,3 +730,47 @@ Dernier élément manquant du verify B38 (« Aucune session HAAS utilisée et do
 ## 2026-10-08 - B25 : reprise de B24 par merge local 83bd71a. Suite Integration (hors Demo) : OK 549 tests / 4127 assertions. Pint, PHPStan 8 et composer test (413 / 4129) verts.
 
 ## 2026-10-08 - B26 : reprise de B25 par merge local 1c81ae4. Suite Integration (hors Demo) : OK 564 tests / 4192 assertions. Pint, PHPStan 8 et composer test (413 / 4203) verts.
+
+## 2026-10-08 — Lot B27 · Téléchargement contrôlé
+
+Statut proposé : B27 **préparé, PR en brouillon**, aucun DONE. Branche `backend/capsules-laboratoire-b27-telechargement`, dérivée de B26 (603f43d).
+
+### Décisions clefs (propriétaire du domaine)
+
+- **Deux routes** : `GET /api/v1/capsules/{capsule}/versions/{version}/artifact/{artifact}` (émission d'un lien signé) et `GET .../stream` (livraison du flux). Nommées suivant la convention B23-B26 nested (slug §26 `/versions/{id}/artifact` ouvert à l'interprétation ; nested conservé par cohérence avec B24/B25).
+- **Gates ré-évaluées à chaque requête** (émission ET stream) : actif+vérifié, visibility=visible, state=published, artefact `approved` avec `notices_path` renseigné. Un retrait ultérieur coupe les anciens liens (AC15, AC25).
+- **Jamais de `private_path` ni de chemin disque** dans Resource, logs ou erreur. Policy ou chemin suspect = 404 (RM06 : ne pas révéler l'existence des contenus masqués/retirés).
+- **Lien signé** : `URL::temporarySignedRoute` TTL 300 s + middleware `signed` sur la route de stream. `signed+verified` sur la stream.
+- **Audit** : `capsule.version.artifact.download_issued` dans `content_revisions`, sha256 et expires_at seulement.
+- **Services** : `IssueArtifactDownloadService` renvoie `{artifact, expires_at}` ; le Controller construit l'URL signée (séparation DomainBoundariesTest). `StreamArtifactService` renvoie `{disk, path, download_name}` ; le Controller appelle `Storage::disk('local')->download`.
+
+### Fichiers créés / modifiés
+
+- Policy : `App\Policies\ArtifactPolicy`.
+- Services : `IssueArtifactDownloadService`, `StreamArtifactService`.
+- Exception : `App\Exceptions\Capsules\ArtifactUnavailable` (404).
+- Controllers minces : `IssueArtifactDownloadController`, `StreamArtifactDownloadController`.
+- Resource : `ArtifactDownloadResource` (sans `private_path`).
+- Routes dans `routes/api/capsules-lab.php` (middleware `verified` sur émission ; `signed+verified` sur stream).
+- Fragment OpenAPI : deux paths + schéma `ArtifactDownload`.
+- Tests : `ArtifactDownloadHttpTest` (12 cas, 27 assertions).
+
+### Fichiers hors de mon domaine modifiés
+
+- `docs/OPENAPI.yaml` : **+4 lignes** (deux `$ref` : issue + stream).
+- `docs/api/generated/haas-api.d.ts` : régénéré (66 types, +3).
+
+Aucun autre fichier du socle n'a été touché.
+
+### Contrôles locaux
+
+- `composer lint` → `{"tool":"pint","result":"passed"}`.
+- `composer analyse` → `[OK] No errors`.
+- `composer test` → `OK (413 tests, 4233 assertions)`.
+- `vendor/bin/phpunit --testsuite Integration --filter ArtifactDownloadHttpTest` → `OK (12 tests, 27 assertions)` en 29,7 s.
+
+### Questions ouvertes
+
+- **Q18** — « Conditions d'évaluation approuvées » (§13:480, ARB05 §04:120) : pour P0 verified+actif suffit ; un drapeau explicite d'acceptation d'évaluation est consigné comme à venir (voir ARB05 non résolu).
+- **Q19** — Nommage §26 `/versions/{id}/artifact` : interprété comme nested `/capsules/{capsule}/versions/{version}/artifact/{artifact}` pour cohérence avec B23-B26. À confirmer.
+- Questions antérieures Q12–Q17 restent ouvertes.

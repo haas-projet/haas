@@ -469,3 +469,28 @@ Deux envois d’un formulaire B2 avec la même clé stable (`Idempotency-Key`, U
 ## 2026-10-08 - B25 : reprise de B24 par merge local 83bd71a. Suite Integration (hors Demo) : OK 549 tests / 4127 assertions. Pint, PHPStan 8 et composer test (413 / 4129) verts.
 
 ## 2026-10-08 - B26 : reprise de B25 par merge local 1c81ae4. Suite Integration (hors Demo) : OK 564 tests / 4192 assertions. Pint, PHPStan 8 et composer test (413 / 4203) verts.
+
+## 2026-10-08 — HANDOFF B27 Téléchargement contrôlé
+
+Branche `backend/capsules-laboratoire-b27-telechargement` dérivée de B26 (603f43d). Préparé, PR en brouillon.
+
+### Résumé
+
+- `GET /artifact/{artifact}` : émet un lien signé courte durée (TTL 300 s) après vérification active+vérifié, visible, published, approved+notices (AC15/AC25/RM06).
+- `GET .../stream` : signed+verified, ré-évalue les mêmes gates. Policy ou chemin suspect = 404.
+- Aucun `private_path`, chemin disque ou champ privé n'est exposé.
+- Audit `capsule.version.artifact.download_issued` dans la transaction d'émission.
+
+### Preuves locales
+
+| Commande | Résultat |
+|---|---|
+| `composer lint` | `passed` |
+| `composer analyse` | `[OK] No errors` |
+| `composer test` | `OK (413 tests, 4233 assertions)` |
+| `vendor/bin/phpunit --testsuite Integration --filter ArtifactDownloadHttpTest` | `OK (12 tests, 27 assertions)` |
+
+### À reprendre
+
+- CI distante à constater sur le SHA du commit publié.
+- Q18 (conditions d'évaluation, ARB05) et Q19 (nommage nested) à relire.

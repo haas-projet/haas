@@ -45,6 +45,10 @@ paths:
     $ref: './api/openapi/administration.yaml#/paths/~1api~1v1~1admin~1members~1{id}'
   /api/v1/capsules:
     $ref: './api/openapi/capsules-lab.yaml#/paths/~1api~1v1~1capsules'
+  /api/v1/capsules/{slug}:
+    $ref: './api/openapi/capsules-lab.yaml#/paths/~1api~1v1~1capsules~1{slug}'
+  /api/v1/capsules/{slug}/versions/{version}:
+    $ref: './api/openapi/capsules-lab.yaml#/paths/~1api~1v1~1capsules~1{slug}~1versions~1{version}'
   /api/v1/capsules/{capsule}/versions:
     $ref: './api/openapi/capsules-lab.yaml#/paths/~1api~1v1~1capsules~1{capsule}~1versions'
   /api/v1/capsules/{capsule}/versions/{version}:

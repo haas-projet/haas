@@ -1,4 +1,4 @@
-# Reprise — capsules/laboratoire
+﻿# Reprise — capsules/laboratoire
 
 Branche active : `backend/capsules-laboratoire`. HEAD local après Lot 1 : commit documentaire courant, précédé de `14c4579` (comparisons), `db1ed8d` (lab), `db30cf6` (capsules) et du merge `5e8fc46` de `origin/main`. Rien n'est poussé ni fusionné. Laravel 13.34.0, PHP de session 8.4.15 depuis `C:\laragon\bin\php\php-8.4.15-Win32-vs17-x64` ; le PHP natif 8.4 du PATH `C:\Program Files\php\php.exe` 8.4.3 ne charge pas `openssl` et doit être évité jusqu'à correction. PostgreSQL cible : 17 sur `127.0.0.1:5432`, aligné avec `phpunit.xml`, la CI `backend-ci.yml` et les preuves B01–B06.
 
@@ -328,6 +328,47 @@ Ajout `backend/tests/Fixtures/write-capsule-concurrently.php` + `backend/tests/I
 
 Fichiers hors de mon domaine modifiés : aucun. Aucun test, Service, migration ou document du socle touché. Prochaines étapes : vérifier le résultat réel de la suite Integration en cours, pousser la branche `backend/capsules-laboratoire-b24-revue`, actualiser le corps de la PR #33 et attendre la CI complète avant d'ouvrir la PR B25 depuis cette branche.
 
+## 2026-10-08 — HANDOFF B25 Publier une version immuable
+
+Branche `backend/capsules-laboratoire-b25-publication` dérivée de B24 (`686a093`). Préparé, PR en brouillon, aucun DONE.
+
+### Résumé du comportement livré
+
+- `POST /api/v1/admin/capsules/{capsule}/versions/{version}/publish` : `in_review → published` par un modérateur/admin ni owner ni contributeur (AC12). `lock_version` + `Idempotency-Key` obligatoires ; champs inconnus refusés en 422.
+- Contrôles atomiques dans la transaction : documentation complète (body ≥ 20 non blancs + limits non vide), résolution source toujours active (si demande d'aide), chaque artefact `approved` → `notices_path` renseigné (`distribution_status` jamais modifié).
+- Écrit `state=published`, `reviewer_id`, `published_at` serveur, `content_digest` SHA-256 d'un payload canonique (`version_label`, `body`, `limits`, `technologies[trié par id]`), décision `approved` dans `capsule_version_reviews` sans note, audit. Pas de notification (Q12 encore ouverte pour `approved`).
+- Trigger SQL `b22_guard_capsule_version` étendu à `content_digest` : toute mutation d'une version publiée est refusée par la base (AC13, RM03).
+
+### Fichiers hors de mon domaine modifiés (B25)
+
+- `docs/OPENAPI.yaml` : **+2 lignes** (`$ref` publish). Commit `55b0287`.
+- `docs/api/generated/haas-api.d.ts` : **régénéré** par le script (`cbb1f05`).
+
+Aucun autre fichier du socle n'a été touché.
+
+### Preuves locales exactes (PHP 8.4.15 Laragon, base dédiée `haas_capsules_test`/`haas_test`)
+
+| Commande | Résultat observé |
+|---|---|
+| `composer lint` | `{"tool":"pint","result":"passed"}` |
+| `composer analyse` | `[OK] No errors` |
+| `composer test` | `OK (350 tests, 3839 assertions)` |
+| `vendor/bin/phpunit --testsuite Integration --filter CapsulePublishHttpTest` | `OK (22 tests, 53 assertions)` |
+| `vendor/bin/phpunit --testsuite Integration --filter CapsuleWritesConcurrencyTest` | `OK (5 tests, 47 assertions)` |
+| `vendor/bin/phpunit --testsuite Integration` (suite entière) | `OK (551 tests, 4137 assertions)` en 8 min 00 s |
+
+### Décisions du propriétaire du domaine à relire
+
+- Format canonique du `content_digest` : JSON `{version_label, body, limits, technologies[trié]}` SHA-256. Alternatives possibles : inclure `editorial_origin`/`slug`. **Q13** ouverte.
+- Contrôle de présence de la procédure NON implémenté : le schéma n'a pas de champ dédié (corps libre et limites). Le Service exige un corps d'au moins 20 caractères non blancs et des limites non vides ; la présence de la procédure dans le corps est jugée par le relecteur humain. **Q14** ouverte.
+- Trigger SQL livré en étendant `b22_guard_capsule_version` (CREATE OR REPLACE), **pas** de nouveau trigger. La suite PostgreSQL de tests passe sous `DomainTables::dropAll()` en tearDown (`CapsulePublishHttpTest`) pour laisser `migrate:rollback` passer malgré les downgrades protecteurs B22/B24/B25.
+
+### À reprendre
+
+- Observer la CI distante sur le SHA de la PR brouillon ; mettre à jour cette entrée après résultat.
+- Décider en revue : Q13 (digest), Q14 (procédure), Q12 (notification `approved`).
+- B26 commence depuis cette branche seulement si la CI B25 est verte.
+
 ## Historique de la branche B38 avant intégration
 
 # HANDOFF — capsules/laboratoire (branche B38)
@@ -385,3 +426,5 @@ Deux envois d’un formulaire B2 avec la même clé stable (`Idempotency-Key`, U
 ## 2026-10-08 - B23 : reprise de b22 par merge local 53ed6d1. Suite Integration (hors Demo) : OK 476 tests / 3724 assertions. Pint, PHPStan 8 et composer test (406 / 4010) verts.
 
 ## 2026-10-08 - B24 : reprise de B23 par merge local 1ce4f1a. Suite Integration (hors Demo) : OK 526 tests / 4063 assertions. Pint, PHPStan 8 et composer test (413 / 4090) verts.
+
+## 2026-10-08 - B25 : reprise de B24 par merge local 83bd71a. Suite Integration (hors Demo) : OK 549 tests / 4127 assertions. Pint, PHPStan 8 et composer test (413 / 4129) verts.

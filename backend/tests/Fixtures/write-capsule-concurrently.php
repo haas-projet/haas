@@ -1,6 +1,7 @@
 <?php
 
 use App\Data\Capsules\CapsuleDraftData;
+use App\Data\Capsules\PublishCommandData;
 use App\Data\Capsules\ReviewCommandData;
 use App\Data\Capsules\UpdateDraftData;
 use App\Data\Capsules\VersionDraftData;
@@ -13,6 +14,7 @@ use App\Models\Capsules\Capsule;
 use App\Models\Capsules\CapsuleVersion;
 use App\Models\User;
 use App\Services\Capsules\CreateCapsuleDraftService;
+use App\Services\Capsules\PublishCapsuleVersionService;
 use App\Services\Capsules\RequestChangesOnCapsuleVersionService;
 use App\Services\Capsules\SubmitCapsuleVersionForReviewService;
 use App\Services\Capsules\UpdateCapsuleVersionDraftService;
@@ -81,6 +83,15 @@ try {
                 Capsule::whereKey($input['capsule_id'])->firstOrFail(),
                 CapsuleVersion::whereKey($input['version_id'])->firstOrFail(),
                 new ReviewCommandData($input['lock_version'], $input['note']),
+                new IdempotencyKey($input['idempotency_key']),
+            );
+            break;
+        case 'publish':
+            app(PublishCapsuleVersionService::class)->handle(
+                $actor,
+                Capsule::whereKey($input['capsule_id'])->firstOrFail(),
+                CapsuleVersion::whereKey($input['version_id'])->firstOrFail(),
+                new PublishCommandData($input['lock_version']),
                 new IdempotencyKey($input['idempotency_key']),
             );
             break;

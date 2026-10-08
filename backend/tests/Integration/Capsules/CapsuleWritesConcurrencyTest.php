@@ -140,6 +140,51 @@ final class CapsuleWritesConcurrencyTest extends PostgresTestCase
         );
     }
 
+    public function test_two_concurrent_publications_write_a_single_approved_decision(): void
+    {
+        $key = 'base64:'.base64_encode(random_bytes(32));
+        config(['app.key' => $key]);
+        $owner = User::factory()->verified()->create();
+        $reviewer = User::factory()->verified()->create(['role' => Role::Moderator]);
+        $capsule = Capsule::factory()->create(['owner_id' => $owner->id, 'slug' => 'publication-concurrente']);
+        $version = CapsuleVersion::factory()->create([
+            'capsule_id' => $capsule->id,
+            'version_label' => '1.0.0',
+            'body' => "## Procédure\n\nÉtape clairement décrite pour la publication.",
+            'limits' => 'Portée réduite au scénario cité.',
+            'state' => CapsuleVersionState::InReview,
+            'lock_version' => 2,
+        ]);
+        $env = $this->childEnv($key);
+        $payloads = [
+            [
+                'mode' => 'publish', 'actor_id' => $reviewer->id, 'capsule_id' => $capsule->id,
+                'version_id' => $version->id, 'lock_version' => 2,
+                'idempotency_key' => (string) Str::uuid(),
+            ],
+            [
+                'mode' => 'publish', 'actor_id' => $reviewer->id, 'capsule_id' => $capsule->id,
+                'version_id' => $version->id, 'lock_version' => 2,
+                'idempotency_key' => (string) Str::uuid(),
+            ],
+        ];
+        $this->raceOnLock(
+            $env,
+            $payloads,
+            fn () => User::whereKey($reviewer->id)->lockForUpdate()->firstOrFail(),
+            function (array $outcomes) use ($version): void {
+                $this->assertEqualsCanonicalizing(['UPDATED', 'CONFLICT'], $outcomes);
+                $version->refresh();
+                $this->assertSame(CapsuleVersionState::Published, $version->state);
+                $this->assertNotNull($version->published_at);
+                $this->assertMatchesRegularExpression('/^[0-9a-f]{64}$/', (string) $version->content_digest);
+                // Une seule ligne de revue `approved`, un seul `published_at`.
+                $this->assertSame(1, DB::table('capsule_version_reviews')->where('decision', ReviewDecision::Approved->value)->count());
+                $this->assertSame(1, DB::table('capsule_versions')->whereNotNull('published_at')->count());
+            },
+        );
+    }
+
     public function test_two_concurrent_request_changes_write_a_single_decision(): void
     {
         $key = 'base64:'.base64_encode(random_bytes(32));

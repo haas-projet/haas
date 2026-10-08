@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\Capsules;
 
+use App\Enums\Capsules\CapsuleVersionState;
 use App\Enums\Capsules\CapsuleVisibility;
 use App\Models\User;
 use Database\Factories\Capsules\CapsuleFactory;
@@ -14,9 +15,15 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
  * @property CapsuleVisibility $visibility
+ * @property string|null $source_request_id
+ * @property string|null $editorial_origin
+ * @property string $owner_id
+ * @property string $slug
+ * @property string $id
  */
 #[Fillable(['slug', 'editorial_origin'])]
 class Capsule extends Model
@@ -45,5 +52,17 @@ class Capsule extends Model
     public function versions(): HasMany
     {
         return $this->hasMany(CapsuleVersion::class);
+    }
+
+    /**
+     * Dernière version publiée (B26) : relation hasOne non-contrainte, hydratée
+     * explicitement par `ListVisibleCapsulesQuery`. Laravel `ofMany()` sur une
+     * clé UUID échoue car PostgreSQL n'a pas de `max(uuid)` pour le tie-break.
+     *
+     * @return HasOne<CapsuleVersion, $this>
+     */
+    public function latestPublished(): HasOne
+    {
+        return $this->hasOne(CapsuleVersion::class)->where('state', CapsuleVersionState::Published);
     }
 }

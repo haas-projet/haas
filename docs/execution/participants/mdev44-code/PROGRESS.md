@@ -604,6 +604,62 @@ Aucun autre fichier du socle n'a été touché.
 - Q12 (B24) — Notification « Revue de capsule terminée » reste ouverte pour la décision `approved`.
 - Q10, Q11 (B23) et Q2–Q7 (B22) restent ouvertes.
 
+## 2026-10-08 — Lot B26 · Catalogue de capsules
+
+Statut proposé : B26 **préparé, PR en brouillon**, aucun `DONE`. Branche `backend/capsules-laboratoire-b26-catalogue`, dérivée de `backend/capsules-laboratoire-b25-publication`.
+
+### Décisions clefs (propriétaire du domaine)
+
+- **Visibilité publique** (`VisibleCapsulesQuery`) : seules les capsules `visible` avec au moins une version `published` apparaissent. Les versions `draft`/`in_review`/`changes_requested`/`withdrawn` n'apparaissent jamais, ni dans la liste, ni dans la recherche, ni dans le détail par slug ou version précisée (AC15, AC25, RM06).
+- **Recherche `q`** (§14) : ILIKE sécurisée (ESCAPE `!`) sur `capsules.slug`, `capsules.editorial_origin`, `capsule_versions.body` et `capsule_versions.limits` des versions publiées. Pas d'index FTS en P0 — **Q15 ouverte** si un index `to_tsvector` ou `pg_trgm` doit être livré.
+- **Tri** en liste blanche stricte : `date` (défaut, dernière publication) ou `relevance` (nécessite `q`). Tout autre tri → 422. Le tri `relevance` ordonne : slug (0), editorial_origin (1), autre (2), puis date.
+- **Pagination** : défaut 20, max 50 (`PageData` existant). Page tri stable `last_published_at DESC, capsules.id ASC`.
+- **Filtre `technology`** (UUID) : rejoint `capsule_version_technologies` sur les versions publiées.
+- **Filtre « présence de laboratoire »** NON livré : `lab_definitions` arrivera en B33 (cahier §15). **Q16 ouverte** pour sa signature exacte.
+- **`source_request_id` NON exposé** (RM06). Seul `source.kind` ('help_request'/'editorial') et `editorial_origin` apparaissent — **Q17 ouverte** sur l'exposition éventuelle d'un `request_summary` masqué.
+- **Resources distinctes de l'édition** : `CapsuleCataloguePreview` (carte), `CapsuleCataloguePage` (collection paginée), `CapsuleCatalogueDetail` (détail + historique + contributeurs). Pas de `reviewer_id`, note, email, chemin privé d'artefact ni empreinte de notice.
+- **Hydratation `latestPublished`** : relation `hasOne` contrainte à `state=published`, hydratée explicitement par `ListVisibleCapsulesQuery::hydrateLatestPublished()`. Laravel `ofMany()` sur UUID échoue car PostgreSQL n'a pas `max(uuid)` pour le tie-break.
+- **Contraintes de route** : slug (`[a-z0-9][a-z0-9-]{1,118}[a-z0-9]`) et version (MAJOR.MINOR.PATCH) distinctes des routes UUID d'édition (POST/PATCH/submit-review/request-changes/publish).
+
+### Fichiers créés / modifiés
+
+- Data : `App\Data\Capsules\CapsuleCatalogueFilterData` (page/search/technology/sort, `relevance` → q requis).
+- Queries : `VisibleCapsulesQuery` (socle visibilité), `ListVisibleCapsulesQuery` (liste paginée + hydratation), `FindVisibleCapsuleQuery` (détail + historique).
+- FormRequest : `ListCapsulesCatalogueRequest` étend `PaginatedRequest`.
+- Resources : `CapsuleCataloguePreview`, `CapsuleCataloguePage`, `CapsuleCatalogueDetail`.
+- Controllers : `ListVisibleCapsulesController`, `ShowVisibleCapsuleController`.
+- Routes : `GET /api/v1/capsules`, `GET /api/v1/capsules/{slug}`, `GET /api/v1/capsules/{slug}/versions/{version}`.
+- Model : `Capsule::latestPublished()` (hasOne), `CapsuleVersion::contributors()` (hasMany).
+- Fragment OpenAPI : trois `paths`, quatre `schemas` (`CapsuleCataloguePage`, `CapsuleCataloguePreview`, `CapsuleCatalogueDetail`, `PaginationMeta`).
+- Tests : `CapsuleCatalogueHttpTest` (15 cas, 65 assertions locales).
+
+### Fichiers hors de mon domaine modifiés
+
+- `docs/OPENAPI.yaml` : **+4 lignes** (deux `$ref` : slug et slug+version).
+- `docs/api/generated/haas-api.d.ts` : **régénéré** (63 types, +4).
+
+Aucun autre fichier du socle n'a été touché.
+
+### Contrôles finaux (PHP 8.4.15 Laragon, base `haas_capsules_test`/`haas_test`, `COMPOSER_PROCESS_TIMEOUT=0`)
+
+| Commande | Résultat observé |
+|---|---|
+| `composer lint` | `{"tool":"pint","result":"passed"}` |
+| `composer analyse` | `[OK] No errors` |
+| `composer test` | `OK (350 tests, 3913 assertions)` |
+| `vendor/bin/phpunit --testsuite Integration --filter CapsuleCatalogueHttpTest` | `OK (15 tests, 65 assertions)` en 16,331 s |
+| `vendor/bin/phpunit --testsuite Integration` (suite complète) | `OK (566 tests, 4202 assertions)` en 16 min 50,310 s |
+
+### Questions ouvertes
+
+- **Q15** — Index FTS (to_tsvector / pg_trgm) : recherche `q` en ILIKE pour P0. Index à prévoir en revue.
+- **Q16** — Filtre « présence de laboratoire » : différé à B33 (table `lab_definitions`).
+- **Q17** — Exposer un `request_summary` masqué pour les capsules issues de demandes d'aide ? Pour l'instant seule `source.kind` et `editorial_origin` sortent.
+- Q13 (B25) — Format canonique du `content_digest` reste ouvert.
+- Q14 (B25) — « Procédure de vérification présente » reste ouvert.
+- Q12 (B24) — Notification `approved` reste ouverte.
+- Q10, Q11 (B23) et Q2–Q7 (B22) restent ouvertes.
+
 ## Historique de la branche B38 avant intégration
 
 # Progression — capsules/laboratoire (branche B38)
@@ -672,3 +728,5 @@ Dernier élément manquant du verify B38 (« Aucune session HAAS utilisée et do
 ## 2026-10-08 - B24 : reprise de B23 par merge local 1ce4f1a. Suite Integration (hors Demo) : OK 526 tests / 4063 assertions. Pint, PHPStan 8 et composer test (413 / 4090) verts.
 
 ## 2026-10-08 - B25 : reprise de B24 par merge local 83bd71a. Suite Integration (hors Demo) : OK 549 tests / 4127 assertions. Pint, PHPStan 8 et composer test (413 / 4129) verts.
+
+## 2026-10-08 - B26 : reprise de B25 par merge local 1c81ae4. Suite Integration (hors Demo) : OK 564 tests / 4192 assertions. Pint, PHPStan 8 et composer test (413 / 4203) verts.

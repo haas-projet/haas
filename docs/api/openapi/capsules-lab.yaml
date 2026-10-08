@@ -5,6 +5,51 @@ info:
   version: 0.2.0
 paths:
   /api/v1/capsules:
+    get:
+      operationId: listVisibleCapsules
+      summary: Lister les capsules publiées (catalogue public)
+      description: >
+        Catalogue public (B26, §14). Visiteurs et membres voient la même
+        liste ; seules les capsules `visible` avec au moins une version
+        `published` apparaissent. Les versions `draft`, `in_review`,
+        `changes_requested` et `withdrawn` ne sont NI listées NI exposées
+        par le détail (RM06, AC15, AC25). Pagination 20 par défaut,
+        maximum 50 ; tri `date` (défaut) ou `relevance` (nécessite `q`).
+        Filtre `technology` sur la technologie de la version publiée la
+        plus récente. Recherche `q` en ILIKE sécurisé sur `slug`,
+        `editorial_origin` et le corps/limites des versions publiées
+        (décision propriétaire : pas d'index FTS en P0 ; voir Q15).
+        Aucun en-tête personnalisé, aucune donnée privée dans les cartes.
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema: { type: integer, minimum: 1 }
+        - name: per_page
+          in: query
+          required: false
+          schema: { type: integer, minimum: 1, maximum: 50 }
+        - name: q
+          in: query
+          required: false
+          schema: { type: string, maxLength: 200 }
+        - name: technology
+          in: query
+          required: false
+          schema: { type: string, format: uuid }
+        - name: sort
+          in: query
+          required: false
+          schema: { type: string, enum: [date, relevance] }
+      responses:
+        '200':
+          description: Page du catalogue
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CapsuleCataloguePage'
+        '422':
+          description: Tri arbitraire, pagination hors limites ou paramètre inconnu
     post:
       operationId: storeCapsuleDraft
       summary: Créer un brouillon de capsule
@@ -271,6 +316,59 @@ paths:
           description: Documentation incomplète, provenance révoquée, artefact approuvé sans notices, ou validation de commande
         '409':
           description: lock_version périmé, état hors `in_review` ou clé réutilisée avec une autre charge
+  /api/v1/capsules/{slug}:
+    get:
+      operationId: showVisibleCapsule
+      summary: Détail d'une capsule publiée (dernière version publiée)
+      description: >
+        Détail public de la capsule désignée par `slug`. Renvoie la dernière
+        version publiée, l'historique des versions publiées (plus récentes
+        d'abord), les contributeurs (handle public et rôle, jamais de
+        courriel) et les technologies. Une capsule masquée ou sans version
+        publiée renvoie 404. Les champs privés (`reviewer_id`, note de
+        revue, courriel, `source_request_id`, chemin privé d'artefact,
+        notices) ne sont jamais exposés (RM06).
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema: { type: string, pattern: '^[a-z0-9][a-z0-9-]{1,118}[a-z0-9]$' }
+      responses:
+        '200':
+          description: Détail de la capsule et de sa version publiée courante
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CapsuleCatalogueDetail'
+        '404':
+          description: Capsule introuvable, masquée ou sans version publiée
+  /api/v1/capsules/{slug}/versions/{version}:
+    get:
+      operationId: showVisibleCapsuleVersion
+      summary: Détail d'une version précise publiée
+      description: >
+        Comme `GET /api/v1/capsules/{slug}` mais pointe une version précise
+        (`version_label` MAJOR.MINOR.PATCH). La version doit être
+        actuellement `published` ; une version retirée après publication
+        disparaît également de ce détail direct (AC15/AC25).
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema: { type: string, pattern: '^[a-z0-9][a-z0-9-]{1,118}[a-z0-9]$' }
+        - name: version
+          in: path
+          required: true
+          schema: { type: string, pattern: '^(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)$' }
+      responses:
+        '200':
+          description: Détail de la version publiée demandée
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CapsuleCatalogueDetail'
+        '404':
+          description: Capsule introuvable, masquée, ou version non publiée
   /api/v1/b2/demo-orders:
     post:
       operationId: recordDemoOrder
@@ -477,6 +575,93 @@ components:
       required: [lock_version]
       properties:
         lock_version: { type: integer, minimum: 1, maximum: 2147483646, description: 'Entier JSON strict ; les chaînes numériques sont refusées.' }
+    CapsuleCataloguePage:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/CapsuleCataloguePreview'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+    CapsuleCataloguePreview:
+      type: object
+      required: [slug, source, version, last_published_at]
+      properties:
+        slug: { type: string }
+        source:
+          type: object
+          required: [kind]
+          properties:
+            kind: { type: string, enum: [help_request, editorial] }
+            editorial_origin: { type: string, nullable: true }
+        version:
+          type: object
+          nullable: true
+          properties:
+            version_label: { type: string }
+            published_at: { type: string, format: date-time, nullable: true }
+            technologies:
+              type: array
+              items:
+                type: object
+                properties:
+                  id: { type: string, format: uuid }
+                  slug: { type: string }
+                  version_label: { type: string, nullable: true }
+        last_published_at: { type: string, format: date-time, nullable: true }
+    CapsuleCatalogueDetail:
+      type: object
+      required: [slug, source, version, history]
+      properties:
+        slug: { type: string }
+        source:
+          type: object
+          required: [kind]
+          properties:
+            kind: { type: string, enum: [help_request, editorial] }
+            editorial_origin: { type: string, nullable: true }
+        version:
+          type: object
+          required: [version_label, body, limits, content_digest, published_at, technologies, contributors]
+          properties:
+            version_label: { type: string }
+            body: { type: string }
+            limits: { type: string, nullable: true }
+            content_digest: { type: string, pattern: '^[0-9a-f]{64}$' }
+            published_at: { type: string, format: date-time, nullable: true }
+            technologies:
+              type: array
+              items:
+                type: object
+                properties:
+                  id: { type: string, format: uuid }
+                  slug: { type: string }
+                  version_label: { type: string, nullable: true }
+            contributors:
+              type: array
+              items:
+                type: object
+                properties:
+                  handle: { type: string, nullable: true }
+                  role: { type: string, enum: [diagnosis, fix, documentation, test, case] }
+        history:
+          type: array
+          items:
+            type: object
+            properties:
+              version_label: { type: string }
+              published_at: { type: string, format: date-time, nullable: true }
+    PaginationMeta:
+      type: object
+      properties:
+        current_page: { type: integer, minimum: 1 }
+        per_page: { type: integer, minimum: 1, maximum: 50 }
+        last_page: { type: integer, minimum: 1 }
+        total: { type: integer, minimum: 0 }
+        from: { type: integer, nullable: true }
+        to: { type: integer, nullable: true }
     CapsuleVersionPublishInput:
       type: object
       additionalProperties: false

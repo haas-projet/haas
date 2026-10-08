@@ -449,8 +449,91 @@ paths:
           $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure'
         '500':
           $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure'
+  /api/v1/capsules/{capsule}/versions/{version}/artifact/{artifact}:
+    get:
+      operationId: issueArtifactDownload
+      summary: Demander un lien signé court vers le kit publié
+      description: >
+        B27 — Télécharger le kit d'une version publiée via contrôle serveur
+        courant (CAHIER_DES_CHARGES.md:956). Les gates sont ré-évaluées à
+        chaque appel : compte actif et vérifié, capsule visible, version
+        `published`, artefact `approved` avec `notices_path` renseigné.
+        La réponse ne porte NI `private_path`, NI chemin disque, NI champ
+        privé. Le `download_url` est signé courte durée et pointe vers une
+        route de streaming qui reévalue les mêmes gates (un retrait
+        ultérieur coupe donc les anciens liens, AC15/AC25). `Cache-Control:
+        no-store, private`.
+      security:
+        - SessionCookie: []
+      parameters:
+        - name: capsule
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - name: version
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - name: artifact
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Lien signé émis
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArtifactDownload'
+        '403':
+          description: Membre non autorisé, non vérifié, suspendu ou droits perdus
+        '404':
+          description: Capsule, version ou artefact introuvable, masqué, non publié, inactif ou chemin invalide
+  /api/v1/capsules/{capsule}/versions/{version}/artifact/{artifact}/stream:
+    get:
+      operationId: streamArtifactDownload
+      summary: Télécharger le fichier derrière un lien signé
+      description: >
+        Route servie uniquement sous `signed` + `verified`. Les mêmes gates
+        qu'à l'émission sont ré-évaluées : si la version est retirée, la
+        capsule masquée, l'artefact rendu inactif ou le compte dévérifié
+        entre l'émission et l'accès, la requête est refusée. Aucune
+        divulgation de chemin disque dans l'erreur. `Cache-Control:
+        no-store, private`.
+      security:
+        - SessionCookie: []
+      parameters:
+        - name: capsule
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - name: version
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - name: artifact
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Fichier retourné en flux `application/octet-stream`
+        '403':
+          description: Lien expiré, falsifié, membre non vérifié ou droits perdus
+        '404':
+          description: Capsule, version ou artefact introuvable, non publié, inactif ou fichier absent
 components:
   schemas:
+    ArtifactDownload:
+      type: object
+      required: [id, sha256, size, notices_path, download_url, expires_at]
+      properties:
+        id: { type: string, format: uuid }
+        sha256: { type: string, pattern: '^[0-9a-f]{64}$' }
+        size: { type: integer, minimum: 1 }
+        notices_path: { type: string, description: 'Chemin public de notices (déclaré par B22). Ne pointe JAMAIS vers un chemin disque privé.' }
+        download_url: { type: string, format: uri, description: 'URL signée courte durée vers le flux ; chaque accès réévalue les gates.' }
+        expires_at: { type: string, format: date-time }
     CapsuleDraftInput:
       type: object
       additionalProperties: false

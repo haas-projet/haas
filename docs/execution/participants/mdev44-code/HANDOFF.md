@@ -145,6 +145,70 @@ Nouveaux faits depuis le premier HANDOFF B22 :
 3. Attendre revue par un relecteur humain distinct de l'autrice.
 
 Aucun `DONE` prononcé.
+
+## 2026-10-07 — HANDOFF B23 Brouillons de capsule
+
+Branche : `backend/capsules-laboratoire-b23-brouillons`. Base : `backend/capsules-laboratoire-b22-schema` (`58fe552`). Statut proposé à l'ouverture de la PR : **préparé, PR en brouillon**. Aucun `DONE`.
+
+### À quelle question ce lot répond
+
+Un membre vérifié peut créer un brouillon de capsule à partir de sa demande résolue (résolution active), avec titre/résumé/problème/cause/correction/procédure dans `capsule_versions.body` et un pivot technologies déclarant les versions compatibles. Un moderator/admin peut créer un brouillon à origine éditoriale. Le propriétaire d'une capsule peut y ajouter une nouvelle version-brouillon. Deux POST avec la même clé d'idempotence et la même charge produisent une seule capsule et une seule revision d'audit ; charge différente = 409.
+
+### Dépendances et contrat
+
+- Prérequis fusionnés dans la branche de base : socle B01–B09, B12, B13, B32, enums PR #12, schéma B22 (capsules/capsule_versions/capsule_contributors/artifacts), schéma B11 complet (help_requests/proposals/resolutions).
+- Aucune route ni Service livré hors de mon domaine. L'audit utilise la table partagée `content_revisions` sans modifier `AuditWriter`.
+
+### Fichiers hors de mon domaine modifiés
+
+- `docs/OPENAPI.yaml` : +4 lignes `$ref` (deux routes B23). Fichier du propriétaire socle 1, modification limitée à l'ajout nécessaire pour `ApiInventoryTest`, par analogie avec la procédure du commit fd82ebc.
+- `docs/api/generated/haas-api.d.ts` : régénéré automatiquement par `scripts/generate-api-types.php`. Aucune édition manuelle ; le diff est strictement l'ajout des quatre schémas B23.
+
+### Prochaines étapes
+
+1. Observer la CI distante après `git push -u origin backend/capsules-laboratoire-b23-brouillons`.
+2. PR brouillon vers `backend/capsules-laboratoire-b22-schema` (empilée sur la PR #29).
+3. Discuter en revue les quatre questions ouvertes B23 (Q8 PATCH, Q9 auteur proposition, Q10 pivot technologies, Q11 header replay) et les cinq questions B22 (Q2 à Q7) encore ouvertes.
+
+## 2026-10-07 — Suite B23 : PATCH, tests HTTP, Q8/Q9 fermées
+
+B23 ajoute la route PATCH, 31 nouveaux tests HTTP (20 POST + 11 PATCH) et ferme Q8 (PATCH livré) et Q9 (auteur de la proposition acceptée autorisé).
+
+### Nouvelles routes exposées
+
+- `PATCH /api/v1/capsules/{capsule}/versions/{version}` (name `capsules.versions.drafts.update`). lock_version obligatoire ; 409 sans mutation si périmé.
+
+### Fichiers hors de mon domaine modifiés (cumul B23)
+
+- `docs/OPENAPI.yaml` : **+6 lignes** cumulées pour les trois routes B23 (POST x2 + PATCH). Commits `5d84bf9` et `6fa306e`.
+- `docs/api/generated/haas-api.d.ts` : **régénéré 2 fois** par `scripts/generate-api-types.php`. Commits `60fceb0` et `5935fe6`.
+
+Aucun autre fichier du socle n'a été touché.
+
+### Contrôles finaux
+
+- `composer lint` → `passed`.
+- `composer analyse` → `[OK] No errors`.
+- `composer test` → **323/2675 OK**.
+- `composer test:integration` (suite complète) → **230/1495 OK**.
+- CI distante : à observer après push.
+
+### Prochaines étapes
+
+1. Pousser les commits locaux restants vers `origin/backend/capsules-laboratoire-b23-brouillons`.
+2. `gh pr edit 30` pour mettre à jour le corps de la PR #30 (nouveaux commits, Q8/Q9 fermées, Q11 clarifiée, Q10 restante).
+3. Attendre revue humaine distincte.
+
+## 2026-10-07 — Correctif de préparation Codex
+
+Reprise de la PR #30 sans réécrire les décisions Q8/Q9 ni leurs suivis. Voir `docs/quality/B23_DRAFT_READINESS.md` : création depuis une résolution cohérente et verrouillée, conflits 409, présence de limites nulles conservée, droits actuels sous verrous, résultat idempotent limité à sa version, validation stricte et six courses réelles. Services compatibles avec les `Fillable` serveur restreints de B22 par `forceFill` explicite.
+
+Le socle commun reçoit seulement la règle `NoLikelySecret` existante, les trois correctifs de tests de cookies relus du B17 `8234470` et le PHPDoc du cast enum existant de `HelpRequest.state`. Les types API sont régénérés par script. Aucun secret ni vendor ajouté au suivi Git.
+
+Contrôles observés : ciblés **13 / 111**, suite capsules **92 / 290**, Unit/Feature/Architecture **323 / 2675**, PHPStan sans erreur, Pint passé, documents **18 + 7**, types **33**. Suite complète combinée après intégration B22/main, CI et revue humaine restent nécessaires. Aucun push ou merge effectué par cet agent ; publication gérée par l'intégrateur. SHA du commit local à consigner dans son bilan après création.
+
+Complément sur le parent combiné `94aeae9` : source masquée refusée sous verrou et au rejeu, trois régressions et septième course réelle ; fixture publiée conforme B22. Ciblés **28 tests / 158 assertions**, Pint/PHPStan verts. La suite SQL partielle a été interrompue et n'est pas déclarée réussie. Reprendre ce correctif dans B24 puis relancer les suites complètes avant CI et revue humaine.
+
 ## 2026-10-05 — Reprise B35 conservée avant intégration
 
 Instantané de la branche B35 ; les instructions ci-dessous décrivent son état historique. L'état d'intégration courant figure dans docs/execution/HANDOFF.md.
@@ -206,6 +270,16 @@ Après le correctif local `2148322`, l’intégrateur prépare un merge normal d
 
 Le conflit du test de migration d’identité conserve les retraits des tables de capsules et des révisions communautaires. Aucun changement d’autorisation ou assouplissement de test. L’intégrateur consigne le SHA réel après création du merge puis publie la branche ; CI du SHA publié et revue humaine toujours à recevoir. Aucun DONE B22, frontend ou déploiement annoncé.
 
+### Transfert de réception B23
+
+Les trois défauts de dernière revue sont reproduits avant correction (13 / 55, dix échecs), puis corrigés. Ciblés définitifs : **24 / 186 réussis**, dont dix courses PostgreSQL réelles ; Pint, PHPStan niveau 8, documents 18/18 et 7/7, types API 54 à jour. Base dédiée `haas_b23_review_test`, PostgreSQL 17 local 55447. Réception globale à relancer du commit transmis par l’intégrateur, sans ajouter les essais précédents au total final. Details : [B23_DRAFT_READINESS.md](../../../quality/B23_DRAFT_READINESS.md). B24 doit reprendre ce parent avant sa réception ; aucun push, frontend ou revue humaine inventée.
+
+### Réception B23 terminée localement — candidat `d7ef6eb`
+
+Code transféré propre `d7ef6eb8c750987ddf509eba6647007162c1bec9`, réception indépendante en lecture seule du métier puis suites complètes : **343 tests / 3720 assertions** Unit/Feature/Architecture et **478 / 3734** PostgreSQL, soit **821 / 7454 uniques réussis**. Les ciblés ne sont pas ajoutés et les essais interrompus restent historiques. PHP 8.5.10, PostgreSQL 17 sur `127.0.0.1:55447`, `haas_b23_review_test`/`haas_test` exclusivement ; XML ignorés sous `backend/storage/logs/b23-reception-*`.
+
+Pint, PHPStan 8, les trois contrôles Composer, documents 18/18 et 7/7, types 54 réussis. Aucun code applicatif ni test modifié dans ce lot documentaire. Preuve détaillée : [B23_DRAFT_READINESS.md](../../../quality/B23_DRAFT_READINESS.md). CI candidat verte, [run 37691657985](https://github.com/haas-projet/haas/actions/runs/37691657985), constat transmis par l’intégrateur. À reprendre : publication du commit de preuve et observation de sa CI exacte par l’intégrateur, puis revue humaine après prérequis ; B24 conserve sa propre base et sa propre réception. Aucun push par cet agent, aucune approbation humaine, gate ou publication de production annoncée.
+
 ## Historique de la branche B38 avant intégration
 
 # HANDOFF — capsules/laboratoire (branche B38)
@@ -259,3 +333,5 @@ Deux envois d’un formulaire B2 avec la même clé stable (`Idempotency-Key`, U
 - CI distante PR #28 (run 37497715618, avant les deux commits de purge) : `PHP 8.4 / PostgreSQL 17` et `PHP 8.5 / PostgreSQL 17` échouent sur le seul `ApiInventoryTest` ; `backend-ci` échoue par dépendance. Rouge attendue tant que `docs/OPENAPI.yaml` n'est pas complété.
 
 ## 2026-10-08 — B22 : reprise de main b76612d par merge local 285f91c. Suite Integration (hors Demo) : OK 397 tests / 3380 assertions. Pint, PHPStan 8 et composer test (398 / 3885) verts. Prerequis local a prevoir : role haas_demo_test + base haas_demo_bootstrap_test + DEMO_DB_PASSWORD pour Integration/Demo (non lancees localement, couvertes par la CI distante).
+
+## 2026-10-08 - B23 : reprise de b22 par merge local 53ed6d1. Suite Integration (hors Demo) : OK 476 tests / 3724 assertions. Pint, PHPStan 8 et composer test (406 / 4010) verts.

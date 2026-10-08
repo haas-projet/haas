@@ -227,6 +227,144 @@ Questions ouvertes restantes :
 - Q7 — Table `capsule_technologies` : le cahier parle de technologies au contenu d'une capsule (`CAHIER:456`) mais sans table nommée dans le §24. Pas livrée dans B22, à trancher par le relecteur.
 
 B22 reste **préparé** et pointe vers une PR en brouillon ; `DONE` n'est pas prononcé avant revue humaine et fusion.
+
+## 2026-10-07 — Lot B23 · Brouillons de capsule
+
+Statut proposé : B23 **préparé, PR en brouillon**, aucun `DONE`. Branche `backend/capsules-laboratoire-b23-brouillons`, dérivée de `backend/capsules-laboratoire-b22-schema` (`58fe552`) et empilée sur la PR #29.
+
+### Décisions clefs
+
+- **Pas de PATCH en B23.** Le cahier §26 ne liste que `POST /capsules` et `POST /capsules/{id}/versions` ; aucune route d'édition `in-place` n'est documentée. Lecture restrictive : B23 n'expose pas de PATCH. Question ouverte Q8 : décision avant B24/B25.
+- **Source `help_request`** réservée à l'auteur de la demande, résolution active obligatoire (`revoked_at IS NULL`). L'alternative « auteur de la proposition acceptée » n'est pas documentée. Lecture restrictive : auteur seul. Question ouverte Q9.
+- **Source `editorial`** réservée aux `moderator`/`admin` (§07 CAHIER:220, §13 CAHIER:456 : « origine éditoriale clairement signalée pour les briques de démonstration »).
+- **Owner uniquement pour la version-brouillon** suivante (B23). Les contributeurs reviewer/maintainer sont habilités plus tard par B24/B25.
+- **IdempotencyService réutilisé.** Pas de header `X-Idempotent-Replay` : le status 201 est renvoyé aux deux appels (le second ne rejoue pas la closure `operation`). Documenté dans le fragment OpenAPI.
+- **Audit interne du domaine** : nouvelle classe `WriteCapsuleAudit` qui insère dans `content_revisions` sans toucher `AuditWriter.php` (fichier du socle, profilé pour Profile uniquement). Même contrat transactionnel : rollback annule l'écriture et l'audit.
+- **ApiExceptionRenderer non touché** (fichier du socle, interdit). `ValidationException` natif Laravel pour les 422 (source introuvable, pas de résolution active) ; `AuthorizationException` pour les 403.
+- **Pivot capsule_version_technologies** aligné sur `request_technologies` : clé primaire composite, pas d'UUID. Supporte « versions compatibles déclarées » (CAHIER:456).
+
+### Fichiers créés / modifiés
+
+- Enums : `App\Enums\Capsules\CapsuleSourceKind` (help_request/editorial).
+- Data : `App\Data\Capsules\{CapsuleDraftData, VersionDraftData, TechnologyAttachmentData}`.
+- Policy : `App\Policies\CapsulePolicy` (proposeEditorial, proposeFromHelpRequest, createVersionDraft, editDraft).
+- Services : `App\Services\Capsules\{CreateCapsuleDraftService, CreateCapsuleVersionDraftService, WriteCapsuleAudit}`.
+- HTTP : `StoreCapsuleDraftRequest`, `StoreCapsuleVersionDraftRequest`, `StoreCapsuleDraftController`, `StoreCapsuleVersionDraftController`, `CapsuleDraftResource`, `CapsuleVersionDraftResource`.
+- Migration : `2026_10_07_123901_create_capsule_version_technologies_table.php` + relation `CapsuleVersion::technologies()`.
+- Routes : `backend/routes/api/capsules-lab.php` (deux routes, `capsules.drafts.store` et `capsules.versions.drafts.store`).
+- Fragment OpenAPI : `docs/api/openapi/capsules-lab.yaml` (operationIds, schémas).
+- Support de test : `DomainTables::TABLES` étendu à `capsule_version_technologies` avant `capsule_versions`.
+- Tests : `CapsuleSourceKindTest`, `CapsuleDraftDataTest`, `CapsuleVersionTechnologiesSchemaTest`, `CreateCapsuleDraftServiceTest`, mise à jour `CapsulesMigrationTest`.
+
+### Fichiers hors de mon domaine modifiés
+
+- `docs/OPENAPI.yaml` : +4 lignes (deux entrées `$ref` pour les routes B23). Commit dédié `docs(api): référencer les routes de brouillon de capsule dans OPENAPI.yaml`.
+- `docs/api/generated/haas-api.d.ts` : régénéré par `scripts/generate-api-types.php` (quatre nouveaux types TypeScript correspondant aux schémas B23). Commit dédié `docs(api): régénérer les types générés depuis le fragment capsules-lab`.
+
+Aucun autre fichier du socle n'a été touché : `routes/api.php`, `bootstrap/`, `config/`, `composer.*`, `phpunit.xml`, `.github/`, `SHA256SUMS` sont intacts.
+
+### Contrôles exécutés et résultats réels
+
+| Commande | Résultat observé | Environnement |
+|---|---|---|
+| `composer lint` | `{"tool":"pint","result":"passed"}` | PHP 8.4.15 Laragon |
+| `composer analyse` | `[OK] No errors` (PHPStan niveau 8) | idem |
+| `composer test` | **323 tests / 2648 assertions, OK** en 5,697 s | idem |
+| `composer test:integration` (filtre `Capsules|Artifacts`) | 14 tests / 28 assertions, OK | PostgreSQL 17 `haas_capsules_test`, `TestDatabaseGuard` respecté |
+| `composer test:integration` (suite complète) | **199 tests / 1430 assertions, OK** en 1 min 57 s | idem |
+
+### Commits locaux (branche `backend/capsules-laboratoire-b23-brouillons`)
+
+1. `46db318` `feat(capsules): poser la table de liaison capsule_version_technologies`
+2. `7e8f180` `feat(capsules): poser le data pour les brouillons de capsule`
+3. `f9f7627` `feat(capsules): poser la Policy et les services de brouillon`
+4. `a849f9b` `feat(capsules): exposer les routes de brouillon et leur contrat OpenAPI`
+5. `5d84bf9` `docs(api): référencer les routes de brouillon de capsule dans OPENAPI.yaml`
+6. `60fceb0` `docs(api): régénérer les types générés depuis le fragment capsules-lab`
+7. `cd48b6a` `test(capsules): étendre le rollback de régression au pivot technologies`
+8. commit documentaire courant.
+
+### Questions ouvertes
+
+- Q8 — PATCH /capsules/{id}/versions/{version} pour éditer un brouillon : non documenté dans §26. Non livré en B23. Décision avant B24/B25.
+- Q9 — Source `help_request` : qui peut proposer, l'auteur de la demande seul (lecture restrictive) ou aussi l'auteur de la proposition acceptée ?
+- Q10 — Table `capsule_version_technologies` : non explicitement nommée dans §24 CAHIER:869-872. Décision de propriétaire du domaine attendue.
+- Q11 — Flag replay côté client : IdempotencyService ne distingue pas 201/200 au rejeu. Faut-il exposer un header `X-Idempotent-Replay` à partir d'une relecture de `api_idempotency.created_at`, ou laisser le client déduire de sa clé ?
+- Q2–Q7 de B22 restent ouvertes.
+
+### Limites et étapes suivantes
+
+- B23 est backend seul : aucun composant React livré.
+- Les transitions `CapsuleVersionState` autres que `draft` sont servies par B24/B25.
+- Aucun push, aucune PR ouverte à ce stade dans PROGRESS ; publication autorisée pour ce lot, consignée dans HANDOFF.
+
+## 2026-10-07 — Suite B23 : PATCH, tests HTTP, décisions Q8/Q9
+
+Statut : B23 reste **préparé, PR en brouillon** sur la PR #30. Aucun `DONE`.
+
+### Décisions prises
+
+- **Q8 fermée** : PATCH `/api/v1/capsules/{capsule}/versions/{version}` livré en B23. Edition autorisée pour les états `draft` et `changes_requested` seulement (CAHIER_DES_CHARGES.md:293 pour la boucle de revue B24). `version_label`, `state`, `owner_id`, `reviewer_id`, `published_at`, `id`, `capsule_id` sont refusés en 422 par le FormRequest. Pas d'`Idempotency-Key` sur ce PATCH : patron B16 (`UpdateHelpRequestRequest` sur `backend/communaute-entraide-b16`) utilise `lock_version` comme unique mécanisme anti-doublon.
+- **Q9 fermée** : la Policy `proposeFromHelpRequest` autorise l'auteur de la demande **et** l'auteur de la proposition acceptée par la résolution active (`revoked_at IS NULL`). CAHIER_DES_CHARGES.md:265 « L'auteur d'une résolution ou un contributeur autorisé propose une capsule ». Le créateur devient `owner_id` (serveur). Trois tests HTTP distincts couvrent les trois cas.
+- **Q11 (clarification)** : au deuxième POST avec la même `Idempotency-Key` et la même charge, `IdempotencyService` relit `api_idempotency` et renvoie le même `StoredCommandResult` que la première écriture ; le `status` stocké est `201`, identique au premier appel. B23 ne distingue donc pas « création » et « rejeu » dans la réponse HTTP (pas de header `X-Idempotent-Replay`). Décision ouverte : exposer le header en relisant `api_idempotency.created_at` ou laisser le client déduire via sa clé.
+
+### Nouveaux fichiers
+
+- Migration `2026_10_07_172331_add_lock_version_to_capsule_versions_table.php` (additive, défaut `1`, down() tolérant au drop préalable pour cohabiter avec `DomainTablesTest`).
+- Data : `App\Data\Capsules\UpdateDraftData` (lock_version obligatoire, body/limits/technologies optionnels, aucun champ serveur).
+- Exception de domaine : `App\Exceptions\Capsules\StaleCapsuleVersion` (lock_version périmé) ; le Controller la transforme en 409 pour respecter `DomainBoundariesTest`.
+- Service : `App\Services\Capsules\UpdateCapsuleVersionDraftService` (transaction, lockForUpdate, vérifie appartenance capsule/version, Policy sur l'état verrouillé, incrémente lock_version, synchronise les technologies, audit dans la même transaction).
+- Policy `editDraft(?User, Capsule, CapsuleVersionState, string $versionId)` : autorise owner OU contributeur de la version précise, pour les états `draft`/`changes_requested`.
+- FormRequest `UpdateCapsuleVersionDraftRequest` : refuse les champs serveur et exige au moins un champ modifiable.
+- Controller `UpdateCapsuleVersionDraftController` (mince) : convertit `StaleCapsuleVersion` → 409.
+- Resource `CapsuleVersionDraftResource` : expose `lock_version` au client.
+- Route `PATCH /api/v1/capsules/{capsule}/versions/{version}` (name `capsules.versions.drafts.update`).
+- Fragment OpenAPI : opération `updateCapsuleVersionDraft` + schéma `CapsuleVersionDraftUpdate`.
+- Tests : `CapsuleDraftHttpTest` (20 cas HTTP sur POST), `CapsuleDraftUpdateHttpTest` (11 cas HTTP sur PATCH).
+
+### Contrôles finaux après la suite B23
+
+| Commande | Résultat observé |
+|---|---|
+| `composer lint` | `{"tool":"pint","result":"passed"}` |
+| `composer analyse` | `[OK] No errors` (PHPStan niveau 8) |
+| `composer test` | **323 tests / 2675 assertions, OK** en 11,832 s |
+| `composer test:integration` (suite complète) | **230 tests / 1495 assertions, OK** en 4 min 51 s |
+
+### Nouveaux commits locaux (suite B23)
+
+- `64b0cc0` `test(capsules): couvrir les routes de brouillon par HTTP et étendre la Policy`
+- `db8cab3` `feat(capsules): poser le verrou optimiste lock_version sur capsule_versions`
+- `f60fa14` `feat(capsules): poser le service d'édition de brouillon avec verrou optimiste`
+- `b96f808` `feat(capsules): exposer la route PATCH d'édition de brouillon`
+- `6fa306e` `docs(api): référencer la route PATCH d'édition de brouillon dans OPENAPI.yaml`
+- `5935fe6` `docs(api): régénérer les types générés pour inclure le PATCH de brouillon`
+- `d9cb216` `fix(capsules): isoler le service du domaine HTTP via StaleCapsuleVersion`
+- `c49044f` `fix(capsules): rendre le down() de lock_version tolérant au drop préalable`
+- commit documentaire courant.
+
+### Questions ouvertes restantes
+
+- Q10 — Nom de la table pivot `capsule_version_technologies` : non explicitement cité dans §24. Décision de propriétaire du domaine, en attente de confirmation du relecteur.
+- Q11 — Header `X-Idempotent-Replay` à exposer ou non.
+- Q2–Q7 de B22 restent ouvertes.
+
+## 2026-10-07 — Préparation technique Codex de la PR #30
+
+Le travail distant `93fafea`, notamment Q8/Q9, est conservé. Les défauts de provenance, conflits, effacement des limites, droits actuels et rejeu sont corrigés ; la projection des réponses est attachée à la version autorisée. Les champs inconnus, technologies inconnues ou répétées, caractères de contrôle et secrets indicatifs sont refusés. Les détails, incidents et commandes réels sont dans `docs/quality/B23_DRAFT_READINESS.md`.
+
+- Readiness et six courses entre deux processus PostgreSQL : **13 tests / 111 assertions, OK** sur `haas_b23_review_test`.
+- Suite capsules complète avant synchronisation B22/main : **92 tests / 290 assertions, OK**.
+- Unit/Feature/Architecture : **323 tests / 2675 assertions, OK**.
+- PHPStan : `[OK] No errors`, après description du cast enum réel et de la Policy SQL impure ; aucune suppression d'erreur. Pint : `passed`.
+- Documents : 18 + 7 contrôles documentaires OK ; **33 types API à jour**.
+
+Statut : correctif local préparé pour synchronisation B22/main, suite combinée complète et CI distante. Revue humaine en attente ; aucune approbation attribuée, aucun `DONE`, aucun frontend. L'intégrateur rapporte le SHA réel après commit.
+
+### Après synchronisation B22/main — parent `94aeae9`
+
+Refus de source masquée dans la Policy relue sous verrou, y compris au rejeu ; trois nouvelles régressions HTTP/service et une septième course réelle. Fixture publiée PATCH conforme aux contraintes B22 (date et reviewer fictif vérifié distinct). Ciblés **28 / 158**, Pint et PHPStan verts. Suite SQL complète initiale interrompue à la demande de l'intégrateur après un échec de fixture : aucune réussite globale attribuée ; relance complète requise après ce commit. Voir le complément de `B23_DRAFT_READINESS.md`.
+
 ## 2026-10-05 — Lot 2 B35 brique B1 (branche dérivée)
 
 Lot B35 livré sur une branche dérivée `backend/capsules-laboratoire-b35-brique-b1` créée depuis `origin/backend/capsules-laboratoire`. La branche parent porte le lot 1 enums ; la PR #12 y est ouverte sur `main` et sa fusion est attendue avant le reciblage de cette PR dérivée.
@@ -313,6 +451,16 @@ Après le correctif local `2148322`, l’intégrateur prépare un merge normal d
 
 Le conflit du test de migration d’identité conserve les retraits des tables de capsules et des révisions communautaires. Aucun changement d’autorisation ou assouplissement de test. L’intégrateur consigne le SHA réel après création du merge puis publie la branche ; CI du SHA publié et revue humaine toujours à recevoir. Aucun DONE B22, frontend ou déploiement annoncé.
 
+### Dernière revue B23 : validation et auteur source
+
+Probes avant correction sur `1ddf681` : 13 / 55, dix échecs réels (500 de DTO, format nested perdu et source devenue inaccessible encore admise). Corps utile contrôlé sans transformation, PATCH blanc refusé, verrou entier JSON strict et auteur source actif/vérifié relu sous partage NOWAIT avec conflit explicite. Dix courses PostgreSQL, dont trois nouvelles pour les droits d’auteur tiers et les verrous croisés. Code définitif ciblé : **24 tests / 186 assertions réussis**, Pint, PHPStan 8, pack 18/18, déploiement 7/7, types 54 à jour. Les essais interrompus ou intermédiaires restent documentés dans [B23_DRAFT_READINESS.md](../../../quality/B23_DRAFT_READINESS.md). Réception globale déléguée sur worktree propre ; aucune publication ou approbation humaine annoncée.
+
+### Réception complète B23 — candidat `d7ef6eb`
+
+Réception indépendante terminée sur le code applicatif propre `d7ef6eb8c750987ddf509eba6647007162c1bec9`, sans changement de code ni de tests : Unit/Feature/Architecture **343 / 3720**, PostgreSQL **478 / 3734**, soit **821 tests / 7454 assertions uniques réussis**. Base dédiée `haas_b23_review_test`, PostgreSQL 17 local 55447, PHP 8.5.10 ; les deux JUnit ont zéro erreur, échec ou test ignoré. Les ciblés précédents ne s’ajoutent pas à ce total.
+
+Pint, PHPStan niveau 8, validation Composer, exigences de plateforme et audit verrouillé réussis ; pack 18/18, documentation de déploiement 7/7 et 54 types API à jour. Détails et commandes : [B23_DRAFT_READINESS.md](../../../quality/B23_DRAFT_READINESS.md). La CI du candidat est verte ([run 37691657985](https://github.com/haas-projet/haas/actions/runs/37691657985), constat de l’intégrateur) ; le commit documentaire de réception recevra encore sa CI exacte après publication. Revue humaine distincte en attente, aucun DONE ou gate. Publication confiée à l’intégrateur.
+
 ## Historique de la branche B38 avant intégration
 
 # Progression — capsules/laboratoire (branche B38)
@@ -375,3 +523,5 @@ Dernier élément manquant du verify B38 (« Aucune session HAAS utilisée et do
 - PR brouillon **#28** publiée ; CI distante rouge uniquement sur `ApiInventoryTest` (attendu). Les deux commits locaux de purge ne sont pas encore poussés.
 
 ## 2026-10-08 — B22 : reprise de main b76612d par merge local 285f91c. Suite Integration (hors Demo) : OK 397 tests / 3380 assertions. Pint, PHPStan 8 et composer test (398 / 3885) verts. Prerequis local a prevoir : role haas_demo_test + base haas_demo_bootstrap_test + DEMO_DB_PASSWORD pour Integration/Demo (non lancees localement, couvertes par la CI distante).
+
+## 2026-10-08 - B23 : reprise de b22 par merge local 53ed6d1. Suite Integration (hors Demo) : OK 476 tests / 3724 assertions. Pint, PHPStan 8 et composer test (406 / 4010) verts.

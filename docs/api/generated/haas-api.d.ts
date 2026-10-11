@@ -23,6 +23,16 @@ export type account_mail_ResetPasswordInput = { readonly "email": account_mail_E
 
 export type administration_Account = { readonly "id": string; readonly "handle": string; readonly "role": "member" | "moderator" | "admin"; readonly "status": "active" | "suspended"; readonly "lock_version": number; };
 
+export type capsules_lab_CapsuleDraft = { readonly "id": string; readonly "slug": string; readonly "visibility": "visible" | "hidden"; readonly "source": { readonly "kind": "help_request" | "editorial"; readonly "help_request_id"?: string; readonly "editorial_origin"?: string; [key: string]: unknown; }; readonly "version": capsules_lab_CapsuleVersionDraft; [key: string]: unknown; };
+
+export type capsules_lab_CapsuleDraftInput = { readonly "slug": string; readonly "source": { readonly "kind": "help_request" | "editorial"; readonly "help_request_id"?: string; readonly "editorial_origin"?: string; }; readonly "version": capsules_lab_CapsuleVersionDraftInput; };
+
+export type capsules_lab_CapsuleVersionDraft = { readonly "id": string; readonly "capsule_id": string; readonly "version_label": string; readonly "state": "draft" | "in_review" | "changes_requested" | "published" | "withdrawn"; readonly "body": string; readonly "limits": string; readonly "lock_version": number; readonly "technologies": ReadonlyArray<{ readonly "id"?: string; readonly "slug"?: string; readonly "version_label"?: string; [key: string]: unknown; }>; [key: string]: unknown; };
+
+export type capsules_lab_CapsuleVersionDraftInput = { readonly "version_label": string; readonly "body": string; readonly "limits"?: string; readonly "technologies"?: ReadonlyArray<{ readonly "technology_id": string; readonly "version_label"?: string; }>; };
+
+export type capsules_lab_CapsuleVersionDraftUpdate = { readonly "lock_version": number; readonly "body"?: string; readonly "limits"?: string; readonly "technologies"?: ReadonlyArray<{ readonly "technology_id": string; readonly "version_label"?: string; }>; };
+
 export type capsules_lab_DemoOrder = { readonly "id": string; readonly "order_ref": string; readonly "amount_minor": number; readonly "currency": "EUR"; readonly "state": "confirmed"; };
 
 export type capsules_lab_DemoOrderInput = { readonly "order_ref": string; readonly "amount_minor": number; readonly "currency": "EUR"; };

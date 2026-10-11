@@ -1,5 +1,127 @@
 # Pilote : mdev44-code. Ajouter uniquement les contrats implémentés.
+openapi: 3.1.0
+info:
+  title: HAAS — Capsules et laboratoire
+  version: 0.1.1
 paths:
+  /api/v1/capsules:
+    post:
+      operationId: storeCapsuleDraft
+      summary: Créer un brouillon de capsule
+      description: >
+        Crée une capsule et sa première version-brouillon. Exactement une des deux
+        sources est acceptée (demande résolue XOR origine éditoriale). L'origine
+        éditoriale est réservée aux rôles moderator/admin. Compte actif et vérifié
+        obligatoire. L'en-tête `Idempotency-Key` est requis. La demande doit être
+        réellement resolved, avec résolution active et proposition accepted cohérentes.
+        Le rejeu relit les droits et la version ; un brouillon modifié produit 409.
+      security:
+        - SessionCookie: []
+      parameters:
+        - $ref: '../../OPENAPI.yaml#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CapsuleDraftInput'
+      responses:
+        '201':
+          description: Capsule et brouillon créés ; même code pour un rejeu idempotent de la même charge
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CapsuleDraft'
+        '409':
+          description: Conflit d'idempotence, slug déjà utilisé ou brouillon modifié depuis sa création
+        '403':
+          description: Rôle insuffisant, source masquée ou auteur/contributeur non autorisé ; contrôle actuel répété au rejeu
+        '422':
+          description: Validation ou source non résolue
+  /api/v1/capsules/{capsule}/versions:
+    post:
+      operationId: storeCapsuleVersionDraft
+      summary: Créer une nouvelle version-brouillon pour une capsule
+      description: >
+        Ajoute une version-brouillon à une capsule existante. Réservé au
+        propriétaire de la capsule en B23 ; les contributeurs habilités seront
+        intégrés par les lots B24/B25. `version_label` MAJOR.MINOR.PATCH unique
+        par capsule.
+      security:
+        - SessionCookie: []
+      parameters:
+        - name: capsule
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - $ref: '../../OPENAPI.yaml#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CapsuleVersionDraftInput'
+      responses:
+        '201':
+          description: Version-brouillon créée ; même code pour un rejeu idempotent de la même charge
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CapsuleVersionDraft'
+        '403':
+          description: Non propriétaire
+        '404':
+          description: Capsule inexistante
+        '409':
+          description: Conflit d'idempotence ou de version_label
+        '422':
+          description: Validation
+  /api/v1/capsules/{capsule}/versions/{version}:
+    patch:
+      operationId: updateCapsuleVersionDraft
+      summary: Modifier un brouillon de capsule
+      description: >
+        Édite body/limits/technologies d'une version en état draft ou
+        changes_requested. Réservé à l'owner de la capsule ou à un
+        contributeur déclaré sur cette version. lock_version obligatoire ;
+        périmé = 409 sans mutation. version_label, state, owner, reviewer
+        et published_at sont fixés par le serveur et refusés. limits null efface
+        les limites déclarées ; un champ absent les conserve. Tous les champs
+        inconnus et les technologies inconnues ou dupliquées sont refusés en 422.
+      security:
+        - SessionCookie: []
+      parameters:
+        - name: capsule
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - name: version
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CapsuleVersionDraftUpdate'
+      responses:
+        '200':
+          description: Brouillon mis à jour, lock_version incrémenté
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CapsuleVersionDraft'
+        '403':
+          description: Non habilité (ni owner, ni contributeur) ou état non éditable
+        '404':
+          description: Version inexistante ou n'appartenant pas à la capsule
+        '409':
+          description: lock_version périmé
+        '422':
+          description: Validation
   /api/v1/b2/demo-orders:
     post:
       operationId: recordDemoOrder
@@ -82,6 +204,134 @@ paths:
           $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure'
 components:
   schemas:
+    CapsuleDraftInput:
+      type: object
+      additionalProperties: false
+      required: [slug, source, version]
+      properties:
+        slug:
+          type: string
+          minLength: 3
+          maxLength: 120
+          pattern: '^[a-z0-9][a-z0-9-]{1,118}[a-z0-9]$'
+        source:
+          type: object
+          additionalProperties: false
+          required: [kind]
+          properties:
+            kind:
+              type: string
+              enum: [help_request, editorial]
+            help_request_id:
+              type: string
+              format: uuid
+              nullable: true
+            editorial_origin:
+              type: string
+              minLength: 3
+              maxLength: 100
+              nullable: true
+        version:
+          $ref: '#/components/schemas/CapsuleVersionDraftInput'
+    CapsuleVersionDraftInput:
+      type: object
+      additionalProperties: false
+      required: [version_label, body]
+      properties:
+        version_label:
+          type: string
+          pattern: '^(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)$'
+          maxLength: 40
+        body:
+          type: string
+          minLength: 20
+          maxLength: 24000
+          description: Au moins 20 caractères après retrait des espaces extérieurs pour la validation ; le corps valide est conservé exactement.
+        limits:
+          type: string
+          minLength: 1
+          maxLength: 4000
+          nullable: true
+        technologies:
+          type: array
+          maxItems: 8
+          items:
+            type: object
+            additionalProperties: false
+            required: [technology_id]
+            properties:
+              technology_id:
+                type: string
+                format: uuid
+              version_label:
+                type: string
+                maxLength: 40
+                nullable: true
+    CapsuleDraft:
+      type: object
+      required: [id, slug, visibility, source, version]
+      properties:
+        id: { type: string, format: uuid }
+        slug: { type: string }
+        visibility: { type: string, enum: [visible, hidden] }
+        source:
+          type: object
+          required: [kind]
+          properties:
+            kind: { type: string, enum: [help_request, editorial] }
+            help_request_id: { type: string, format: uuid, nullable: true }
+            editorial_origin: { type: string, nullable: true }
+        version:
+          $ref: '#/components/schemas/CapsuleVersionDraft'
+    CapsuleVersionDraft:
+      type: object
+      required: [id, capsule_id, version_label, state, body, limits, lock_version, technologies]
+      properties:
+        id: { type: string, format: uuid }
+        capsule_id: { type: string, format: uuid }
+        version_label: { type: string }
+        state: { type: string, enum: [draft, in_review, changes_requested, published, withdrawn] }
+        body: { type: string }
+        limits: { type: string, nullable: true }
+        lock_version: { type: integer, minimum: 1 }
+        technologies:
+          type: array
+          items:
+            type: object
+            properties:
+              id: { type: string, format: uuid }
+              slug: { type: string }
+              version_label: { type: string, nullable: true }
+    CapsuleVersionDraftUpdate:
+      type: object
+      additionalProperties: false
+      required: [lock_version]
+      properties:
+        lock_version:
+          type: integer
+          minimum: 1
+          maximum: 2147483646
+          description: Entier JSON strict ; les chaînes numériques sont refusées.
+        body:
+          type: string
+          minLength: 20
+          maxLength: 24000
+          description: Au moins 20 caractères après retrait des espaces extérieurs pour la validation ; le corps valide est conservé exactement.
+        limits:
+          type: string
+          minLength: 1
+          maxLength: 4000
+          nullable: true
+        technologies:
+          type: array
+          maxItems: 8
+          items:
+            type: object
+            additionalProperties: false
+            required: [technology_id]
+            properties:
+              technology_id: { type: string, format: uuid }
+              version_label: { type: string, maxLength: 40, nullable: true }
     DemoOrderInput:
       type: object
       additionalProperties: false

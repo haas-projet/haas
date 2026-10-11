@@ -2,6 +2,8 @@
 
 ## État vérifié le 11 octobre 2026 — priorité aux PR
 
+- Propagation B23 : prérequis documentaire B22 6021968 reçu par merge normal, manifeste complet contrôlé et backend inchangé ; nouvelle CI à recevoir sur le head publié.
+
 B38 #28 est fusionnée dans main d0d47c5. Les trois branches permanentes sont alignées sur main ; 10 branches distantes restent nécessaires, dont les six PR ouvertes. #29/#30/#33 n’ont pas de conflit et ont une CI verte sur leurs heads contrôlés ; #29 attend une revue humaine. Leurs manifestes périmés sont corrigés et un contrôle CI dédié est ajouté. B25–B27 sont encore en correction ; B26 reste partiel sans Q16/B33. Les lots non fusionnés ne sont pas DONE. Aucun gate ni accord frontend/production. Voir [PR_MANIFEST_20261011.md](../quality/PR_MANIFEST_20261011.md). Le bilan ci-dessous du 7 octobre et les entrées antérieures sont historiques.
 
 - Lot documentaire d’intégration : empreintes complètes et vérifiées, pack 18/18, déploiement documentaire 7/7 et diff propre ; octets backend inchangés. Nouvelle CI à recevoir après publication. SHA réel à consulter dans le bilan/PR après création du commit.

@@ -26,6 +26,7 @@ final class CapsuleVersionFactory extends Factory
             'state' => CapsuleVersionState::Draft,
             'reviewer_id' => null,
             'published_at' => null,
+            'lock_version' => 1,
         ];
     }
 

@@ -13,6 +13,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Schema;
 use ReflectionMethod;
 use Tests\PostgresTestCase;
+use Tests\Support\Mdev44\DomainTables;
 
 final class HelpRequestsMigrationTest extends PostgresTestCase
 {
@@ -42,6 +43,7 @@ final class HelpRequestsMigrationTest extends PostgresTestCase
             return $migration;
         }, $paths);
 
+        DomainTables::dropAll();
         foreach (array_reverse($migrations) as $migration) {
             (new ReflectionMethod($migration, 'down'))->invoke($migration);
         }

@@ -18,13 +18,16 @@ Ces parcours définissent le produit à livrer. Leur avancement est détaillé c
 | Périmètre | État réel |
 |---|---|
 | Socle B01–B09, B11–B13 et B32 | **13 lots intégrés dans `main`** : Laravel, qualité/CI, contrat HTTP, identité, authentification par session, courriels/reset, compte et permissions, schéma de collaboration, audit, idempotence et administration. |
+| Demandes et commentaires B14–B17 | **4 lots intégrés dans `main` par #24** : création, lecture/recherche, édition/publication versionnée, commentaires historisés et notifications après commit. |
 | Profils B10, notifications B29, modération B30–B31 et préparation B39–B42 | Livraisons partielles intégrées ; raccordements métier et réception transversale à compléter. |
-| Capsules et laboratoire | Enums intégrés par #12 ; B22/B23 en préparation dans les PR brouillons #29/#30. |
+| Capsules et laboratoire | Enums intégrés par #12 ; B22/B23/B24 en préparation dans les PR #29/#30/#33. |
 | Brique interne B1 — B35 | Service transactionnel, déduplication, tests de concurrence et correction UTC intégrés par #27. Connexion/runtime laboratoire séparés et module pédagogique défectueux à compléter. |
-| API de démonstration B2 — B38 | PR #28 bloquée : origine de démonstration refusée et cookies HAAS émis dans les tests de revue. Isolation à corriger. |
+| API de démonstration B2 — B38 | PR #28 : isolation corrigée dans le travail de revue, validations finales en cours avant approbation. Livraison distincte de `main`. |
 | Frontend React/TypeScript | À développer après **BACKEND_GATE** et **GO_FRONTEND** ; `frontend/` contient les consignes. |
 
 Les PR [#12](https://github.com/haas-projet/haas/pull/12), [#23](https://github.com/haas-projet/haas/pull/23) (avec les compléments #22) et [#27](https://github.com/haas-projet/haas/pull/27) sont fusionnées dans `main`. Le code B1+B11 combiné a passé **488 tests / 3 977 assertions**, localement puis sous PHP 8.4/8.5 et PostgreSQL 17 dans la [CI 37637092346](https://github.com/haas-projet/haas/actions/runs/37637092346). La [CI de `main` après fusion](https://github.com/haas-projet/haas/actions/runs/37637569825) est également verte.
+
+B14–B17 sont désormais fusionnés par [#24](https://github.com/haas-projet/haas/pull/24), commit `b76612d`. Le head publié et main ont chacun une CI verte sur PHP 8.4/8.5 : **671 tests / 6 805 assertions** par version, PostgreSQL compris. Voir la [CI de main 37681824151](https://github.com/haas-projet/haas/actions/runs/37681824151) et le [bilan de préparation des PR](docs/quality/PR_READINESS_20261007.md).
 
 Preuves : [revue et fusions de Madina](docs/quality/MERGE_MADINA.md), [fusions du socle](docs/quality/MERGE_SOCLE.md), [réception partielle](docs/quality/SOCLE_RECEPTION_PARTIELLE.md) et [blocages du socle](docs/BLOCKERS.md).
 

@@ -6,6 +6,8 @@ Laravel 13.34.0, PHP 8.4 minimum, PostgreSQL, identifiants utilisateur UUID et f
 
 Suivre [les commandes d'installation et de test](../docs/COMMANDS.md), [les versions observées](../docs/VERSIONS.md) et [l'état des livraisons](../README.md). Les résultats datés sont dans [les preuves de qualité](../docs/quality/) ; le [suivi d'exécution](../docs/execution/PROGRESS.md) indique les lots reçus, partiels et bloqués.
 
+Les demandes et commentaires B14–B17 sont intégrés dans `main` par #24 : création, lecture/recherche, édition/publication sous version et commentaires historisés. [Preuves de fusion et CI](../docs/quality/PR_READINESS_20261007.md). Les capsules et B2 restent proposés dans leurs PR séparées.
+
 ## Arborescence
 
 ```text

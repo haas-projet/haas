@@ -70,6 +70,81 @@ Contrôles verts localement (253/2454, 141/1266 — compteurs élargis par la fu
 
 Prochaine reprise après B11 fusionnée : B22 sur `backend/capsules-laboratoire`.
 
+## 2026-10-07 — HANDOFF B22 Schéma des capsules
+
+Branche : `backend/capsules-laboratoire-b22-schema`. Base : `backend/capsules-laboratoire` (`71daddf`, qui a déjà fusionné `origin/main` `7a8c672`). Lot livré : **B22 — Schéma des capsules**. Statut proposé : `IN_REVIEW` à l'ouverture d'une PR brouillon ; aucune revue humaine effectuée à ce stade.
+
+### À quelle question ce lot répond
+
+Le schéma SQL des capsules est posé : quatre tables (`capsules`, `capsule_versions`, `capsule_contributors`, `artifacts`) sous les règles de `CAHIER_DES_CHARGES.md:869-872`. Une capsule a toujours exactement une origine (demande résolue XOR origine éditoriale) ; une version par capsule est unique ; un contributeur ne peut pas tenir deux fois le même rôle sur la même version ; un artefact approuvé est unique par (version, digest) sans empêcher l'historique inactif. Les trois objets (capsule, brique facultative, laboratoire facultatif) restent strictement distincts : aucune FK du domaine B22 ne pointe vers les tables `lab_*`, `test_*` ou `demo_*`.
+
+### Dépendances et contrat
+
+- Prérequis fusionné dans `main` : socle B01–B09, B12, B13, B32 ; identité `users` et trait `HasUuids` (User.php:14+32).
+- Prérequis fusionné dans la branche de base : enums PR #12 `App\Enums\Capsules\CapsuleVersionState`, `App\Enums\Lab\LabRunState`, `App\Enums\Comparisons\{ComparisonState,ComparisonOutcome}`.
+- Prérequis **absent de `main`** : table `help_requests` (branche `backend/communaute-entraide-b11-schema`, auteur `mamylahi`). `capsules.source_request_id` est donc UUID nullable sans FK ; migration de raccord à prévoir après fusion de B11.
+- Aucune route ni Service livré ; `docs/OPENAPI.yaml` n'est pas touché.
+
+### Fichiers livrés
+
+- 3 enums `App\Enums\Capsules\` (visibilité, rôle de contribution, statut de distribution).
+- 4 migrations `database/migrations/2026_10_07_01*_create_<table>_table.php`.
+- 4 modèles Eloquent `App\Models\Capsules\{Capsule,CapsuleVersion,CapsuleContributor,Artifact}`.
+- 4 factories `Database\Factories\Capsules\`.
+- 3 tests unitaires d'enum + 5 tests d'intégration PostgreSQL (31 tests / 70 assertions au total pour B22).
+
+### Prochaines étapes pour la propriétaire
+
+1. Attendre le feu vert utilisateur avant tout push : `git push -u origin backend/capsules-laboratoire-b22-schema`.
+2. Ouvrir une PR brouillon vers `backend/capsules-laboratoire` (branche de base de PR #12) ou directement vers `main` si PR #12 est fusionnée d'ici là. Discuter en revue les six questions ouvertes consignées dans PROGRESS.md (visibilité, rôle, statut, format editorial_origin, FK source_request_id, convention nommage).
+3. Observer la CI distante après le push.
+4. B23 démarre sur une branche dérivée séparée de B22, sans toucher la PR en revue.
+
+### Fichiers à ne pas toucher jusqu'à nouvel ordre
+
+- `backend/config/*`, `backend/bootstrap/app.php`, `backend/phpunit.xml`, `backend/.env.example`, `backend/composer.*`, `.github/workflows/*`.
+- `backend/routes/api.php`, `backend/routes/api/identity.php`, `backend/routes/console.php`.
+- `docs/OPENAPI.yaml` (fichier responsable 1 ; B22 n'ajoute aucune route).
+
+### Contrôles réellement exécutés
+
+- `composer lint` **passed**, `composer analyse` **[OK] No errors**.
+- `composer test` : **284 tests / 2510 assertions, OK**.
+- `composer test:integration` (filtre Capsules|Artifacts) : **31 tests / 70 assertions, OK**.
+- `composer test:integration` (suite complète) : **164 tests / 1320 assertions, OK**.
+- CI distante NON EXÉCUTÉE à ce stade (branche non poussée).
+
+## 2026-10-07 — HANDOFF B22 (après reprise à l'étape 3)
+
+Branche : `backend/capsules-laboratoire-b22-schema`. Statut proposé à l'ouverture de la PR : **préparé, PR en brouillon**. Aucun `DONE` ne doit être prononcé avant revue humaine et fusion.
+
+Nouveaux faits depuis le premier HANDOFF B22 :
+
+- Merge local `--no-ff` de `origin/backend/communaute-entraide` dans `backend/capsules-laboratoire-b22-schema` (`478d1e0`). Trois fichiers documentaires résolus manuellement (`docs/AI_USAGE.md`, PROGRESS.md et HANDOFF.md du participant) sans reformulation, ordre chronologique préservé. Aucun autre fichier n'a dû être résolu à la main.
+- FK posée : `capsules.source_request_id → help_requests` (`restrictOnDelete`, nullable). La contrainte XOR `capsules_source_xor` reste intacte. Q1 fermée.
+- Enum `ContributionRole` reconstruit sur le vocabulaire du cahier (`diagnosis, fix, documentation, test, case`). Q4 fermée.
+- Nouveau helper `Tests\Support\Mdev44\DomainTables::dropAll()` pour que les tests de migration partagés (`HelpRequestsMigrationTest`, `IdentityMigrationTest`) puissent déposer la chaîne capsule avant les rollbacks B11/B05.
+
+### Fichiers hors de mon domaine modifiés (minimal)
+
+- `backend/tests/Integration/HelpRequests/HelpRequestsMigrationTest.php` : +2 lignes (import + appel `DomainTables::dropAll()`). Raison : la FK `capsules.source_request_id → help_requests` empêche le rollback de B11 sans ce dépôt préalable.
+- `backend/tests/Integration/IdentityMigrationTest.php` : +2 lignes (import + appel `DomainTables::dropAll()`). Raison : la même FK, propagée jusqu'à B05 via `help_requests → users`.
+
+### Contrôles finaux
+
+- `composer lint` → `{"tool":"pint","result":"passed"}`.
+- `composer analyse` → `[OK] No errors` (PHPStan niveau 8).
+- `composer test` → **315 tests / 2541 assertions, OK**.
+- `composer test:integration` (suite complète) → **185 tests / 1400 assertions, OK**.
+- CI distante : à observer après push.
+
+### Prochaines étapes
+
+1. Pousser la branche et ouvrir une PR brouillon, base `backend/capsules-laboratoire`.
+2. Mentionner dans le corps : « contient le merge du schéma B11 », cinq questions ouvertes restantes (Q2, Q3, Q5, Q6, Q7), et les deux fichiers hors de mon domaine modifiés.
+3. Attendre revue par un relecteur humain distinct de l'autrice.
+
+Aucun `DONE` prononcé.
 ## 2026-10-05 — Reprise B35 conservée avant intégration
 
 Instantané de la branche B35 ; les instructions ci-dessous décrivent son état historique. L'état d'intégration courant figure dans docs/execution/HANDOFF.md.
@@ -116,6 +191,20 @@ Prochaines actions, sur décision humaine : pousser `backend/capsules-laboratoir
 - B33 (registre lab) : attend B22 pour le lien capsule↔lab facultatif.
 - BV201 (schéma cas + `help_intent`) : attend B11, coordination `LamineGL` obligatoire avant d'écrire sur `help_requests`.
 - B36 (worker canal Unix) : attend B33/B34 **et** une plateforme compatible — PHP Windows (bare 8.4.3 et Laragon 8.4.15 confirmés) n'enregistre pas le transport `unix://` ; les tests réels devront passer par la CI Linux `ubuntu-24.04` du workflow `backend-ci.yml` ou via WSL2 (décision humaine).
+
+## 2026-10-07 — B22 : corrections avant revue humaine
+
+À la demande de l’utilisateur, Codex prépare la PR #29 sans effacer les preuves antérieures. Main `e3bd34c` intégré par merge normal `39d923c` ; conflits documentaires résolus en conservant les historiques. Date de publication/retrait corrigée dans une migration additive ; versions publiées, provenance, attributions et technologies protégées en SQL ; relecteur indépendant et FK RESTRICT ; lock positif et technologies déclarées ; champs serveur non mass assignables. Les migrations B23 de pivot et de verrou sont reprises sous leurs noms existants, sans doublon. Aucune dépendance ni route B22.
+
+Preuves, commandes exactes, incidents de fixtures et limites : [B22_CAPSULE_SCHEMA.md](../../../quality/B22_CAPSULE_SCHEMA.md). Contrat : [CAPSULE_DATA.md](../../../architecture/CAPSULE_DATA.md). Hors SQL 319 / 2570 et SQL 232 / 1587 réussis, soit 551 tests / 4157 assertions uniques ; Pint, PHPStan 8 et Composer réussis. Base dédiée `haas_b22_review_test` sur PostgreSQL 17 local 55447 ; correctif de cookies simulés B17 repris sans assouplissement de production.
+
+Statut : prêt localement pour la revue humaine, CI du SHA publié et revue humaine en attente ; aucun DONE ou BACKEND_GATE. Après contrôles et publication par l’intégrateur, examiner B22 puis intégrer son schéma dans B23/B24 et refaire les tests des consommateurs. Aucun push effectué par cet agent.
+
+### Revalidation B22 avec main B14–B17 intégré
+
+Après le correctif local `2148322`, l’intégrateur prépare un merge normal de main `b76612d1b6587119127fd364244f5248f05f1ff2`. Tests du code combiné réellement exécutés sur la base dédiée `haas_b22_review_test` (PostgreSQL 17, 55447) : hors SQL **335 / 3595**, SQL **399 / 3390**, soit **734 tests / 6985 assertions uniques réussis** ; Pint et PHPStan niveau 8 réussis. Les anciens 551 / 4157 restent une preuve historique et ne s’ajoutent pas à ce total. Journaux/JUnit ignorés dans `backend/storage/logs/b22-main-integration.*`. Détails : [B22_CAPSULE_SCHEMA.md](../../../quality/B22_CAPSULE_SCHEMA.md).
+
+Le conflit du test de migration d’identité conserve les retraits des tables de capsules et des révisions communautaires. Aucun changement d’autorisation ou assouplissement de test. L’intégrateur consigne le SHA réel après création du merge puis publie la branche ; CI du SHA publié et revue humaine toujours à recevoir. Aucun DONE B22, frontend ou déploiement annoncé.
 
 ## Historique de la branche B38 avant intégration
 
@@ -168,3 +257,5 @@ Deux envois d’un formulaire B2 avec la même clé stable (`Idempotency-Key`, U
 - `composer test:integration` : **154 tests / 1332 assertions, OK** (dont 21 cas Demo B38 : 10 service + 5 http + 6 purge).
 - `php scripts/generate-api-types.php` : 30 types, diff limité à B38.
 - CI distante PR #28 (run 37497715618, avant les deux commits de purge) : `PHP 8.4 / PostgreSQL 17` et `PHP 8.5 / PostgreSQL 17` échouent sur le seul `ApiInventoryTest` ; `backend-ci` échoue par dépendance. Rouge attendue tant que `docs/OPENAPI.yaml` n'est pas complété.
+
+## 2026-10-08 — B22 : reprise de main b76612d par merge local 285f91c. Suite Integration (hors Demo) : OK 397 tests / 3380 assertions. Pint, PHPStan 8 et composer test (398 / 3885) verts. Prerequis local a prevoir : role haas_demo_test + base haas_demo_bootstrap_test + DEMO_DB_PASSWORD pour Integration/Demo (non lancees localement, couvertes par la CI distante).

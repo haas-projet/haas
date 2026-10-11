@@ -26,7 +26,6 @@ final class FindVisibleCapsuleQuery
     {
         $capsule = $this->visible->builder()
             ->whereRaw('lower(slug) = ?', [strtolower($slug)])
-            ->with(['owner'])
             ->first();
         if ($capsule === null) {
             throw new NotFoundHttpException;
@@ -42,10 +41,11 @@ final class FindVisibleCapsuleQuery
         if ($version === null) {
             throw new NotFoundHttpException;
         }
-        $version->load(['technologies', 'contributors.user']);
+        $version->load(['technologies', 'contributors.user:id,handle']);
 
         /** @var list<CapsuleVersion> $history */
         $history = (clone $publishedQuery)
+            ->select(['id', 'capsule_id', 'version_label', 'published_at'])
             ->orderByDesc('published_at')
             ->orderBy('id')
             ->get()

@@ -24,11 +24,11 @@ paths:
         - name: page
           in: query
           required: false
-          schema: { type: integer, minimum: 1 }
+          schema: { type: integer, minimum: 1, maximum: 2147483647, default: 1 }
         - name: per_page
           in: query
           required: false
-          schema: { type: integer, minimum: 1, maximum: 50 }
+          schema: { type: integer, minimum: 1, maximum: 50, default: 20 }
         - name: q
           in: query
           required: false
@@ -279,7 +279,13 @@ paths:
         `published_at` serveur et un `content_digest` SHA-256 des
         champs canoniques (`version_label`, `body`, `limits`,
         `technologies` triées). Une décision `approved` est écrite dans
-        `capsule_version_reviews` ; aucune note. Une version publiée
+        `capsule_version_reviews` ; aucune note. Le journal
+        conserve reviewed_lock_version de la révision avant transition.
+        L'intention capsule.version.published au propriétaire de la capsule
+        est écrite dans la même transaction ; livraison après commit,
+        chemin vers cette version précise, aucun corps ni note copié.
+        Le rôle, le compte vérifié actif et la visibilité sont recontrôlés
+        avant tout rejeu ; retrait ou révision ultérieure donne 409. Une version publiée
         devient immuable par trigger SQL (B22 étendu). AC13 appliqué :
         la publication n'hérite d'aucune preuve ni définition de
         laboratoire ; une correction ultérieure est une nouvelle version.
@@ -339,7 +345,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CapsuleCatalogueDetail'
+                $ref: '#/components/schemas/CapsuleCatalogueDetailResponse'
         '404':
           description: Capsule introuvable, masquée ou sans version publiée
   /api/v1/capsules/{slug}/versions/{version}:
@@ -366,7 +372,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CapsuleCatalogueDetail'
+                $ref: '#/components/schemas/CapsuleCatalogueDetailResponse'
         '404':
           description: Capsule introuvable, masquée, ou version non publiée
   /api/v1/b2/demo-orders:
@@ -742,13 +748,12 @@ components:
           required: [kind]
           properties:
             kind: { type: string, enum: [help_request, editorial] }
-            editorial_origin: { type: string, nullable: true }
+            editorial_origin: { type: [string, 'null'] }
         version:
-          type: object
-          nullable: true
+          type: [object, 'null']
           properties:
             version_label: { type: string }
-            published_at: { type: string, format: date-time, nullable: true }
+            published_at: { type: [string, 'null'], format: date-time }
             technologies:
               type: array
               items:
@@ -756,8 +761,14 @@ components:
                 properties:
                   id: { type: string, format: uuid }
                   slug: { type: string }
-                  version_label: { type: string, nullable: true }
-        last_published_at: { type: string, format: date-time, nullable: true }
+                  version_label: { type: [string, 'null'] }
+        last_published_at: { type: [string, 'null'], format: date-time }
+    CapsuleCatalogueDetailResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/CapsuleCatalogueDetail'
     CapsuleCatalogueDetail:
       type: object
       required: [slug, source, version, history]
@@ -768,16 +779,19 @@ components:
           required: [kind]
           properties:
             kind: { type: string, enum: [help_request, editorial] }
-            editorial_origin: { type: string, nullable: true }
+            editorial_origin: { type: [string, 'null'] }
         version:
           type: object
           required: [version_label, body, limits, content_digest, published_at, technologies, contributors]
           properties:
             version_label: { type: string }
             body: { type: string }
-            limits: { type: string, nullable: true }
-            content_digest: { type: string, pattern: '^[0-9a-f]{64}$' }
-            published_at: { type: string, format: date-time, nullable: true }
+            limits: { type: [string, 'null'] }
+            content_digest:
+              type: [string, 'null']
+              pattern: '^[0-9a-f]{64}$'
+              description: 'SHA-256 figé par B25 lors de la publication ; null pour une publication historique antérieure sans empreinte, conservé sans recalcul ni backfill.'
+            published_at: { type: [string, 'null'], format: date-time }
             technologies:
               type: array
               items:
@@ -785,13 +799,13 @@ components:
                 properties:
                   id: { type: string, format: uuid }
                   slug: { type: string }
-                  version_label: { type: string, nullable: true }
+                  version_label: { type: [string, 'null'] }
             contributors:
               type: array
               items:
                 type: object
                 properties:
-                  handle: { type: string, nullable: true }
+                  handle: { type: [string, 'null'] }
                   role: { type: string, enum: [diagnosis, fix, documentation, test, case] }
         history:
           type: array
@@ -799,7 +813,7 @@ components:
             type: object
             properties:
               version_label: { type: string }
-              published_at: { type: string, format: date-time, nullable: true }
+              published_at: { type: [string, 'null'], format: date-time }
     PaginationMeta:
       type: object
       properties:
@@ -807,8 +821,8 @@ components:
         per_page: { type: integer, minimum: 1, maximum: 50 }
         last_page: { type: integer, minimum: 1 }
         total: { type: integer, minimum: 0 }
-        from: { type: integer, nullable: true }
-        to: { type: integer, nullable: true }
+        from: { type: [integer, 'null'] }
+        to: { type: [integer, 'null'] }
     CapsuleVersionPublishInput:
       type: object
       additionalProperties: false

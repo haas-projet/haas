@@ -8,6 +8,7 @@ use App\Data\Capsules\PublishCommandData;
 use App\Data\Idempotency\IdempotencyData;
 use App\Data\Idempotency\IdempotencyKey;
 use App\Data\Idempotency\StoredCommandResult;
+use App\Data\Notifications\NotificationEvent;
 use App\Enums\Capsules\ArtifactDistributionStatus;
 use App\Enums\Capsules\CapsuleVersionState;
 use App\Enums\Capsules\ReviewDecision;
@@ -20,6 +21,7 @@ use App\Models\Technology;
 use App\Models\User;
 use App\Policies\CapsulePolicy;
 use App\Services\Idempotency\IdempotencyService;
+use App\Services\Notifications\NotificationOutbox;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Support\Facades\DB;
@@ -44,8 +46,8 @@ use Illuminate\Validation\ValidationException;
  *
  * RM03 appliqué : la version publiée est immuable, aucune preuve ni
  * définition de laboratoire n'est copiée vers une nouvelle version
- * (c'est le travail de B33, hors de ce lot). Aucune notification
- * (Q12 reste ouverte pour la décision « approved »).
+ * (c'est le travail de B33, hors de ce lot). L'intention Q12 destinée au
+ * propriétaire est enregistrée dans la même transaction ; livraison après commit.
  */
 final class PublishCapsuleVersionService
 {
@@ -53,6 +55,7 @@ final class PublishCapsuleVersionService
         private readonly CapsulePolicy $policy,
         private readonly WriteCapsuleAudit $audit,
         private readonly IdempotencyService $idempotency,
+        private readonly NotificationOutbox $outbox,
     ) {}
 
     public function handle(User $actor, Capsule $capsule, CapsuleVersion $version, PublishCommandData $command, IdempotencyKey $key): CapsuleVersion
@@ -92,6 +95,7 @@ final class PublishCapsuleVersionService
 
                 $publishedAt = now()->utc();
                 $digest = $this->computeContentDigest($locked);
+                $reviewedVersion = $locked->lock_version;
                 $locked->state = CapsuleVersionState::Published;
                 $locked->reviewer_id = $current->id;
                 $locked->published_at = $publishedAt;
@@ -104,7 +108,7 @@ final class PublishCapsuleVersionService
                     'reviewer_id' => $current->id,
                     'decision' => ReviewDecision::Approved,
                     'note' => null,
-                    'reviewed_lock_version' => $locked->lock_version,
+                    'reviewed_lock_version' => $reviewedVersion,
                     'created_at' => $publishedAt,
                 ]);
                 $review->save();
@@ -115,6 +119,7 @@ final class PublishCapsuleVersionService
                     'lock_version' => $locked->lock_version,
                     'content_digest' => $digest,
                 ]);
+                $this->outbox->record(new NotificationEvent($review->id, $sourceCapsule->owner_id, 'capsule.version.published'));
 
                 return new StoredCommandResult(
                     200,

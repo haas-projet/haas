@@ -53,6 +53,28 @@ paths:
     $ref: './api/openapi/administration.yaml#/paths/~1api~1v1~1admin~1members'
   /api/v1/admin/members/{id}:
     $ref: './api/openapi/administration.yaml#/paths/~1api~1v1~1admin~1members~1{id}'
+  /api/v1/capsules:
+    $ref: './api/openapi/capsules-lab.yaml#/paths/~1api~1v1~1capsules'
+  /api/v1/capsules/{slug}:
+    $ref: './api/openapi/capsules-lab.yaml#/paths/~1api~1v1~1capsules~1{slug}'
+  /api/v1/capsules/{slug}/versions/{version}:
+    $ref: './api/openapi/capsules-lab.yaml#/paths/~1api~1v1~1capsules~1{slug}~1versions~1{version}'
+  /api/v1/capsules/{capsule}/versions:
+    $ref: './api/openapi/capsules-lab.yaml#/paths/~1api~1v1~1capsules~1{capsule}~1versions'
+  /api/v1/capsules/{capsule}/versions/{version}:
+    $ref: './api/openapi/capsules-lab.yaml#/paths/~1api~1v1~1capsules~1{capsule}~1versions~1{version}'
+  /api/v1/capsules/{capsule}/versions/{version}/submit-review:
+    $ref: './api/openapi/capsules-lab.yaml#/paths/~1api~1v1~1capsules~1{capsule}~1versions~1{version}~1submit-review'
+  /api/v1/admin/capsules/{capsule}/versions/{version}/request-changes:
+    $ref: './api/openapi/capsules-lab.yaml#/paths/~1api~1v1~1admin~1capsules~1{capsule}~1versions~1{version}~1request-changes'
+  /api/v1/admin/capsules/{capsule}/versions/{version}/publish:
+    $ref: './api/openapi/capsules-lab.yaml#/paths/~1api~1v1~1admin~1capsules~1{capsule}~1versions~1{version}~1publish'
+  /api/v1/capsules/{capsule}/versions/{version}/artifact/{artifact}:
+    $ref: './api/openapi/capsules-lab.yaml#/paths/~1api~1v1~1capsules~1{capsule}~1versions~1{version}~1artifact~1{artifact}'
+  /api/v1/capsules/{capsule}/versions/{version}/artifact/{artifact}/stream:
+    $ref: './api/openapi/capsules-lab.yaml#/paths/~1api~1v1~1capsules~1{capsule}~1versions~1{version}~1artifact~1{artifact}~1stream'
+  /api/v1/capsules/{capsule}/versions/{version}/artifact/{artifact}/notices:
+    $ref: './api/openapi/capsules-lab.yaml#/paths/~1api~1v1~1capsules~1{capsule}~1versions~1{version}~1artifact~1{artifact}~1notices'
   /api/v1/members/{handle}:
     $ref: './api/openapi/identity.yaml#/paths/~1api~1v1~1members~1{handle}'
   /api/v1/me/profile:

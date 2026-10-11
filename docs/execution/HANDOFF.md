@@ -1,8 +1,48 @@
 # Reprise de session
 
+État courant : Intégration locale P0 en préparation : B19 39f96e9 et B27 524067b3 réunis sur une branche de contrôle isolée. Les 15 conflits sont résolus ; 586 tests / 5605 assertions hors SQL, PHPStan8/Pint, Composer, 82 types et documents reçus. Integration PostgreSQL complète en cours : aucune réussite finale présumée. Les 18 lots intégrés dans main d0d47c5 restent DONE ; les PR B18/B19 et capsules conservent leurs statuts et prérequis. B20, BC01 et B33 sont préparés séparément. Aucun merge de PR distante, avis humain ou gate.
+
+## 11 octobre 2026 — Composition locale des domaines P0
+
+Composition normale de B19 `39f96e94d8664bb39da4083a57fbd93ba295a643` avec B27 `524067b3eda56b0f6f04098423d707f6ebee4087`. Les deux historiques sont préservés ; 15 conflits résolus dans les notifications, les contrats générés, les empreintes et le suivi. La branche sert à vérifier les domaines ensemble et à préparer les raccords. Elle n'approuve ni ne fusionne les PR de l'équipe.
+
+[Preuve de composition](../quality/BACKEND_INTEGRATION_20261011.md) : 586/5605 hors SQL, PHPStan8/Pint, Composer et audit sans avis de vulnérabilité, 82 types API, documents 18/18 et 7/7. Suite Integration complète en cours sur sa seule base locale ; CI de composition à recevoir. Aucun résultat PostgreSQL complet annoncé. B20/BC01/B33 sur branches séparées ; aucun BACKEND_GATE, frontend ou déploiement.
+
+## Réception B27 par CI complète — 11 octobre 2026
+
+Source `bef006c481ed8f2692277b3c91cab1a9de13fb1c`, [CI 38162823982](https://github.com/haas-projet/haas/actions/runs/38162823982) : PHP 8.4 et PHP 8.5, chacun 454/4351 hors SQL +708/5028 Integration =**1162 tests /9379 assertions** ; backend-ci, statiques, types67 et empreintes798 réussis. Deux journaux individuels lus. Local Windows : Unit 454/4351 et ciblés 74/436 reçus ; la suite SQL complète est interrompue sans résultat final et reste distincte des réussites CI. Preuve : [B27_ARTIFACT_READINESS.md](../quality/B27_ARTIFACT_READINESS.md). B27 IN_REVIEW ; #35/#36 brouillons pour prérequis B26 partiel/B33 et ARB05 inactive. Six PR sans conflit constaté ; aucun merge ou approbation humaine.
+
+## Réception complète B26 — 11 octobre 2026
+
+B26 reçu sur `32347387536fa76f498ca21c62292c9b6ebfa80d` : hors SQL 421/4241, Integration 641/4758, total disjoint 1062/8999, erreurs/échecs/skips=0. PHPStan8, Pint, Composer, types66 et documents18/18 +7/7 réussis. B26 reste IN_PROGRESS et PR35 Draft : badge, has_lab et Q16 dépendent du registre B33 absent. La CI verte ne clôturera pas cette dépendance. Nouvelle CI du SHA publié et revue humaine encore attendues. Preuve : [B26_CATALOGUE_READINESS.md](../quality/B26_CATALOGUE_READINESS.md). Les mentions d’attente des étapes précédentes ci-dessous sont historiques.
+
+## Réception complète B25 — 11 octobre 2026
+
+B25 reçu sur `77d4147d18d1b5fb4f4cc8ed38b09840f978c46c` : hors SQL 413/4129, Integration 611/4607, total disjoint 1024/8736, erreurs/échecs/skips=0. PHPStan8, Pint, Composer, types61 et documents18/18 +7/7 réussis. Q12 utilise la cible propriétaire UX08 prévue ; aucun écran frontend livré ou testé. Publication corrigée, revue humaine des prérequis encore nécessaire. Nouvelle CI du SHA publié et revue humaine encore attendues. Preuve : [B25_RECEPTION_20261011.md](../quality/B25_RECEPTION_20261011.md). Les mentions d’attente des étapes précédentes ci-dessous sont historiques.
+
+## Reprise vérifiée le 11 octobre 2026
+
+B27 f0df4d7 reçoit normalement B26 3234738, B25 corrigée et le contrôle d'intégrité. Les historiques sont conservés et 67 types API composés sont générés. Recevoir les suites complètes sur la base B27 dédiée, puis les bilans documentaires finaux des parents avec contrôle d'identité backend avant publication. ARB05 reste inactive ; aucune revue humaine ou validation de gate n'est déclarée.
+
+B26 0632510 est synchronisée avec le code B25 77d4147 ; historiques conservés et types composés. L'intégrateur exécute maintenant ses suites complètes sur la seule base B26 dédiée. Propager ensuite le bilan final B25 et vérifier que les octets backend restent identiques. PR35 demeure en brouillon pour B33/badge/has_lab/Q16.
+
+B25 6a7d16c reçoit B24 2463e4b après handoff propre. Historique IA des deux branches conservé et manifeste complet régénéré, sans changement backend. Exécuter les suites Unit/Feature/Architecture puis Integration sur sa seule base dédiée via le runner, compléter la preuve B25 puis publier pour CI exacte avant passage en revue.
+
+B24 reçoit B23 c753017 sans changement backend. Recevoir la nouvelle CI de #33 après publication puis intégrer ce prérequis documentaire dans B25 après gel de ses corrections métier.
+
+B23 reçoit B22 6021968 sans changement backend. Vérifier la nouvelle CI de #30 après publication et transmettre ce prérequis documentaire à B24 par merge normal.
+
+Priorité utilisateur : terminer la préparation des six PR #29/#30/#33/#34/#35/#36 avant de reprendre B18. Les trois permanentes suivent main d0d47c5 ; la seule branche B38 déjà fusionnée est supprimée, sans supprimer les six branches de PR. #29 attend la revue humaine ; aucun merge des PR restantes n’est effectué. B25–B27 sont en correction métier ; B26 attend aussi Q16/B33. Aucun gate frontend/production.
+
+Lire [PR_MANIFEST_20261011.md](../quality/PR_MANIFEST_20261011.md). Après chaque édition, ajouter explicitement les nouvelles sources à l’index, régénérer SHA256SUMS et exécuter `node scripts/check-manifest.mjs` ; la CI contrôle désormais la couverture entière et les octets. Correction documentaire B22 testée sans changement backend, à propager vers B23/B24 par merges normaux puis recevoir leurs nouvelles CI. Les résultats et SHA réels vont dans la PR et le bilan après commit.
+
+Le checkout principal modifié et le travail B18 existant sont conservés. Les états et consignes datés ci-dessous retracent les sessions antérieures.
+
 Inspecter le dépôt, préserver les fichiers/commits/saisies existants, lire ADR-006. Appliquer F18 : projets ouverts, offres consenties, décision propriétaire, fil et projection publique contrôlés. Nouvelle recette avant GO_FRONTEND ; ne pas prendre un ancien gate pour un accord sur ce périmètre. Systalink/Vercel inchangé.
 
-État courant : B01–B09, B11–B17, B32 et B38 intégrés dans main d0d47c5 (18 lots entiers). B18 IN_REVIEW, PR #37 ready : head d4db146 et CI finale 38169301011 reçue, 991 / 9968 par PHP 8.4/8.5. B19 IN_REVIEW, PR #38 sur base temporaire B18 : applicatif d5bb2a5, CI 38174008525 complète reçue, 1155 tests / 12198 assertions par PHP 8.4/8.5, dont 632 / 7091 PostgreSQL complet, 66 types et 710 empreintes. CI documentaire finale à recevoir avant ready. Huit PR sans conflit au dernier constat ; #29 → #30 → #33 → #34 et #37 → #38 dans leur ordre de prérequis. #35/#36 restent Draft (B26 partiel sans B33). Aucun avis humain ou merge simulé ; 122 lots et historiques conservés. Aucun gate, frontend ou déploiement. Voir B19_RESOLUTIONS_20261011.md et le suivi de Lamine ; entrées suivantes historiques.
+État historique : État courant : B01–B09, B11–B17, B32 et B38 intégrés dans main d0d47c5 (18 lots entiers). B18 IN_REVIEW, PR #37 ready : head d4db146 et CI finale 38169301011 reçue, 991 / 9968 par PHP 8.4/8.5. B19 IN_REVIEW, PR #38 sur base temporaire B18 : applicatif d5bb2a5, CI 38174008525 complète reçue, 1155 tests / 12198 assertions par PHP 8.4/8.5, dont 632 / 7091 PostgreSQL complet, 66 types et 710 empreintes. CI documentaire finale à recevoir avant ready. Huit PR sans conflit au dernier constat ; #29 → #30 → #33 → #34 et #37 → #38 dans leur ordre de prérequis. #35/#36 restent Draft (B26 partiel sans B33). Aucun avis humain ou merge simulé ; 122 lots et historiques conservés. Aucun gate, frontend ou déploiement. Voir B19_RESOLUTIONS_20261011.md et le suivi de Lamine ; entrées suivantes historiques.
+
+État historique : État courant : B01–B09, B11–B17, B32 et B38 DONE (18 lots backend intégrés). B38 #28 réellement fusionnée dans main d0d47c5, CI 37690142490 reçue. B22–B25 et B27 IN_REVIEW ; B26 IN_PROGRESS pour B33/badge/has_lab/Q16. Six PR ouvertes et sans conflit constaté : #29/#30/#33/#34 prêtes à la revue humaine, #35/#36 brouillons. B27 reçu sur CI complète PHP 8.4/8.5 (1162/9379 par version) ; suite SQL Windows interrompue, non reçue. Trois permanentes suivant main et six temporaires de PR, dix branches distantes. B18 socle en cours dans son worktree préservé ; endpoints et réception métier non livrés. B35/S01/S02 partiels ; aucun gate frontend ou production. Les mentions des bilans datés précédents sont historiques.
 
 ## Reprise après préparation GitHub — 2026-10-01
 
@@ -210,3 +250,7 @@ Fusions distantes vérifiées : #12 33eafa0, #22 957029b dans B11, #23 17c6daa e
 Reprendre B22 #29 (retrait avec date de publication conservée, champs serveur, versions/technologies), puis B23 #30 (source vraiment résolue, validations, verrouillage/rejeu et tests HTTP). Les PR restent en brouillon. B38 #28 reste BLOCKED : probes Origin démonstration=403 et Origin HAAS=deux cookies ; appliquer le patch inerte docs/quality/probes/B38_ISOLATION.patch sur la branche B2 pour reproduire, avec base locale dédiée. Corriger origine/routage sans session et isolation réelle base/runtime/configuration, puis revalider la concurrence.
 
 B35 IN_PROGRESS : service transactionnel et concurrence reçus, câblage haas_lab/isolation et module défectueux pédagogique à compléter avant B36. Le cluster PostgreSQL temporaire de revue est arrêté. Travail local initial B14 préservé ; ne pas écraser sa modification de routes. Toutes les branches distantes sont conservées. Aucun BACKEND_GATE, GO_FRONTEND ou GO_PRODUCTION.
+
+## 11 octobre 2026 — Handoff du contrat Q12 nullable
+
+Correction isolée sur le parent documentaire B24 `2463e4b` : schéma réponse `CapsuleVersionReview.reviewed_lock_version` en integer/null, type généré number/null ; Request toujours stricte. Probe Node ignoré : deux assertions rouges puis deux vertes ; 59 types à jour, documents 18/18 et déploiement 7/7. Voir `docs/quality/B24_REVIEW_READINESS.md`. Aucun backend, tâche, NULL historique ou test PHP/SQL/HTTP modifié. L'intégrateur propage normalement le microcommit et reçoit sa CI exacte ; aucune publication ou approbation humaine par cet agent.

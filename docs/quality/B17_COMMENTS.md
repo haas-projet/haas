@@ -78,3 +78,7 @@ La CI du head consolidé `d9cba0b5eea334a05fce1acaed6be3936c692ef9`, run `376660
 Le premier contrôle `git diff --exit-code d9cba0b -- backend` signale uniquement `backend/README.md` provenant de main. `git diff --exit-code d9cba0b -- backend ':(exclude)backend/README.md'` confirme qu'aucun autre fichier backend ne change. Aucun nouveau test SQL local n'est annoncé pour cette synchronisation.
 
 Contrôles réellement relancés : `node scripts/validate-pack.mjs` **18/18**, `node scripts/check-deployment-docs.mjs` **7/7**, PHP 8.5.10 `scripts/generate-api-types.php --check` **49 types à jour**, `git diff --cached --check` sans erreur. Le premier appel du validateur n'a pas pu démarrer PowerShell (CLR HRESULT 80004005, contrôle non exécuté) ; la relance isolée a exécuté le script et réussi. Les **596 empreintes** sont régénérées et vérifiées avant commit. La CI du nouveau head reste à constater avant l'approbation ; aucun gate ou frontend.
+
+## Fusion réelle constatée — 7 octobre 2026
+
+#24 est fusionnée dans main `b76612d1b6587119127fd364244f5248f05f1ff2` à 20:24:58 UTC. Son head `2addb4d` passe la CI `37681430317` ; main passe `37681824151`, PHP 8.4/8.5 et backend-ci verts, chacun 671 tests / 6805 assertions. Le diff backend entre head et main est vide. B14–B17 sont intégrés ; aucun gate ni avis humain absent n’est présumé. Les détails GitHub et la suite des PR sont dans PR_READINESS_20261007.md.

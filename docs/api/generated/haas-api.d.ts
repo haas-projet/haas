@@ -23,9 +23,41 @@ export type account_mail_ResetPasswordInput = { readonly "email": account_mail_E
 
 export type administration_Account = { readonly "id": string; readonly "handle": string; readonly "role": "member" | "moderator" | "admin"; readonly "status": "active" | "suspended"; readonly "lock_version": number; };
 
+export type capsules_lab_ArtifactDownload = { readonly "id": string; readonly "sha256": string; readonly "size": number; readonly "notices_url": string; readonly "notices_sha256": string; readonly "notices_size": number; readonly "download_url": string; readonly "expires_at": string; };
+
+export type capsules_lab_CapsuleCatalogueDetail = { readonly "slug": string; readonly "source": { readonly "kind": "help_request" | "editorial"; readonly "editorial_origin"?: string | null; [key: string]: unknown; }; readonly "version": { readonly "version_label": string; readonly "body": string; readonly "limits": string | null; readonly "content_digest": string | null; readonly "published_at": string | null; readonly "technologies": ReadonlyArray<{ readonly "id"?: string; readonly "slug"?: string; readonly "version_label"?: string | null; [key: string]: unknown; }>; readonly "contributors": ReadonlyArray<{ readonly "handle"?: string | null; readonly "role"?: "diagnosis" | "fix" | "documentation" | "test" | "case"; [key: string]: unknown; }>; [key: string]: unknown; }; readonly "history": ReadonlyArray<{ readonly "version_label"?: string; readonly "published_at"?: string | null; [key: string]: unknown; }>; [key: string]: unknown; };
+
+export type capsules_lab_CapsuleCatalogueDetailResponse = { readonly "data": capsules_lab_CapsuleCatalogueDetail; [key: string]: unknown; };
+
+export type capsules_lab_CapsuleCataloguePage = { readonly "data": ReadonlyArray<capsules_lab_CapsuleCataloguePreview>; readonly "meta": capsules_lab_PaginationMeta; [key: string]: unknown; };
+
+export type capsules_lab_CapsuleCataloguePreview = { readonly "slug": string; readonly "source": { readonly "kind": "help_request" | "editorial"; readonly "editorial_origin"?: string | null; [key: string]: unknown; }; readonly "version": { readonly "version_label"?: string; readonly "published_at"?: string | null; readonly "technologies"?: ReadonlyArray<{ readonly "id"?: string; readonly "slug"?: string; readonly "version_label"?: string | null; [key: string]: unknown; }>; [key: string]: unknown; } | null; readonly "last_published_at": string | null; [key: string]: unknown; };
+
+export type capsules_lab_CapsuleDraft = { readonly "id": string; readonly "slug": string; readonly "visibility": "visible" | "hidden"; readonly "source": { readonly "kind": "help_request" | "editorial"; readonly "help_request_id"?: string; readonly "editorial_origin"?: string; [key: string]: unknown; }; readonly "version": capsules_lab_CapsuleVersionDraft; [key: string]: unknown; };
+
+export type capsules_lab_CapsuleDraftInput = { readonly "slug": string; readonly "source": { readonly "kind": "help_request" | "editorial"; readonly "help_request_id"?: string; readonly "editorial_origin"?: string; }; readonly "version": capsules_lab_CapsuleVersionDraftInput; };
+
+export type capsules_lab_CapsuleVersionDraft = { readonly "id": string; readonly "capsule_id": string; readonly "version_label": string; readonly "state": "draft" | "in_review" | "changes_requested" | "published" | "withdrawn"; readonly "body": string; readonly "limits": string; readonly "lock_version": number; readonly "technologies": ReadonlyArray<{ readonly "id"?: string; readonly "slug"?: string; readonly "version_label"?: string; [key: string]: unknown; }>; [key: string]: unknown; };
+
+export type capsules_lab_CapsuleVersionDraftInput = { readonly "version_label": string; readonly "body": string; readonly "limits"?: string; readonly "technologies"?: ReadonlyArray<{ readonly "technology_id": string; readonly "version_label"?: string; }>; };
+
+export type capsules_lab_CapsuleVersionDraftUpdate = { readonly "lock_version": number; readonly "body"?: string; readonly "limits"?: string; readonly "technologies"?: ReadonlyArray<{ readonly "technology_id": string; readonly "version_label"?: string; }>; };
+
+export type capsules_lab_CapsuleVersionPublishInput = { readonly "lock_version": number; };
+
+export type capsules_lab_CapsuleVersionPublished = { readonly "id": string; readonly "capsule_id": string; readonly "version_label": string; readonly "state": "published"; readonly "body": string; readonly "limits": string; readonly "content_digest": string; readonly "lock_version": number; readonly "published_at": string; readonly "technologies": ReadonlyArray<{ readonly "id"?: string; readonly "slug"?: string; readonly "version_label"?: string; [key: string]: unknown; }>; [key: string]: unknown; };
+
+export type capsules_lab_CapsuleVersionReview = { readonly "id": string; readonly "version_id": string; readonly "reviewed_lock_version": number | null; readonly "decision": "request_changes"; readonly "note": string; readonly "created_at"?: string; [key: string]: unknown; };
+
+export type capsules_lab_CapsuleVersionReviewInput = { readonly "lock_version": number; readonly "note": string; };
+
+export type capsules_lab_CapsuleVersionSubmitReviewInput = { readonly "lock_version": number; };
+
 export type capsules_lab_DemoOrder = { readonly "id": string; readonly "order_ref": string; readonly "amount_minor": number; readonly "currency": "EUR"; readonly "state": "confirmed"; };
 
 export type capsules_lab_DemoOrderInput = { readonly "order_ref": string; readonly "amount_minor": number; readonly "currency": "EUR"; };
+
+export type capsules_lab_PaginationMeta = { readonly "current_page"?: number; readonly "per_page"?: number; readonly "last_page"?: number; readonly "total"?: number; readonly "from"?: number | null; readonly "to"?: number | null; [key: string]: unknown; };
 
 export type community_Comment = { readonly "id": string; readonly "request_id": string; readonly "author": { readonly "id": string; readonly "handle": string; }; readonly "body": string; readonly "body_html": string; readonly "lock_version": number; readonly "created_at": string | null; readonly "edited_at": string | null; };
 
@@ -123,7 +155,7 @@ export type moderation_Receipt = (moderation_ReportFields);
 
 export type moderation_ReportFields = { readonly "id": string; readonly "resource_type": "profile"; readonly "resource_id": string; readonly "status": "new" | "in_review" | "resolved" | "dismissed"; readonly "lock_version": number; readonly "created_at": string; [key: string]: unknown; };
 
-export type notifications_Notification = { readonly "id": string; readonly "kind": "profile.moderated" | "comment.created" | "proposal.created" | "resolution.accepted"; readonly "message": string; readonly "target_path": string; readonly "read_at": string | null; readonly "created_at": string; };
+export type notifications_Notification = { readonly "id": string; readonly "kind": "profile.moderated" | "comment.created" | "proposal.created" | "resolution.accepted" | "capsule.review.changes_requested" | "capsule.version.published"; readonly "message": string; readonly "target_path": string; readonly "read_at": string | null; readonly "created_at": string; };
 
 export type profiles_ProfileFields = { readonly "id": string; readonly "handle": identity_Handle; readonly "avatar_initials": string; readonly "bio": string; readonly "country": string | null; readonly "primary_language": string; readonly "github_url": string | null; readonly "technologies": ReadonlyArray<profiles_Technology>; readonly "is_demo": boolean; readonly "contributions": null; [key: string]: unknown; };
 

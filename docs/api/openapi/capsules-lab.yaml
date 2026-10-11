@@ -1,5 +1,380 @@
 # Pilote : mdev44-code. Ajouter uniquement les contrats implémentés.
+openapi: 3.1.0
+info:
+  title: HAAS — Capsules et laboratoire
+  version: 0.2.0
 paths:
+  /api/v1/capsules:
+    get:
+      operationId: listVisibleCapsules
+      summary: Lister les capsules publiées (catalogue public)
+      description: >
+        Catalogue public (B26, §14). Visiteurs et membres voient la même
+        liste ; seules les capsules `visible` avec au moins une version
+        `published` apparaissent. Les versions `draft`, `in_review`,
+        `changes_requested` et `withdrawn` ne sont NI listées NI exposées
+        par le détail (RM06, AC15, AC25). Pagination 20 par défaut,
+        maximum 50 ; tri `date` (défaut) ou `relevance` (nécessite `q`).
+        Filtre `technology` sur la technologie de la version publiée la
+        plus récente. Recherche `q` en ILIKE sécurisé sur `slug`,
+        `editorial_origin` et le corps/limites des versions publiées
+        (décision propriétaire : pas d'index FTS en P0 ; voir Q15).
+        Aucun en-tête personnalisé, aucune donnée privée dans les cartes.
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema: { type: integer, minimum: 1, maximum: 2147483647, default: 1 }
+        - name: per_page
+          in: query
+          required: false
+          schema: { type: integer, minimum: 1, maximum: 50, default: 20 }
+        - name: q
+          in: query
+          required: false
+          schema: { type: string, maxLength: 200 }
+        - name: technology
+          in: query
+          required: false
+          schema: { type: string, format: uuid }
+        - name: sort
+          in: query
+          required: false
+          schema: { type: string, enum: [date, relevance] }
+      responses:
+        '200':
+          description: Page du catalogue
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CapsuleCataloguePage'
+        '422':
+          description: Tri arbitraire, pagination hors limites ou paramètre inconnu
+    post:
+      operationId: storeCapsuleDraft
+      summary: Créer un brouillon de capsule
+      description: >
+        Crée une capsule et sa première version-brouillon. Exactement une des deux
+        sources est acceptée (demande résolue XOR origine éditoriale). L'origine
+        éditoriale est réservée aux rôles moderator/admin. Compte actif et vérifié
+        obligatoire. L'en-tête `Idempotency-Key` est requis. La demande doit être
+        réellement resolved, avec résolution active et proposition accepted cohérentes.
+        Le rejeu relit les droits et la version ; un brouillon modifié produit 409.
+      security:
+        - SessionCookie: []
+      parameters:
+        - $ref: '../../OPENAPI.yaml#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CapsuleDraftInput'
+      responses:
+        '201':
+          description: Capsule et brouillon créés ; même code pour un rejeu idempotent de la même charge
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CapsuleDraft'
+        '409':
+          description: Conflit d'idempotence, slug déjà utilisé ou brouillon modifié depuis sa création
+        '403':
+          description: Rôle insuffisant, source masquée ou auteur/contributeur non autorisé ; contrôle actuel répété au rejeu
+        '422':
+          description: Validation ou source non résolue
+  /api/v1/capsules/{capsule}/versions:
+    post:
+      operationId: storeCapsuleVersionDraft
+      summary: Créer une nouvelle version-brouillon pour une capsule
+      description: >
+        Ajoute une version-brouillon à une capsule existante. Réservé au
+        propriétaire de la capsule en B23 ; les contributeurs habilités seront
+        intégrés par les lots B24/B25. `version_label` MAJOR.MINOR.PATCH unique
+        par capsule.
+      security:
+        - SessionCookie: []
+      parameters:
+        - name: capsule
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - $ref: '../../OPENAPI.yaml#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CapsuleVersionDraftInput'
+      responses:
+        '201':
+          description: Version-brouillon créée ; même code pour un rejeu idempotent de la même charge
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CapsuleVersionDraft'
+        '403':
+          description: Non propriétaire
+        '404':
+          description: Capsule inexistante
+        '409':
+          description: Conflit d'idempotence ou de version_label
+        '422':
+          description: Validation
+  /api/v1/capsules/{capsule}/versions/{version}:
+    patch:
+      operationId: updateCapsuleVersionDraft
+      summary: Modifier un brouillon de capsule
+      description: >
+        Édite body/limits/technologies d'une version en état draft ou
+        changes_requested. Réservé à l'owner de la capsule ou à un
+        contributeur déclaré sur cette version. lock_version obligatoire ;
+        périmé = 409 sans mutation. version_label, state, owner, reviewer
+        et published_at sont fixés par le serveur et refusés. limits null efface
+        les limites déclarées ; un champ absent les conserve. Tous les champs
+        inconnus et les technologies inconnues ou dupliquées sont refusés en 422.
+      security:
+        - SessionCookie: []
+      parameters:
+        - name: capsule
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - name: version
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CapsuleVersionDraftUpdate'
+      responses:
+        '200':
+          description: Brouillon mis à jour, lock_version incrémenté
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CapsuleVersionDraft'
+        '403':
+          description: Non habilité (ni owner, ni contributeur) ou état non éditable
+        '404':
+          description: Version inexistante ou n'appartenant pas à la capsule
+        '409':
+          description: lock_version périmé
+        '422':
+          description: Validation
+  /api/v1/capsules/{capsule}/versions/{version}/submit-review:
+    post:
+      operationId: submitCapsuleVersionForReview
+      summary: Soumettre une version-brouillon à la revue
+      description: >
+        Transition draft → in_review ou changes_requested → in_review. Réservée
+        à l'owner ou à un contributeur de la version. Les champs minimum
+        (body non vide ≥ 20, limits non vides) sont requis : contenu insuffisant
+        produit 422 avec les champs manquants.
+        lock_version et Idempotency-Key obligatoires. Le rejeu relit les droits
+        actuels et exige la même version en in_review ; toute édition ou décision
+        ultérieure produit 409. La soumission ne publie pas la capsule (B25).
+      security:
+        - SessionCookie: []
+      parameters:
+        - name: capsule
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - name: version
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - $ref: '../../OPENAPI.yaml#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CapsuleVersionSubmitReviewInput'
+      responses:
+        '200':
+          description: Version soumise à la revue, ou même résultat rejoué sans nouvel audit
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CapsuleVersionDraft'
+        '403':
+          description: Non habilité ou état non éligible
+        '404':
+          description: Version inexistante ou n'appartenant pas à la capsule
+        '422':
+          description: Validation, champ inconnu ou contenu insuffisant
+        '409':
+          description: lock_version périmé, état changé ou clé réutilisée avec une autre charge
+  /api/v1/admin/capsules/{capsule}/versions/{version}/request-changes:
+    post:
+      operationId: requestChangesOnCapsuleVersion
+      summary: Demander des corrections sur une version en revue
+      description: >
+        Transition in_review → changes_requested. Réservée aux moderator/admin
+        qui ne sont NI owner NI contributeur de la version. Note obligatoire
+        entre 20 et 2000 caractères. Renseigne reviewer_id et enregistre la
+        note dans capsule_version_reviews avec le lock_version du contenu relu.
+        lock_version et Idempotency-Key obligatoires ; champs inconnus refusés.
+        Le journal de décisions conserve notes et attributions sans modification
+        ni suppression. Cette décision demande une correction ; l'acceptation et
+        la publication restent du ressort de B25 avec revue indépendante.
+        Une intention capsule.review.changes_requested destinée au propriétaire
+        est enregistrée dans la transaction de revue ; la livraison est distincte,
+        après commit. La notification contient uniquement message générique et
+        références, et respecte visibilité et droits courants avant lecture.
+      security:
+        - SessionCookie: []
+      parameters:
+        - name: capsule
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - name: version
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - $ref: '../../OPENAPI.yaml#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CapsuleVersionReviewInput'
+      responses:
+        '201':
+          description: Décision enregistrée, ou même décision rejouée sans doublon
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CapsuleVersionReview'
+        '403':
+          description: Auto-revue refusée, rôle insuffisant, ou état non éligible
+        '404':
+          description: Version inexistante ou n'appartenant pas à la capsule
+        '422':
+          description: Note hors format, secret indicatif, contrôle interdit ou validation de commande
+        '409':
+          description: lock_version périmé, état changé ou clé réutilisée avec une autre charge
+  /api/v1/admin/capsules/{capsule}/versions/{version}/publish:
+    post:
+      operationId: publishCapsuleVersion
+      summary: Publier une version en revue
+      description: >
+        Transition `in_review → published`. Réservée aux moderator/admin
+        qui ne sont NI owner NI contributeur de cette version (AC12,
+        CAHIER_DES_CHARGES.md:462 et :955). La publication exige un
+        `lock_version` courant et une `Idempotency-Key` ; champs inconnus
+        refusés. Contrôles atomiques : documentation complète (body ≥ 20
+        caractères non blancs, limits non vide), résolution source toujours
+        active (si demande d'aide), et pour chaque artefact `approved` un
+        `notices_path` renseigné. La publication ne change JAMAIS
+        `distribution_status`. Pose `state=published`, `reviewer_id`,
+        `published_at` serveur et un `content_digest` SHA-256 des
+        champs canoniques (`version_label`, `body`, `limits`,
+        `technologies` triées). Une décision `approved` est écrite dans
+        `capsule_version_reviews` ; aucune note. Le journal
+        conserve reviewed_lock_version de la révision avant transition.
+        L'intention capsule.version.published au propriétaire de la capsule
+        est écrite dans la même transaction ; livraison après commit,
+        chemin vers cette version précise, aucun corps ni note copié.
+        Le rôle, le compte vérifié actif et la visibilité sont recontrôlés
+        avant tout rejeu ; retrait ou révision ultérieure donne 409. Une version publiée
+        devient immuable par trigger SQL (B22 étendu). AC13 appliqué :
+        la publication n'hérite d'aucune preuve ni définition de
+        laboratoire ; une correction ultérieure est une nouvelle version.
+      security:
+        - SessionCookie: []
+      parameters:
+        - name: capsule
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - name: version
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - $ref: '../../OPENAPI.yaml#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CapsuleVersionPublishInput'
+      responses:
+        '200':
+          description: Version publiée, ou même publication rejouée sans nouvelle écriture
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CapsuleVersionPublished'
+        '403':
+          description: Auto-publication refusée, rôle insuffisant ou droits perdus
+        '404':
+          description: Version inexistante ou n'appartenant pas à la capsule
+        '422':
+          description: Documentation incomplète, provenance révoquée, artefact approuvé sans notices, ou validation de commande
+        '409':
+          description: lock_version périmé, état hors `in_review` ou clé réutilisée avec une autre charge
+  /api/v1/capsules/{slug}:
+    get:
+      operationId: showVisibleCapsule
+      summary: Détail d'une capsule publiée (dernière version publiée)
+      description: >
+        Détail public de la capsule désignée par `slug`. Renvoie la dernière
+        version publiée, l'historique des versions publiées (plus récentes
+        d'abord), les contributeurs (handle public et rôle, jamais de
+        courriel) et les technologies. Une capsule masquée ou sans version
+        publiée renvoie 404. Les champs privés (`reviewer_id`, note de
+        revue, courriel, `source_request_id`, chemin privé d'artefact,
+        notices) ne sont jamais exposés (RM06).
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema: { type: string, pattern: '^[a-z0-9][a-z0-9-]{1,118}[a-z0-9]$' }
+      responses:
+        '200':
+          description: Détail de la capsule et de sa version publiée courante
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CapsuleCatalogueDetailResponse'
+        '404':
+          description: Capsule introuvable, masquée ou sans version publiée
+  /api/v1/capsules/{slug}/versions/{version}:
+    get:
+      operationId: showVisibleCapsuleVersion
+      summary: Détail d'une version précise publiée
+      description: >
+        Comme `GET /api/v1/capsules/{slug}` mais pointe une version précise
+        (`version_label` MAJOR.MINOR.PATCH). La version doit être
+        actuellement `published` ; une version retirée après publication
+        disparaît également de ce détail direct (AC15/AC25).
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema: { type: string, pattern: '^[a-z0-9][a-z0-9-]{1,118}[a-z0-9]$' }
+        - name: version
+          in: path
+          required: true
+          schema: { type: string, pattern: '^(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)$' }
+      responses:
+        '200':
+          description: Détail de la version publiée demandée
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CapsuleCatalogueDetailResponse'
+        '404':
+          description: Capsule introuvable, masquée, ou version non publiée
   /api/v1/b2/demo-orders:
     post:
       operationId: recordDemoOrder
@@ -80,8 +455,431 @@ paths:
           $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure'
         '500':
           $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure'
+  /api/v1/capsules/{capsule}/versions/{version}/artifact/{artifact}:
+    get:
+      operationId: issueArtifactDownload
+      summary: Demander un lien signé court vers le kit publié
+      description: >
+        B27 — Télécharger le kit d'une version publiée via contrôle serveur
+        courant (CAHIER_DES_CHARGES.md:956). Les gates sont ré-évaluées à
+        chaque appel : compte actif et vérifié, capsule visible, version
+        `published`, artefact `approved`, kit et notices réellement présents
+        et conformes aux empreintes/taille enregistrées. Kit limité à 20 Mio,
+        notices à 1 Mio ; 30 accès par minute et membre et 60 par adresse IP,
+        partagés entre émission, flux et notices.
+        La réponse ne porte NI `private_path`, NI chemin disque, NI champ
+        privé. Le `download_url` est signé courte durée et pointe vers une
+        route liée au membre qui réévalue les mêmes droits (un retrait
+        ultérieur coupe donc les anciens liens, AC15/AC25). `Cache-Control:
+        no-store, private`.
+      security:
+        - SessionCookie: []
+      parameters:
+        - name: capsule
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - name: version
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - name: artifact
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Lien signé émis
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/ArtifactDownload' }
+        '401':
+          description: Session absente
+        '403':
+          description: Membre non autorisé, non vérifié, suspendu ou droits perdus
+        '404':
+          description: Capsule, version ou artefact introuvable, masqué, non publié, inactif ou chemin invalide
+        '429':
+          description: Quota partagé de téléchargement atteint
+  /api/v1/capsules/{capsule}/versions/{version}/artifact/{artifact}/stream:
+    get:
+      operationId: streamArtifactDownload
+      summary: Télécharger le fichier derrière un lien signé
+      description: >
+        Route servie sous session, compte vérifié et signature relative liée
+        au membre (`member`, `expires`, `signature`). Les mêmes droits
+        qu'à l'émission sont ré-évaluées : si la version est retirée, la
+        capsule masquée, l'artefact rendu inactif ou le compte dévérifié
+        entre l'émission et l'accès, la requête est refusée. Aucune
+        divulgation de chemin disque dans l'erreur. `Cache-Control:
+        no-store, private`. Les octets livrés proviennent de la copie bornée
+        effectivement vérifiée, jamais d'un chemin rouvert au callback.
+        Aucun code n'est exécuté ; le kit ne constitue pas un rapport de laboratoire.
+      security:
+        - SessionCookie: []
+      parameters:
+        - name: capsule
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - name: version
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - name: artifact
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - name: member
+          in: query
+          required: true
+          schema: { type: string, format: uuid }
+        - name: expires
+          in: query
+          required: true
+          schema: { type: integer }
+        - name: signature
+          in: query
+          required: true
+          schema: { type: string, pattern: '^[0-9a-f]{64}$' }
+      responses:
+        '200':
+          description: Fichier retourné en flux `application/octet-stream`
+          content:
+            application/octet-stream:
+              schema: { type: string, format: binary }
+        '401':
+          description: Session absente
+        '403':
+          description: Lien expiré, falsifié, membre non vérifié ou droits perdus
+        '404':
+          description: Capsule, version ou artefact introuvable, non publié, inactif ou fichier absent
+        '429':
+          description: Quota partagé de téléchargement atteint
+  /api/v1/capsules/{capsule}/versions/{version}/artifact/{artifact}/notices:
+    get:
+      operationId: streamArtifactNotices
+      summary: Télécharger les notices versionnées du kit
+      description: >
+        Même session, membre, signature relative, contrôle courant, quota et
+        relecture des empreintes que le flux du kit. Notices limitées à 1 Mio,
+        envoyées en pièce jointe inerte avec nosniff et no-store, private.
+        Aucun chemin du registre ou du disque n'est exposé. Disponibilité et
+        empreinte ne confèrent aucun droit de réutilisation : ARB05 reste requis.
+      security:
+        - SessionCookie: []
+      parameters:
+        - { name: capsule, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: version, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: artifact, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: member, in: query, required: true, schema: { type: string, format: uuid } }
+        - { name: expires, in: query, required: true, schema: { type: integer } }
+        - { name: signature, in: query, required: true, schema: { type: string, pattern: '^[0-9a-f]{64}$' } }
+      responses:
+        '200':
+          description: Notices effectivement vérifiées
+          content:
+            application/octet-stream:
+              schema: { type: string, format: binary }
+        '401': { description: Session absente }
+        '403': { description: 'Signature absente, expirée ou falsifiée, compte non vérifié ou origine refusée' }
+        '404': { description: 'Mauvais membre, kit indisponible, retiré, masqué, inactif, absent ou corrompu' }
+        '429': { description: Quota partagé de téléchargement atteint }
 components:
   schemas:
+    ArtifactDownload:
+      type: object
+      additionalProperties: false
+      required: [id, sha256, size, notices_url, notices_sha256, notices_size, download_url, expires_at]
+      properties:
+        id: { type: string, format: uuid }
+        sha256: { type: string, pattern: '^[0-9a-f]{64}$' }
+        size: { type: integer, minimum: 1, maximum: 20971520 }
+        notices_url: { type: string, format: uri, description: 'URL signée des notices liée au membre ; droits et intégrité revérifiés.' }
+        notices_sha256: { type: string, pattern: '^[0-9a-f]{64}$' }
+        notices_size: { type: integer, minimum: 1, maximum: 1048576 }
+        download_url: { type: string, format: uri, description: 'URL signée courte durée vers le flux ; chaque accès réévalue les gates.' }
+        expires_at: { type: string, format: date-time }
+    CapsuleDraftInput:
+      type: object
+      additionalProperties: false
+      required: [slug, source, version]
+      properties:
+        slug:
+          type: string
+          minLength: 3
+          maxLength: 120
+          pattern: '^[a-z0-9][a-z0-9-]{1,118}[a-z0-9]$'
+        source:
+          type: object
+          additionalProperties: false
+          required: [kind]
+          properties:
+            kind:
+              type: string
+              enum: [help_request, editorial]
+            help_request_id:
+              type: string
+              format: uuid
+              nullable: true
+            editorial_origin:
+              type: string
+              minLength: 3
+              maxLength: 100
+              nullable: true
+        version:
+          $ref: '#/components/schemas/CapsuleVersionDraftInput'
+    CapsuleVersionDraftInput:
+      type: object
+      additionalProperties: false
+      required: [version_label, body]
+      properties:
+        version_label:
+          type: string
+          pattern: '^(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)$'
+          maxLength: 40
+        body:
+          type: string
+          minLength: 20
+          maxLength: 24000
+          description: Au moins 20 caractères après retrait des espaces extérieurs pour la validation ; le corps valide est conservé exactement.
+        limits:
+          type: string
+          minLength: 1
+          maxLength: 4000
+          nullable: true
+        technologies:
+          type: array
+          maxItems: 8
+          items:
+            type: object
+            additionalProperties: false
+            required: [technology_id]
+            properties:
+              technology_id:
+                type: string
+                format: uuid
+              version_label:
+                type: string
+                maxLength: 40
+                nullable: true
+    CapsuleDraft:
+      type: object
+      required: [id, slug, visibility, source, version]
+      properties:
+        id: { type: string, format: uuid }
+        slug: { type: string }
+        visibility: { type: string, enum: [visible, hidden] }
+        source:
+          type: object
+          required: [kind]
+          properties:
+            kind: { type: string, enum: [help_request, editorial] }
+            help_request_id: { type: string, format: uuid, nullable: true }
+            editorial_origin: { type: string, nullable: true }
+        version:
+          $ref: '#/components/schemas/CapsuleVersionDraft'
+    CapsuleVersionDraft:
+      type: object
+      required: [id, capsule_id, version_label, state, body, limits, lock_version, technologies]
+      properties:
+        id: { type: string, format: uuid }
+        capsule_id: { type: string, format: uuid }
+        version_label: { type: string }
+        state: { type: string, enum: [draft, in_review, changes_requested, published, withdrawn] }
+        body: { type: string }
+        limits: { type: string, nullable: true }
+        lock_version: { type: integer, minimum: 1 }
+        technologies:
+          type: array
+          items:
+            type: object
+            properties:
+              id: { type: string, format: uuid }
+              slug: { type: string }
+              version_label: { type: string, nullable: true }
+    CapsuleVersionReviewInput:
+      type: object
+      additionalProperties: false
+      required: [lock_version, note]
+      properties:
+        lock_version: { type: integer, minimum: 1, maximum: 2147483646, description: 'Entier JSON strict ; les chaînes numériques sont refusées.' }
+        note:
+          type: string
+          minLength: 20
+          maxLength: 2000
+    CapsuleVersionReview:
+      type: object
+      required: [id, version_id, reviewed_lock_version, decision, note]
+      properties:
+        id: { type: string, format: uuid }
+        version_id: { type: string, format: uuid }
+        reviewed_lock_version: { type: [integer, 'null'], minimum: 1, description: 'Version relue ; null uniquement pour le journal antérieur à cette migration, sans attribution inventée.' }
+        decision: { type: string, enum: [request_changes] }
+        note: { type: string }
+        created_at: { type: string, format: date-time, nullable: true }
+    CapsuleVersionSubmitReviewInput:
+      type: object
+      additionalProperties: false
+      required: [lock_version]
+      properties:
+        lock_version: { type: integer, minimum: 1, maximum: 2147483646, description: 'Entier JSON strict ; les chaînes numériques sont refusées.' }
+    CapsuleCataloguePage:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/CapsuleCataloguePreview'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+    CapsuleCataloguePreview:
+      type: object
+      required: [slug, source, version, last_published_at]
+      properties:
+        slug: { type: string }
+        source:
+          type: object
+          required: [kind]
+          properties:
+            kind: { type: string, enum: [help_request, editorial] }
+            editorial_origin: { type: [string, 'null'] }
+        version:
+          type: [object, 'null']
+          properties:
+            version_label: { type: string }
+            published_at: { type: [string, 'null'], format: date-time }
+            technologies:
+              type: array
+              items:
+                type: object
+                properties:
+                  id: { type: string, format: uuid }
+                  slug: { type: string }
+                  version_label: { type: [string, 'null'] }
+        last_published_at: { type: [string, 'null'], format: date-time }
+    CapsuleCatalogueDetailResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/CapsuleCatalogueDetail'
+    CapsuleCatalogueDetail:
+      type: object
+      required: [slug, source, version, history]
+      properties:
+        slug: { type: string }
+        source:
+          type: object
+          required: [kind]
+          properties:
+            kind: { type: string, enum: [help_request, editorial] }
+            editorial_origin: { type: [string, 'null'] }
+        version:
+          type: object
+          required: [version_label, body, limits, content_digest, published_at, technologies, contributors]
+          properties:
+            version_label: { type: string }
+            body: { type: string }
+            limits: { type: [string, 'null'] }
+            content_digest:
+              type: [string, 'null']
+              pattern: '^[0-9a-f]{64}$'
+              description: 'SHA-256 figé par B25 lors de la publication ; null pour une publication historique antérieure sans empreinte, conservé sans recalcul ni backfill.'
+            published_at: { type: [string, 'null'], format: date-time }
+            technologies:
+              type: array
+              items:
+                type: object
+                properties:
+                  id: { type: string, format: uuid }
+                  slug: { type: string }
+                  version_label: { type: [string, 'null'] }
+            contributors:
+              type: array
+              items:
+                type: object
+                properties:
+                  handle: { type: [string, 'null'] }
+                  role: { type: string, enum: [diagnosis, fix, documentation, test, case] }
+        history:
+          type: array
+          items:
+            type: object
+            properties:
+              version_label: { type: string }
+              published_at: { type: [string, 'null'], format: date-time }
+    PaginationMeta:
+      type: object
+      properties:
+        current_page: { type: integer, minimum: 1 }
+        per_page: { type: integer, minimum: 1, maximum: 50 }
+        last_page: { type: integer, minimum: 1 }
+        total: { type: integer, minimum: 0 }
+        from: { type: [integer, 'null'] }
+        to: { type: [integer, 'null'] }
+    CapsuleVersionPublishInput:
+      type: object
+      additionalProperties: false
+      required: [lock_version]
+      properties:
+        lock_version: { type: integer, minimum: 1, maximum: 2147483646, description: 'Entier JSON strict ; les chaînes numériques sont refusées.' }
+    CapsuleVersionPublished:
+      type: object
+      required: [id, capsule_id, version_label, state, body, limits, content_digest, lock_version, published_at, technologies]
+      properties:
+        id: { type: string, format: uuid }
+        capsule_id: { type: string, format: uuid }
+        version_label: { type: string }
+        state: { type: string, enum: [published] }
+        body: { type: string }
+        limits: { type: string, nullable: true }
+        content_digest: { type: string, pattern: '^[0-9a-f]{64}$', description: 'SHA-256 figé au moment de la publication. Jamais modifié après.' }
+        lock_version: { type: integer, minimum: 1 }
+        published_at: { type: string, format: date-time, nullable: true, description: 'Posé par le serveur. Nullable uniquement si la lecture précède la commande, jamais inventé.' }
+        technologies:
+          type: array
+          items:
+            type: object
+            properties:
+              id: { type: string, format: uuid }
+              slug: { type: string }
+              version_label: { type: string, nullable: true }
+    CapsuleVersionDraftUpdate:
+      type: object
+      additionalProperties: false
+      required: [lock_version]
+      properties:
+        lock_version:
+          type: integer
+          minimum: 1
+          maximum: 2147483646
+          description: Entier JSON strict ; les chaînes numériques sont refusées.
+        body:
+          type: string
+          minLength: 20
+          maxLength: 24000
+          description: Au moins 20 caractères après retrait des espaces extérieurs pour la validation ; le corps valide est conservé exactement.
+        limits:
+          type: string
+          minLength: 1
+          maxLength: 4000
+          nullable: true
+        technologies:
+          type: array
+          maxItems: 8
+          items:
+            type: object
+            additionalProperties: false
+            required: [technology_id]
+            properties:
+              technology_id: { type: string, format: uuid }
+              version_label: { type: string, maxLength: 40, nullable: true }
     DemoOrderInput:
       type: object
       additionalProperties: false

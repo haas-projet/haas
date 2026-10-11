@@ -59,6 +59,16 @@ Aucun commit poussé, aucune PR ouverte, aucune fusion effectuée.
 
 Codex, à la demande de l'utilisateur : reprise sans réécriture du travail B11 de mdev44-code, compléments de versions positives/protection des champs serveur/factory, tests de FK et migrations, contrat et suivi. Aucune identité Git de collègue ni revue humaine simulée. Vérifications : Pint/PHPStan, 282 tests / 2483 assertions hors SQL, 151 tests / 1316 assertions PostgreSQL ; B11 ciblé 18 / 66 après corrections ; audit sans alerte et validation Composer. Preuves et limites dans `docs/quality/B11_COLLABORATION.md`. La CI et le SHA final seront rapportés dans la PR ; aucun déploiement ni frontend.
 
+## Préparation de la PR #33 B24 — 7 octobre 2026
+
+Codex : audit et corrections versionnées de la soumission et des demandes de corrections, en préservant l'indépendance existante du reviewer et la séparation de publication B25. Preuves réelles dans `docs/quality/B24_REVIEW_READINESS.md` : 33 tests / 162 assertions PostgreSQL, compléments 23 / 90, contrôle PHPStan, documents et types. Préparation encore en cours : parent B23/B22/main, notification via outbox et suites combinées avant revue humaine. Aucune approbation simulée, aucun frontend ou déploiement.
+
+## Préparation de la PR #30 B23 — 7 octobre 2026
+
+Codex, à la demande de l'utilisateur : audit du travail `93fafea`, probes de défauts puis corrections de provenance, concurrence, validation, édition et idempotence sans modifier les décisions Q8/Q9. Contrôles locaux : 13 tests / 111 assertions PostgreSQL (six courses réelles), 323 tests / 2675 assertions hors SQL, Pint passé, PHPStan sans erreur, 18 + 7 contrôles documentaires, 33 types API à jour. Preuves, essais échoués et limites dans `docs/quality/B23_DRAFT_READINESS.md`. Synchronisation B22/main, suite combinée complète, CI distante et revue humaine en attente. Aucune validation humaine simulée ; aucun frontend ou déploiement.
+
+Complément B23 après parent `94aeae9` : source masquée refusée sur création/service/rejeu, septième course réelle et fixture publiée conforme B22 ; ciblés 28 / 158 et Pint/PHPStan verts. Une suite SQL partielle interrompue n'est pas une réussite ; suites combinées complètes encore requises. Preuve actualisée dans `B23_DRAFT_READINESS.md`.
+
 ## B14 — Création des demandes, 4 octobre 2026
 
 | Outil / intervention | Périmètre | Contrôles | Revue humaine de l'équipe |
@@ -112,9 +122,51 @@ Addendum de publication : synchronisation B14/B15/B16 par merges normaux et CI v
 
 Second nettoyage après fusions externes : #32/#26/#25 constatées vers leurs bases ; consolidation normale B14–B17 dans #24 `d9cba0b`, CI `37666083469` verte. Backend identique au code B17 validé 671 / 6805 ; contrôles documentaires et 49 types relancés. Suppression des trois références intermédiaires B15/B16/B17 après ascendance vers B14 publié et contrôle frais d'absence de PR ouverte dépendante, sans supprimer les branches locales. État constaté 19:27 UTC : 10 branches, quatre permanentes et six temporaires. Aucun nouveau lot intégré dans main ni revue humaine simulée ; les références externes B23/B24 sont conservées.
 
+
+## B22 — préparation des PR restantes à la revue humaine, 7 octobre 2026
+
+Codex (GPT-6), sur demande de l’utilisateur : revue du schéma B22 conservant le travail mdev44-code, main intégré normalement, régression du retrait reproduite puis corrigée par migration additive, contraintes d’historique/version/relecteur, technologies et champs serveur protégés. Reprise coordonnée des migrations B23 et du correctif de navigateur de tests B17 ; aucune nouvelle dépendance ni route. Contrôles et incidents réels : `docs/quality/B22_CAPSULE_SCHEMA.md`. 551 tests / 4157 assertions uniques réussis (319 / 2570 hors SQL et 232 / 1587 SQL), Pint, PHPStan 8, Composer, pack 18/18, docs déploiement 7/7 et 28 types API à jour. Aucune revue humaine simulée, publication distante confiée à l’intégrateur, aucun gate ou déploiement.
+
+## Synchronisation B23 avec le schéma renforcé B22
+
+Merge normal du commit B22 testé2148322 dans B23 corrigé57f0727 ; historiques IA/participant conservés. Rollback capsules repris par chemins explicites, enfants avant parents ; pivot technologique dédoublonné dans le helper de migration. Contrôles réels avant commit : 327tests/2704assertions horsSQL, Pint, pack18/18, documentationdéploiement7/7, 33types àjour. Le codeSQL B22 a ses551tests/4157assertions avantintégration ; les suitesSQL combinées après réceptionmain doivent encore être exécutées. Aucune déclaration de readiness distante sur cette étape locale.
+
+
 ## Préparation des PR avant approbation — 7 octobre 2026
 
 Codex, demande de l'utilisateur : réception de main e3bd34c après fusion réelle de #31 ; résolution des cinq conflits documentaires de #24 en conservant les historiques et les 122 lots. Aucun changement applicatif : seul backend/README.md rejoint main. Code identique à d9cba0b testé 671 / 6805 et CI verte ; contrôles documentaires relancés, nouveau head CI à observer. Revues parallèles et corrections séparées des PR B22/B23/B24 et B38, bases PostgreSQL locales distinctes ; aucun contrôle absent compté réussi et aucune approbation humaine inventée. Travail local initial, migrations et contributions préexistantes préservés.
+
+B23 avec main b76612d : conflits résolus en conservant les casts et champs B14–B17 et en retirant les enfants capsules et révisions avant les tables parentes. Contrôles réels : 343 tests / 3720 assertions hors SQL, pack 18/18, 54 types API à jour, PHPStan niveau 8 réussi par la revue parallèle. La suite SQL est interrompue avant correction de fixtures anciennes incompatibles avec le nouveau CHECK de publication et ajout du refus d’une demande source masquée ; aucun résultat SQL complet revendiqué. Cette synchronisation locale ne déclare pas la PR prête.
+
+## Constat de fusion et consolidation B22 — 7 octobre 2026
+
+À la demande de préparer les PR avant approbation, Codex constate la fusion externe de #24 dans main b76612d, sa CI verte et l’absence de revue enregistrée. Consolidation des statuts B14–B17 et des preuves, sans modifier les cartes externes ni inventer une approbation. Merge normal de main dans B22 : historiques conservés ; conflit du test de migration identité résolu en déposant enfants capsules puis révisions des demandes/commentaires avant les parents. Les suites combinées sont exécutées sur la base B22 dédiée avant publication. Aucun gate, frontend ou déploiement.
+
+B22 après intégration de main b76612d : suites effectivement terminées sur haas_b22_review_test, 335 tests / 3595 assertions hors SQL et 399 / 3390 PostgreSQL, soit 734 / 6985 uniques. Pint et PHPStan niveau 8 réussis. Les journaux/JUnit locaux de la suite SQL sont ignorés sous backend/storage/logs. Pack 18/18, déploiement 7/7 et 49 types relancés par l’intégrateur ; aucune CI du nouveau head n’est présumée avant publication et lecture des checks.
+
+## Synchronisation B24 avant Q12 — 7 octobre 2026
+
+Merge normal du parent B23 94aeae9 (incluant B22 65bc08a et main b76612d), sans réécrire les historiques. Rollback capsules par neuf chemins explicites, historique de revue et liens technologiques retirés avant les versions ; contrat de revue 0.2.0 conservé. Contrôles exécutés : 350 tests / 3800 assertions Unit, Feature et Architecture ; Pint réussi ; pack documentaire 18/18, déploiement documentaire 7/7, 57 types API à jour. Cette étape ne vaut pas réception SQL complète : Q12 notifications et la fixture de soumission publiée restent à corriger avant readiness.
+
+B23 dernière revue, Codex GPT-6 : probes réels avant correction 13 / 55 avec dix échecs ; contrôle du texte utile et conservation du corps, entier JSON strict, droits actuels de l’auteur source et verrous croisés sans deadlock. Ciblés définitifs 24 / 186 réussis sur base B23 dédiée, Pint, PHPStan 8, documents 18/18 et 7/7 et 54 types API à jour. Essai intermédiaire 44 / 260 avec deux échecs corrigés et suites SQL interrompues déclarés distinctement. Réception globale déléguée ; revue humaine en attente.
+
+B24 Q12, Codex GPT-6 : outbox de corrections demandées raccordée aux contrats communs et six tests réels, contrôles de droits/visibilité avant projections, integer strict et fixture publiée B22. Perte de snapshot au downgrade reproduite avant guard transactionnel. Revue parallèle automatisée en lecture seule, sans attribution humaine. Ciblés53/496 et onze exacts11/116 se recouvrent ; horsSQL350/3800, Pint/PHPStan8/Composer, documents18/7 et types57 verts. SQL complet lancé sur base B24 dédiée et encore en cours ; CI du candidat et revue humaine en attente. Aucun frontend, acceptation/publication B25 ou déploiement.
+
+## Dernières validations B23 reprises dans B24 — 7 octobre 2026
+
+Merge normal de d7ef6eb, en conservant les probes B24 séparément : auteur de la source relu sous FOR SHARE NOWAIT, format du corps préservé et minimum utile validé, lock_version HTTP entier strict. Historiques IA conservés. Contrôles combinés réellement exécutés : 350 tests / 3800 assertions Unit, Feature et Architecture ; Pint sur Policy et bootstrap fusionnés ; 57 types API à jour ; pack 18/18 et documentation déploiement 7/7. Les probes B24 de strictint sont restaurés après cette synchronisation ; ils attendent encore leur correction et Q12 avant toute readiness.
+
+## Réception indépendante B23 — 7 octobre 2026
+
+Codex (GPT-6), sur demande de préparer les PR avant approbation : relecture des correctifs finaux B23 et réception du code propre `d7ef6eb8c750987ddf509eba6647007162c1bec9`, sans changement applicatif ou de tests. Droits actuels de la source et de son auteur, rejeu, verrous NOWAIT, validation et attribution relus ; suites réelles sur `haas_b23_review_test` dédiée, PostgreSQL 17 local 55447 et PHP 8.5.10 : 343 / 3720 hors SQL et 478 / 3734 SQL, soit **821 tests / 7454 assertions uniques réussis**. Les probes et essais interrompus restent distincts. Pint, PHPStan 8, validation/plateforme/audit Composer, pack 18/18, déploiement documentaire 7/7 et 54 types réussis. Preuve, PROGRESS/HANDOFF participant et empreintes actualisés ; aucun journal, clé ou vendor suivi. CI candidat verte, run 37691657985 constaté par l’intégrateur ; CI du futur commit documentaire à observer. Revue humaine en attente, publication confiée à l’intégrateur, aucun DONE, gate, frontend ou déploiement.
+
+## Preuves finales B23 reçues pendant la suite B24 — 7 octobre 2026
+
+Merge normal du commit documentaire B23 11b9fec : réception locale complète 821 tests / 7454 assertions et CI du code d7ef6eb identique sur PHP 8.4/8.5, run37691657985. Les cinq fichiers entrants sont documentaires. Diff intégral de backend entre le candidat B24 994de150 et l’index de fusion vide : PHP, tests, configuration et routes strictement identiques. La suite SQL B24 continue sans interruption sur ce code figé ; aucun succès SQL complet B24 ni CI absente déclaré. Les historiques IA et participant des deux lots sont conservés.
+
+## Réception finale B24 et état des PR — 7 octobre 2026
+
+Codex (GPT-6), demande de préparation avant approbation : réception SQL B24 complète terminée sur code figé `994de150`, identique au merge documentaire `e01202f`, sans modification applicative ou de tests. Local PHP 8.5.10 / PostgreSQL 17, base dédiée `haas_b24_review_test` : 350 / 3800 hors SQL et 524 / 4037 SQL, soit **874 tests / 7837 assertions uniques réussis** ; JUnit SQL sans erreur, échec ou skip, aucun ciblé ajouté. Pint, PHPStan 8, validation/plateforme/audit Composer réussis ; notices du PHAR Composer externe distinctes. CI candidate 37692436571 et CI exacte e01202f 37693092990 réellement lues par l’intégrateur : PHP 8.4/8.5 chacune 874 / 7837, 57 types API à jour et PHPStan sans erreur. Preuves, PROGRESS/HANDOFF, état consolidé des quatre PR et empreintes actualisés ; aucune clé, log ou vendor suivi. L’intégrateur publiera le bilan et observera la CI de son SHA exact ; revue humaine en attente. Aucun push par cet agent, approbation, DONE, gate, frontend, publication B25 ou déploiement.
 
 ## Historique de la branche B38 avant intégration
 
@@ -152,3 +204,69 @@ Assistance Codex sur branche isolée issue de B18 d4db146 : service transactionn
 ## 11 octobre 2026 — Réception CI complète B19
 
 Codex : PR #38 publiée en Draft sur B18 #37, applicatif d5bb2a580e6b21e8230b84f8f85479997bbb69ec. Journaux individuels du run 38174008525 lus : 1155 tests / 12198 assertions par PHP 8.4/8.5, dont 632 / 7091 PostgreSQL complet, types 66 et empreintes 710. Relecture automatisée distincte du journal PHP 8.5, sans avis humain inventé. B19 IN_REVIEW ; ce complément porte seulement les preuves/suivis/README/empreintes. Sa CI exacte doit être reçue avant ready. Aucune fusion, tâche B20, frontend ou déploiement.
+
+
+## 11 octobre 2026 - B27, premiere tranche fichiers
+
+Codex (GPT-6), demande de preparation de la PR36 avant approbation : audit du head f5949de5, probes rouges reels, bibliotheque de fichiers serveur verifies et snapshots bornes sans execution de code, tests de traversal/empreinte/taille et vrais liens filesystem limites au storage de fixture. 24 tests / 52 assertions Windows OK ; incidents de nettoyage et partage Storage::fake distingues des resultats finaux. Aucun package, secret, fichier host externe ou frontend ajoute. Acces/audit/SQL et prerequis corriges attendent la reception suivante ; aucun push, approbation, fusion, DONE ou gate par cet agent. Empreintes de cette tranche calculees sur les blobs de l index afin de preserver les changements suivants encore non selectionnes.
+
+## 11 octobre 2026 — B27 : accès, notices et atomicité
+
+Codex (GPT-6) poursuit la préparation autorisée de PR36 : droits courants et rattachements sous verrou de version, métadonnées des notices et kit immuables après publication, signatures relatives liées au membre, notices accessibles sans chemin disque, quotas et audit atomique. Une relecture indépendante de l'intégrateur a identifié l'audit conservé sans liens : probe rouge réel, correction dans la transaction et recontrôle. Dernier probe d'origine permissive `parse_url` : cinq échecs reproduits puis validation de l'URL et unités vertes. Deadlock SQL 40P01 réellement reproduit avec verrou enfant, corrigé par lecture MVCC sous la garde commune de version, course relancée en deux processus. Aucun test ne prouve une licence ni un rapport de laboratoire ; fixtures exclusivement fictives et sous le storage du worktree.
+
+Contrôles ciblés locaux PHP 8.5.10/PG17 sur la seule base B27 dédiée à 55447 : 66 tests / 258 assertions SQL/HTTP/concurrence, 33 / 69 unités fichiers/liens, 7 / 127 atomicité/contrat/frontières/modèles (totaux recouvrants). Pint/PHPStan 8/Composer/types 66/documents 18/18 et déploiement 7/7 réussis. Historique et incidents conservés dans B27_ARTIFACT_READINESS. Pré-requis B24/B25/B26 corrigés, suites complètes, Linux/CI exacte et Qodana restent à recevoir. Aucun package, baseline, frontend, push, approbation humaine, fusion ou gate ajouté. Première tranche locale `13ae33e02f21b9a1a700647da50820ae88cd37b7` ; le SHA de la tranche suivante sera communiqué après sa création.
+
+## 11 octobre 2026 — B27 : composition de la fixture de publication
+
+Codex (GPT-6), reprise autorisée au parent 8fe85fe après SQL globale 245 / 1323 avec 1 erreur : le test ajoutait un Artifact après publication. JUnit original et copie ignorée conservés avec SHA256 identique ; probe rouge réel 1 / 1 / erreur23514. Fixture seule corrigée avant publication réelle du Service B25, avec conservation intégrale des attributs du kit ancien ; probe vert 1 / 8. Composition B25/B27 courante 74 tests / 436 assertions réussie, sans erreur/échec/skip ; PHPStan 8/Pint verts, base dédiée et runner B27 explicites. Aucun code/trigger/down de production modifié, aucune protection affaiblie ; lecture indépendante non comptée comme test. Preuve et participant conservés, chiffres ciblés non additionnés. Réception complète B27 et CI exacte restent à l'intégrateur ; aucun autre worktree suivi changé, push, approbation humaine, frontend ou déploiement.
+
+## 11 octobre 2026 — B27 : répétabilité de la migration fraîche
+
+Codex (GPT-6), correction après stack précis de l'intégrateur au candidat synchronisé 134ebe0 : fonction PostgreSQL b27_guard_artifact persistante, SQL42723. Diff production strictement CREATE OR REPLACE, corps/verrous/trigger/down préservés. Probe frais réellement rouge 1 test / 1 assertion / 1 erreur ; après correction, deux migrate:fresh et garde active, 1 / 11 vert. Trois alertes statiques du nouveau test ont conduit à arrêter le ciblage incomplet avant correction du helper console/SQLSTATE, sans cast/ignore/baseline. Ciblage final courant 69 tests / 285 assertions réussi, PHPStan 8/Pint verts, 67 types API à jour ; toutes commandes PHP via runner B27, base dédiée haas_b27_review_test à 55447 et journaux ignorés. Lecture indépendante de pr_capsule_versions distincte des tests. Preuve/participant conservés ; réceptions globales interrompues NON TERMINÉES, réception complète et CI exacte à reprendre par l'intégrateur. Aucun fichier B24/B26, garde de production affaiblie, dépendance, secret suivi, push, approbation, frontend ou déploiement.
+
+## 11 octobre 2026 — Reprise B26, validation et attribution publiques
+
+Codex (GPT-6), préparation de PR avant approbation humaine, nouveau worktree au head b568a511. Lecture des contrats et revalidation réelle des défauts, corrections Unicode, tableaux q/sort et exposition du handle public. PostgreSQL 17 dédié haas_b26_review_test / PHP 8.5.10 : rouge 8 tests / 8 assertions avec 1 erreur et 6 échecs, puis vert 23 / 78 incluant les probes ; PHPStan 8 et Pint --test réussis. Preuve B26_CATALOGUE_READINESS.md ; aucune lecture indépendante comptée comme test. Aucun secret suivi, dépendance nouvelle, push, approbation, frontend ou déploiement. Contrat de dernière publication/enveloppe et réception parent B25 restent à terminer ; B33/has_lab/Q16 ne sont pas livrés.
+
+
+## 11 octobre 2026 — B26 : lectures bornées et contrat du catalogue
+
+Codex (GPT-6), correction après régressions réelles : technologie de dernière publication, hydratation une version par carte, corps unique au détail, historique metadata-only, projection des contributeurs id/handle. Deux retours rouges distincts 3 / 6 et 1 / 4 ; erreur de chemin de fixture OpenAPI et nullsafe de test corrigés avant ciblage final 39 tests / 2620 assertions. PHPStan 8 et Pint verts, 66 types API ; scripts documentaires 18 et 7 contrôles réussis, sans test serveur. Lecture indépendante de pr_capsule_schema non comptée comme test. Base haas_b26_review_test et runner explicite, journaux ignorés. Le microcommit précédent réel est a56f0144fb104d07c52e51a5aa7c9019dc2f0e94. Preuve B26_CATALOGUE_READINESS.md ; parent B25 final et réception complète encore attendus, B33/has_lab/Q16 absents. Aucun nouveau modèle de permissions propriétaire/source inventé, dépendance, exécution de code utilisateur, secret suivi, push, approbation, frontend ou déploiement.
+
+Relecture finale du contrat B26 : nullable hérité ignoré par la génération, 2 tests / 3 assertions réellement rouges, union de types 3.1 sur les seuls schémas catalogue, 66 types régénérés sans modifier le générateur. Ciblage final 39 / 2620, PHPStan 8 et Pint verts. Pas de réception globale avant parent B25, PR35 Draft et B26 partiel pour B33/badge/has_lab/Q16.
+
+## 11 octobre 2026 — B26 : type fidèle à l'empreinte historique absente
+
+Codex (GPT-6), après le signal de l'intégrateur : probes frais HTTP/contrat/types pour content_digest legacy réellement nul. Avant correction, 3 tests / 12 assertions avec 2 échecs OpenAPI/types ; HTTP conservait déjà null sur les deux routes et la base inchangée. Seul CatalogueDetail reçoit l'union string|null et une description sans recalcul/backfill, avec 66 types régénérés ; aucun digest fabriqué ni migration/runtime modifié. Ciblage final courant 42 tests / 2635 assertions réussi, PHPStan 8 et Pint verts via le runner/base B26 dédiés, journaux ignorés. Les nombres ciblés se remplacent sans addition ; la lecture indépendante ne compte pas comme test. Microcommit précédent fe8b4cdab77acca4f9471a1d06cdce9aee956b11, preuves/participant conservés. Pas de SQL global avant parent B25 final, CI exacte et revue humaine attendues, PR35 Draft/B26 partiel pour B33/badge/has_lab/Q16. Aucun push, approbation, frontend ou déploiement.
+
+## 11 octobre 2026 — réception B25 avant approbation
+
+Codex (GPT-6), demande de préparation des PR restantes : audit du head PR34 `ce75045` dans un nouveau worktree, sans modifier les anciens. Probe HTTP réel rouge du snapshot puis correction minimale : la revue journalise la révision avant transition ; réponse et rejeu conservent la révision publiée. Suite ciblée HTTP 23 / 59 et Pint réussis sur base locale dédiée. Les défauts de notification Q12 et de downgrade sont revalidés sur le head actuel et restent en cours ; aucun résultat global, approbation, push ou frontend inventé. Preuve : `B25_RECEPTION_20261011.md`.
+
+Deuxième étape B25 : défauts de downgrade confirmés puis locks et refus conservateurs ajoutés aux trois migrations, sans réécrire B22 ni supprimer des données pour rendre une descente acceptable. Legacy NULL down/up réel et cinq courses à deux processus testés : 10 / 79 verts. Un enum/format de fixture corrigé et un timeout transitoire lors d’une pause de l’hôte ne sont pas déclarés probes métier réussis. Remise à zéro limitée aux fixtures, DB dédiée gardée. Q12 et réception complète restent à recevoir.
+
+Étape Q12 B25 : probe réel rouge 1/1 puis producteur d’intention propriétaire/version stable, projection privée et migration additive composant les types SQL installés, sans notes/corps ni nouvelle route frontend. Cible UX08 déjà définie avec /edition et UUID précis, consultation future de la version immuable. Régressions SQL de panne/rollback/livraison/retry, droits actuels/retrait, legacy et événements stables, courses même clé et relecteurs indépendants. Réception ciblée définitive **57 / 467**, APIInventory **1 / 81**, Pint complet/PHPStan8, types61 et contrôles documents18/18 +7/7 réussis ; essais d’attentes de fixture erronées distincts. Note de modèle nullable alignée sur approved SQL, types contrôlés sans cast/baseline/suppression. Les pauses host ne servent pas de benchmark. Code figé transmis à l’intégrateur pour parent documentaire et suites/CI complètes, sans push, ready, approbation humaine, frontend ou déploiement par cet agent.
+
+## 2026-10-11 — Intégrité des PR capsules
+
+À la demande de vérifier Git et poursuivre les PR prioritaires, Codex contrôle les six PR distantes et les blobs des trois premiers heads. Les manifestes périmés/incomplets sont corrigés ; un contrôle Node sans dépendance compare les octets et la couverture des fichiers suivis dans les deux jobs CI. Aucun backend ni identifiant de tâche n’est réécrit dans ce lot. Les résultats et limites figurent dans docs/quality/PR_MANIFEST_20261011.md ; aucune approbation humaine n’est simulée. La modification locale préexistante et le travail B18 sont préservés.
+
+## 11 octobre 2026 — Contrat Q12 nullable historique
+
+Codex (GPT-6), correction autorisée uniquement dans le worktree documentaire B24 : remplacer `nullable: true` par l'union OpenAPI 3.1 integer/null pour `CapsuleVersionReview.reviewed_lock_version`, puis régénérer son type number/null. Probe Node local ignoré sur les blobs initiaux puis les fichiers corrigés : deux assertions rouges puis deux vertes ; lecteur de bloc corrigé avant la comparaison finale. Les NULL historiques déjà prouvés en SQL restent conservés sans backfill. Aucun test HTTP, SQL ou PHPUnit exécuté ici ; aucun fichier backend ou tâche modifié. PHP 8.5.10 absolu et environnement système seul pour le générateur autonome : 59 types à jour ; documents 18/18 et déploiement 7/7 reçus. Vendor indépendant ignoré à lock identique, aucune dépendance ajoutée. Preuve B24_REVIEW_READINESS et empreintes actualisées ; propagation et CI du nouveau head confiées à l'intégrateur, sans push, approbation humaine, gate ni frontend.
+
+## 11 octobre 2026 — Intégration et réception complète B26
+
+Codex, préparation autorisée des PR avant approbation : merges normaux des prérequis, conflits documentaires conservant les historiques et types régénérés depuis les sources composées. Réception complète locale sur `32347387536fa76f498ca21c62292c9b6ebfa80d`, base dédiée b26 et B2 séparé : 421/4241 hors SQL +641/4758 Integration, total disjoint 1062/8999, aucune erreur/échec/skip. Contrôles statiques/Composer/types/documents réussis ; ancienne CI distincte du futur SHA publié. B38 fusion réelle et CI exactes consolidées sans compter l’absence de revue comme une approbation. B26 reste IN_PROGRESS et PR35 Draft : badge, has_lab et Q16 dépendent du registre B33 absent. La CI verte ne clôturera pas cette dépendance. Aucune donnée privée/secret/dépendance/identité ajoutée ; racine et B18 conservés, pas de merge de PR, frontend ou déploiement.
+
+## 11 octobre 2026 — Intégration et réception complète B25
+
+Codex, préparation autorisée des PR avant approbation : merges normaux des prérequis, conflits documentaires conservant les historiques et types régénérés depuis les sources composées. Réception complète locale sur `77d4147d18d1b5fb4f4cc8ed38b09840f978c46c`, base dédiée b25 et B2 séparé : 413/4129 hors SQL +611/4607 Integration, total disjoint 1024/8736, aucune erreur/échec/skip. Contrôles statiques/Composer/types/documents réussis ; ancienne CI distincte du futur SHA publié. B38 fusion réelle et CI exactes consolidées sans compter l’absence de revue comme une approbation. Q12 utilise la cible propriétaire UX08 prévue ; aucun écran frontend livré ou testé. Publication corrigée, revue humaine des prérequis encore nécessaire. Aucune donnée privée/secret/dépendance/identité ajoutée ; racine et B18 conservés, pas de merge de PR, frontend ou déploiement.
+
+## 11 octobre 2026 — Réception B27 par les deux jobs CI exacts
+
+Codex, préparation autorisée avant approbation : publication normale du candidat `bef006c481ed8f2692277b3c91cab1a9de13fb1c`, résolution du dernier conflit distant par conservation des prérequis. CI 38162823982 et deux journaux PHP individuels lus : chacun 454/4351 +708/5028 =1162/9379 ; types67/empreintes798 et trois jobs réussis. Unit locale454/4351 et ciblés74/436 distincts. Relance SQL locale interrompue avec JUnit vide/service de tests arrêté : aucun succès Windows complet inventé. B27 IN_REVIEW ; prérequis B26/B33 partiel et ARB05 inactive, brouillons #35/#36 conservés. Six PR sans conflit, aucune approbation ou fusion effectuée ; aucune identité, dépendance, frontend ou publication de service ajoutée. Racine et neuf fichiers B18 initiaux conservés, socle B18 reçu séparément lorsqu’il sera testé.
+
+## 11 octobre 2026 — Composition locale P0
+
+Codex a préparé une branche isolée depuis B19 puis intégré B27 par merge normal local. Un agent a résolu les cinq conflits PHP des notifications et du cleanup Identity ; l'intégrateur a relu ces diffs, résolu les dix conflits de contrat/suivi et régénéré les types et empreintes. Les historiques des deux côtés restent conservés. [Contrôles et limites](quality/BACKEND_INTEGRATION_20261011.md). Aucune approbation humaine, fusion distante, suite SQL encore en cours ou licence Qodana présumée.

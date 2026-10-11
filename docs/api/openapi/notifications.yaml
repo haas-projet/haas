@@ -6,7 +6,7 @@ paths:
       description: >-
         Session active requise, projection privée no-store. Ordre date/UUID décroissant.
         Aucun courriel, texte de contenu, code, motif de signalement ou lien public retiré.
-        Types pris en charge : profile.moderated, comment.created, proposal.created et resolution.accepted.
+        Types pris en charge : profile.moderated, comment.created, proposal.created, resolution.accepted, capsule.review.changes_requested et capsule.version.published.
         Pour les commentaires, la visibilité courante du commentaire, de son auteur et du parent
         filtre liste et compteur avant pagination ; aucun extrait n'est exposé.
         Pour les propositions, vérifier aussi le contributeur, le parent et son propriétaire courant
@@ -15,6 +15,10 @@ paths:
         avec événement stable par UUID de résolution. Résolution active, parent et proposition actuellement
         visibles et destinataire encore contributeur actif sont vérifiés avant liste, compteur et marquage.
         Aucun contexte déclaré, note de validation, code ou contact n'est copié dans le message.
+        Pour les corrections de capsule, le propriétaire courant actif et vérifié et la capsule visible
+        filtrent liste, compteur et marquage ; aucun corps ni note de revue n'est exposé.
+        Pour les publications, les mêmes droits courants et une version encore published
+        sont requis ; le lien désigne cette version précise, jamais une version ultérieure.
       security: [{ SessionCookie: [] }]
       parameters:
         - $ref: '../../OPENAPI.yaml#/components/parameters/Page'
@@ -41,7 +45,7 @@ paths:
     patch:
       operationId: markOwnNotification
       summary: Marquer sa notification comme lue ou non lue
-      description: Session/CSRF, propriétaire actif, relecture sous verrou. Un tiers reçoit 404 même administrateur. La visibilité courante du commentaire, de la proposition ou de la résolution active, de leurs auteurs et du parent est recontrôlée ; une notification devenue inaccessible donne 404. Répéter read=true conserve la première date.
+      description: Session/CSRF, propriétaire actif, relecture sous verrou. Un tiers reçoit 404 même administrateur. Visibilité courante du commentaire, proposition ou résolution active et de leurs auteurs/parent, ou capsule visible et propriétaire actuel actif vérifié, recontrôlée. Une publication exige une version encore published. Notification inaccessible donne 404. Répéter read=true conserve la première date.
       security: [{ SessionCookie: [] }]
       parameters:
         - name: id
@@ -84,7 +88,7 @@ components:
       required: [id, kind, message, target_path, read_at, created_at]
       properties:
         id: { type: string, format: uuid }
-        kind: { type: string, enum: [profile.moderated, comment.created, proposal.created, resolution.accepted] }
+        kind: { type: string, enum: [profile.moderated, comment.created, proposal.created, resolution.accepted, capsule.review.changes_requested, capsule.version.published] }
         message: { type: string }
         target_path:
           type: string

@@ -1,4 +1,4 @@
-# Progression — capsules/laboratoire
+﻿# Progression — capsules/laboratoire
 
 ## 2026-10-02 — Prise en main et phase 0
 
@@ -129,6 +129,306 @@ Contrôles exécutés localement sous PHP 8.4.15 après fusion et corrections :
 
 Nouveaux commits sur la branche : `b152fc1` (merge main) et `12c0d50` (corrections). HEAD à `12c0d50`, sept commits ahead of `origin/main` au total (dont le merge commit).
 
+## 2026-10-07 — Lot B22 · Schéma des capsules
+
+Branche `backend/capsules-laboratoire-b22-schema` dérivée de `backend/capsules-laboratoire` (`71daddf`, qui a déjà fusionné `origin/main` `7a8c672` et porte les enums de PR #12 `CapsuleVersionState`, `LabRunState`, `ComparisonState/Outcome`). La table `help_requests` n'est pas dans `main` au 2026-10-07 : la colonne `capsules.source_request_id` est posée en UUID nullable **sans FK**, pour ne pas bloquer B22 sur la fusion de B11. La FK sera ajoutée dans une migration de raccord quand B11 sera dans `main`.
+
+### Décisions clefs
+
+- **Isolation stricte capsule / brique / laboratoire.** Aucune FK du schéma B22 ne pointe vers `lab_definitions`, `lab_runs`, `lab_results`, `test_events`, `test_orders` ni `demo_orders` ; une requête `information_schema` est inscrite au test `CapsulesMigrationTest::test_capsules_schema_has_no_foreign_key_toward_lab_or_test_tables`. Les six FK réelles sont `capsules.owner_id → users`, `capsule_versions.capsule_id → capsules`, `capsule_versions.reviewer_id → users (nullable)`, `capsule_contributors.version_id → capsule_versions`, `capsule_contributors.user_id → users (restrictOnDelete)`, `artifacts.version_id → capsule_versions`.
+- **Contrainte XOR source / origine éditoriale.** `capsules_source_xor` impose `(source_request_id IS NULL) <> (editorial_origin IS NULL)` : une capsule a toujours exactement une origine, jamais les deux ni aucune.
+- **Index partiel approved.** `artifacts_version_sha_approved_unique` protège un artefact approuvé unique par (version, digest) sans empêcher l'historique inactif.
+- **CHECK published_at ↔ state.** `published_at IS NULL OR state = 'published'` ferme la porte à toute pose de date de publication en dehors du Service de publication (B25).
+- **Convention de nommage.** Migrations en `create_<table>_table.php` sans préfixe de lot, cohérent avec B11 (`create_help_requests_table.php`), B35 (`create_test_events_table.php`) et B38 (`create_demo_orders_table.php`).
+
+### Fichiers créés
+
+- Enums : `backend/app/Enums/Capsules/{CapsuleVisibility,ContributionRole,ArtifactDistributionStatus}.php`.
+- Modèles : `backend/app/Models/Capsules/{Capsule,CapsuleVersion,CapsuleContributor,Artifact}.php`.
+- Migrations : `backend/database/migrations/2026_10_07_013053_create_capsules_table.php`, `2026_10_07_013654_create_capsule_versions_table.php`, `2026_10_07_014031_create_capsule_contributors_table.php`, `2026_10_07_014215_create_artifacts_table.php`.
+- Factories : `backend/database/factories/Capsules/{Capsule,CapsuleVersion,CapsuleContributor,Artifact}Factory.php`.
+- Tests Unit : `backend/tests/Unit/Enums/Capsules/{CapsuleVisibility,ContributionRole,ArtifactDistributionStatus}Test.php`.
+- Tests Integration : `backend/tests/Integration/Capsules/{CapsulesSchema,CapsuleVersionsSchema,CapsuleContributorsSchema,ArtifactsSchema,CapsulesMigration}Test.php`.
+
+### Contrôles exécutés et résultats réels
+
+| Commande | Résultat observé | Environnement |
+|---|---|---|
+| `composer lint` | `{"tool":"pint","result":"passed"}` | PHP 8.4.15 Laragon, Windows |
+| `composer analyse` | **[OK] No errors** (PHPStan/Larastan niveau 8) | idem |
+| `composer test` | **284 tests / 2510 assertions, OK** en 21,934 s | idem |
+| `composer test:integration` (filtre `Capsules\|Artifacts`) | **31 tests / 70 assertions, OK** en 33,784 s | PostgreSQL 17 `haas_capsules_test`, rôle `haas_test`, `TestDatabaseGuard` accepté sans contournement |
+| `composer test:integration` (suite complète) | **164 tests / 1320 assertions, OK** en 2 min 51 s | idem |
+| CI distante | NON EXÉCUTÉE à ce stade | branche non poussée |
+
+### Commits locaux (branche `backend/capsules-laboratoire-b22-schema`)
+
+1. `22d95b1` `feat(capsules): poser les enums de visibilité, rôle et distribution`
+2. `9304cdd` `feat(capsules): créer la table capsules avec contrainte XOR`
+3. `b581867` `feat(capsules): créer la table capsule_versions`
+4. `5a9d488` `feat(capsules): créer la table capsule_contributors`
+5. `f9fd15f` `feat(capsules): créer la table artifacts`
+6. `1fa173b` `test(capsules): vérifier la régression des migrations et l'isolation`
+7. commit documentaire courant.
+
+### Questions ouvertes (non bloquantes, choix dégradés pris)
+
+- **Q1 — FK `capsules.source_request_id` vers `help_requests`.** La table `help_requests` est sur `backend/communaute-entraide-b11-schema`, non fusionnée. Choix retenu : UUID nullable sans FK. Migration de raccord à prévoir après fusion de B11, ou dans une version de B23/B25 qui en a besoin pour une Policy.
+- **Q2 — `CapsuleVisibility`.** `CAHIER_DES_CHARGES.md:869` cite « visibility » sans énumérer. Choix retenu : `visible|hidden`. À confirmer par le relecteur.
+- **Q3 — `editorial_origin`.** Type non spécifié. Choix retenu : `string(100)` nullable sous CHECK format. À confirmer.
+- **Q4 — `ContributionRole`.** Valeurs non spécifiées. Choix retenu : `author|reviewer|contributor|maintainer`. À confirmer. Le rôle `reviewer` est documentaire ici ; la revue indépendante (B24) sera posée sur `capsule_versions.reviewer_id`, pas sur ce pivot.
+- **Q5 — `ArtifactDistributionStatus`.** Choix retenu : `inactive|approved`, défaut `inactive` conforme à `tasks.json:329`. À confirmer.
+- **Q6 — Convention nommage migrations.** `main` mélange les deux conventions `bXX_create_*` (Ousseynou) et `create_<table>_table` (mdev44). Alignement sur ma convention antérieure. À confirmer par le relecteur.
+
+### Limites et étapes suivantes
+
+- B22 est backend seul : aucun Service de création/publication, aucune Policy, aucune route livrés — ces couches sont les lots B23 à B27.
+- Les transitions `CapsuleVersionState` restent celles définies par PR #12 ; `in_review → published` et `published → withdrawn` sont inscrites comme déduites ; leur verrouillage côté Service appartient à B24/B25/B31.
+- Aucun fichier interdit n'a été touché : `config/`, `bootstrap/`, `phpunit.xml`, `.env.example`, `composer.*`, `.github/workflows/`, `routes/api.php`, `docs/OPENAPI.yaml` sont intacts.
+- B22 ne livre aucune route API. Aucune ligne à ajouter dans `docs/OPENAPI.yaml`.
+- Aucun push, aucune PR ouverte, aucune revue humaine simulée.
+
+## 2026-10-07 — Reprise B22 : intégration B11, FK source, rôles cahier, support de test
+
+Statut proposé : B22 **préparé, PR en brouillon**, aucun `DONE`.
+
+- `git merge --no-ff origin/backend/communaute-entraide` fusionné localement (`478d1e0`) : B11 complet d'Ousseynou/mdev44 (6 migrations help_requests → request_technologies → proposals → comments → resolutions → b11_add_collaboration_versions, modèles, factories, enums `HelpRequestState`/`ProposalState`, SHA256SUMS mis à jour par Ousseynou, docs AI_USAGE et participants). Conflits textuels résolus manuellement sur les trois fichiers autorisés uniquement : `docs/AI_USAGE.md` (3 sections B11 conservées, 0 ligne HEAD apportée dans la zone), `PROGRESS.md` et `HANDOFF.md` de ce répertoire (sections B11 du 2026-10-03 remises AVANT la section B22 du 2026-10-07, aucune reformulation). `composer.lock`/`composer.json` inchangés par le merge.
+- `feat(capsules): poser la clé étrangère vers help_requests pour la source` (`f59b779`) : `capsules.source_request_id` devient `foreignUuid('help_requests')->restrictOnDelete`. La contrainte XOR `capsules_source_xor` reste inchangée. 4 tests FK ajoutés dans `CapsulesSchemaTest` (UUID réel accepté, UUID inexistant refusé, suppression de la demande source refusée, XOR dans les deux sens). `CapsulesMigrationTest::test_capsules_schema_has_no_foreign_key_toward_lab_or_test_tables` ajoute `capsules.source_request_id` à la liste attendue des 7 FK du schéma B22 (6 originelles + source). → **Q1 fermée** par la pose de la FK.
+- `fix(capsules): aligner contribution_role sur le vocabulaire du cahier` (`bc7b8ee`) : enum `ContributionRole` reconstruit avec `diagnosis|fix|documentation|test|case`, union littérale de `CAHIER_DES_CHARGES.md:364` (« cas, diagnostic, correctif, documentation ») et `CAHIER_DES_CHARGES.md:508` (« diagnostic, correction, documentation, test »). Facteurs et tests mis à jour. L'enum des states de la migration `create_capsule_contributors_table` itère `ContributionRole::cases()` : la nouvelle liste se propage sans édition de migration. → **Q4 fermée.**
+- `test(capsules): déposer les tables de capsules avant le rollback des migrations partagées` (`5a49dab`) : la FK `capsules.source_request_id` empêchait le rollback de `help_requests` (SQLSTATE 2BP01). Nouveau support `Tests\Support\Mdev44\DomainTables::dropAll()` qui drope `artifacts → capsule_contributors → capsule_versions → capsules` (enfants d'abord). Appelé en une ligne dans `HelpRequestsMigrationTest::test_b11_can_be_rolled_back_…` et dans `IdentityMigrationTest::runIdentityMigration('down')`. Modification cross-domain minimale (2 lignes par fichier : import + appel), sans toucher à aucune migration applicative. Un test `DomainTablesTest` vérifie que `dropAll()` fonctionne sur une base migrée à neuf et préserve `help_requests`/`users`.
+
+Vérifier §24 du cahier : les 4 tables (capsules, capsule_versions, capsule_contributors, artifacts) couvrent les colonnes citées dans `CAHIER_DES_CHARGES.md:869-872` sans écart. `state` utilise bien `CapsuleVersionState` du lot 1 (brouillon, en revue, à corriger, publiée, retirée).
+
+Technologies de capsule : `CAHIER_DES_CHARGES.md:456` cite « technologies, versions compatibles déclarées » mais aucune table `capsule_technologies` n'est nommée dans le dictionnaire §24. **Q7 reste ouverte**, aucune table de liaison inventée dans ce lot. Question posée au relecteur et consignée dans le corps de la PR.
+
+Contrôles exécutés après reprise :
+
+| Commande | Résultat observé | Environnement |
+|---|---|---|
+| `composer lint` | `{"tool":"pint","result":"passed"}` | PHP 8.4.15 Laragon |
+| `composer analyse` | `[OK] No errors` (PHPStan niveau 8) | idem |
+| `composer test` | **315 tests / 2541 assertions, OK** en 5,975 s | idem |
+| `composer test:integration` (filtre `Capsules|Artifacts`) | **33 tests / 74 assertions, OK** après la FK | PostgreSQL 17 `haas_capsules_test` |
+| `composer test:integration` (suite complète) | **185 tests / 1400 assertions, OK** en 1 min 50 s | idem |
+
+Nouveaux commits locaux (10 au total sur la branche) :
+
+8. `478d1e0` `chore(capsules): intégrer le schéma B11 pour la clé étrangère de source`
+9. `f59b779` `feat(capsules): poser la clé étrangère vers help_requests pour la source`
+10. `bc7b8ee` `fix(capsules): aligner contribution_role sur le vocabulaire du cahier`
+11. `5a49dab` `test(capsules): déposer les tables de capsules avant le rollback des migrations partagées`
+12. commit documentaire courant.
+
+Questions ouvertes restantes :
+- Q2 — `CapsuleVisibility` : valeurs `visible|hidden`, non littéralement citées. À confirmer.
+- Q3 — `editorial_origin` : type `string(100)` nullable sous CHECK, non littéralement cité. À confirmer.
+- Q5 — `ArtifactDistributionStatus` : valeurs `inactive|approved`, défaut `inactive` conforme à `tasks.json:329`. À confirmer.
+- Q6 — Convention nommage migrations : `create_<table>_table.php` sans préfixe de lot, cohérent B11/B35/B38 côté mdev44 mais écart avec `bXX_create_*` d'Ousseynou. À arbitrer par le responsable 1.
+- Q7 — Table `capsule_technologies` : le cahier parle de technologies au contenu d'une capsule (`CAHIER:456`) mais sans table nommée dans le §24. Pas livrée dans B22, à trancher par le relecteur.
+
+B22 reste **préparé** et pointe vers une PR en brouillon ; `DONE` n'est pas prononcé avant revue humaine et fusion.
+
+## 2026-10-07 — Lot B23 · Brouillons de capsule
+
+Statut proposé : B23 **préparé, PR en brouillon**, aucun `DONE`. Branche `backend/capsules-laboratoire-b23-brouillons`, dérivée de `backend/capsules-laboratoire-b22-schema` (`58fe552`) et empilée sur la PR #29.
+
+### Décisions clefs
+
+- **Pas de PATCH en B23.** Le cahier §26 ne liste que `POST /capsules` et `POST /capsules/{id}/versions` ; aucune route d'édition `in-place` n'est documentée. Lecture restrictive : B23 n'expose pas de PATCH. Question ouverte Q8 : décision avant B24/B25.
+- **Source `help_request`** réservée à l'auteur de la demande, résolution active obligatoire (`revoked_at IS NULL`). L'alternative « auteur de la proposition acceptée » n'est pas documentée. Lecture restrictive : auteur seul. Question ouverte Q9.
+- **Source `editorial`** réservée aux `moderator`/`admin` (§07 CAHIER:220, §13 CAHIER:456 : « origine éditoriale clairement signalée pour les briques de démonstration »).
+- **Owner uniquement pour la version-brouillon** suivante (B23). Les contributeurs reviewer/maintainer sont habilités plus tard par B24/B25.
+- **IdempotencyService réutilisé.** Pas de header `X-Idempotent-Replay` : le status 201 est renvoyé aux deux appels (le second ne rejoue pas la closure `operation`). Documenté dans le fragment OpenAPI.
+- **Audit interne du domaine** : nouvelle classe `WriteCapsuleAudit` qui insère dans `content_revisions` sans toucher `AuditWriter.php` (fichier du socle, profilé pour Profile uniquement). Même contrat transactionnel : rollback annule l'écriture et l'audit.
+- **ApiExceptionRenderer non touché** (fichier du socle, interdit). `ValidationException` natif Laravel pour les 422 (source introuvable, pas de résolution active) ; `AuthorizationException` pour les 403.
+- **Pivot capsule_version_technologies** aligné sur `request_technologies` : clé primaire composite, pas d'UUID. Supporte « versions compatibles déclarées » (CAHIER:456).
+
+### Fichiers créés / modifiés
+
+- Enums : `App\Enums\Capsules\CapsuleSourceKind` (help_request/editorial).
+- Data : `App\Data\Capsules\{CapsuleDraftData, VersionDraftData, TechnologyAttachmentData}`.
+- Policy : `App\Policies\CapsulePolicy` (proposeEditorial, proposeFromHelpRequest, createVersionDraft, editDraft).
+- Services : `App\Services\Capsules\{CreateCapsuleDraftService, CreateCapsuleVersionDraftService, WriteCapsuleAudit}`.
+- HTTP : `StoreCapsuleDraftRequest`, `StoreCapsuleVersionDraftRequest`, `StoreCapsuleDraftController`, `StoreCapsuleVersionDraftController`, `CapsuleDraftResource`, `CapsuleVersionDraftResource`.
+- Migration : `2026_10_07_123901_create_capsule_version_technologies_table.php` + relation `CapsuleVersion::technologies()`.
+- Routes : `backend/routes/api/capsules-lab.php` (deux routes, `capsules.drafts.store` et `capsules.versions.drafts.store`).
+- Fragment OpenAPI : `docs/api/openapi/capsules-lab.yaml` (operationIds, schémas).
+- Support de test : `DomainTables::TABLES` étendu à `capsule_version_technologies` avant `capsule_versions`.
+- Tests : `CapsuleSourceKindTest`, `CapsuleDraftDataTest`, `CapsuleVersionTechnologiesSchemaTest`, `CreateCapsuleDraftServiceTest`, mise à jour `CapsulesMigrationTest`.
+
+### Fichiers hors de mon domaine modifiés
+
+- `docs/OPENAPI.yaml` : +4 lignes (deux entrées `$ref` pour les routes B23). Commit dédié `docs(api): référencer les routes de brouillon de capsule dans OPENAPI.yaml`.
+- `docs/api/generated/haas-api.d.ts` : régénéré par `scripts/generate-api-types.php` (quatre nouveaux types TypeScript correspondant aux schémas B23). Commit dédié `docs(api): régénérer les types générés depuis le fragment capsules-lab`.
+
+Aucun autre fichier du socle n'a été touché : `routes/api.php`, `bootstrap/`, `config/`, `composer.*`, `phpunit.xml`, `.github/`, `SHA256SUMS` sont intacts.
+
+### Contrôles exécutés et résultats réels
+
+| Commande | Résultat observé | Environnement |
+|---|---|---|
+| `composer lint` | `{"tool":"pint","result":"passed"}` | PHP 8.4.15 Laragon |
+| `composer analyse` | `[OK] No errors` (PHPStan niveau 8) | idem |
+| `composer test` | **323 tests / 2648 assertions, OK** en 5,697 s | idem |
+| `composer test:integration` (filtre `Capsules|Artifacts`) | 14 tests / 28 assertions, OK | PostgreSQL 17 `haas_capsules_test`, `TestDatabaseGuard` respecté |
+| `composer test:integration` (suite complète) | **199 tests / 1430 assertions, OK** en 1 min 57 s | idem |
+
+### Commits locaux (branche `backend/capsules-laboratoire-b23-brouillons`)
+
+1. `46db318` `feat(capsules): poser la table de liaison capsule_version_technologies`
+2. `7e8f180` `feat(capsules): poser le data pour les brouillons de capsule`
+3. `f9f7627` `feat(capsules): poser la Policy et les services de brouillon`
+4. `a849f9b` `feat(capsules): exposer les routes de brouillon et leur contrat OpenAPI`
+5. `5d84bf9` `docs(api): référencer les routes de brouillon de capsule dans OPENAPI.yaml`
+6. `60fceb0` `docs(api): régénérer les types générés depuis le fragment capsules-lab`
+7. `cd48b6a` `test(capsules): étendre le rollback de régression au pivot technologies`
+8. commit documentaire courant.
+
+### Questions ouvertes
+
+- Q8 — PATCH /capsules/{id}/versions/{version} pour éditer un brouillon : non documenté dans §26. Non livré en B23. Décision avant B24/B25.
+- Q9 — Source `help_request` : qui peut proposer, l'auteur de la demande seul (lecture restrictive) ou aussi l'auteur de la proposition acceptée ?
+- Q10 — Table `capsule_version_technologies` : non explicitement nommée dans §24 CAHIER:869-872. Décision de propriétaire du domaine attendue.
+- Q11 — Flag replay côté client : IdempotencyService ne distingue pas 201/200 au rejeu. Faut-il exposer un header `X-Idempotent-Replay` à partir d'une relecture de `api_idempotency.created_at`, ou laisser le client déduire de sa clé ?
+- Q2–Q7 de B22 restent ouvertes.
+
+### Limites et étapes suivantes
+
+- B23 est backend seul : aucun composant React livré.
+- Les transitions `CapsuleVersionState` autres que `draft` sont servies par B24/B25.
+- Aucun push, aucune PR ouverte à ce stade dans PROGRESS ; publication autorisée pour ce lot, consignée dans HANDOFF.
+
+## 2026-10-07 — Suite B23 : PATCH, tests HTTP, décisions Q8/Q9
+
+Statut : B23 reste **préparé, PR en brouillon** sur la PR #30. Aucun `DONE`.
+
+### Décisions prises
+
+- **Q8 fermée** : PATCH `/api/v1/capsules/{capsule}/versions/{version}` livré en B23. Edition autorisée pour les états `draft` et `changes_requested` seulement (CAHIER_DES_CHARGES.md:293 pour la boucle de revue B24). `version_label`, `state`, `owner_id`, `reviewer_id`, `published_at`, `id`, `capsule_id` sont refusés en 422 par le FormRequest. Pas d'`Idempotency-Key` sur ce PATCH : patron B16 (`UpdateHelpRequestRequest` sur `backend/communaute-entraide-b16`) utilise `lock_version` comme unique mécanisme anti-doublon.
+- **Q9 fermée** : la Policy `proposeFromHelpRequest` autorise l'auteur de la demande **et** l'auteur de la proposition acceptée par la résolution active (`revoked_at IS NULL`). CAHIER_DES_CHARGES.md:265 « L'auteur d'une résolution ou un contributeur autorisé propose une capsule ». Le créateur devient `owner_id` (serveur). Trois tests HTTP distincts couvrent les trois cas.
+- **Q11 (clarification)** : au deuxième POST avec la même `Idempotency-Key` et la même charge, `IdempotencyService` relit `api_idempotency` et renvoie le même `StoredCommandResult` que la première écriture ; le `status` stocké est `201`, identique au premier appel. B23 ne distingue donc pas « création » et « rejeu » dans la réponse HTTP (pas de header `X-Idempotent-Replay`). Décision ouverte : exposer le header en relisant `api_idempotency.created_at` ou laisser le client déduire via sa clé.
+
+### Nouveaux fichiers
+
+- Migration `2026_10_07_172331_add_lock_version_to_capsule_versions_table.php` (additive, défaut `1`, down() tolérant au drop préalable pour cohabiter avec `DomainTablesTest`).
+- Data : `App\Data\Capsules\UpdateDraftData` (lock_version obligatoire, body/limits/technologies optionnels, aucun champ serveur).
+- Exception de domaine : `App\Exceptions\Capsules\StaleCapsuleVersion` (lock_version périmé) ; le Controller la transforme en 409 pour respecter `DomainBoundariesTest`.
+- Service : `App\Services\Capsules\UpdateCapsuleVersionDraftService` (transaction, lockForUpdate, vérifie appartenance capsule/version, Policy sur l'état verrouillé, incrémente lock_version, synchronise les technologies, audit dans la même transaction).
+- Policy `editDraft(?User, Capsule, CapsuleVersionState, string $versionId)` : autorise owner OU contributeur de la version précise, pour les états `draft`/`changes_requested`.
+- FormRequest `UpdateCapsuleVersionDraftRequest` : refuse les champs serveur et exige au moins un champ modifiable.
+- Controller `UpdateCapsuleVersionDraftController` (mince) : convertit `StaleCapsuleVersion` → 409.
+- Resource `CapsuleVersionDraftResource` : expose `lock_version` au client.
+- Route `PATCH /api/v1/capsules/{capsule}/versions/{version}` (name `capsules.versions.drafts.update`).
+- Fragment OpenAPI : opération `updateCapsuleVersionDraft` + schéma `CapsuleVersionDraftUpdate`.
+- Tests : `CapsuleDraftHttpTest` (20 cas HTTP sur POST), `CapsuleDraftUpdateHttpTest` (11 cas HTTP sur PATCH).
+
+### Contrôles finaux après la suite B23
+
+| Commande | Résultat observé |
+|---|---|
+| `composer lint` | `{"tool":"pint","result":"passed"}` |
+| `composer analyse` | `[OK] No errors` (PHPStan niveau 8) |
+| `composer test` | **323 tests / 2675 assertions, OK** en 11,832 s |
+| `composer test:integration` (suite complète) | **230 tests / 1495 assertions, OK** en 4 min 51 s |
+
+### Nouveaux commits locaux (suite B23)
+
+- `64b0cc0` `test(capsules): couvrir les routes de brouillon par HTTP et étendre la Policy`
+- `db8cab3` `feat(capsules): poser le verrou optimiste lock_version sur capsule_versions`
+- `f60fa14` `feat(capsules): poser le service d'édition de brouillon avec verrou optimiste`
+- `b96f808` `feat(capsules): exposer la route PATCH d'édition de brouillon`
+- `6fa306e` `docs(api): référencer la route PATCH d'édition de brouillon dans OPENAPI.yaml`
+- `5935fe6` `docs(api): régénérer les types générés pour inclure le PATCH de brouillon`
+- `d9cb216` `fix(capsules): isoler le service du domaine HTTP via StaleCapsuleVersion`
+- `c49044f` `fix(capsules): rendre le down() de lock_version tolérant au drop préalable`
+- commit documentaire courant.
+
+### Questions ouvertes restantes
+
+- Q10 — Nom de la table pivot `capsule_version_technologies` : non explicitement cité dans §24. Décision de propriétaire du domaine, en attente de confirmation du relecteur.
+- Q11 — Header `X-Idempotent-Replay` à exposer ou non.
+- Q2–Q7 de B22 restent ouvertes.
+
+## 2026-10-07 — Lot B24 · Soumettre à la revue
+
+Statut proposé : **préparé, PR en brouillon**, aucun `DONE`. Branche `backend/capsules-laboratoire-b24-revue`, dérivée de `backend/capsules-laboratoire-b23-brouillons` (`93fafea`).
+
+### Décisions clefs
+
+- **Deux transitions** : `draft → in_review` et `changes_requested → in_review` (CAHIER_DES_CHARGES.md:293). La transition `in_review → published` reste pour B25. Toute autre transition est refusée.
+- **Soumission** : owner ou contributeur de la version. Contenu minimal exigé (body ≥ 20 non blancs ET limits non vide) sinon 422 ciblé avec champs manquants.
+- **Revue « demander des corrections »** : moderator/admin qui N'EST NI owner NI contributeur de la version. Un admin auteur ou admin contributeur ne se relit pas, même avec les droits techniques (CAHIER_DES_CHARGES.md:462). Transition `in_review → changes_requested` ; `reviewer_id` posé sur `capsule_versions` ; note 20-2000 caractères non blancs enregistrée dans `capsule_version_reviews`.
+- **Table `capsule_version_reviews`** : décision du propriétaire du domaine, non nommée dans §24. Colonnes id/version_id/reviewer_id/decision/note/created_at. Immuable par Service (pas d'`updated_at`).
+- **Notification « Revue de capsule terminée »** : non livrée en B24. L'API `NotificationEvent` du socle n'accepte que `kind === 'profile.moderated'` (`backend/app/Data/Notifications/NotificationEvent.php`). Toute extension exige la modification d'un fichier du socle (interdit). Question ouverte Q12 : élargir l'enum `kind` ou poser un adaptateur local.
+
+### Fichiers créés
+
+- Enum : `App\Enums\Capsules\ReviewDecision` (request_changes).
+- Migration : `2026_10_07_174813_create_capsule_version_reviews_table.php` + CHECK note 20-2000.
+- Modèle `App\Models\Capsules\CapsuleVersionReview` + factory.
+- Exception de domaine : `App\Exceptions\Capsules\InsufficientDraftContent` (contenu minimal manquant) ; le Controller la transforme en 422.
+- Policy étendue : `submitForReview`, `reviewVersion`.
+- Services : `SubmitCapsuleVersionForReviewService`, `RequestChangesOnCapsuleVersionService` (transactions, audit atomique).
+- FormRequest `RequestChangesRequest` ; Controllers `SubmitCapsuleVersionForReviewController`, `RequestChangesController`.
+- Routes : `POST .../submit-review` et `POST /admin/capsules/.../request-changes`.
+- Fragment OpenAPI + 2 nouveaux schémas (`CapsuleVersionReviewInput`, `CapsuleVersionReview`).
+- Tests : `CapsuleVersionReviewsSchemaTest` (4 cas) + `CapsuleReviewHttpTest` (14 cas HTTP).
+- Support de test : `DomainTables` inclut `capsule_version_reviews` ; `CapsulesMigrationTest` incrémente son compteur à sept.
+
+### Fichiers hors de mon domaine modifiés
+
+- `docs/OPENAPI.yaml` : **+4 lignes** (deux routes B24). Commit `6831521`.
+- `docs/api/generated/haas-api.d.ts` : **régénéré** par `scripts/generate-api-types.php`. Commit `51370b8`.
+
+Aucun autre fichier du socle n'a été touché.
+
+### Contrôles finaux
+
+| Commande | Résultat observé |
+|---|---|
+| `composer lint` | `passed` |
+| `composer analyse` | `[OK] No errors` |
+| `composer test` | **323 tests / 2723 assertions, OK** en 10,975 s |
+| `vendor/bin/phpunit --testsuite Integration` (direct, composer time-out) | **248 tests / 1523 assertions, OK** en 5 min 25 s |
+
+### Commits locaux
+
+- `21fdf30` policy + services
+- `6831521` $ref OPENAPI
+- `51370b8` types régénérés
+- commits de schéma, routes et tests déjà poussés via le lot.
+
+### Questions ouvertes
+
+- Q12 — Notifier « Revue de capsule terminée » : l'API `NotificationEvent` restreint `kind` à `profile.moderated`. Options : élargir l'enum côté socle (hors de mon domaine) ou créer un canal local. Décision à prendre avant B25.
+- Q10 (B23) — Nom du pivot `capsule_version_technologies` reste ouvert.
+- Q11 (B23) — Header `X-Idempotent-Replay` reste ouvert.
+- Q2–Q7 de B22 restent ouvertes.
+
+## 2026-10-07 — Préparation technique Codex de la PR #33
+
+Source `e5dabac` préservée. Soumission et corrections exigent intention idempotente et verrou, relisent les droits actuels et invalident un rejeu devenu périmé. Le journal capture `reviewed_lock_version`, conserve notes/reviewers et refuse leur modification ou suppression. Aucune acceptation/publication B25 ajoutée.
+
+Contrôles réels : HTTP/readiness **21 / 81**, puis HTTP/readiness/schema/six courses **33 / 162**, compléments SQL rollback/upgrade et DTO **23 / 90**, PHPStan sans erreur après les compléments, Pint passé, documents **18 + 7**, types **36**. Détails et limites dans `docs/quality/B24_REVIEW_READINESS.md`.
+
+Statut : préparation locale en cours, non `DONE`. Parent B23/B22/main et suites combinées à intégrer. Q12 doit être raccordée à l'outbox commune pour les corrections demandées avant présentation à la revue humaine ; publication/acceptation demeurent B25. CI et revue humaine finales en attente.
+
+## 2026-10-07 — Préparation technique Codex de la PR #30
+
+Le travail distant `93fafea`, notamment Q8/Q9, est conservé. Les défauts de provenance, conflits, effacement des limites, droits actuels et rejeu sont corrigés ; la projection des réponses est attachée à la version autorisée. Les champs inconnus, technologies inconnues ou répétées, caractères de contrôle et secrets indicatifs sont refusés. Les détails, incidents et commandes réels sont dans `docs/quality/B23_DRAFT_READINESS.md`.
+
+- Readiness et six courses entre deux processus PostgreSQL : **13 tests / 111 assertions, OK** sur `haas_b23_review_test`.
+- Suite capsules complète avant synchronisation B22/main : **92 tests / 290 assertions, OK**.
+- Unit/Feature/Architecture : **323 tests / 2675 assertions, OK**.
+- PHPStan : `[OK] No errors`, après description du cast enum réel et de la Policy SQL impure ; aucune suppression d'erreur. Pint : `passed`.
+- Documents : 18 + 7 contrôles documentaires OK ; **33 types API à jour**.
+
+Statut : correctif local préparé pour synchronisation B22/main, suite combinée complète et CI distante. Revue humaine en attente ; aucune approbation attribuée, aucun `DONE`, aucun frontend. L'intégrateur rapporte le SHA réel après commit.
+
+### Après synchronisation B22/main — parent `94aeae9`
+
+Refus de source masquée dans la Policy relue sous verrou, y compris au rejeu ; trois nouvelles régressions HTTP/service et une septième course réelle. Fixture publiée PATCH conforme aux contraintes B22 (date et reviewer fictif vérifié distinct). Ciblés **28 / 158**, Pint et PHPStan verts. Suite SQL complète initiale interrompue à la demande de l'intégrateur après un échec de fixture : aucune réussite globale attribuée ; relance complète requise après ce commit. Voir le complément de `B23_DRAFT_READINESS.md`.
+
 ## 2026-10-05 — Lot 2 B35 brique B1 (branche dérivée)
 
 Lot B35 livré sur une branche dérivée `backend/capsules-laboratoire-b35-brique-b1` créée depuis `origin/backend/capsules-laboratoire`. La branche parent porte le lot 1 enums ; la PR #12 y est ouverte sur `main` et sa fusion est attendue avant le reciblage de cette PR dérivée.
@@ -201,6 +501,165 @@ Limites :
 
 Prochaines actions : obtenir une relecture humaine du lot B35 par `ousseynoufayeisidk-sys` ; soumettre à `ousseynoufayeisidk-sys` la demande de câblage de la connexion `haas_lab` dans `config/`, `phpunit.xml` et la CI. Les lots suivants (B22 schéma capsules, B33 registre lab) attendent respectivement B11 (collaboration) et B22.
 
+## 2026-10-07 — B22 : corrections avant revue humaine
+
+À la demande de l’utilisateur, Codex prépare la PR #29 sans effacer les preuves antérieures. Main `e3bd34c` intégré par merge normal `39d923c` ; conflits documentaires résolus en conservant les historiques. Date de publication/retrait corrigée dans une migration additive ; versions publiées, provenance, attributions et technologies protégées en SQL ; relecteur indépendant et FK RESTRICT ; lock positif et technologies déclarées ; champs serveur non mass assignables. Les migrations B23 de pivot et de verrou sont reprises sous leurs noms existants, sans doublon. Aucune dépendance ni route B22.
+
+Preuves, commandes exactes, incidents de fixtures et limites : [B22_CAPSULE_SCHEMA.md](../../../quality/B22_CAPSULE_SCHEMA.md). Contrat : [CAPSULE_DATA.md](../../../architecture/CAPSULE_DATA.md). Hors SQL 319 / 2570 et SQL 232 / 1587 réussis, soit 551 tests / 4157 assertions uniques ; Pint, PHPStan 8 et Composer réussis. Base dédiée `haas_b22_review_test` sur PostgreSQL 17 local 55447 ; correctif de cookies simulés B17 repris sans assouplissement de production.
+
+Statut : prêt localement pour la revue humaine, CI du SHA publié et revue humaine en attente ; aucun DONE ou BACKEND_GATE. Après contrôles et publication par l’intégrateur, examiner B22 puis intégrer son schéma dans B23/B24 et refaire les tests des consommateurs. Aucun push effectué par cet agent.
+
+### Revalidation B22 avec main B14–B17 intégré
+
+Après le correctif local `2148322`, l’intégrateur prépare un merge normal de main `b76612d1b6587119127fd364244f5248f05f1ff2`. Tests du code combiné réellement exécutés sur la base dédiée `haas_b22_review_test` (PostgreSQL 17, 55447) : hors SQL **335 / 3595**, SQL **399 / 3390**, soit **734 tests / 6985 assertions uniques réussis** ; Pint et PHPStan niveau 8 réussis. Les anciens 551 / 4157 restent une preuve historique et ne s’ajoutent pas à ce total. Journaux/JUnit ignorés dans `backend/storage/logs/b22-main-integration.*`. Détails : [B22_CAPSULE_SCHEMA.md](../../../quality/B22_CAPSULE_SCHEMA.md).
+
+Le conflit du test de migration d’identité conserve les retraits des tables de capsules et des révisions communautaires. Aucun changement d’autorisation ou assouplissement de test. L’intégrateur consigne le SHA réel après création du merge puis publie la branche ; CI du SHA publié et revue humaine toujours à recevoir. Aucun DONE B22, frontend ou déploiement annoncé.
+
+### Dernière revue B23 : validation et auteur source
+
+Probes avant correction sur `1ddf681` : 13 / 55, dix échecs réels (500 de DTO, format nested perdu et source devenue inaccessible encore admise). Corps utile contrôlé sans transformation, PATCH blanc refusé, verrou entier JSON strict et auteur source actif/vérifié relu sous partage NOWAIT avec conflit explicite. Dix courses PostgreSQL, dont trois nouvelles pour les droits d’auteur tiers et les verrous croisés. Code définitif ciblé : **24 tests / 186 assertions réussis**, Pint, PHPStan 8, pack 18/18, déploiement 7/7, types 54 à jour. Les essais interrompus ou intermédiaires restent documentés dans [B23_DRAFT_READINESS.md](../../../quality/B23_DRAFT_READINESS.md). Réception globale déléguée sur worktree propre ; aucune publication ou approbation humaine annoncée.
+
+### Candidat B24 : Q12 et histoire de revue
+
+Parent `81ac242` repris. Corrections demandées notifiées via outbox transactionnelle, livraison après commit, message/références seuls et droits/visibilité courants avant liste/compteur/marquage. Entier JSON strict, fixture publiée conforme B22 et downgrade refusant perte de snapshots/événements stables. Probes réels 3/13 (deux500) et 1/1 (downgrade sans refus) avant fix ; ciblés 53/496 puis onze ciblés exacts 11/116 recouvrant les précédents, tous verts. Hors SQL 350/3800, Pint/PHPStan8, Composer, documents18/7 et types57 verts. Suite PostgreSQL complète en cours sur base B24 dédiée, résultat non revendiqué ; CI du candidat en brouillon et revue humaine à recevoir. Preuves : [B24_REVIEW_READINESS.md](../../../quality/B24_REVIEW_READINESS.md). Aucun DONE ou acceptation/publication B25.
+
+### Réception complète B23 — candidat `d7ef6eb`
+
+Réception indépendante terminée sur le code applicatif propre `d7ef6eb8c750987ddf509eba6647007162c1bec9`, sans changement de code ni de tests : Unit/Feature/Architecture **343 / 3720**, PostgreSQL **478 / 3734**, soit **821 tests / 7454 assertions uniques réussis**. Base dédiée `haas_b23_review_test`, PostgreSQL 17 local 55447, PHP 8.5.10 ; les deux JUnit ont zéro erreur, échec ou test ignoré. Les ciblés précédents ne s’ajoutent pas à ce total.
+
+Pint, PHPStan niveau 8, validation Composer, exigences de plateforme et audit verrouillé réussis ; pack 18/18, documentation de déploiement 7/7 et 54 types API à jour. Détails et commandes : [B23_DRAFT_READINESS.md](../../../quality/B23_DRAFT_READINESS.md). La CI du candidat est verte ([run 37691657985](https://github.com/haas-projet/haas/actions/runs/37691657985), constat de l’intégrateur) ; le commit documentaire de réception recevra encore sa CI exacte après publication. Revue humaine distincte en attente, aucun DONE ou gate. Publication confiée à l’intégrateur.
+
+### Réception finale B24 — 7 octobre 2026, 22:06 UTC
+
+Code `994de150` inchangé par le merge documentaire `e01202f` du parent B23 final. Suites complètes terminées : **350 tests / 3800 assertions** hors SQL et **524 / 4037** sur `haas_b24_review_test` dédiée, soit **874 / 7837 uniques réussis**. JUnit SQL sans erreur, échec ou test ignoré ; aucune somme de ciblés. Pint, PHPStan 8, validation/plateforme/audit Composer réussis ; contrôles documentaires et 57 types conservés. La [CI exacte e01202f](https://github.com/haas-projet/haas/actions/runs/37693092990) est verte sur PHP 8.4/8.5 avec les mêmes totaux, constat et logs transmis par l’intégrateur. Revue humaine en attente ; bilan documentaire à publier puis CI de son SHA exact à observer. Détails : [B24_REVIEW_READINESS.md](../../../quality/B24_REVIEW_READINESS.md) et [état des PR](../../../quality/PR_READINESS_20261007.md). Aucun DONE, gate ou publication B25.
+
+
+### Suite de concurrence B23/B24 — tests ajoutés
+
+Patron NotificationConcurrencyTest/IdempotencyConcurrencyTest (Symfony Process + barrière PostgreSQL via `application_name = 'haas_b24_capsule_worker'`) étendu aux écritures des brouillons/revues. `backend/tests/Fixtures/write-capsule-concurrently.php` et `backend/tests/Integration/Capsules/CapsuleWritesConcurrencyTest.php` couvrent quatre scénarios réellement concurrents : (i) deux `POST /capsules` avec la même `Idempotency-Key` écrivent une seule capsule (rejeu via `api_idempotency`) ; (ii) deux PATCH simultanés avec le même `lock_version` → un `UPDATED`, un `409 StaleCapsuleVersion` ; (iii) deux `submit-review` simultanés (acteur unique, clés distinctes) → un seul passage `draft → in_review`, un `AuthorizationException` ; (iv) deux `request-changes` simultanés (même modérateur, clés distinctes) → une seule décision écrite en `capsule_version_reviews`, un `AuthorizationException`. Chaque enfant termine sa transaction propre ; aucun test n'a révélé un double effet ou un défaut dans les Services courants. Trait `CapsuleReviewNotificationFixtures` ajouté pour laisser `migrate:rollback` purger les événements de revue (le downgrade B24 refuse de perdre un événement stable).
+
+Contrôles exécutés depuis la racine `backend/` sous PHP Laragon 8.4.15, base `haas_capsules_test`/`haas_test`, `COMPOSER_PROCESS_TIMEOUT=0` : `composer lint` → `{"tool":"pint","result":"passed"}` ; `composer analyse` → `[OK] No errors` ; `composer test` → `OK (350 tests, 3800 assertions)` en 15,258 s ; `vendor/bin/phpunit --testsuite Integration --filter CapsuleWritesConcurrencyTest` → `OK (4 tests, 36 assertions)` en 12,011 s ; `vendor/bin/phpunit --testsuite Integration` complète → `OK (528 tests, 4073 assertions)` en 12 min 51,171 s. Les mêmes totaux sont attendus côté CI distante, à constater sur le SHA du commit publié. Aucune donnée hors domaine modifiée. Aucun DONE, gate, frontend ou déploiement annoncé.
+
+## 2026-10-08 — Lot B25 · Publier une version immuable
+
+Statut proposé : B25 **préparé, PR en brouillon**, aucun `DONE`. Branche `backend/capsules-laboratoire-b25-publication`, dérivée de `backend/capsules-laboratoire-b24-revue` (`686a093`).
+
+### Décisions clefs (propriétaire du domaine)
+
+- **`content_digest` : nullable `char(64)`** sur `capsule_versions` avec CHECK format hex 64 et CHECK `state IN ('published','withdrawn')`. Le cahier §09 et §13 citent une « empreinte » sans nommer la colonne : lecture restrictive consignée, la colonne n'est jamais écrite hors du Service de publication (RM03).
+- **Sérialisation canonique** du digest : SHA-256 d'un JSON `{version_label, body, limits, technologies[trié par technology_id]}` (`JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES`). Décision consignée Q13 à relire par l'intégrateur.
+- **Décision `approved`** ajoutée à `ReviewDecision` + migration : enum étendu et `note` devient nullable, CHECK conditionnel (`approved ⇒ note NULL`, autre ⇒ 20-2000 caractères).
+- **Immuabilité SQL** : étend `b22_guard_capsule_version` (CREATE OR REPLACE) pour inclure `content_digest` dans la liste des colonnes refusées sur une version publiée/retirée. Pas de nouveau trigger : la garde B22 existait déjà pour `version_label`/`body`/`limits`/`capsule_id`/`reviewer_id`/`published_at`.
+- **Pas de notification** sur `approved` (Q12 encore ouverte). **Pas de copie automatique** d'artefacts ou de définitions de laboratoire vers une nouvelle version (RM03 ; AC13 couvert par tests).
+- Contrôle de présence de la procédure NON implémenté : le schéma n'a pas de champ dédié (corps libre et limites). Le Service exige un corps d'au moins 20 caractères non blancs et des limites non vides ; la présence de la procédure dans le corps est jugée par le relecteur humain. Question ouverte Q14 pour une colonne distincte si le cahier le réclame plus tard.
+- **Resource de publication** : whitelist stricte, aucun `reviewer_id`, aucune note, aucun chemin privé d'artefact.
+
+### Fichiers créés / modifiés
+
+- Enum : `App\Enums\Capsules\ReviewDecision` (ajout de `Approved`).
+- Data : `App\Data\Capsules\PublishCommandData` (lock_version seul).
+- Policy étendue : `CapsulePolicy::publishVersion` (délègue à `reviewVersion`).
+- Service : `App\Services\Capsules\PublishCapsuleVersionService` (transaction, verrou, documentation complète, provenance active, artefact `approved` → `notices_path` obligatoire, calcul du digest, décision `approved`, audit).
+- Migrations : `add_content_digest_to_capsule_versions_table`, `allow_approved_review_decision`, `b25_protect_content_digest_on_published_versions`.
+- Controller/Request/Resource : `PublishCapsuleVersionController`, `PublishCapsuleVersionRequest`, `CapsuleVersionPublishedResource`.
+- Route : `POST /api/v1/admin/capsules/{capsule}/versions/{version}/publish` dans `routes/api/capsules-lab.php`.
+- Fragment OpenAPI : nouveau chemin + `CapsuleVersionPublishInput`/`CapsuleVersionPublished`.
+- Tests : `CapsulePublishHttpTest` (22 cas) + extension du fixture `write-capsule-concurrently.php` et `CapsuleWritesConcurrencyTest` (+1 cas de publication concurrente).
+
+### Fichiers hors de mon domaine modifiés
+
+- `docs/OPENAPI.yaml` : **+2 lignes** (ajout `$ref` publish). Commit `55b0287`.
+- `docs/api/generated/haas-api.d.ts` : **régénéré** par `scripts/generate-api-types.php` (59 types au total, +2). Commit `cbb1f05`.
+
+Aucun autre fichier du socle n'a été touché.
+
+### Contrôles finaux (PHP 8.4.15 Laragon, base `haas_capsules_test`/`haas_test`, `COMPOSER_PROCESS_TIMEOUT=0`)
+
+| Commande | Résultat observé |
+|---|---|
+| `composer lint` | `{"tool":"pint","result":"passed"}` |
+| `composer analyse` | `[OK] No errors` |
+| `composer test` | `OK (350 tests, 3839 assertions)` |
+| `vendor/bin/phpunit --testsuite Integration --filter CapsulePublishHttpTest` | `OK (22 tests, 53 assertions)` |
+| `vendor/bin/phpunit --testsuite Integration --filter CapsuleWritesConcurrencyTest` | `OK (5 tests, 47 assertions)` |
+| `vendor/bin/phpunit --testsuite Integration` (suite complète) | `OK (551 tests, 4137 assertions)` en 8 min 00,023 s |
+
+### Commits locaux
+
+- `781be66` schema (digest + approved + note nullable)
+- `c49ef3e` trigger (content_digest immuable)
+- `04415a7` service + Policy + DTO
+- `c266953` route + Controller + Resource + Request
+- `589df82` fragment OpenAPI
+- `55b0287` `$ref` OPENAPI racine
+- `cbb1f05` types régénérés
+- `fac3ead` style Pint migration
+- `6717f96` fix StoredCommandResult (UUID uniquement)
+- `b3c3d71` tests (HTTP + concurrence)
+
+### Questions ouvertes
+
+- **Q13** — Format canonique de `content_digest` : décision du propriétaire du domaine (sérialisation JSON triée par `technology_id`). Lectures alternatives possibles : inclure l'`editorial_origin` ou `slug` dans le payload. À confirmer en revue.
+- **Q14** — Contrôle de présence de la procédure NON implémenté : le schéma n'a pas de champ dédié (corps libre et limites). Le Service exige un corps d'au moins 20 caractères non blancs et des limites non vides ; la présence de la procédure dans le corps est jugée par le relecteur humain. Prévoir une colonne distincte si le cahier le réclame plus tard.
+- Q12 (B24) — Notification « Revue de capsule terminée » reste ouverte pour la décision `approved`.
+- Q10, Q11 (B23) et Q2–Q7 (B22) restent ouvertes.
+
+## 2026-10-08 — Lot B26 · Catalogue de capsules
+
+Statut proposé : B26 **préparé, PR en brouillon**, aucun `DONE`. Branche `backend/capsules-laboratoire-b26-catalogue`, dérivée de `backend/capsules-laboratoire-b25-publication`.
+
+### Décisions clefs (propriétaire du domaine)
+
+- **Visibilité publique** (`VisibleCapsulesQuery`) : seules les capsules `visible` avec au moins une version `published` apparaissent. Les versions `draft`/`in_review`/`changes_requested`/`withdrawn` n'apparaissent jamais, ni dans la liste, ni dans la recherche, ni dans le détail par slug ou version précisée (AC15, AC25, RM06).
+- **Recherche `q`** (§14) : ILIKE sécurisée (ESCAPE `!`) sur `capsules.slug`, `capsules.editorial_origin`, `capsule_versions.body` et `capsule_versions.limits` des versions publiées. Pas d'index FTS en P0 — **Q15 ouverte** si un index `to_tsvector` ou `pg_trgm` doit être livré.
+- **Tri** en liste blanche stricte : `date` (défaut, dernière publication) ou `relevance` (nécessite `q`). Tout autre tri → 422. Le tri `relevance` ordonne : slug (0), editorial_origin (1), autre (2), puis date.
+- **Pagination** : défaut 20, max 50 (`PageData` existant). Page tri stable `last_published_at DESC, capsules.id ASC`.
+- **Filtre `technology`** (UUID) : rejoint `capsule_version_technologies` sur les versions publiées.
+- **Filtre « présence de laboratoire »** NON livré : `lab_definitions` arrivera en B33 (cahier §15). **Q16 ouverte** pour sa signature exacte.
+- **`source_request_id` NON exposé** (RM06). Seul `source.kind` ('help_request'/'editorial') et `editorial_origin` apparaissent — **Q17 ouverte** sur l'exposition éventuelle d'un `request_summary` masqué.
+- **Resources distinctes de l'édition** : `CapsuleCataloguePreview` (carte), `CapsuleCataloguePage` (collection paginée), `CapsuleCatalogueDetail` (détail + historique + contributeurs). Pas de `reviewer_id`, note, email, chemin privé d'artefact ni empreinte de notice.
+- **Hydratation `latestPublished`** : relation `hasOne` contrainte à `state=published`, hydratée explicitement par `ListVisibleCapsulesQuery::hydrateLatestPublished()`. Laravel `ofMany()` sur UUID échoue car PostgreSQL n'a pas `max(uuid)` pour le tie-break.
+- **Contraintes de route** : slug (`[a-z0-9][a-z0-9-]{1,118}[a-z0-9]`) et version (MAJOR.MINOR.PATCH) distinctes des routes UUID d'édition (POST/PATCH/submit-review/request-changes/publish).
+
+### Fichiers créés / modifiés
+
+- Data : `App\Data\Capsules\CapsuleCatalogueFilterData` (page/search/technology/sort, `relevance` → q requis).
+- Queries : `VisibleCapsulesQuery` (socle visibilité), `ListVisibleCapsulesQuery` (liste paginée + hydratation), `FindVisibleCapsuleQuery` (détail + historique).
+- FormRequest : `ListCapsulesCatalogueRequest` étend `PaginatedRequest`.
+- Resources : `CapsuleCataloguePreview`, `CapsuleCataloguePage`, `CapsuleCatalogueDetail`.
+- Controllers : `ListVisibleCapsulesController`, `ShowVisibleCapsuleController`.
+- Routes : `GET /api/v1/capsules`, `GET /api/v1/capsules/{slug}`, `GET /api/v1/capsules/{slug}/versions/{version}`.
+- Model : `Capsule::latestPublished()` (hasOne), `CapsuleVersion::contributors()` (hasMany).
+- Fragment OpenAPI : trois `paths`, quatre `schemas` (`CapsuleCataloguePage`, `CapsuleCataloguePreview`, `CapsuleCatalogueDetail`, `PaginationMeta`).
+- Tests : `CapsuleCatalogueHttpTest` (15 cas, 65 assertions locales).
+
+### Fichiers hors de mon domaine modifiés
+
+- `docs/OPENAPI.yaml` : **+4 lignes** (deux `$ref` : slug et slug+version).
+- `docs/api/generated/haas-api.d.ts` : **régénéré** (63 types, +4).
+
+Aucun autre fichier du socle n'a été touché.
+
+### Contrôles finaux (PHP 8.4.15 Laragon, base `haas_capsules_test`/`haas_test`, `COMPOSER_PROCESS_TIMEOUT=0`)
+
+| Commande | Résultat observé |
+|---|---|
+| `composer lint` | `{"tool":"pint","result":"passed"}` |
+| `composer analyse` | `[OK] No errors` |
+| `composer test` | `OK (350 tests, 3913 assertions)` |
+| `vendor/bin/phpunit --testsuite Integration --filter CapsuleCatalogueHttpTest` | `OK (15 tests, 65 assertions)` en 16,331 s |
+| `vendor/bin/phpunit --testsuite Integration` (suite complète) | `OK (566 tests, 4202 assertions)` en 16 min 50,310 s |
+
+### Questions ouvertes
+
+- **Q15** — Index FTS (to_tsvector / pg_trgm) : recherche `q` en ILIKE pour P0. Index à prévoir en revue.
+- **Q16** — Filtre « présence de laboratoire » : différé à B33 (table `lab_definitions`).
+- **Q17** — Exposer un `request_summary` masqué pour les capsules issues de demandes d'aide ? Pour l'instant seule `source.kind` et `editorial_origin` sortent.
+- Q13 (B25) — Format canonique du `content_digest` reste ouvert.
+- Q14 (B25) — « Procédure de vérification présente » reste ouvert.
+- Q12 (B24) — Notification `approved` reste ouverte.
+- Q10, Q11 (B23) et Q2–Q7 (B22) restent ouvertes.
+
 ## Historique de la branche B38 avant intégration
 
 # Progression — capsules/laboratoire (branche B38)
@@ -261,3 +720,104 @@ Dernier élément manquant du verify B38 (« Aucune session HAAS utilisée et do
 - Aucun fichier interdit n’a été touché : `config/`, `bootstrap/`, `phpunit.xml`, `.env.example`, `composer.json/lock`, `.github/workflows/`, `routes/api.php`, `routes/api/identity.php`, `routes/console.php`, `docs/OPENAPI.yaml` sont intacts.
 - La connexion `demo` n’est pas câblée : les tables vivent sur la base par défaut. Trois fichiers du socle à étendre lors du câblage (voir `docs/quality/B38_B2_API.md` §Écarts).
 - PR brouillon **#28** publiée ; CI distante rouge uniquement sur `ApiInventoryTest` (attendu). Les deux commits locaux de purge ne sont pas encore poussés.
+
+## 2026-10-08 — B22 : reprise de main b76612d par merge local 285f91c. Suite Integration (hors Demo) : OK 397 tests / 3380 assertions. Pint, PHPStan 8 et composer test (398 / 3885) verts. Prerequis local a prevoir : role haas_demo_test + base haas_demo_bootstrap_test + DEMO_DB_PASSWORD pour Integration/Demo (non lancees localement, couvertes par la CI distante).
+
+## 2026-10-08 - B23 : reprise de b22 par merge local 53ed6d1. Suite Integration (hors Demo) : OK 476 tests / 3724 assertions. Pint, PHPStan 8 et composer test (406 / 4010) verts.
+
+## 2026-10-08 - B24 : reprise de B23 par merge local 1ce4f1a. Suite Integration (hors Demo) : OK 526 tests / 4063 assertions. Pint, PHPStan 8 et composer test (413 / 4090) verts.
+
+## 2026-10-08 - B25 : reprise de B24 par merge local 83bd71a. Suite Integration (hors Demo) : OK 549 tests / 4127 assertions. Pint, PHPStan 8 et composer test (413 / 4129) verts.
+
+## 2026-10-08 - B26 : reprise de B25 par merge local 1c81ae4. Suite Integration (hors Demo) : OK 564 tests / 4192 assertions. Pint, PHPStan 8 et composer test (413 / 4203) verts.
+
+## 2026-10-08 — Lot B27 · Téléchargement contrôlé
+
+Statut proposé : B27 **préparé, PR en brouillon**, aucun DONE. Branche `backend/capsules-laboratoire-b27-telechargement`, dérivée de B26 (603f43d).
+
+### Décisions clefs (propriétaire du domaine)
+
+- **Deux routes** : `GET /api/v1/capsules/{capsule}/versions/{version}/artifact/{artifact}` (émission d'un lien signé) et `GET .../stream` (livraison du flux). Nommées suivant la convention B23-B26 nested (slug §26 `/versions/{id}/artifact` ouvert à l'interprétation ; nested conservé par cohérence avec B24/B25).
+- **Gates ré-évaluées à chaque requête** (émission ET stream) : actif+vérifié, visibility=visible, state=published, artefact `approved` avec `notices_path` renseigné. Un retrait ultérieur coupe les anciens liens (AC15, AC25).
+- **Jamais de `private_path` ni de chemin disque** dans Resource, logs ou erreur. Policy ou chemin suspect = 404 (RM06 : ne pas révéler l'existence des contenus masqués/retirés).
+- **Lien signé** : `URL::temporarySignedRoute` TTL 300 s + middleware `signed` sur la route de stream. `signed+verified` sur la stream.
+- **Audit** : `capsule.version.artifact.download_issued` dans `content_revisions`, sha256 et expires_at seulement.
+- **Services** : `IssueArtifactDownloadService` renvoie `{artifact, expires_at}` ; le Controller construit l'URL signée (séparation DomainBoundariesTest). `StreamArtifactService` renvoie `{disk, path, download_name}` ; le Controller appelle `Storage::disk('local')->download`.
+
+### Fichiers créés / modifiés
+
+- Policy : `App\Policies\ArtifactPolicy`.
+- Services : `IssueArtifactDownloadService`, `StreamArtifactService`.
+- Exception : `App\Exceptions\Capsules\ArtifactUnavailable` (404).
+- Controllers minces : `IssueArtifactDownloadController`, `StreamArtifactDownloadController`.
+- Resource : `ArtifactDownloadResource` (sans `private_path`).
+- Routes dans `routes/api/capsules-lab.php` (middleware `verified` sur émission ; `signed+verified` sur stream).
+- Fragment OpenAPI : deux paths + schéma `ArtifactDownload`.
+- Tests : `ArtifactDownloadHttpTest` (12 cas, 27 assertions).
+
+### Fichiers hors de mon domaine modifiés
+
+- `docs/OPENAPI.yaml` : **+4 lignes** (deux `$ref` : issue + stream).
+- `docs/api/generated/haas-api.d.ts` : régénéré (66 types, +3).
+
+Aucun autre fichier du socle n'a été touché.
+
+### Contrôles locaux
+
+- `composer lint` → `{"tool":"pint","result":"passed"}`.
+- `composer analyse` → `[OK] No errors`.
+- `composer test` → `OK (413 tests, 4233 assertions)`.
+- `vendor/bin/phpunit --testsuite Integration --filter ArtifactDownloadHttpTest` → `OK (12 tests, 27 assertions)` en 29,7 s.
+
+### Questions ouvertes
+
+- **Q18** — « Conditions d'évaluation approuvées » (§13:480, ARB05 §04:120) : pour P0 verified+actif suffit ; un drapeau explicite d'acceptation d'évaluation est consigné comme à venir (voir ARB05 non résolu).
+- **Q19** — Nommage §26 `/versions/{id}/artifact` : interprété comme nested `/capsules/{capsule}/versions/{version}/artifact/{artifact}` pour cohérence avec B23-B26. À confirmer.
+- Questions antérieures Q12–Q17 restent ouvertes.
+
+
+## 2026-10-11 - B27 : lecture de fichiers verifiee avant reception des acces
+
+Premiere tranche locale : ArtifactSnapshot et VerifiedArtifactFiles, registre serveur prive borne, fichiers canoniques reguliers, refus traversal/URL/liens, taille exacte et digest des octets copies, resources fermees. Unites reelles : 24 tests / 52 assertions OK sur PHP8.5.10 Windows, junctions reelles uniquement sous le storage de test de ce worktree. Linux/symlinks et CI restent a recevoir. Les incidents de fixtures et probes rouges sont conserves dans docs/quality/B27_ARTIFACT_READINESS.md. Les endpoints/audit/registreSQL puis les prerequis B24/B25/B26 attendent leur reception ; aucune readiness, approbation, fusion ou gate. Les anciennes entrees B27 sont historiques et ne valident pas cette reprise.
+
+## 11 octobre 2026 — B27 : accès et registre reçus en ciblage
+
+Bibliothèque initiale commitée localement en `13ae33e02f21b9a1a700647da50820ae88cd37b7`. Les services contrôlent maintenant les droits courants sous verrou, les rattachements, les octets du kit et des notices ; liens signés relatifs liés au membre et à la cible, notices accessibles sans chemin serveur, quota partagé, audit et génération des deux liens atomiques. Registre des notices additif et immutabilité après publication, désactivation conservée, rollback sans perte d'histoire. ARB05 reste sans approbation : aucune activation automatique et aucun vrai kit/licence de production ajouté.
+
+Ciblés PostgreSQL : **66 tests / 258 assertions OK**. Unités finales fichiers/liens : **33 / 69 OK**. Atomicité/API/frontières/modèles après validation finale de l'origine : **7 / 127 OK**. Pint et PHPStan 8 verts ; 66 types à jour, Composer validate/platform/audit réussis, documents 18/18 et déploiement 7/7. Probes rouges et incidents dans `docs/quality/B27_ARTIFACT_READINESS.md` ; totaux recouvrants, pas une suite complète. B27 reste partiel/en brouillon ; synchronisation normale B24/B25/B26 par l'intégrateur avant réception complète et CI exacte. Aucune approbation humaine, fusion, DONE ou gate.
+
+
+## 2026-10-11 — B26 : validation et attribution avant revue
+
+Reprise du head b568a511 dans un nouveau worktree, historiques conservés. Trois défauts corrigés : Unicode 200 caractères, q/sort tableaux refusés avant cast, pseudonyme public handle à la place du nom privé. Probes réellement rouges : 8 tests / 8 assertions, 1 erreur et 6 échecs ; ciblage vert incluant ces probes : 23 tests / 78 assertions. PHPStan 8 et Pint --test réussis. Base PostgreSQL dédiée haas_b26_review_test, runner explicite. Preuve : docs/quality/B26_CATALOGUE_READINESS.md. Sélection dernière publication, hydratation bornée et contrat data en cours ; parent B25 final puis réception complète et CI exacte encore attendus. has_lab/Q16 dépend de B33 absent : aucune déclaration DONE, gate ou approbation humaine.
+
+
+## 2026-10-11 — B26 : sélection et projection du catalogue
+
+Premier correctif local a56f0144fb104d07c52e51a5aa7c9019dc2f0e94. Sélection SQL déterministe de la dernière version publiée avant filtre technologie/tri/pagination ; une version par carte, sans corps ; détail limité au corps choisi et historique de métadonnées ; pseudonyme sélectionné sans champs privés ni owner inutile. Enveloppe data OpenAPI et limites communes décrites, 66 types API. Rouge réel : 3 tests / 6 assertions pour sélection/hydratation/enveloppe et 1 / 4 pour corps de l’historique. Ciblage final exact : 39 tests / 2620 assertions, PHPStan 8 sans erreur et Pint --test verts. Validation pack 18 et déploiement 7 contrôles documentaires verts. Relances non additionnées ; erreur de chemin dans le probe OpenAPI puis nullsafe redondant de fixture corrigés et consignés. Preuve : B26_CATALOGUE_READINESS.md. Parent B25 final, réception complète, CI exacte et revue humaine restent attendus. has_lab/Q16 dépend de B33 absent ; aucun DONE/gate, frontend, push, publication ou déploiement.
+
+Dernière relecture B26 : 2 probes de nullabilité 3.1 rouges (2 tests / 3 assertions), schémas catalogue en unions [T, null] et types régénérés (66), générateur inchangé. Les 39 tests / 2620 assertions finaux incluent les probes ; PHPStan 8 et Pint verts. PR35 reste Draft / B26 partiel pour badge, has_lab/Q16 et B33 absent. Aucun SQL global avant parent B25 final.
+
+## 2026-10-11 — B27 : composition de la fixture de publication
+
+Reprise exclusive au parent documentaire 8fe85fe après réception globale en erreur : 245 tests / 1323 assertions / 1 erreur. JUnit rouge original conservé et copié à hash identique, preuve B27_ARTIFACT_READINESS.md. Probe ciblé rouge réel 1 / 1 avec SQL23514 : insertion Artifact après publication. Fixture corrigée : registre créé pendant InReview puis publication réelle par modérateur indépendant et nouveau brouillon ; attributs anciens vérifiés intégralement. Probe vert 1 / 8, composition courante 74 tests / 436 assertions réussie sans erreur/échec/skip, PHPStan 8/Pint verts. Aucun changement production ni affaiblissement des gardes ; autres fixtures d'artefacts relues, insertion négative intentionnelle conservée. Lecture indépendante distincte des tests. L'intégrateur reprend la réception SQL complète et la CI exacte après commit propre ; aucune suite complète B27 passée ni approbation/DONE/gate/frontend annoncé.
+
+## 2026-10-11 — B27 : fonction de garde répétable après migrate:fresh
+
+Après synchronisation des parents au candidat 134ebe0, deux réceptions globales Integration ont été interrompues par l'intégrateur ; stack SQL42723 sur la fonction b27_guard_artifact déjà présente, sans succès complet. Correction minimale CREATE OR REPLACE, corps/locks/contraintes/down inchangés. Nouveau probe réellement rouge 1 test / 1 assertion / 1 erreur ; relance 1 / 11 verte avec deux migrate:fresh et deux refus d'altération d'empreinte publiée. Alertes de typage du nouveau test corrigées sans ignore/baseline après arrêt du ciblage incomplet. Ciblage final courant 69 tests / 285 assertions réussi, PHPStan 8/Pint verts et 67 types à jour. Preuve B27_ARTIFACT_READINESS.md ; lecture indépendante non comptée comme test. Aucun fichier B24/B26 modifié, aucune garde de production affaiblie. Réception globale et CI exacte à relancer par l'intégrateur ; ARB05 inactive, aucune approbation/DONE/gate/frontend.
+
+## 2026-10-11 — B26 : conserver l'absence d'empreinte historique
+
+Après les microcommits a56f0144 et fe8b4cda, l'intégrateur a relevé le contrat non nullable d'un content_digest historique réellement nul. Trois probes frais avant correction : 3 tests / 12 assertions, 2 échecs OpenAPI/types ; le probe HTTP réussissait déjà sur les deux routes, sans modification du digest en base. CatalogueDetail décrit maintenant string|null, pattern64 et absence historique sans recalcul/backfill ; 66 types régénérés. Ciblage courant terminé : 42 tests / 2635 assertions, PHPStan 8 sans erreur et Pint --test verts. Preuve B26_CATALOGUE_READINESS.md. Les nombres ciblés remplacent les précédents sans addition. Aucun SQL global avant parent B25 final ; CI exacte et revue humaine à recevoir. B33/badge/has_lab/Q16 absents : PR35 reste Draft, aucun B26 DONE/gate.
+
+## 2026-10-11 — B25 : attribution avant publication
+
+Reprise isolée depuis PR34 `ce75045`, historiques préservés. Probe rouge réel : approbation de la révision 2 enregistrée à 3 (1 test / 2 assertions). Correction minimale du snapshot avant transition ; HTTP B25 vert 23 / 59 et Pint ciblé vert, sur base dédiée `haas_b25_review_test`. La publication Q12 et les protections de downgrade restent à corriger ; aucune réception globale ni approbation humaine déclarée. Preuve : `docs/quality/B25_RECEPTION_20261011.md`.
+
+### B25 — downgrade conservateur
+
+Snapshot commité localement en `18bfbe0`. Trois défauts de descente de schéma reproduits puis corrigés : locks transactionnels avant contrôle/DDL, refus des empreintes ou approbations connues ; vrai cycle legacy down/up sans purge ni attribution inventée. Ciblés schéma + concurrence réelle verts **10 / 79** ; seuls les helpers de fixtures sont adaptés au refus conservateur. Timeout transitoire d’une relance distingué du succès final. Q12 publication reste à terminer.
+
+### B25 — Q12 corrigée, code prêt à réception intégrateur
+
+Downgrade commité en `eceb4bc`. Intention de publication propriétaire/version stable dans transaction métier puis livraison après commit ; visibilité/état/droits courants avant liste, compteur et marquage ; migration composée conservant les autres types SQL, refus des événements stables. Probe rouge 1 / 1 puis ciblés définitifs **57 / 467** verts, APIInventory **1 / 81**, Pint complet/PHPStan8, types61, pack18/18 et déploiement documentaire7/7 verts. Code/fixtures figés ; root reprend le parent documentaire B24 puis les suites complètes et la CI exacte. Aucun test actif, push, ready ou approbation humaine par cet agent. Preuve détaillée `B25_RECEPTION_20261011.md`.

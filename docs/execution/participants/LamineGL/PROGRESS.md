@@ -1,5 +1,10 @@
 # Suivi — communauté et entraide / LamineGL
 
+## 11 octobre 2026 — BC01, schéma reçu sur contrôles ciblés
+
+BC01 **IN_PROGRESS** sur la branche isolée `backend/communaute-entraide-bc01-schema` depuis B19 39f96e9. Projets/pivot, préférences volontaires privées et lien facultatif avec propriétaire garanti reçus : 530/5167 hors SQL, 66/469 SQL ciblés/composition, PHPStan8/Pint et diff propres. Suite Integration complète en cours, CI exacte et revue humaine à recevoir. [Preuves et limites](../../../quality/BC01_PROJECT_SCHEMA_20261011.md). Préparation assistée par Codex, sans identité de Lamine ni validation humaine inventée. Prochain BC02, puis BC03/BC06 et raccords BC04/BC05 ; aucun gate, frontend ou déploiement.
+
+
 
 
 ## 11 octobre 2026 — B19, CI complète reçue pour revue

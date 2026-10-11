@@ -483,8 +483,12 @@
       "verify": "Migrations montée/base neuve et données antérieures testées sur PostgreSQL ; uniques/FK valides ; opt-in false par défaut ; pas de données privées seedées.",
       "refs": "F16/F17 ; AC53/AC60",
       "phase": "B",
-      "status": "TODO",
-      "execution_order": 41
+      "status": "IN_PROGRESS",
+      "execution_order": 41,
+      "evidence": [
+        "docs/api/BC01_PROJECT_SCHEMA.md",
+        "docs/quality/BC01_PROJECT_SCHEMA_20261011.md"
+      ]
     },
     {
       "id": "BC02",

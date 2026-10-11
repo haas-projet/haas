@@ -2,7 +2,7 @@
 
 ## État et périmètre
 
-Branche isolée `backend/communaute-entraide-b19-resolution`, issue du head B18 `d4db146786a925e9d08004c35b296f6950d0dc83` de la [PR #37](https://github.com/haas-projet/haas/pull/37). Main reste `d0d47c5dd62887fcf18361f499a33a800538b2b1`. **B19 IN_PROGRESS jusqu’à réception CI publiée**, puis revue humaine et intégration des prérequis. Publication distincte à la demande de continuation ; base temporaire B18 afin de rendre le seul diff B19 révisable. Aucune approbation ou signature de Lamine inventée. Le changement préexistant des routes capsules dans le dossier principal est préservé et exclu.
+Branche isolée `backend/communaute-entraide-b19-resolution`, issue du head B18 `d4db146786a925e9d08004c35b296f6950d0dc83` de la [PR #37](https://github.com/haas-projet/haas/pull/37). Main reste `d0d47c5dd62887fcf18361f499a33a800538b2b1`. **B19 IN_REVIEW après réception CI complète**, revue humaine et intégration des prérequis requises. Publication distincte à la demande de continuation ; base temporaire B18 afin de rendre le seul diff B19 révisable. Aucune approbation ou signature de Lamine inventée. Le changement préexistant des routes capsules dans le dossier principal est préservé et exclu.
 
 - POST /api/v1/requests/{id}/resolve et GET /api/v1/requests/{id}/resolution, [contrat RESOLUTIONS.md](../api/RESOLUTIONS.md), OpenAPI et 66 types générés. Cinq champs stricts ; JSON brut contrôlé avant trim Unicode, note utile 20–4 000 caractères, contexte 1–255, versions entières et UUID. Sources Markdown inertes ; aucun code, shell ou URL utilisateur exécuté.
 - Auteur actif/vérifié seul décide, même face à un admin tiers. Proposition de la même demande, visible et proposée, deux versions actuelles. Comptes par UUID trié, puis parent et proposition verrouillés ; règles relues après attente et avant rejeu. Parent ouvert/en cours vers résolu, version parent +1 ; version et contenu de proposition inchangés. Les autres propositions restent proposées et ne sont plus éditables sur un parent résolu.
@@ -51,3 +51,14 @@ Suite Integration complète locale **non exécutée** ; les tests ciblés ne la 
 ## Limites et prochaine étape
 
 AC09 reçu côté API, affichage/navigateur non exécuté. AC10 vérifié sous concurrence PostgreSQL réelle ; réception CI publiée et revue humaine encore requises. B18 n’est pas intégré. B20 réouverture, B21 non-sélection/archivage et profils de contribution B10 ne sont pas livrés par ce lot. B26 reste partiel sans B33 ; #35/#36 restent Draft. Aucun BACKEND_GATE, GO_FRONTEND ou GO_PRODUCTION, Qodana ou déploiement reçu.
+
+## Réception CI complète — PR #38
+
+[PR #38](https://github.com/haas-projet/haas/pull/38), base temporaire B18 #37. Commit applicatif testé `d5bb2a580e6b21e8230b84f8f85479997bbb69ec`. [Run 38174008525](https://github.com/haas-projet/haas/actions/runs/38174008525) completed/success et backend-ci réussi ; **journaux PHP lus individuellement**, étapes Unit/Integration distinguées sans compter deux fois une frontière de seconde. Aucun test sauté ni réserve PHPUnit.
+
+| Job reçu | Unit/Feature/Architecture | Integration PostgreSQL complète | Total disjoint | Types | Empreintes |
+|---|---|---|---|---|---|
+| [PHP 8.4 / PostgreSQL 17](https://github.com/haas-projet/haas/actions/runs/38174008525/job/114572408837) | 523 / 5107 | 632 / 7091 | **1155 / 12198** | 66 | 710 |
+| [PHP 8.5 / PostgreSQL 17](https://github.com/haas-projet/haas/actions/runs/38174008525/job/114572408739) | 523 / 5107 | 632 / 7091 | **1155 / 12198** | 66 | 710 |
+
+PHPStan/Pint, dépendances verrouillées/plateforme/audit et documentation réussis. La suite complète PostgreSQL est reçue dans cette CI ; les 308 ciblés locaux restent une preuve distincte, non ajoutée à son total. B19 IN_REVIEW ; recevoir aussi le nouveau head documentaire exact avant ready, intégrer B18 avant B19 et conserver la revue humaine. Aucun statut DONE ou gate inventé.

@@ -1,6 +1,6 @@
 # Tableau Systalink — partie de Lamine
 
-État consolidé du 11 octobre 2026 : B11 et B14–B17 présents dans main `d0d47c5`, B18 PR #37 ready et B19 reçu localement, CI publiée à recevoir. Les entrées et preuves antérieures sont conservées. Ce tableau local ne modifie aucune carte Systalink distante.
+État consolidé du 11 octobre 2026 : B11 et B14–B17 présents dans main `d0d47c5`, B18 #37 ready et B19 #38 IN_REVIEW après CI complète. Les entrées et preuves antérieures sont conservées. Ce tableau local ne modifie aucune carte Systalink distante.
 
 Assigné : LamineGL. Étiquette : Backend. Priorité normale ; pas d'échéance inventée.
 
@@ -18,7 +18,7 @@ Description B11 : Créer les tables et relations PostgreSQL, protéger les réf�
 | B16 — Modifier une demande | Terminé — intégration dans main d0d47c5 vérifiée |
 | B17 — Commentaires | Terminé — intégration dans main d0d47c5 vérifiée |
 | B18 — Propositions de solution | En cours — PR #37, CI complète 991 / 9968, revue humaine/intégration en attente |
-| B19 — Accepter une proposition | En cours — réception locale et CI/revue/intégration en attente |
+| B19 — Accepter une proposition | En cours — PR #38, CI complète 1155 / 12198, revue humaine/intégration en attente |
 | B20 — Rouvrir une demande | À faire |
 | B21 — Archiver et non-retenir | À faire |
 | BC01 — Schéma des projets et découverte volontaire | À faire |

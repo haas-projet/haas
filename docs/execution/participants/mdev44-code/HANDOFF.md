@@ -432,3 +432,5 @@ Deux envois d’un formulaire B2 avec la même clé stable (`Idempotency-Key`, U
 ## Reprise B25 — 11 octobre 2026
 
 Worktree isolé `pr-ready-b25-20261011`, base PR34 `ce75045`. Snapshot de la révision approuvée corrigé après probe HTTP rouge ; suite HTTP 23 / 59 et Pint ciblé verts. Prochaines corrections : notification Q12 de publication et downgrade conservant empreintes/attributions. L’intégrateur publiera seulement après réception du code figé et CI exacte ; revue humaine en attente. Les anciens worktrees restent historiques.
+
+Downgrade B25 corrigé sous verrou transactionnel : refus explicite des empreintes/approbations connues, garde inchangée ; legacy NULL down/up réel conservant dates, contenus et notes. Suite ciblée schéma + cinq courses réelle verte 10 / 79. Continuer Q12 dans ce worktree ; aucun test global concurrent ni push.

@@ -676,3 +676,7 @@ Dernier élément manquant du verify B38 (« Aucune session HAAS utilisée et do
 ## 2026-10-11 — B25 : attribution avant publication
 
 Reprise isolée depuis PR34 `ce75045`, historiques préservés. Probe rouge réel : approbation de la révision 2 enregistrée à 3 (1 test / 2 assertions). Correction minimale du snapshot avant transition ; HTTP B25 vert 23 / 59 et Pint ciblé vert, sur base dédiée `haas_b25_review_test`. La publication Q12 et les protections de downgrade restent à corriger ; aucune réception globale ni approbation humaine déclarée. Preuve : `docs/quality/B25_RECEPTION_20261011.md`.
+
+### B25 — downgrade conservateur
+
+Snapshot commité localement en `18bfbe0`. Trois défauts de descente de schéma reproduits puis corrigés : locks transactionnels avant contrôle/DDL, refus des empreintes ou approbations connues ; vrai cycle legacy down/up sans purge ni attribution inventée. Ciblés schéma + concurrence réelle verts **10 / 79** ; seuls les helpers de fixtures sont adaptés au refus conservateur. Timeout transitoire d’une relance distingué du succès final. Q12 publication reste à terminer.

@@ -25,16 +25,19 @@ return new class extends Migration
 
     public function down(): void
     {
-        if (! Schema::hasTable('capsule_version_reviews')) {
-            return;
-        }
-        if (DB::table('capsule_version_reviews')->where('decision', 'approved')->exists()) {
-            throw new RuntimeException('Retour B25 refusé : décisions de publication à conserver.');
-        }
-        DB::statement('ALTER TABLE capsule_version_reviews DROP CONSTRAINT capsule_version_reviews_note_min');
-        DB::statement('ALTER TABLE capsule_version_reviews ADD CONSTRAINT capsule_version_reviews_note_min CHECK (char_length(btrim(note)) BETWEEN 20 AND 2000)');
-        DB::statement('ALTER TABLE capsule_version_reviews ALTER COLUMN note SET NOT NULL');
-        DB::statement('ALTER TABLE capsule_version_reviews DROP CONSTRAINT capsule_version_reviews_decision_check');
-        DB::statement("ALTER TABLE capsule_version_reviews ADD CONSTRAINT capsule_version_reviews_decision_check CHECK (decision = 'request_changes')");
+        DB::transaction(function (): void {
+            if (! Schema::hasTable('capsule_version_reviews')) {
+                return;
+            }
+            DB::statement('LOCK TABLE capsule_version_reviews IN ACCESS EXCLUSIVE MODE');
+            if (DB::table('capsule_version_reviews')->where('decision', 'approved')->exists()) {
+                throw new RuntimeException('Retour B25 refusé : décisions de publication à conserver.');
+            }
+            DB::statement('ALTER TABLE capsule_version_reviews DROP CONSTRAINT capsule_version_reviews_note_min');
+            DB::statement('ALTER TABLE capsule_version_reviews ADD CONSTRAINT capsule_version_reviews_note_min CHECK (char_length(btrim(note)) BETWEEN 20 AND 2000)');
+            DB::statement('ALTER TABLE capsule_version_reviews ALTER COLUMN note SET NOT NULL');
+            DB::statement('ALTER TABLE capsule_version_reviews DROP CONSTRAINT capsule_version_reviews_decision_check');
+            DB::statement("ALTER TABLE capsule_version_reviews ADD CONSTRAINT capsule_version_reviews_decision_check CHECK (decision = 'request_changes')");
+        });
     }
 };

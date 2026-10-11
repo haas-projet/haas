@@ -16,7 +16,7 @@ use Illuminate\Support\Str;
 use Symfony\Component\Process\InputStream;
 use Symfony\Component\Process\Process;
 use Tests\PostgresTestCase;
-use Tests\Support\CapsuleReviewNotificationFixtures;
+use Tests\Support\CapsulePublicationFixtures;
 
 /**
  * Concurrence réelle (deux processus PHP) sur les écritures de capsules
@@ -31,7 +31,7 @@ use Tests\Support\CapsuleReviewNotificationFixtures;
  */
 final class CapsuleWritesConcurrencyTest extends PostgresTestCase
 {
-    use CapsuleReviewNotificationFixtures, DatabaseMigrations;
+    use CapsulePublicationFixtures, DatabaseMigrations;
 
     public function test_two_posts_with_same_idempotency_key_write_only_one_capsule(): void
     {

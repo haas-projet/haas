@@ -55,7 +55,7 @@ final class CapsuleCatalogueDetail extends JsonResource
             $user = $contributor->getRelation('user');
 
             return [
-                'handle' => $user?->name,
+                'handle' => $user?->handle,
                 'role' => $contributor->contribution_role->value,
             ];
         })->all();

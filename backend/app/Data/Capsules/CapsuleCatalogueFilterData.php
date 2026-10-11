@@ -31,7 +31,7 @@ final readonly class CapsuleCatalogueFilterData
         if ($technology !== null && preg_match('/\A[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\z/i', $technology) !== 1) {
             throw new InvalidArgumentException('technology doit être un UUID.');
         }
-        if ($search !== null && strlen($search) > 200) {
+        if ($search !== null && mb_strlen($search, 'UTF-8') > 200) {
             throw new InvalidArgumentException('La recherche doit faire 200 caractères maximum.');
         }
     }

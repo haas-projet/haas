@@ -469,3 +469,8 @@ Deux envois d’un formulaire B2 avec la même clé stable (`Idempotency-Key`, U
 ## 2026-10-08 - B25 : reprise de B24 par merge local 83bd71a. Suite Integration (hors Demo) : OK 549 tests / 4127 assertions. Pint, PHPStan 8 et composer test (413 / 4129) verts.
 
 ## 2026-10-08 - B26 : reprise de B25 par merge local 1c81ae4. Suite Integration (hors Demo) : OK 564 tests / 4192 assertions. Pint, PHPStan 8 et composer test (413 / 4203) verts.
+
+
+## 2026-10-11 — B26 : validation et attribution avant revue
+
+Reprise du head b568a511 dans un nouveau worktree, historiques conservés. Trois défauts corrigés : Unicode 200 caractères, q/sort tableaux refusés avant cast, pseudonyme public handle à la place du nom privé. Probes réellement rouges : 8 tests / 8 assertions, 1 erreur et 6 échecs ; ciblage vert incluant ces probes : 23 tests / 78 assertions. PHPStan 8 et Pint --test réussis. Base PostgreSQL dédiée haas_b26_review_test, runner explicite. Preuve : docs/quality/B26_CATALOGUE_READINESS.md. Sélection dernière publication, hydratation bornée et contrat data en cours ; parent B25 final puis réception complète et CI exacte encore attendus. has_lab/Q16 dépend de B33 absent : aucune déclaration DONE, gate ou approbation humaine.

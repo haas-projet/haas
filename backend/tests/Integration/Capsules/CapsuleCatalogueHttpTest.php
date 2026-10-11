@@ -16,6 +16,7 @@ use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\PostgresTestCase;
 use Tests\Support\Mdev44\DomainTables;
 use Tests\Support\SpaHttpRequests;
@@ -182,6 +183,40 @@ final class CapsuleCatalogueHttpTest extends PostgresTestCase
         $secondPageSlugs = array_column($page2->json('data'), 'slug');
 
         $this->assertEmpty(array_intersect($firstPageSlugs, $secondPageSlugs));
+    }
+
+    public function test_unicode_search_accepts_two_hundred_characters_and_refuses_more(): void
+    {
+        $query = rawurlencode(str_repeat('é', 200));
+        $this->browserRequest('GET', '/api/v1/capsules?q='.$query)->assertOk()->assertJsonPath('meta.total', 0);
+        $query = rawurlencode(str_repeat('é', 201));
+        $this->browserRequest('GET', '/api/v1/capsules?q='.$query)->assertStatus(422);
+    }
+
+    /** @return iterable<string, array{string}> */
+    public static function arrayFilters(): iterable
+    {
+        yield 'q list' => ['q[]=x'];
+        yield 'q object' => ['q[key]=x'];
+        yield 'sort list' => ['sort[]=date'];
+        yield 'sort object' => ['sort[key]=relevance'];
+    }
+
+    #[DataProvider('arrayFilters')]
+    public function test_array_filters_are_validation_errors_without_string_casts(string $query): void
+    {
+        $this->browserRequest('GET', '/api/v1/capsules?'.$query)->assertStatus(422);
+    }
+
+    public function test_detail_attributes_the_public_handle_without_legacy_private_name(): void
+    {
+        [$owner] = $this->publishCapsule('attribution-publique');
+        $owner->forceFill(['name' => 'Nom personnel fictif privé', 'handle' => 'pseudonyme_public'])->save();
+        $response = $this->browserRequest('GET', '/api/v1/capsules/attribution-publique')
+            ->assertOk()->assertJsonPath('data.version.contributors.0.handle', 'pseudonyme_public');
+        $content = $response->getContent();
+        $this->assertIsString($content);
+        $this->assertStringNotContainsString('Nom personnel fictif privé', $content);
     }
 
     public function test_empty_result_returns_empty_list_never_fabricated(): void

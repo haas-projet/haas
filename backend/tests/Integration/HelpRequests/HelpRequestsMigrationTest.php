@@ -37,6 +37,8 @@ final class HelpRequestsMigrationTest extends PostgresTestCase
         $paths[] = database_path('migrations/2026_10_04_000017_b17_comment_revisions_and_events.php');
         $paths[] = database_path('migrations/2026_10_08_000018_b18_proposal_content_and_revisions.php');
         $paths[] = database_path('migrations/2026_10_11_200000_b18_proposal_notification_events.php');
+        $paths[] = database_path('migrations/2026_10_11_210000_b19_resolution_snapshots.php');
+        $paths[] = database_path('migrations/2026_10_11_210100_b19_resolution_notification_events.php');
         $migrations = array_map(function (string $path): Migration {
             $migration = require $path;
             $this->assertInstanceOf(Migration::class, $migration);

@@ -91,6 +91,14 @@ export type community_ProposalUpdateInput = { readonly "diagnosis"?: community_P
 
 export type community_RequestTechnologyInput = { readonly "id": string; readonly "version_label"?: string | null; };
 
+export type community_Resolution = { readonly "id": string; readonly "request_id": string; readonly "proposal_id": string; readonly "proposal_version": number | null; readonly "environment": string | null; readonly "validation_note": string; readonly "validation_note_html": community_ProposalRenderedDescription; readonly "accepted_by": { readonly "id": string; readonly "handle": string; }; readonly "self_resolution": boolean; readonly "accepted_at": string; readonly "revoked_at": string | null; readonly "request_lock_version": number; };
+
+export type community_ResolutionDetail = { readonly "data": community_Resolution; };
+
+export type community_ResolutionEnvironmentInput = string;
+
+export type community_ResolutionInput = { readonly "proposal_id": string; readonly "lock_version": number; readonly "proposal_lock_version": number; readonly "environment": community_ResolutionEnvironmentInput; readonly "validation_note": community_ProposalDescriptionInput; };
+
 export type current_account_Me = { readonly "id": string; readonly "handle": identity_Handle; readonly "email": string; readonly "email_verified": boolean; readonly "role": identity_AccountRole; readonly "status": "active"; readonly "is_demo": boolean; readonly "can": { readonly "manage_account_mail": boolean; readonly "update_profile": boolean; readonly "participate": boolean; readonly "moderate": boolean; readonly "administer": boolean; }; };
 
 export type identity_AccountRole = "member" | "moderator" | "admin";
@@ -115,7 +123,7 @@ export type moderation_Receipt = (moderation_ReportFields);
 
 export type moderation_ReportFields = { readonly "id": string; readonly "resource_type": "profile"; readonly "resource_id": string; readonly "status": "new" | "in_review" | "resolved" | "dismissed"; readonly "lock_version": number; readonly "created_at": string; [key: string]: unknown; };
 
-export type notifications_Notification = { readonly "id": string; readonly "kind": "profile.moderated" | "comment.created" | "proposal.created"; readonly "message": string; readonly "target_path": string; readonly "read_at": string | null; readonly "created_at": string; };
+export type notifications_Notification = { readonly "id": string; readonly "kind": "profile.moderated" | "comment.created" | "proposal.created" | "resolution.accepted"; readonly "message": string; readonly "target_path": string; readonly "read_at": string | null; readonly "created_at": string; };
 
 export type profiles_ProfileFields = { readonly "id": string; readonly "handle": identity_Handle; readonly "avatar_initials": string; readonly "bio": string; readonly "country": string | null; readonly "primary_language": string; readonly "github_url": string | null; readonly "technologies": ReadonlyArray<profiles_Technology>; readonly "is_demo": boolean; readonly "contributions": null; [key: string]: unknown; };
 

@@ -8,6 +8,7 @@ use App\Exceptions\Collaboration\ProposalVersionConflict;
 use App\Exceptions\Demo\DemoCapacityReached;
 use App\Exceptions\HelpRequests\HelpRequestCreationRejected;
 use App\Exceptions\HelpRequests\HelpRequestVersionConflict;
+use App\Exceptions\HelpRequests\ResolutionConflict;
 use App\Exceptions\Idempotency\IdempotencyConflict;
 use App\Exceptions\Identity\AccountVersionConflict;
 use App\Exceptions\Identity\InactiveAccount;
@@ -46,7 +47,7 @@ final class ApiExceptionRenderer
             $exception instanceof ValidationException, $exception instanceof RegistrationRejected => 422,
             $exception instanceof InvalidCredentials, $exception instanceof InvalidResetToken => 422,
             $exception instanceof ProfileUpdateRejected, $exception instanceof HelpRequestCreationRejected => 422,
-            $exception instanceof HelpRequestVersionConflict, $exception instanceof CommentVersionConflict, $exception instanceof ProposalVersionConflict, $exception instanceof ProposalHistoryRejected => 409,
+            $exception instanceof HelpRequestVersionConflict, $exception instanceof ResolutionConflict, $exception instanceof CommentVersionConflict, $exception instanceof ProposalVersionConflict, $exception instanceof ProposalHistoryRejected => 409,
             $exception instanceof ProfileVersionConflict, $exception instanceof IdempotencyConflict, $exception instanceof AccountVersionConflict, $exception instanceof ModerationRejected => 409,
             $exception instanceof InactiveAccount => 403,
             $exception instanceof RegistrationUnavailable => 503,

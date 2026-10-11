@@ -140,3 +140,7 @@ Codex (GPT-6), demande de vérifier Git et continuer : neuf fichiers non commit�
 ## 11 octobre 2026 — API et réception locale B18
 
 Codex poursuit la demande de l’utilisateur dans le worktree B18 : adaptateurs HTTP, service transactionnel, contrat, tests SQL/concurrence et notifications, avec trois relectures automatisées distinctes. Corrections réellement reproduites et tests d’attentes de session/visibilité documentés dans B18_PROPOSALS_20261011.md ; aucune approbation humaine simulée. Réception finale 664 tests / 7176 assertions distincts, statiques et dépendances verrouillées reçus ; CI complète distante à observer. Aucun code utilisateur exécuté, dépendance ajoutée, identité de collègue inventée, frontend ou déploiement.
+
+## 11 octobre 2026 — Réception CI complète B18
+
+Codex : publication normale de la PR #37 vers main puis lecture distincte des deux jobs PHP 8.4/8.5 du run 38167657147, head applicatif 122bf5665b91561c92cbdf85f0a0b36ae3fcc0ed. Résultats 991 / 9968 par version, dont 515 / 5117 PostgreSQL, 62 types et 689 empreintes reçus ; contrôles de qualité terminés. Relecture automatisée distincte sans nouvel écart, aucune approbation humaine inventée. B18 IN_REVIEW ; le commit suivant ne porte que les preuves/suivis/empreintes, sa CI exacte doit encore être observée avant ready. Aucune fusion, tâche B19, frontend ou déploiement.

@@ -17,7 +17,7 @@ Description B11 : Créer les tables et relations PostgreSQL, protéger les réf�
 | B15 — Lire et rechercher les demandes | Terminé — intégration dans main d0d47c5 vérifiée |
 | B16 — Modifier une demande | Terminé — intégration dans main d0d47c5 vérifiée |
 | B17 — Commentaires | Terminé — intégration dans main d0d47c5 vérifiée |
-| B18 — Propositions de solution | En cours — API et 664 tests locaux reçus, CI et revue en attente |
+| B18 — Propositions de solution | En cours — PR #37, CI complète 991 / 9968, revue humaine/intégration en attente |
 | B19 — Accepter une proposition | À faire |
 | B20 — Rouvrir une demande | À faire |
 | B21 — Archiver et non-retenir | À faire |

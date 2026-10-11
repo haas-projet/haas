@@ -1,5 +1,9 @@
 # Reprise — communauté et entraide
 
+## 11 octobre 2026 — B18, CI complète reçue pour revue
+
+B18 **IN_REVIEW**, [PR #37](https://github.com/haas-projet/haas/pull/37) vers main d0d47c5. Commits préservés : socle 865ba827e732f3bfb15b2a86b3f1972e1296d3d6, API 122bf5665b91561c92cbdf85f0a0b36ae3fcc0ed. CI 38167657147 complète reçue sous PHP 8.4/8.5 : **991 tests / 9968 assertions par version**, dont 515 / 5117 PostgreSQL. PHPStan/Pint/Composer, 62 types et 689 empreintes réussis. Preuves exactes et incidents conservés dans [B18_PROPOSALS_20261011.md](../../../quality/B18_PROPOSALS_20261011.md). La CI du commit documentaire final reste à recevoir avant passage de la PR à ready. Revue humaine et intégration requises ; assistance Codex, aucune identité ou signature de Lamine inventée. Prochain B19 après intégration. Aucun gate, frontend ou déploiement.
+
 ## 11 octobre 2026 — API B18 reçue localement
 
 Socle local `865ba827e732f3bfb15b2a86b3f1972e1296d3d6` conservé. Les cinq routes, création/édition idempotentes, première transition sous verrou, révisions/audits/outbox atomiques et notification privée sont reçus localement. **B18 IN_PROGRESS** jusqu’à la CI publiée. Tests finaux : 476 / 4851 hors SQL et 188 / 2325 PostgreSQL ciblés élargis, soit 664 / 7176 distincts ; PHPStan 8/Pint/Composer et 62 types réussis. Concurrence réelle à deux processus et corrections DTO/legacy documentées dans [B18_PROPOSALS_20261011.md](../../../quality/B18_PROPOSALS_20261011.md). Suite SQL complète locale non exécutée ; CI PHP 8.4/8.5 à recevoir. Assistance Codex, aucune signature de Lamine ni revue humaine inventée. Prochain : publication distincte et réception CI, puis B19 après intégration. Aucun gate, frontend ou déploiement.

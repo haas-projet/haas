@@ -20,6 +20,7 @@ use Illuminate\Support\Carbon;
  * @property CapsuleVersionState $state
  * @property Carbon|null $published_at
  * @property int $lock_version
+ * @property string|null $content_digest
  */
 #[Fillable(['version_label', 'body', 'limits'])]
 class CapsuleVersion extends Model

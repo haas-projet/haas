@@ -53,6 +53,8 @@ paths:
     $ref: './api/openapi/capsules-lab.yaml#/paths/~1api~1v1~1capsules~1{capsule}~1versions~1{version}~1submit-review'
   /api/v1/admin/capsules/{capsule}/versions/{version}/request-changes:
     $ref: './api/openapi/capsules-lab.yaml#/paths/~1api~1v1~1admin~1capsules~1{capsule}~1versions~1{version}~1request-changes'
+  /api/v1/admin/capsules/{capsule}/versions/{version}/publish:
+    $ref: './api/openapi/capsules-lab.yaml#/paths/~1api~1v1~1admin~1capsules~1{capsule}~1versions~1{version}~1publish'
   /api/v1/members/{handle}:
     $ref: './api/openapi/identity.yaml#/paths/~1api~1v1~1members~1{handle}'
   /api/v1/me/profile:

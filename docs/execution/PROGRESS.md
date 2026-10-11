@@ -1,6 +1,12 @@
 # Suivi du dépôt HAAS
 
+## Réception complète B25 — 11 octobre 2026
+
+B25 reçu sur `77d4147d18d1b5fb4f4cc8ed38b09840f978c46c` : hors SQL 413/4129, Integration 611/4607, total disjoint 1024/8736, erreurs/échecs/skips=0. PHPStan8, Pint, Composer, types61 et documents18/18 +7/7 réussis. Q12 utilise la cible propriétaire UX08 prévue ; aucun écran frontend livré ou testé. Publication corrigée, revue humaine des prérequis encore nécessaire. Nouvelle CI du SHA publié et revue humaine encore attendues. Preuve : [B25_RECEPTION_20261011.md](../quality/B25_RECEPTION_20261011.md). Les mentions d’attente des étapes précédentes ci-dessous sont historiques.
+
 ## État vérifié le 11 octobre 2026 — priorité aux PR
+
+- B25 reçoit le prérequis documentaire B24 2463e4b par merge normal après gel des corrections 6a7d16c. Seuls SHA256SUMS et le journal IA demandaient une résolution : les deux historiques sont conservés, les empreintes régénérées. Backend inchangé pendant ce merge ; réception complète locale et nouvelle CI à recevoir.
 
 - Propagation B24 : B23 c753017 reçu par merge normal avec le contrôle d’intégrité, couverture complète vérifiée et backend inchangé ; nouvelle CI du head publié à recevoir.
 
@@ -10,7 +16,7 @@ B38 #28 est fusionnée dans main d0d47c5. Les trois branches permanentes sont al
 
 - Lot documentaire d’intégration : empreintes complètes et vérifiées, pack 18/18, déploiement documentaire 7/7 et diff propre ; octets backend inchangés. Nouvelle CI à recevoir après publication. SHA réel à consulter dans le bilan/PR après création du commit.
 
-**Statut actif :** B01–B09, B11–B17 et B32 DONE (17 lots entiers). #24 est réellement fusionnée dans main b76612d le 7 octobre à 20:24:58 UTC ; CI du head 2addb4d et CI de main vertes (671 tests / 6805 assertions sur PHP 8.4 et 8.5). GitHub ne contient aucune revue enregistrée sur #24 ; aucune approbation humaine n’est inventée. #31 (README et bilan) est fusionnée dans main e3bd34c. B22/B23/B24 sont préparés dans #29/#30/#33, corrections et synchronisations en cours ; B38 #28 attend les preuves finales de son isolation corrigée. B35 reste partiel. Les 22 autres lots de Lamine restent à faire. B10/B29/B30/B31 et B39–B42 IN_PROGRESS ; B43/B44 BLOCKED. S01/S02 partiels. Aucun BACKEND_GATE, GO_FRONTEND ou GO_PRODUCTION. Voir PR_READINESS_20261007.md et les preuves métier. Les entrées suivantes sont historiques.
+**Statut actif :** B01–B09, B11–B17, B32 et B38 DONE (18 lots backend intégrés). B38 #28 est réellement fusionnée dans main d0d47c5 le 8 octobre à12:52:52 UTC ; CI exacte 37690142490 réussie, 770 tests /7291 assertions par version PHP8.4/8.5, backend identique au head0ad5a99. B22–B25 IN_REVIEW ; B26 IN_PROGRESS/Draft pour B33/badge/has_lab/Q16 ; B27 IN_PROGRESS. Six PR ouvertes, aucun merge ou avis humain simulé. Les trois permanentes suivent main ; dix branches distantes conservées. B18 préexistant à reprendre après préparation des PR prioritaires. B35 et S01/S02 restent partiels ; aucun gate frontend/production. Voir les preuves du 11 octobre ; les bilans datés précédents sont historiques.
 
 À renseigner après commandes réelles : date / lot / responsable / fichiers / commandes / observé / commit ou raison de non-commit / blocage / prochaine action. Les contrôles documentaires de ce pack ne valident pas BACKEND_GATE, FRONTEND_GATE ou RELEASE_GATE.
 

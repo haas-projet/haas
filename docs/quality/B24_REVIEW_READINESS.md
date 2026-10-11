@@ -89,3 +89,15 @@ La soumission est réservée au propriétaire ou contributeur autorisé de cette
 L’intégrateur a lu les checks et logs GitHub : [CI du candidat 994de150](https://github.com/haas-projet/haas/actions/runs/37692436571) et [CI exacte e01202f](https://github.com/haas-projet/haas/actions/runs/37693092990) réussies sur PHP 8.4, PHP 8.5 et backend-ci. Chaque version rapporte 350 / 3800 hors SQL et 524 / 4037 SQL, soit **874 / 7837**, 57 types API à jour et PHPStan sans erreur. Le parent B23 final est également contrôlé sur son SHA exact ; voir [l’état consolidé des PR](PR_READINESS_20261007.md).
 
 Statut : **prêt localement pour la revue humaine, avec CI du code final verte**. L’intégrateur publiera ce bilan documentaire et observera encore la CI de son nouveau SHA exact avant de passer #33 prête à revue. Q12 corrections demandées est livrée ; décision d’acceptation et publication demeurent le lot B25. Revue humaine et Qodana non reçus ; aucun `DONE`, BACKEND_GATE, GO_FRONTEND ou déploiement annoncé. Prochaine étape : revue #29 puis #30 puis #33, avec synchronisation et CI après toute fusion de prérequis.
+
+## 11 octobre 2026 — Nullabilité du contrat Q12
+
+Correction documentaire isolée depuis `2463e4ba5c6db95d754b951e9b33e932d7a111ee` : `CapsuleVersionReview.reviewed_lock_version` utilise maintenant `type: [integer, 'null']` au lieu de `nullable: true`, ignoré par le générateur en OpenAPI 3.1. Le type généré devient `number | null`. Ce schéma concerne la réponse 201 de demande de corrections ; la Request conserve son entier JSON strict. Aucun autre champ de contrat ni fichier backend n'est modifié.
+
+Les NULL du journal antérieur sont déjà conservés par `CapsuleVersionReviewsSchemaTest`, sans snapshot inventé ni backfill. Cette correction de forme JSON ne prétend pas prouver un rejeu HTTP historique : aucun HTTP, SQL ou PHPUnit exécuté pour ce micro-lot.
+
+- Probe Node ignoré `.worktrees/q12-nullability-probe-20261011.cjs`, exécuté sur les blobs du head initial puis sur les fichiers corrigés : **2 assertions en échec, exit 1 → 2 réussies, exit 0**. Le premier lecteur de bloc du probe s'arrêtait prématurément en fin de ligne ; il a été corrigé avant cette comparaison finale.
+- Régénération puis `scripts/generate-api-types.php --check` par PHP 8.5.10 absolu, avec environnement limité aux variables système, sans lecture de `.env` ni bootstrap applicatif : **59 types à jour**. Copie locale de vendor indépendante et ignorée, lock identique ; aucun package ajouté.
+- `node scripts/validate-pack.mjs` : **18/18** ; `node scripts/check-deployment-docs.mjs` : **7/7**, documentation uniquement. `git diff --check` propre. Les **122 tâches** et tout `backend/` restent identiques au head initial ; empreintes régénérées et vérifiées avant commit.
+
+L'intégrateur propagera normalement ce parent et observera la CI de son nouveau SHA exact. Les suites et CI historiques ci-dessus ne sont pas présentées comme des tests de ce changement. Aucune publication, revue humaine, décision de gate, frontend ou déploiement.

@@ -1,5 +1,9 @@
 # Suivi du dépôt HAAS
 
+## Réception complète B26 — 11 octobre 2026
+
+B26 reçu sur `32347387536fa76f498ca21c62292c9b6ebfa80d` : hors SQL 421/4241, Integration 641/4758, total disjoint 1062/8999, erreurs/échecs/skips=0. PHPStan8, Pint, Composer, types66 et documents18/18 +7/7 réussis. B26 reste IN_PROGRESS et PR35 Draft : badge, has_lab et Q16 dépendent du registre B33 absent. La CI verte ne clôturera pas cette dépendance. Nouvelle CI du SHA publié et revue humaine encore attendues. Preuve : [B26_CATALOGUE_READINESS.md](../quality/B26_CATALOGUE_READINESS.md). Les mentions d’attente des étapes précédentes ci-dessous sont historiques.
+
 ## État vérifié le 11 octobre 2026 — priorité aux PR
 
 - B27 f0df4d7 reçoit B26 3234738 et les corrections B25 par merge normal. Historiques IA/participant conservés ; types générés depuis les contrats composés, dont notices privées et empreinte historique nullable. Réception complète B27 à lancer sur sa base dédiée ; bilans finaux des parents à propager sans modifier le backend. Aucun statut DONE ni approbation humaine ; ARB05 reste inactive.
@@ -16,7 +20,7 @@ B38 #28 est fusionnée dans main d0d47c5. Les trois branches permanentes sont al
 
 - Lot documentaire d’intégration : empreintes complètes et vérifiées, pack 18/18, déploiement documentaire 7/7 et diff propre ; octets backend inchangés. Nouvelle CI à recevoir après publication. SHA réel à consulter dans le bilan/PR après création du commit.
 
-**Statut actif :** B01–B09, B11–B17 et B32 DONE (17 lots entiers). #24 est réellement fusionnée dans main b76612d le 7 octobre à 20:24:58 UTC ; CI du head 2addb4d et CI de main vertes (671 tests / 6805 assertions sur PHP 8.4 et 8.5). GitHub ne contient aucune revue enregistrée sur #24 ; aucune approbation humaine n’est inventée. #31 (README et bilan) est fusionnée dans main e3bd34c. B22/B23/B24 sont préparés dans #29/#30/#33, corrections et synchronisations en cours ; B38 #28 attend les preuves finales de son isolation corrigée. B35 reste partiel. Les 22 autres lots de Lamine restent à faire. B10/B29/B30/B31 et B39–B42 IN_PROGRESS ; B43/B44 BLOCKED. S01/S02 partiels. Aucun BACKEND_GATE, GO_FRONTEND ou GO_PRODUCTION. Voir PR_READINESS_20261007.md et les preuves métier. Les entrées suivantes sont historiques.
+**Statut actif :** B01–B09, B11–B17, B32 et B38 DONE (18 lots backend intégrés). B38 #28 est réellement fusionnée dans main d0d47c5 le 8 octobre à12:52:52 UTC ; CI exacte 37690142490 réussie, 770 tests /7291 assertions par version PHP8.4/8.5, backend identique au head0ad5a99. B22–B25 IN_REVIEW ; B26 IN_PROGRESS/Draft pour B33/badge/has_lab/Q16 ; B27 IN_PROGRESS. Six PR ouvertes, aucun merge ou avis humain simulé. Les trois permanentes suivent main ; dix branches distantes conservées. B18 préexistant à reprendre après préparation des PR prioritaires. B35 et S01/S02 restent partiels ; aucun gate frontend/production. Voir les preuves du 11 octobre ; les bilans datés précédents sont historiques.
 
 À renseigner après commandes réelles : date / lot / responsable / fichiers / commandes / observé / commit ou raison de non-commit / blocage / prochaine action. Les contrôles documentaires de ce pack ne valident pas BACKEND_GATE, FRONTEND_GATE ou RELEASE_GATE.
 
@@ -286,3 +290,7 @@ B11 DONE (13 lots backend entiers terminés). B35 IN_PROGRESS : isolation/connex
 ### B38 — correction terminée localement, revue à recevoir
 
 Runtime et données B2 séparés ; garde DNS/configuration et permissions PostgreSQL avant cache/écritures ; cache partagé obligatoire hors testing, bornes atomiques 1000 entrées / 100 verrous, TTL24h et purge complète. Synchronisation normale de main b76612d (B14–B17), historiques et statuts conservés. Suites finales : 391 / 3850 et 379 / 3438, soit 770 tests / 7288 assertions OK. PHPStan niveau 8, Pint, Composer et contrats/documents réussis ; preuve B38_ISOLATION_20261007.md. Statut local IN_REVIEW : CI du SHA exact et revue humaine restent nécessaires ; aucun DONE/gate ni frontend/déploiement. L’intégrateur publiera le commit réel après ce bilan.
+
+## 11 octobre 2026 — Contrat Q12 : snapshot historique nullable
+
+Micro-lot documentaire depuis B24 `2463e4b` : union OpenAPI integer/null et type `number | null` pour `CapsuleVersionReview.reviewed_lock_version`. Probe Node ignoré réel : deux assertions rouges sur le head initial, puis deux vertes ; 59 types à jour, documents 18/18 et déploiement 7/7. Backend et 122 tâches inchangés, aucun HTTP/SQL/PHPUnit nouveau. Preuve : `docs/quality/B24_REVIEW_READINESS.md`. Propagation normale et CI exacte par l'intégrateur ; aucun statut de lot ou gate changé.

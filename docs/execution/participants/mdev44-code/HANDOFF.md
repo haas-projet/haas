@@ -199,6 +199,37 @@ Aucun autre fichier du socle n'a été touché.
 2. `gh pr edit 30` pour mettre à jour le corps de la PR #30 (nouveaux commits, Q8/Q9 fermées, Q11 clarifiée, Q10 restante).
 3. Attendre revue humaine distincte.
 
+## 2026-10-07 — HANDOFF B24 Soumettre à la revue
+
+Branche : `backend/capsules-laboratoire-b24-revue`. Base : `backend/capsules-laboratoire-b23-brouillons` (`93fafea`). Statut proposé : **préparé, PR en brouillon**. Aucun `DONE`.
+
+### Nouvelles routes
+
+- `POST /api/v1/capsules/{capsule}/versions/{version}/submit-review`.
+- `POST /api/v1/admin/capsules/{capsule}/versions/{version}/request-changes`.
+
+### Fichiers hors de mon domaine modifiés (B24)
+
+- `docs/OPENAPI.yaml` : +4 lignes `$ref`.
+- `docs/api/generated/haas-api.d.ts` : régénéré.
+
+### Contrôles finaux
+
+- `composer lint` passed ; `composer analyse` OK ; `composer test` 323/2723 ; `vendor/bin/phpunit --testsuite Integration` 248/1523.
+- CI distante : à observer après push.
+
+### Question Q12 bloquante pour B25
+
+La notification « Revue de capsule terminée » (CAHIER_DES_CHARGES.md:355) nécessite d'étendre `App\Data\Notifications\NotificationEvent` qui limite `kind` à `profile.moderated` (fichier du socle, hors de mon domaine). Décision à prendre avant B25.
+
+## 2026-10-07 — Correctif de préparation Codex
+
+Revue indépendante conservée, mêmes frontières B24/B25. Nouveaux verrous/intention/rejeu, refus des champs inconnus, notes Unicode/multilignes, projection privée, snapshot versionné et conservation SQL append-only des décisions. Une panne SQL d'audit réelle annule aussi bien la soumission que la demande de corrections ; upgrade/rollback conserve les notes antérieures. Six courses entre deux processus PostgreSQL réellement bloqués couvrent les conflits et les droits modifiés.
+
+Preuves locales : **33 tests / 162 assertions** domaine puis **23 / 90** compléments, types **36**, documents **18 + 7** ; voir `docs/quality/B24_REVIEW_READINESS.md`. Les trois correctifs de tests cookies B17 `8234470` sont repris ponctuellement et la règle de secrets existante est copiée sans dépendance nouvelle.
+
+Q12 concerne déjà les corrections B24 selon le cahier :355. Le contrat main B17 fournit maintenant `NotificationOutbox`; l'intégrateur a réservé ses fichiers communs pour le raccord B24. Après ce premier commit propre, intégrer B23/B22/main, raccorder la notification générique sans note, tester droits/visibilité et suites complètes. Aucun push/merge/ready effectué par cet agent, aucune attribution de revue humaine.
+
 ## 2026-10-07 — Correctif de préparation Codex
 
 Reprise de la PR #30 sans réécrire les décisions Q8/Q9 ni leurs suivis. Voir `docs/quality/B23_DRAFT_READINESS.md` : création depuis une résolution cohérente et verrouillée, conflits 409, présence de limites nulles conservée, droits actuels sous verrous, résultat idempotent limité à sa version, validation stricte et six courses réelles. Services compatibles avec les `Fillable` serveur restreints de B22 par `forceFill` explicite.
@@ -274,11 +305,28 @@ Le conflit du test de migration d’identité conserve les retraits des tables d
 
 Les trois défauts de dernière revue sont reproduits avant correction (13 / 55, dix échecs), puis corrigés. Ciblés définitifs : **24 / 186 réussis**, dont dix courses PostgreSQL réelles ; Pint, PHPStan niveau 8, documents 18/18 et 7/7, types API 54 à jour. Base dédiée `haas_b23_review_test`, PostgreSQL 17 local 55447. Réception globale à relancer du commit transmis par l’intégrateur, sans ajouter les essais précédents au total final. Details : [B23_DRAFT_READINESS.md](../../../quality/B23_DRAFT_READINESS.md). B24 doit reprendre ce parent avant sa réception ; aucun push, frontend ou revue humaine inventée.
 
+### Candidat B24 après reprise du parent B23
+
+Q12 corrections demandées et préservation de l’attribution raccordées, aucun B25. Hors SQL350/3800, ciblés53/496 puis onze ciblés exacts11/116 verts (recouvrement), Pint/PHPStan8/Composer/documents18+7/types57 verts. Suite complète Integration en cours sur `haas_b24_review_test`, journal/JUnit ignorés `backend/storage/logs/b24-q12-integration.*` ; aucun résultat complet encore acquis. L’intégrateur peut publier ce candidat en brouillon pour CI parallèle PHP8.4/8.5 ; réception SQL complète et CI du SHA final indispensables avant ready. Détails : [B24_REVIEW_READINESS.md](../../../quality/B24_REVIEW_READINESS.md). Revue humaine en attente.
+
 ### Réception B23 terminée localement — candidat `d7ef6eb`
 
 Code transféré propre `d7ef6eb8c750987ddf509eba6647007162c1bec9`, réception indépendante en lecture seule du métier puis suites complètes : **343 tests / 3720 assertions** Unit/Feature/Architecture et **478 / 3734** PostgreSQL, soit **821 / 7454 uniques réussis**. Les ciblés ne sont pas ajoutés et les essais interrompus restent historiques. PHP 8.5.10, PostgreSQL 17 sur `127.0.0.1:55447`, `haas_b23_review_test`/`haas_test` exclusivement ; XML ignorés sous `backend/storage/logs/b23-reception-*`.
 
 Pint, PHPStan 8, les trois contrôles Composer, documents 18/18 et 7/7, types 54 réussis. Aucun code applicatif ni test modifié dans ce lot documentaire. Preuve détaillée : [B23_DRAFT_READINESS.md](../../../quality/B23_DRAFT_READINESS.md). CI candidat verte, [run 37691657985](https://github.com/haas-projet/haas/actions/runs/37691657985), constat transmis par l’intégrateur. À reprendre : publication du commit de preuve et observation de sa CI exacte par l’intégrateur, puis revue humaine après prérequis ; B24 conserve sa propre base et sa propre réception. Aucun push par cet agent, aucune approbation humaine, gate ou publication de production annoncée.
+
+### Transfert final B24 — 7 octobre 2026, 22:06 UTC
+
+Réception locale complète sur le code `994de150`, identique dans `backend/` au merge documentaire `e01202f` : **350 / 3800** hors SQL + **524 / 4037** PostgreSQL = **874 tests / 7837 assertions uniques**, exit 0, JUnit SQL sans erreur, échec ou skip. Base dédiée `haas_b24_review_test`, PG17 local 55447 / `haas_test`, PHP 8.5.10 ; aucun test actif après ce résultat. Pint, PHPStan 8, Composer validation/plateforme/audit réussis. [CI exacte e01202f](https://github.com/haas-projet/haas/actions/runs/37693092990) PHP 8.4/8.5/backend-ci verte avec les mêmes totaux, logs lus par l’intégrateur. Les incidents et résultats intermédiaires restent dans [B24_REVIEW_READINESS.md](../../../quality/B24_REVIEW_READINESS.md).
+
+À reprendre par l’intégrateur : publier ce commit documentaire propre, observer sa CI exacte, mettre #33 prête à revue, puis revue humaine dans l’ordre #29 → #30 → #33 ; #28 indépendante. Statuts/heads/runs dans [PR_READINESS_20261007.md](../../../quality/PR_READINESS_20261007.md). Le SHA réel sera transmis après création du commit ; aucun push par cet agent ni approbation inventée. Q12 corrections livrée, acceptation/publication B25 ultérieure ; aucun DONE, gate, frontend ou déploiement.
+
+
+### Compléments B24 — tests de concurrence réels (parent `1fce2ad`)
+
+Ajout `backend/tests/Fixtures/write-capsule-concurrently.php` + `backend/tests/Integration/Capsules/CapsuleWritesConcurrencyTest.php` empilés sur la PR #33. Patron Symfony Process + barrière PostgreSQL (`application_name = 'haas_b24_capsule_worker'`) comme `IdempotencyConcurrencyTest` et `ModerationConcurrencyTest` ; `pcntl` non utilisé (Windows). Scénarios : POST idempotent, PATCH `lock_version` périmé, soumission concurrente (acteur unique, clés différentes) et `request-changes` concurrente (modérateur unique, clés différentes). Les deux processus enfants attendent réellement un verrou PostgreSQL que le parent détient avant de libérer la course ; aucun scénario n'a mis au jour une double écriture ou un défaut dans les Services courants. Trait `CapsuleReviewNotificationFixtures` repris pour que `migrate:rollback` passe malgré le downgrade protecteur du lot B24. `composer lint`/`composer analyse`/`composer test` verts (350 / 3800) ; `Integration` complète réelle : **528 tests / 4073 assertions** en 12 min 51 s. CI du commit publié à inscrire dans la revue après observation.
+
+Fichiers hors de mon domaine modifiés : aucun. Aucun test, Service, migration ou document du socle touché. Prochaines étapes : vérifier le résultat réel de la suite Integration en cours, pousser la branche `backend/capsules-laboratoire-b24-revue`, actualiser le corps de la PR #33 et attendre la CI complète avant d'ouvrir la PR B25 depuis cette branche.
 
 ## Historique de la branche B38 avant intégration
 
@@ -335,3 +383,5 @@ Deux envois d’un formulaire B2 avec la même clé stable (`Idempotency-Key`, U
 ## 2026-10-08 — B22 : reprise de main b76612d par merge local 285f91c. Suite Integration (hors Demo) : OK 397 tests / 3380 assertions. Pint, PHPStan 8 et composer test (398 / 3885) verts. Prerequis local a prevoir : role haas_demo_test + base haas_demo_bootstrap_test + DEMO_DB_PASSWORD pour Integration/Demo (non lancees localement, couvertes par la CI distante).
 
 ## 2026-10-08 - B23 : reprise de b22 par merge local 53ed6d1. Suite Integration (hors Demo) : OK 476 tests / 3724 assertions. Pint, PHPStan 8 et composer test (406 / 4010) verts.
+
+## 2026-10-08 - B24 : reprise de B23 par merge local 1ce4f1a. Suite Integration (hors Demo) : OK 526 tests / 4063 assertions. Pint, PHPStan 8 et composer test (413 / 4090) verts.

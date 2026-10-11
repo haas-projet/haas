@@ -24,6 +24,10 @@ Le même contrôle et la correction sont propagés vers B23 puis B24 par merges 
 
 ## Branches et limites
 
+### Propagation B24
+
+B24 35f6270a reçoit le prérequis documentaire B23 c753017 par merge normal. Le manifeste est régénéré et vérifié pour toute sa couverture ; pack 18/18, déploiement documentaire 7/7 et diff réussis. `git diff --quiet 35f6270a -- backend` confirme que son backend est identique. La nouvelle CI du merge reste à recevoir après publication ; aucun résultat applicatif local supplémentaire n’est revendiqué.
+
 ### Propagation B23
 
 B23 eb685501 reçoit le prérequis documentaire B22 6021968 par merge normal. Le manifeste est régénéré pour ses propres fichiers suivis ; le contrôle complet, pack 18/18, déploiement documentaire 7/7 et diff sont réussis. `git diff --quiet eb685501 -- backend` confirme que son backend est identique. Nouvelle CI du merge à recevoir après publication ; aucun nouveau résultat applicatif local n’est inventé.

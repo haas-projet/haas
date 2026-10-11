@@ -11,7 +11,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['diagnosis', 'fix', 'verification', 'limits'])]
+/** @property ProposalState $state */
+#[Fillable(['diagnosis', 'fix', 'verification', 'limits', 'code'])]
 class Proposal extends Model
 {
     /** @use HasFactory<ProposalFactory> */
@@ -46,6 +47,8 @@ class Proposal extends Model
         return [
             'lock_version' => 'integer',
             'state' => ProposalState::class,
+            'edited_at' => 'immutable_datetime',
+            'hidden_at' => 'immutable_datetime',
         ];
     }
 }

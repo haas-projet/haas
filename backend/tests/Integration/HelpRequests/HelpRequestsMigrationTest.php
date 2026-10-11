@@ -35,6 +35,7 @@ final class HelpRequestsMigrationTest extends PostgresTestCase
         $paths[] = database_path('migrations/2026_10_04_000014_b14_extend_help_request_content.php');
         $paths[] = database_path('migrations/2026_10_04_000016_b16_create_help_request_revisions.php');
         $paths[] = database_path('migrations/2026_10_04_000017_b17_comment_revisions_and_events.php');
+        $paths[] = database_path('migrations/2026_10_08_000018_b18_proposal_content_and_revisions.php');
         $migrations = array_map(function (string $path): Migration {
             $migration = require $path;
             $this->assertInstanceOf(Migration::class, $migration);
@@ -46,7 +47,7 @@ final class HelpRequestsMigrationTest extends PostgresTestCase
             (new ReflectionMethod($migration, 'down'))->invoke($migration);
         }
 
-        foreach (['help_requests', 'request_technologies', 'comments', 'proposals', 'resolutions'] as $table) {
+        foreach (['help_requests', 'request_technologies', 'comments', 'proposals', 'resolutions', 'proposal_revisions'] as $table) {
             $this->assertFalse(Schema::hasTable($table));
         }
         $this->assertModelExists($author);
@@ -58,6 +59,8 @@ final class HelpRequestsMigrationTest extends PostgresTestCase
 
         $this->assertTrue(Schema::hasColumn('help_requests', 'help_intent'));
         $this->assertTrue(Schema::hasTable('help_request_revisions'));
+        $this->assertTrue(Schema::hasTable('proposal_revisions'));
+        $this->assertTrue(Schema::hasColumn('proposals', 'code'));
         $resolution = Resolution::factory()->create();
         $this->assertModelExists($resolution);
         $this->assertSame($resolution->request()->firstOrFail()->author_id, $resolution->accepted_by);

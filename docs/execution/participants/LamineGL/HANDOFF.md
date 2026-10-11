@@ -1,5 +1,9 @@
 # Reprise — communauté et entraide
 
+## 11 octobre 2026 — B18, premier socle reçu localement
+
+Branche isolée `backend/communaute-entraide-b18-propositions` depuis main `d0d47c5`. Les neuf fichiers de préparation préexistants sont complétés ; DTO, validation Unicode/liens/code, Policy, Queries et migration avec conservation historique reçus. **B18 IN_PROGRESS**, aucun endpoint ni transition/idempotence de proposition encore livré. Tests réels : 472 / 4164 hors SQL et 51 / 308 PostgreSQL ciblés, soit 523 / 4472 distincts ; PHPStan 8/Pint/Composer/types 51 et documents 18/18 + 7/7 réussis. Suite SQL complète et CI B18 non exécutées sur ce premier socle. Voir [B18_FOUNDATION_20261011.md](../../../quality/B18_FOUNDATION_20261011.md). Assistance Codex, sans signature de Lamine inventée. Prochaine tranche : commandes idempotentes et première transition sous verrou, HTTP/contrat/concurrence ; aucun B19, gate, frontend ou déploiement.
+
 ## Préparation de l'approbation — 7 octobre 2026
 
 À la demande de gérer les PR restantes avant approbation : main `e3bd34c` contient désormais la fusion réelle de #31 (README et bilan). Intégration par merge normal dans #24 ; conflits seulement dans AI_USAGE, suivi racine, preuve B11 du catalogue et empreintes. Les histoires des deux domaines et les 122 lots sont préservés. Aucun code applicatif ne change par cette synchronisation ; seule la documentation backend README rejoint main. Les tests 671 / 6805 et la CI `37666083469` portent sur le même code ; la CI du nouveau head doit encore être constatée. Revue humaine de #24 toujours requise, aucun avis simulé. Les corrections des cinq PR ouvertes sont coordonnées séparément ; aucun gate, frontend ni déploiement.

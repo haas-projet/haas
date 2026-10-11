@@ -2,7 +2,7 @@
 
 Inspecter le dépôt, préserver les fichiers/commits/saisies existants, lire ADR-006. Appliquer F18 : projets ouverts, offres consenties, décision propriétaire, fil et projection publique contrôlés. Nouvelle recette avant GO_FRONTEND ; ne pas prendre un ancien gate pour un accord sur ce périmètre. Systalink/Vercel inchangé.
 
-État courant : B01–B09, B11–B13 et B32 DONE (13 lots entiers). B14/B15/B16/B17 IN_REVIEW, consolidés dans #24 vers main ; #25/#26/#32 sont des fusions intermédiaires. #31 (README et bilan) est réellement fusionnée dans main e3bd34c. B22/B23/B24 restent en brouillon dans #29/#30/#33, corrections en cours ; B38 reste BLOCKED avant correction et preuve d'isolation. B35 partiel. Les 22 autres lots de Lamine restent à faire. B10/B29/B30/B31 et B39–B42 IN_PROGRESS ; B43/B44 BLOCKED. S01/S02 partiels. Aucun BACKEND_GATE, GO_FRONTEND ou GO_PRODUCTION. Voir MERGE_MADINA.md, B17_COMMENTS.md et le suivi de Lamine. Les entrées suivantes sont historiques.
+État courant : B01–B09, B11–B17, B32 et B38 intégrés dans main d0d47c5 (18 lots entiers). B18 IN_PROGRESS sur la branche isolée de Lamine : premier socle reçu 523 / 4472, commandes HTTP/idempotence/transition à poursuivre. Six PR distantes #29/#30/#33/#34/#35/#36 sans conflit, CI exactes vertes au constat du 11 octobre ; #29/#30/#33/#34 prêtes pour revue dans cet ordre, #35/#36 encore Draft (B26 partiel et prérequis). Ces PR restent non fusionnées et leurs preuves complètes sont portées par leurs branches. Aucun avis humain simulé. B35 et S01/S02 partiels ; les autres lots et historiques sont conservés. Aucun BACKEND_GATE, GO_FRONTEND ou GO_PRODUCTION. Voir B18_FOUNDATION_20261011.md et le suivi de Lamine ; entrées suivantes historiques.
 
 ## Reprise après préparation GitHub — 2026-10-01
 

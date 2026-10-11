@@ -1,5 +1,9 @@
 # Reprise de session
 
+## Réception complète B26 — 11 octobre 2026
+
+B26 reçu sur `32347387536fa76f498ca21c62292c9b6ebfa80d` : hors SQL 421/4241, Integration 641/4758, total disjoint 1062/8999, erreurs/échecs/skips=0. PHPStan8, Pint, Composer, types66 et documents18/18 +7/7 réussis. B26 reste IN_PROGRESS et PR35 Draft : badge, has_lab et Q16 dépendent du registre B33 absent. La CI verte ne clôturera pas cette dépendance. Nouvelle CI du SHA publié et revue humaine encore attendues. Preuve : [B26_CATALOGUE_READINESS.md](../quality/B26_CATALOGUE_READINESS.md). Les mentions d’attente des étapes précédentes ci-dessous sont historiques.
+
 ## Reprise vérifiée le 11 octobre 2026
 
 B26 0632510 est synchronisée avec le code B25 77d4147 ; historiques conservés et types composés. L'intégrateur exécute maintenant ses suites complètes sur la seule base B26 dédiée. Propager ensuite le bilan final B25 et vérifier que les octets backend restent identiques. PR35 demeure en brouillon pour B33/badge/has_lab/Q16.
@@ -18,7 +22,7 @@ Le checkout principal modifié et le travail B18 existant sont conservés. Les �
 
 Inspecter le dépôt, préserver les fichiers/commits/saisies existants, lire ADR-006. Appliquer F18 : projets ouverts, offres consenties, décision propriétaire, fil et projection publique contrôlés. Nouvelle recette avant GO_FRONTEND ; ne pas prendre un ancien gate pour un accord sur ce périmètre. Systalink/Vercel inchangé.
 
-État courant : B01–B09, B11–B17 et B32 DONE (17 lots entiers). #24 est réellement fusionnée dans main b76612d le 7 octobre à 20:24:58 UTC ; CI du head 2addb4d et CI de main vertes (671 tests / 6805 assertions sur PHP 8.4 et 8.5). GitHub ne contient aucune revue enregistrée sur #24 ; aucune approbation humaine n’est inventée. #31 (README et bilan) est fusionnée dans main e3bd34c. B22/B23/B24 sont préparés dans #29/#30/#33, corrections et synchronisations en cours ; B38 #28 attend les preuves finales de son isolation corrigée. B35 reste partiel. Les 22 autres lots de Lamine restent à faire. B10/B29/B30/B31 et B39–B42 IN_PROGRESS ; B43/B44 BLOCKED. S01/S02 partiels. Aucun BACKEND_GATE, GO_FRONTEND ou GO_PRODUCTION. Voir PR_READINESS_20261007.md et les preuves métier. Les entrées suivantes sont historiques.
+État courant : B01–B09, B11–B17, B32 et B38 DONE (18 lots backend intégrés). B38 #28 est réellement fusionnée dans main d0d47c5 le 8 octobre à12:52:52 UTC ; CI exacte 37690142490 réussie, 770 tests /7291 assertions par version PHP8.4/8.5, backend identique au head0ad5a99. B22–B25 IN_REVIEW ; B26 IN_PROGRESS/Draft pour B33/badge/has_lab/Q16 ; B27 IN_PROGRESS. Six PR ouvertes, aucun merge ou avis humain simulé. Les trois permanentes suivent main ; dix branches distantes conservées. B18 préexistant à reprendre après préparation des PR prioritaires. B35 et S01/S02 restent partiels ; aucun gate frontend/production. Voir les preuves du 11 octobre ; les bilans datés précédents sont historiques.
 
 ## Reprise après préparation GitHub — 2026-10-01
 

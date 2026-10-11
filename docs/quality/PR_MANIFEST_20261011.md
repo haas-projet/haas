@@ -37,3 +37,13 @@ La PR #28 / B38 a été fusionnée dans main d0d47c5dd62887fcf18361f499a33a80053
 B25–B27 font l’objet de corrections métier séparées avec tests de régression. B26 reste partiel sans le contrat `has_lab`/Q16, dépendant de B33. Les PR non fusionnées ne sont pas déclarées DONE. B35 reste partiel ; aucun BACKEND_GATE, GO_FRONTEND, GO_PRODUCTION ou déploiement n’est validé.
 
 Le checkout principal conserve sa modification préexistante de `backend/routes/api/capsules-lab.php`. Le travail B18 déjà commencé reste préservé ; il reprendra après la préparation des PR prioritaires. Aucune réécriture d’historique, identité Git inventée ou approbation simulée.
+
+## CI reçues des prérequis documentaires — 11 octobre 2026
+
+| PR | Head exact | Run CI | Hors SQL | Integration | Types | Empreintes |
+|---|---|---|---|---|---|---|
+|#29|6021968b60cbc4672a128c47363d483d15b7965c|38150757607|398/3885|435/3586|51|688|
+|#30|c7530174b16c997d3e684ceae1edce77cda2f89a|38150757065|406/4010|514/3930|56|723|
+|#33|2463e4ba5c6db95d754b951e9b33e932d7a111ee|38150757640|413/4090|564/4269|59|749|
+
+Les six logs PHP8.4/8.5 ont été lus : mêmes totaux par version, PHPStan, documents et manifeste réussis ; chaque backend-ci réussit. Les descriptions GitHub portent déjà le head et la CI exacts. Ces résultats ne sont pas des contrôles B25–B27.

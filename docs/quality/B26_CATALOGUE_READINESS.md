@@ -84,3 +84,19 @@ Contrôles réellement terminés sur le runner B26, PHP 8.5.10 et la même base 
 - `node scripts/validate-pack.mjs` et `node scripts/check-deployment-docs.mjs` depuis le worktree : respectivement 18 et 7 contrôles documentaires réussis ; aucun test applicatif ou serveur.
 
 Les 42 tests remplacent les nombres ciblés précédents ; ils ne s'y additionnent pas. La lecture indépendante finale des Queries/Resources par `pr_capsule_schema` n'a trouvé aucun autre défaut concret et n'est pas comptée comme un test. Parent B25 final, réception complète, CI exacte et revue humaine restent à recevoir. PR #35 reste Draft / B26 partiel pour B33, badge, `has_lab` et Q16. Aucun push ni fusion de PR par cet agent.
+
+## Réception complète B26 par l’intégrateur — 11 octobre 2026
+
+Code reçu sur `32347387536fa76f498ca21c62292c9b6ebfa80d` après merges normaux des prérequis corrigés. Validation Unicode/tableaux, pseudonyme public, dernière publication avant filtre, hydratation bornée et contrat nullable fidèle aux données historiques.
+
+PHP 8.5.10 / PostgreSQL 17, base locale dédiée `haas_b26_review_test` à127.0.0.1:55447. Commandes depuis la racine via `node .worktrees/run-pr-review-20261011.cjs b26 ...` :
+
+- `vendor/bin/phpunit --testsuite Unit,Feature,Architecture --colors=never --log-junit storage/logs/b26-final-unit-20261011.xml` : **421 tests / 4241 assertions**, erreurs/échecs/skips =0.
+- `vendor/bin/phpunit --testsuite Integration --colors=never --log-junit storage/logs/b26-final-integration-20261011.xml` : **641 tests / 4758 assertions**, erreurs/échecs/skips =0. Inclut B2 dans son runtime/base/rôle séparés.
+- Total disjoint : **1062 tests / 8999 assertions** ; les ciblés antérieurs ne sont pas ajoutés. Les pauses de l’hôte ne servent pas de mesure de performance.
+- `vendor/bin/phpstan analyse --memory-limit=512M --no-progress`, `vendor/bin/pint --test`, Composer `validate --strict --no-check-publish`, `check-platform-reqs` et `audit --locked --no-interaction` : réussis. Dépréciations du PHAR Composer externe distinguées du code applicatif ; aucune dépendance modifiée.
+- `../scripts/generate-api-types.php --check` : 66 types à jour ; `node scripts/validate-pack.mjs`18/18 et `node scripts/check-deployment-docs.mjs`7/7. Les empreintes et le diff sont recontrôlés après cette consolidation documentaire.
+
+Relectures indépendantes en lecture seule : aucun défaut concret supplémentaire trouvé, aucun test ou approbation humaine déduit de ces lectures. B26 reste IN_PROGRESS et PR35 Draft : badge, has_lab et Q16 dépendent du registre B33 absent. La CI verte ne clôturera pas cette dépendance.
+
+Ces résultats portent sur le backend du candidat ci-dessus. Le commit de bilan conserve ses octets ; les conflits documentaires sont résolus en conservant les deux historiques. Nouvelle CI PHP8.4/8.5 sur le SHA publié à recevoir et à consigner dans la PR après commit. Aucun merge de PR, approbation humaine, Qodana reçu, BACKEND_GATE, GO_FRONTEND, GO_PRODUCTION ou déploiement. Checkout principal modifié et travail B18 préexistant préservés.

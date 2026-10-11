@@ -1,5 +1,17 @@
 # Reprise de session
 
+## Reprise vérifiée le 11 octobre 2026
+
+B24 reçoit B23 c753017 sans changement backend. Recevoir la nouvelle CI de #33 après publication puis intégrer ce prérequis documentaire dans B25 après gel de ses corrections métier.
+
+B23 reçoit B22 6021968 sans changement backend. Vérifier la nouvelle CI de #30 après publication et transmettre ce prérequis documentaire à B24 par merge normal.
+
+Priorité utilisateur : terminer la préparation des six PR #29/#30/#33/#34/#35/#36 avant de reprendre B18. Les trois permanentes suivent main d0d47c5 ; la seule branche B38 déjà fusionnée est supprimée, sans supprimer les six branches de PR. #29 attend la revue humaine ; aucun merge des PR restantes n’est effectué. B25–B27 sont en correction métier ; B26 attend aussi Q16/B33. Aucun gate frontend/production.
+
+Lire [PR_MANIFEST_20261011.md](../quality/PR_MANIFEST_20261011.md). Après chaque édition, ajouter explicitement les nouvelles sources à l’index, régénérer SHA256SUMS et exécuter `node scripts/check-manifest.mjs` ; la CI contrôle désormais la couverture entière et les octets. Correction documentaire B22 testée sans changement backend, à propager vers B23/B24 par merges normaux puis recevoir leurs nouvelles CI. Les résultats et SHA réels vont dans la PR et le bilan après commit.
+
+Le checkout principal modifié et le travail B18 existant sont conservés. Les états et consignes datés ci-dessous retracent les sessions antérieures.
+
 Inspecter le dépôt, préserver les fichiers/commits/saisies existants, lire ADR-006. Appliquer F18 : projets ouverts, offres consenties, décision propriétaire, fil et projection publique contrôlés. Nouvelle recette avant GO_FRONTEND ; ne pas prendre un ancien gate pour un accord sur ce périmètre. Systalink/Vercel inchangé.
 
 État courant : B01–B09, B11–B17 et B32 DONE (17 lots entiers). #24 est réellement fusionnée dans main b76612d le 7 octobre à 20:24:58 UTC ; CI du head 2addb4d et CI de main vertes (671 tests / 6805 assertions sur PHP 8.4 et 8.5). GitHub ne contient aucune revue enregistrée sur #24 ; aucune approbation humaine n’est inventée. #31 (README et bilan) est fusionnée dans main e3bd34c. B22/B23/B24 sont préparés dans #29/#30/#33, corrections et synchronisations en cours ; B38 #28 attend les preuves finales de son isolation corrigée. B35 reste partiel. Les 22 autres lots de Lamine restent à faire. B10/B29/B30/B31 et B39–B42 IN_PROGRESS ; B43/B44 BLOCKED. S01/S02 partiels. Aucun BACKEND_GATE, GO_FRONTEND ou GO_PRODUCTION. Voir PR_READINESS_20261007.md et les preuves métier. Les entrées suivantes sont historiques.

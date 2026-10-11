@@ -280,3 +280,7 @@ B11 DONE (13 lots backend entiers terminés). B35 IN_PROGRESS : isolation/connex
 ### B38 — correction terminée localement, revue à recevoir
 
 Runtime et données B2 séparés ; garde DNS/configuration et permissions PostgreSQL avant cache/écritures ; cache partagé obligatoire hors testing, bornes atomiques 1000 entrées / 100 verrous, TTL24h et purge complète. Synchronisation normale de main b76612d (B14–B17), historiques et statuts conservés. Suites finales : 391 / 3850 et 379 / 3438, soit 770 tests / 7288 assertions OK. PHPStan niveau 8, Pint, Composer et contrats/documents réussis ; preuve B38_ISOLATION_20261007.md. Statut local IN_REVIEW : CI du SHA exact et revue humaine restent nécessaires ; aucun DONE/gate ni frontend/déploiement. L’intégrateur publiera le commit réel après ce bilan.
+
+## 11 octobre 2026 — Contrat Q12 : snapshot historique nullable
+
+Micro-lot documentaire depuis B24 `2463e4b` : union OpenAPI integer/null et type `number | null` pour `CapsuleVersionReview.reviewed_lock_version`. Probe Node ignoré réel : deux assertions rouges sur le head initial, puis deux vertes ; 59 types à jour, documents 18/18 et déploiement 7/7. Backend et 122 tâches inchangés, aucun HTTP/SQL/PHPUnit nouveau. Preuve : `docs/quality/B24_REVIEW_READINESS.md`. Propagation normale et CI exacte par l'intégrateur ; aucun statut de lot ou gate changé.

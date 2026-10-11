@@ -33,7 +33,7 @@ export type capsules_lab_CapsuleVersionDraftInput = { readonly "version_label": 
 
 export type capsules_lab_CapsuleVersionDraftUpdate = { readonly "lock_version": number; readonly "body"?: string; readonly "limits"?: string; readonly "technologies"?: ReadonlyArray<{ readonly "technology_id": string; readonly "version_label"?: string; }>; };
 
-export type capsules_lab_CapsuleVersionReview = { readonly "id": string; readonly "version_id": string; readonly "reviewed_lock_version": number; readonly "decision": "request_changes"; readonly "note": string; readonly "created_at"?: string; [key: string]: unknown; };
+export type capsules_lab_CapsuleVersionReview = { readonly "id": string; readonly "version_id": string; readonly "reviewed_lock_version": number | null; readonly "decision": "request_changes"; readonly "note": string; readonly "created_at"?: string; [key: string]: unknown; };
 
 export type capsules_lab_CapsuleVersionReviewInput = { readonly "lock_version": number; readonly "note": string; };
 

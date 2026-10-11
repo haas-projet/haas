@@ -413,7 +413,7 @@ components:
       properties:
         id: { type: string, format: uuid }
         version_id: { type: string, format: uuid }
-        reviewed_lock_version: { type: integer, minimum: 1, nullable: true, description: 'Version relue ; null uniquement pour le journal antérieur à cette migration, sans attribution inventée.' }
+        reviewed_lock_version: { type: [integer, 'null'], minimum: 1, description: 'Version relue ; null uniquement pour le journal antérieur à cette migration, sans attribution inventée.' }
         decision: { type: string, enum: [request_changes] }
         note: { type: string }
         created_at: { type: string, format: date-time, nullable: true }

@@ -746,3 +746,15 @@ Dernière relecture B26 : 2 probes de nullabilité 3.1 rouges (2 tests / 3 asser
 ## 2026-10-11 — B26 : conserver l'absence d'empreinte historique
 
 Après les microcommits a56f0144 et fe8b4cda, l'intégrateur a relevé le contrat non nullable d'un content_digest historique réellement nul. Trois probes frais avant correction : 3 tests / 12 assertions, 2 échecs OpenAPI/types ; le probe HTTP réussissait déjà sur les deux routes, sans modification du digest en base. CatalogueDetail décrit maintenant string|null, pattern64 et absence historique sans recalcul/backfill ; 66 types régénérés. Ciblage courant terminé : 42 tests / 2635 assertions, PHPStan 8 sans erreur et Pint --test verts. Preuve B26_CATALOGUE_READINESS.md. Les nombres ciblés remplacent les précédents sans addition. Aucun SQL global avant parent B25 final ; CI exacte et revue humaine à recevoir. B33/badge/has_lab/Q16 absents : PR35 reste Draft, aucun B26 DONE/gate.
+
+## 2026-10-11 — B25 : attribution avant publication
+
+Reprise isolée depuis PR34 `ce75045`, historiques préservés. Probe rouge réel : approbation de la révision 2 enregistrée à 3 (1 test / 2 assertions). Correction minimale du snapshot avant transition ; HTTP B25 vert 23 / 59 et Pint ciblé vert, sur base dédiée `haas_b25_review_test`. La publication Q12 et les protections de downgrade restent à corriger ; aucune réception globale ni approbation humaine déclarée. Preuve : `docs/quality/B25_RECEPTION_20261011.md`.
+
+### B25 — downgrade conservateur
+
+Snapshot commité localement en `18bfbe0`. Trois défauts de descente de schéma reproduits puis corrigés : locks transactionnels avant contrôle/DDL, refus des empreintes ou approbations connues ; vrai cycle legacy down/up sans purge ni attribution inventée. Ciblés schéma + concurrence réelle verts **10 / 79** ; seuls les helpers de fixtures sont adaptés au refus conservateur. Timeout transitoire d’une relance distingué du succès final. Q12 publication reste à terminer.
+
+### B25 — Q12 corrigée, code prêt à réception intégrateur
+
+Downgrade commité en `eceb4bc`. Intention de publication propriétaire/version stable dans transaction métier puis livraison après commit ; visibilité/état/droits courants avant liste, compteur et marquage ; migration composée conservant les autres types SQL, refus des événements stables. Probe rouge 1 / 1 puis ciblés définitifs **57 / 467** verts, APIInventory **1 / 81**, Pint complet/PHPStan8, types61, pack18/18 et déploiement documentaire7/7 verts. Code/fixtures figés ; root reprend le parent documentaire B24 puis les suites complètes et la CI exacte. Aucun test actif, push, ready ou approbation humaine par cet agent. Preuve détaillée `B25_RECEPTION_20261011.md`.

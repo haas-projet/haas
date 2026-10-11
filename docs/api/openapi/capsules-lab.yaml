@@ -279,7 +279,13 @@ paths:
         `published_at` serveur et un `content_digest` SHA-256 des
         champs canoniques (`version_label`, `body`, `limits`,
         `technologies` triées). Une décision `approved` est écrite dans
-        `capsule_version_reviews` ; aucune note. Une version publiée
+        `capsule_version_reviews` ; aucune note. Le journal
+        conserve reviewed_lock_version de la révision avant transition.
+        L'intention capsule.version.published au propriétaire de la capsule
+        est écrite dans la même transaction ; livraison après commit,
+        chemin vers cette version précise, aucun corps ni note copié.
+        Le rôle, le compte vérifié actif et la visibilité sont recontrôlés
+        avant tout rejeu ; retrait ou révision ultérieure donne 409. Une version publiée
         devient immuable par trigger SQL (B22 étendu). AC13 appliqué :
         la publication n'hérite d'aucune preuve ni définition de
         laboratoire ; une correction ultérieure est une nouvelle version.

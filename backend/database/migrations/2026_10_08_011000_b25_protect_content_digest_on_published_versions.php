@@ -51,10 +51,19 @@ return new class extends Migration
 
     public function down(): void
     {
-        if (! Schema::hasTable('capsule_versions')) {
-            return;
-        }
-        DB::unprepared(<<<'SQL'
+        DB::transaction(function (): void {
+            if (! Schema::hasTable('capsule_versions')) {
+                return;
+            }
+            DB::statement('LOCK TABLE capsule_versions IN ACCESS EXCLUSIVE MODE');
+            if (Schema::hasTable('capsule_version_reviews')) {
+                DB::statement('LOCK TABLE capsule_version_reviews IN ACCESS EXCLUSIVE MODE');
+            }
+            if ((Schema::hasColumn('capsule_versions', 'content_digest') && DB::table('capsule_versions')->whereNotNull('content_digest')->exists())
+                || (Schema::hasTable('capsule_version_reviews') && DB::table('capsule_version_reviews')->where('decision', 'approved')->exists())) {
+                throw new RuntimeException('Retour B25 refusé : garde des empreintes et décisions de publication à conserver.');
+            }
+            DB::unprepared(<<<'SQL'
             CREATE OR REPLACE FUNCTION b22_guard_capsule_version() RETURNS trigger LANGUAGE plpgsql AS $$
             DECLARE capsule_owner uuid;
             BEGIN
@@ -84,5 +93,6 @@ return new class extends Migration
             END;
             $$;
             SQL);
+        });
     }
 };

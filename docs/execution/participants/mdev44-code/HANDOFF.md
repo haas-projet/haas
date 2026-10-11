@@ -485,3 +485,15 @@ Dernière relecture B26 : 2 probes de nullabilité 3.1 rouges (2 tests / 3 asser
 ## 2026-10-11 — B26 : empreinte historique absente et nouvelle transmission
 
 Dernier correctif après fe8b4cdab77acca4f9471a1d06cdce9aee956b11 : le catalogue conserve l'absence réelle de content_digest des publications pré-B25. Aucun recalcul/backfill ; seul CatalogueDetail et son type généré passent à string|null, avec pattern et description historique. Probe HTTP des deux routes positif avant correction ; probes contrat/types réellement rouges (ciblage 3 / 12, 2 échecs). Ciblage final courant 42 tests / 2635 assertions réussi, PHPStan 8/Pint verts, 66 types vérifiés. Voir B26_CATALOGUE_READINESS.md. Le SHA du microcommit sera transmis après commit. Prochaine étape : synchronisation normale du parent B25 final par l'intégrateur puis réception complète et CI du SHA exact ; aucun SQL global ni push ici. PR35 reste Draft / B26 partiel pour B33/badge/has_lab/Q16 ; revue humaine encore attendue.
+
+## Reprise B25 — 11 octobre 2026
+
+Worktree isolé `pr-ready-b25-20261011`, base PR34 `ce75045`. Snapshot de la révision approuvée corrigé après probe HTTP rouge ; suite HTTP 23 / 59 et Pint ciblé verts. Prochaines corrections : notification Q12 de publication et downgrade conservant empreintes/attributions. L’intégrateur publiera seulement après réception du code figé et CI exacte ; revue humaine en attente. Les anciens worktrees restent historiques.
+
+Downgrade B25 corrigé sous verrou transactionnel : refus explicite des empreintes/approbations connues, garde inchangée ; legacy NULL down/up réel conservant dates, contenus et notes. Suite ciblée schéma + cinq courses réelle verte 10 / 79. Continuer Q12 dans ce worktree ; aucun test global concurrent ni push.
+
+### Transfert B25 — 11 octobre 2026
+
+Worktree `C:/laragon/www/HAAS_Projet/.worktrees/pr-ready-b25-20261011`, branche `review/pr-b25-20261011`. Microcommits précédents : snapshot `18bfbe0a460c4e82608dfdc8c02c84f6f35f9551`, downgrade `eceb4bcb2f5387891c98de00ce641894d27ed6c4`. Le SHA du commit Q12 est transmis dans le bilan réel, jamais inscrit dans lui-même.
+
+Q12 prête à réception : événement UUID de revue, owner sous verrou, cible propriétaire UX08 future `/capsules/<UUID>/versions/<UUID>/edition`, aucune note/corps projeté, état publié visible et compte courant avant lecture/compteur/marquage ; retrait exclu. Migrateur conserve les types SQL installés et refuse de perdre les événements stables. Ciblés SQL57/467, APIInventory1/81, Pint complet/PHPStan8, 61 types API, docs18/18 et7/7 réussis. Code figé, aucun test B25 actif ; env/vendor ignorés conservés, runner racine obligatoire pour PHP. Root fusionne B24 documentaire `2463e4b`, vérifie manifest/backend, puis Unit+Integration complètes sur les bases B25 dédiées et CI exacte. Aucun push/ready/merge de PR/revue humaine par cet agent ; parent en attente de revue humaine.

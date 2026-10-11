@@ -330,7 +330,7 @@
       "phase": "B",
       "execution_order": 28,
       "status": "IN_PROGRESS",
-      "evidence": ["docs/quality/B26_CATALOGUE_READINESS.md"]
+      "evidence": ["docs/quality/B26_CATALOGUE_READINESS.md", "docs/quality/PR_MANIFEST_20261011.md"]
     },
     {
       "id": "B27",

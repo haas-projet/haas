@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\Collaboration\ProposalState;
+use Carbon\CarbonImmutable;
 use Database\Factories\ProposalFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -11,7 +12,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-/** @property ProposalState $state */
+/**
+ * @property ProposalState $state
+ * @property CarbonImmutable|null $edited_at
+ * @property CarbonImmutable|null $hidden_at
+ */
 #[Fillable(['diagnosis', 'fix', 'verification', 'limits', 'code'])]
 class Proposal extends Model
 {

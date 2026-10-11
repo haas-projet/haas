@@ -67,6 +67,28 @@ export type community_HelpRequestRevisionPage = { readonly "data": ReadonlyArray
 
 export type community_HelpRequestUpdateInput = (unknown | unknown | unknown | unknown | unknown | unknown | unknown | unknown | unknown | unknown | unknown | unknown) & { readonly "lock_version": number; readonly "help_intent"?: "unblock" | "review_solution" | "reproduce_behavior" | "ask_question"; readonly "title"?: string; readonly "goal"?: string | null; readonly "expected"?: string | null; readonly "observed"?: string | null; readonly "attempts"?: string | null; readonly "environment"?: string | null; readonly "code"?: string | null; readonly "code_language"?: string | null; readonly "primary_language"?: string; readonly "reproduction_url"?: string | null; readonly "technologies"?: ReadonlyArray<community_RequestTechnologyInput>; readonly "edit_note"?: string | null; };
 
+export type community_Proposal = { readonly "id": string; readonly "request_id": string; readonly "author": { readonly "id": string; readonly "handle": string; }; readonly "diagnosis": community_ProposalSource; readonly "diagnosis_html": community_ProposalRenderedDescription; readonly "fix": community_ProposalSource; readonly "fix_html": community_ProposalRenderedDescription; readonly "verification": community_ProposalSource; readonly "verification_html": community_ProposalRenderedDescription; readonly "limits": community_ProposalSource; readonly "limits_html": community_ProposalRenderedDescription; readonly "code": string | null; readonly "state": "proposed" | "accepted" | "not_selected"; readonly "lock_version": number; readonly "created_at": string | null; readonly "edited_at": string | null; };
+
+export type community_ProposalCodeInput = string | null;
+
+export type community_ProposalCreateInput = { readonly "diagnosis": community_ProposalDescriptionInput; readonly "fix": community_ProposalDescriptionInput; readonly "verification": community_ProposalDescriptionInput; readonly "limits": community_ProposalDescriptionInput; readonly "code"?: community_ProposalCodeInput; };
+
+export type community_ProposalDescriptionInput = string;
+
+export type community_ProposalDetail = { readonly "data": community_Proposal; };
+
+export type community_ProposalPage = { readonly "data": ReadonlyArray<community_Proposal>; readonly "meta": OPENAPI_PaginationMeta; };
+
+export type community_ProposalRenderedDescription = string;
+
+export type community_ProposalRevision = { readonly "id": string; readonly "proposal_version": number; readonly "action": "created" | "updated" | "before_edit"; readonly "diagnosis": community_ProposalSource; readonly "diagnosis_html": community_ProposalRenderedDescription; readonly "fix": community_ProposalSource; readonly "fix_html": community_ProposalRenderedDescription; readonly "verification": community_ProposalSource; readonly "verification_html": community_ProposalRenderedDescription; readonly "limits": community_ProposalSource; readonly "limits_html": community_ProposalRenderedDescription; readonly "code": string | null; readonly "occurred_at": string; };
+
+export type community_ProposalRevisionPage = { readonly "data": ReadonlyArray<community_ProposalRevision>; readonly "meta": OPENAPI_PaginationMeta; };
+
+export type community_ProposalSource = string;
+
+export type community_ProposalUpdateInput = { readonly "diagnosis"?: community_ProposalDescriptionInput; readonly "fix"?: community_ProposalDescriptionInput; readonly "verification"?: community_ProposalDescriptionInput; readonly "limits"?: community_ProposalDescriptionInput; readonly "code"?: community_ProposalCodeInput; readonly "lock_version": number; };
+
 export type community_RequestTechnologyInput = { readonly "id": string; readonly "version_label"?: string | null; };
 
 export type current_account_Me = { readonly "id": string; readonly "handle": identity_Handle; readonly "email": string; readonly "email_verified": boolean; readonly "role": identity_AccountRole; readonly "status": "active"; readonly "is_demo": boolean; readonly "can": { readonly "manage_account_mail": boolean; readonly "update_profile": boolean; readonly "participate": boolean; readonly "moderate": boolean; readonly "administer": boolean; }; };
@@ -93,7 +115,7 @@ export type moderation_Receipt = (moderation_ReportFields);
 
 export type moderation_ReportFields = { readonly "id": string; readonly "resource_type": "profile"; readonly "resource_id": string; readonly "status": "new" | "in_review" | "resolved" | "dismissed"; readonly "lock_version": number; readonly "created_at": string; [key: string]: unknown; };
 
-export type notifications_Notification = { readonly "id": string; readonly "kind": "profile.moderated" | "comment.created"; readonly "message": string; readonly "target_path": string; readonly "read_at": string | null; readonly "created_at": string; };
+export type notifications_Notification = { readonly "id": string; readonly "kind": "profile.moderated" | "comment.created" | "proposal.created"; readonly "message": string; readonly "target_path": string; readonly "read_at": string | null; readonly "created_at": string; };
 
 export type profiles_ProfileFields = { readonly "id": string; readonly "handle": identity_Handle; readonly "avatar_initials": string; readonly "bio": string; readonly "country": string | null; readonly "primary_language": string; readonly "github_url": string | null; readonly "technologies": ReadonlyArray<profiles_Technology>; readonly "is_demo": boolean; readonly "contributions": null; [key: string]: unknown; };
 

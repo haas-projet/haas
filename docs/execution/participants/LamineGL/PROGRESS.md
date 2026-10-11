@@ -1,5 +1,9 @@
 # Suivi — communauté et entraide / LamineGL
 
+## 11 octobre 2026 — API B18 reçue localement
+
+Socle local `865ba827e732f3bfb15b2a86b3f1972e1296d3d6` conservé. Les cinq routes, création/édition idempotentes, première transition sous verrou, révisions/audits/outbox atomiques et notification privée sont reçus localement. **B18 IN_PROGRESS** jusqu’à la CI publiée. Tests finaux : 476 / 4851 hors SQL et 188 / 2325 PostgreSQL ciblés élargis, soit 664 / 7176 distincts ; PHPStan 8/Pint/Composer et 62 types réussis. Concurrence réelle à deux processus et corrections DTO/legacy documentées dans [B18_PROPOSALS_20261011.md](../../../quality/B18_PROPOSALS_20261011.md). Suite SQL complète locale non exécutée ; CI PHP 8.4/8.5 à recevoir. Assistance Codex, aucune signature de Lamine ni revue humaine inventée. Prochain : publication distincte et réception CI, puis B19 après intégration. Aucun gate, frontend ou déploiement.
+
 ## 11 octobre 2026 — B18, premier socle reçu localement
 
 Branche isolée `backend/communaute-entraide-b18-propositions` depuis main `d0d47c5`. Les neuf fichiers de préparation préexistants sont complétés ; DTO, validation Unicode/liens/code, Policy, Queries et migration avec conservation historique reçus. **B18 IN_PROGRESS**, aucun endpoint ni transition/idempotence de proposition encore livré. Tests réels : 472 / 4164 hors SQL et 51 / 308 PostgreSQL ciblés, soit 523 / 4472 distincts ; PHPStan 8/Pint/Composer/types 51 et documents 18/18 + 7/7 réussis. Suite SQL complète et CI B18 non exécutées sur ce premier socle. Voir [B18_FOUNDATION_20261011.md](../../../quality/B18_FOUNDATION_20261011.md). Assistance Codex, sans signature de Lamine inventée. Prochaine tranche : commandes idempotentes et première transition sous verrou, HTTP/contrat/concurrence ; aucun B19, gate, frontend ou déploiement.

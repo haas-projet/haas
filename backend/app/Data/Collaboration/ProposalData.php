@@ -20,6 +20,7 @@ final readonly class ProposalData
             || ($lockVersion !== null && (! is_int($lockVersion) || $lockVersion < 1 || $lockVersion >= 2147483647))) {
             throw new InvalidArgumentException('Données de proposition hors contrat.');
         }
+        $source = $changes;
         foreach ($changes as $field => $value) {
             if ($field === 'code' && $value === null) {
                 continue;
@@ -34,7 +35,7 @@ final readonly class ProposalData
         if ($lockVersion === null && array_diff(array_slice(ProposalContent::FIELDS, 0, 4), array_keys($changes)) !== []) {
             throw new InvalidArgumentException('Les quatre descriptions sont requises.');
         }
-        if (! ProposalContent::isValid($changes, $lockVersion !== null)) {
+        if (! ProposalContent::isValid($source, $lockVersion !== null)) {
             throw new InvalidArgumentException('Contenu de proposition hors contrat.');
         }
         $this->changes = $changes;

@@ -43,6 +43,8 @@ final class ProposalContentTest extends TestCase
         yield 'reference Markdown link' => ["[Documentation détaillée][ref]\n\n[ref]: https://example.test/docs"];
         yield 'inline title and parentheses' => ['[Documentation](https://example.test/docs(annexe) "Titre fictif")'];
         yield 'control' => ['Diagnostic fictif avec '."\x00".' contrôle'];
+        yield 'edge vertical tabs' => ["\x0BDescription entièrement fictive.\x0B"];
+        yield 'edge form feeds' => ["\x0CDescription entièrement fictive.\x0C"];
         yield 'invalid UTF-8' => [str_repeat('x', 21)."\xFF"];
         yield 'fictitious key' => ['api_key='.str_repeat('f', 32)];
         yield 'fictitious token' => ['ghp_'.str_repeat('f', 32)];

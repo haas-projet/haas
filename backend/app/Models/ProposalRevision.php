@@ -6,7 +6,13 @@ use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 
-/** @property CarbonImmutable $occurred_at */
+/**
+ * @property CarbonImmutable $occurred_at
+ * @property string $diagnosis
+ * @property string $fix
+ * @property string $verification
+ * @property string $limits
+ */
 final class ProposalRevision extends Model
 {
     use HasUuids;

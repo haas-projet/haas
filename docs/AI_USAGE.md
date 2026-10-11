@@ -144,3 +144,7 @@ Codex poursuit la demande de l’utilisateur dans le worktree B18 : adaptateurs 
 ## 11 octobre 2026 — Réception CI complète B18
 
 Codex : publication normale de la PR #37 vers main puis lecture distincte des deux jobs PHP 8.4/8.5 du run 38167657147, head applicatif 122bf5665b91561c92cbdf85f0a0b36ae3fcc0ed. Résultats 991 / 9968 par version, dont 515 / 5117 PostgreSQL, 62 types et 689 empreintes reçus ; contrôles de qualité terminés. Relecture automatisée distincte sans nouvel écart, aucune approbation humaine inventée. B18 IN_REVIEW ; le commit suivant ne porte que les preuves/suivis/empreintes, sa CI exacte doit encore être observée avant ready. Aucune fusion, tâche B19, frontend ou déploiement.
+
+## 11 octobre 2026 — B19 acceptation et résolution
+
+Assistance Codex sur branche isolée issue de B18 d4db146 : service transactionnel, Policy, queries, DTO/Request/Resources, deux routes, migrations additives, audit/outbox/notification et contrat. Trois sous-agents spécialisés pour HTTP, tests et concurrence, puis relecture indépendante ; ownership d’écriture rendu à l’intégrateur. Aucun avis humain ni identité de Lamine inventé. Rejeu remplacé 500 reproduit puis corrigé en 409 ; fixture de notification stale rafraîchie avec assertions de l’état réellement stocké. Réception locale 831 / 9415, types et qualité reçus ; CI complète à observer. Bases PostgreSQL de revue dédiées et rôle B2 séparé, dépendances inchangées, aucun code utilisateur exécuté, frontend ou déploiement.

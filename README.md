@@ -13,18 +13,24 @@ Le projet est en développement : backend Laravel/PostgreSQL d'abord, puis SPA R
 
 Ces parcours définissent le produit à livrer. Leur avancement est détaillé ci-dessous et dans [le suivi d'exécution](docs/execution/PROGRESS.md).
 
-## État du développement — 7 octobre 2026
+## État du développement — 11 octobre 2026
 
 | Périmètre | État réel |
 |---|---|
 | Socle B01–B09, B11–B13 et B32 | **13 lots intégrés dans `main`** : Laravel, qualité/CI, contrat HTTP, identité, authentification par session, courriels/reset, compte et permissions, schéma de collaboration, audit, idempotence et administration. |
+| Demandes et commentaires B14–B17 | **4 lots intégrés dans `main` par #24** : création, lecture/recherche, édition/publication versionnée, commentaires historisés et notifications après commit. |
+| Propositions B18 et résolution B19 | [B18 #37](https://github.com/haas-projet/haas/pull/37) prête pour revue après CI exacte, 991 / 9968 par PHP 8.4/8.5. B19 reçu localement sur branche distincte depuis B18, CI publiée et revue humaine en attente ; [preuves et limites](docs/quality/B19_RESOLUTIONS_20261011.md). Aucun de ces deux lots intégré. |
 | Profils B10, notifications B29, modération B30–B31 et préparation B39–B42 | Livraisons partielles intégrées ; raccordements métier et réception transversale à compléter. |
-| Capsules et laboratoire | Enums intégrés par #12 ; B22/B23 en préparation dans les PR brouillons #29/#30. |
+| Capsules et laboratoire | Enums intégrés par #12 ; B22–B27 proposés dans les PR #29/#30/#33/#34/#35/#36, sans fusion. Corrections et synchronisations vérifiées ; B26 reste partiel pour badge/has_lab/Q16, dépendant de B33. |
 | Brique interne B1 — B35 | Service transactionnel, déduplication, tests de concurrence et correction UTC intégrés par #27. Connexion/runtime laboratoire séparés et module pédagogique défectueux à compléter. |
-| API de démonstration B2 — B38 | PR #28 bloquée : origine de démonstration refusée et cookies HAAS émis dans les tests de revue. Isolation à corriger. |
+| API de démonstration B2 — B38 | Intégrée dans `main` par #28 : runtime/configuration et base fictive séparés, sans cookie HAAS, clés stables, quotas et purge. Isolation OS/VPS et parcours navigateur à recevoir. |
 | Frontend React/TypeScript | À développer après **BACKEND_GATE** et **GO_FRONTEND** ; `frontend/` contient les consignes. |
 
 Les PR [#12](https://github.com/haas-projet/haas/pull/12), [#23](https://github.com/haas-projet/haas/pull/23) (avec les compléments #22) et [#27](https://github.com/haas-projet/haas/pull/27) sont fusionnées dans `main`. Le code B1+B11 combiné a passé **488 tests / 3 977 assertions**, localement puis sous PHP 8.4/8.5 et PostgreSQL 17 dans la [CI 37637092346](https://github.com/haas-projet/haas/actions/runs/37637092346). La [CI de `main` après fusion](https://github.com/haas-projet/haas/actions/runs/37637569825) est également verte.
+
+B14–B17 sont désormais fusionnés par [#24](https://github.com/haas-projet/haas/pull/24), commit `b76612d`. Le head publié et main ont chacun une CI verte sur PHP 8.4/8.5 : **671 tests / 6 805 assertions** par version, PostgreSQL compris. Voir la [CI de main 37681824151](https://github.com/haas-projet/haas/actions/runs/37681824151) et le [bilan de préparation des PR](docs/quality/PR_READINESS_20261007.md).
+
+B38 est fusionnée par [#28](https://github.com/haas-projet/haas/pull/28), commit `d0d47c5`. Sa [CI exacte 37690142490](https://github.com/haas-projet/haas/actions/runs/37690142490) passe sur PHP 8.4/8.5 : **770 tests / 7 291 assertions** par version. [Preuve d’isolation et limites](docs/quality/B38_ISOLATION_20261007.md). Au total, **18 lots backend sont intégrés** ; les six PR capsules restent soumises à la revue humaine.
 
 Preuves : [revue et fusions de Madina](docs/quality/MERGE_MADINA.md), [fusions du socle](docs/quality/MERGE_SOCLE.md), [réception partielle](docs/quality/SOCLE_RECEPTION_PARTIELLE.md) et [blocages du socle](docs/BLOCKERS.md).
 

@@ -1,8 +1,8 @@
 openapi: 3.1.0
 info:
   title: HAAS — Socle API
-  version: 0.18.0
-  description: Socle identité, profils, audit et idempotence ; demandes B14–B16, commentaires B17 et propositions structurées historisées B18 ; acceptation et résolution B19 à raccorder.
+  version: 0.19.0
+  description: Socle identité, profils, audit et idempotence ; demandes B14–B16, commentaires B17, propositions structurées historisées B18 et acceptation/résolution attribuée B19. Réouverture B20 et non-sélection/archivage B21 à raccorder.
 servers:
   - url: http://localhost:8000
 x-haas-domain-fragments:
@@ -13,6 +13,10 @@ x-haas-domain-fragments:
   capsules-lab:
     $ref: './api/openapi/capsules-lab.yaml'
 paths:
+  '/api/v1/requests/{id}/resolve':
+    $ref: './api/openapi/community.yaml#/paths/~1api~1v1~1requests~1{id}~1resolve'
+  '/api/v1/requests/{id}/resolution':
+    $ref: './api/openapi/community.yaml#/paths/~1api~1v1~1requests~1{id}~1resolution'
   '/api/v1/requests/{id}/proposals':
     $ref: './api/openapi/community.yaml#/paths/~1api~1v1~1requests~1{id}~1proposals'
   '/api/v1/proposals/{id}':

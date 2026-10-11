@@ -1,5 +1,11 @@
 # Suivi du dépôt HAAS
 
+## État vérifié le 11 octobre 2026 — priorité aux PR
+
+B38 #28 est fusionnée dans main d0d47c5. Les trois branches permanentes sont alignées sur main ; 10 branches distantes restent nécessaires, dont les six PR ouvertes. #29/#30/#33 n’ont pas de conflit et ont une CI verte sur leurs heads contrôlés ; #29 attend une revue humaine. Leurs manifestes périmés sont corrigés et un contrôle CI dédié est ajouté. B25–B27 sont encore en correction ; B26 reste partiel sans Q16/B33. Les lots non fusionnés ne sont pas DONE. Aucun gate ni accord frontend/production. Voir [PR_MANIFEST_20261011.md](../quality/PR_MANIFEST_20261011.md). Le bilan ci-dessous du 7 octobre et les entrées antérieures sont historiques.
+
+- Lot documentaire d’intégration : empreintes complètes et vérifiées, pack 18/18, déploiement documentaire 7/7 et diff propre ; octets backend inchangés. Nouvelle CI à recevoir après publication. SHA réel à consulter dans le bilan/PR après création du commit.
+
 **Statut actif :** B01–B09, B11–B17 et B32 DONE (17 lots entiers). #24 est réellement fusionnée dans main b76612d le 7 octobre à 20:24:58 UTC ; CI du head 2addb4d et CI de main vertes (671 tests / 6805 assertions sur PHP 8.4 et 8.5). GitHub ne contient aucune revue enregistrée sur #24 ; aucune approbation humaine n’est inventée. #31 (README et bilan) est fusionnée dans main e3bd34c. B22/B23/B24 sont préparés dans #29/#30/#33, corrections et synchronisations en cours ; B38 #28 attend les preuves finales de son isolation corrigée. B35 reste partiel. Les 22 autres lots de Lamine restent à faire. B10/B29/B30/B31 et B39–B42 IN_PROGRESS ; B43/B44 BLOCKED. S01/S02 partiels. Aucun BACKEND_GATE, GO_FRONTEND ou GO_PRODUCTION. Voir PR_READINESS_20261007.md et les preuves métier. Les entrées suivantes sont historiques.
 
 À renseigner après commandes réelles : date / lot / responsable / fichiers / commandes / observé / commit ou raison de non-commit / blocage / prochaine action. Les contrôles documentaires de ce pack ne valident pas BACKEND_GATE, FRONTEND_GATE ou RELEASE_GATE.

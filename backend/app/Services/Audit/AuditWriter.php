@@ -4,10 +4,12 @@ namespace App\Services\Audit;
 
 use App\Data\Audit\HelpRequestRevisionData;
 use App\Data\Audit\ProfileRevisionData;
+use App\Enums\HelpRequests\HelpRequestState;
 use App\Exceptions\Audit\AuditStorageFailed;
 use App\Models\Comment;
 use App\Models\HelpRequest;
 use App\Models\Profile;
+use App\Models\Proposal;
 use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\Model;
@@ -70,6 +72,43 @@ final class AuditWriter
                 'id' => (string) Str::uuid(), 'actor_id' => $actor->id, 'resource_type' => 'comment', 'resource_id' => $comment->id,
                 'revision' => $comment->lock_version, 'action' => $created ? 'comment.created' : 'comment.updated',
                 'metadata' => json_encode(['request_id' => $comment->request_id, 'comment_version' => $comment->lock_version], JSON_THROW_ON_ERROR), 'occurred_at' => now()->utc(),
+            ]);
+        } catch (QueryException) {
+            throw new AuditStorageFailed('Échec du stockage de la révision.');
+        }
+    }
+
+    public function proposalChanged(User $actor, Proposal $proposal, bool $created): void
+    {
+        $this->requireTransaction($actor, $proposal);
+        try {
+            Gate::forUser($actor)->authorize('update', $proposal);
+            DB::table('content_revisions')->insert([
+                'id' => (string) Str::uuid(), 'actor_id' => $actor->id, 'resource_type' => 'proposal', 'resource_id' => $proposal->id,
+                'revision' => $proposal->lock_version, 'action' => $created ? 'proposal.created' : 'proposal.updated',
+                'metadata' => json_encode(['request_id' => $proposal->request_id, 'proposal_version' => $proposal->lock_version], JSON_THROW_ON_ERROR), 'occurred_at' => now()->utc(),
+            ]);
+        } catch (QueryException) {
+            throw new AuditStorageFailed('Échec du stockage de la révision.');
+        }
+    }
+
+    public function helpRequestStarted(User $actor, HelpRequest $request, Proposal $proposal): void
+    {
+        $this->requireTransaction($actor, $request);
+        $this->requireTransaction($actor, $proposal);
+        try {
+            Gate::forUser($actor)->authorize('create', [Proposal::class, $request]);
+            if ($proposal->author_id !== $actor->id || $proposal->request_id !== $request->id
+                || $proposal->lock_version !== 1 || $request->state !== HelpRequestState::InProgress) {
+                throw new AuthorizationException;
+            }
+            // Transition automatique : elle n'usurpe pas une édition du propriétaire.
+            $revision = (int) DB::table('content_revisions')->where('resource_type', 'help_request')->where('resource_id', $request->id)->max('revision') + 1;
+            DB::table('content_revisions')->insert([
+                'id' => (string) Str::uuid(), 'actor_id' => $actor->id, 'resource_type' => 'help_request', 'resource_id' => $request->id,
+                'revision' => $revision, 'action' => 'help_request.started',
+                'metadata' => json_encode(['request_version' => $request->lock_version, 'proposal_id' => $proposal->id], JSON_THROW_ON_ERROR), 'occurred_at' => now()->utc(),
             ]);
         } catch (QueryException) {
             throw new AuditStorageFailed('Échec du stockage de la révision.');

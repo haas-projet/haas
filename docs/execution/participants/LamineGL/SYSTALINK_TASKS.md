@@ -1,5 +1,7 @@
 # Tableau Systalink — partie de Lamine
 
+État consolidé du 11 octobre 2026 : B11 et B14–B17 présents dans main `d0d47c5`, B18 reçu localement puis à publier pour revue. Les entrées et preuves antérieures sont conservées. Ce tableau local ne modifie aucune carte Systalink distante.
+
 Assigné : LamineGL. Étiquette : Backend. Priorité normale ; pas d'échéance inventée.
 
 B11 est intégré dans main depuis la fusion de #23 le 7 octobre 2026 ; sa carte peut passer à **Terminé**. Les statuts de ce fichier sont à reporter dans Systalink : aucune carte distante n'a été modifiée par cette livraison. Ne pas cocher toute la tâche de coordination #2 : elle contient 27 lots. Les autres lots ne sont pas déclarés terminés.
@@ -11,11 +13,11 @@ Description B11 : Créer les tables et relations PostgreSQL, protéger les réf�
 | Tâche | Colonne actuelle |
 |---|---|
 | B11 — Schéma de collaboration | Terminé — fusion #23 vérifiée dans main |
-| B14 — Créer une demande | En cours — API réalisée, revue et intégration en attente |
-| B15 — Lire et rechercher les demandes | En cours — API réalisée, revue et intégration en attente |
-| B16 — Modifier une demande | En cours — édition/publication/historique, revue et intégration en attente |
-| B17 — Commentaires | En cours — commentaires/révisions/notifications testés, revue et intégration en attente |
-| B18 — Propositions de solution | À faire |
+| B14 — Créer une demande | Terminé — intégration dans main d0d47c5 vérifiée |
+| B15 — Lire et rechercher les demandes | Terminé — intégration dans main d0d47c5 vérifiée |
+| B16 — Modifier une demande | Terminé — intégration dans main d0d47c5 vérifiée |
+| B17 — Commentaires | Terminé — intégration dans main d0d47c5 vérifiée |
+| B18 — Propositions de solution | En cours — PR #37, CI complète 991 / 9968, revue humaine/intégration en attente |
 | B19 — Accepter une proposition | À faire |
 | B20 — Rouvrir une demande | À faire |
 | B21 — Archiver et non-retenir | À faire |

@@ -3,6 +3,8 @@
 namespace App\Support\Http;
 
 use App\Exceptions\Collaboration\CommentVersionConflict;
+use App\Exceptions\Collaboration\ProposalHistoryRejected;
+use App\Exceptions\Collaboration\ProposalVersionConflict;
 use App\Exceptions\Demo\DemoCapacityReached;
 use App\Exceptions\HelpRequests\HelpRequestCreationRejected;
 use App\Exceptions\HelpRequests\HelpRequestVersionConflict;
@@ -44,7 +46,7 @@ final class ApiExceptionRenderer
             $exception instanceof ValidationException, $exception instanceof RegistrationRejected => 422,
             $exception instanceof InvalidCredentials, $exception instanceof InvalidResetToken => 422,
             $exception instanceof ProfileUpdateRejected, $exception instanceof HelpRequestCreationRejected => 422,
-            $exception instanceof HelpRequestVersionConflict, $exception instanceof CommentVersionConflict => 409,
+            $exception instanceof HelpRequestVersionConflict, $exception instanceof CommentVersionConflict, $exception instanceof ProposalVersionConflict, $exception instanceof ProposalHistoryRejected => 409,
             $exception instanceof ProfileVersionConflict, $exception instanceof IdempotencyConflict, $exception instanceof AccountVersionConflict, $exception instanceof ModerationRejected => 409,
             $exception instanceof InactiveAccount => 403,
             $exception instanceof RegistrationUnavailable => 503,
@@ -78,6 +80,10 @@ final class ApiExceptionRenderer
         if ($exception instanceof IdempotencyConflict) {
             $code = 'IDEMPOTENCY_CONFLICT';
             $message = 'Cette clé correspond à une autre intention. Reprenez la demande d’origine.';
+        }
+        if ($exception instanceof ProposalHistoryRejected) {
+            $code = 'PROPOSAL_HISTORY_REQUIRES_REVIEW';
+            $message = 'Le contenu historique nécessite un traitement de modération avant cette modification.';
         }
 
         $headers = $exception instanceof HttpExceptionInterface ? $exception->getHeaders() : [];

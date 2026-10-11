@@ -1,8 +1,8 @@
 openapi: 3.1.0
 info:
   title: HAAS — Socle API
-  version: 0.16.0
-  description: Socle identité, profils, audit et idempotence ; création B14, lecture B15, édition/publication/historique B16 ; commentaires historisés et notifications internes B17 ; autres contributions à raccorder.
+  version: 0.18.0
+  description: Socle identité, profils, audit et idempotence ; demandes B14–B16, commentaires B17 et propositions structurées historisées B18 ; acceptation et résolution B19 à raccorder.
 servers:
   - url: http://localhost:8000
 x-haas-domain-fragments:
@@ -13,6 +13,12 @@ x-haas-domain-fragments:
   capsules-lab:
     $ref: './api/openapi/capsules-lab.yaml'
 paths:
+  '/api/v1/requests/{id}/proposals':
+    $ref: './api/openapi/community.yaml#/paths/~1api~1v1~1requests~1{id}~1proposals'
+  '/api/v1/proposals/{id}':
+    $ref: './api/openapi/community.yaml#/paths/~1api~1v1~1proposals~1{id}'
+  '/api/v1/proposals/{id}/revisions':
+    $ref: './api/openapi/community.yaml#/paths/~1api~1v1~1proposals~1{id}~1revisions'
   '/api/v1/requests/{id}/comments':
     $ref: './api/openapi/community.yaml#/paths/~1api~1v1~1requests~1{id}~1comments'
   '/api/v1/comments/{id}':
@@ -96,6 +102,11 @@ components:
     SessionCookie:
       $ref: './api/openapi/identity.yaml#/components/securitySchemes/SessionCookie'
   headers:
+    NoStore:
+      description: La réponse contient la directive no-store ; le transport peut également ajouter private.
+      schema:
+        type: string
+      example: no-store, private
     RequestId:
       description: UUID généré par le serveur pour chaque requête ; un identifiant fourni par le client est ignoré.
       schema:
@@ -217,6 +228,8 @@ components:
     ApiFailure:
       description: Erreur HAAS. Voir le tableau de codes communs dans HTTP_CONTRACT.md.
       headers:
+        Cache-Control:
+          $ref: '#/components/headers/NoStore'
         X-Request-ID:
           $ref: '#/components/headers/RequestId'
       content:
@@ -226,6 +239,8 @@ components:
     RetryableFailure:
       description: Erreur 429 ou 503 ; Retry-After conservé lorsqu'il est disponible.
       headers:
+        Cache-Control:
+          $ref: '#/components/headers/NoStore'
         X-Request-ID:
           $ref: '#/components/headers/RequestId'
         Retry-After:

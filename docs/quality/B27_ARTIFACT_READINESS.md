@@ -58,3 +58,25 @@ La capsule documentaire publiée reste indépendante de l'état de son propriét
 ## Réception complète
 
 En attente de la synchronisation des prérequis corrigés, des suites complètes locales et de la CI du head exact, notamment les symlinks Linux. Publication et état de PR confiés à l'intégrateur. Revue humaine, Qodana, BACKEND_GATE, GO_FRONTEND et GO_PRODUCTION non reçus.
+
+## Correction de répétabilité après synchronisation — 11 octobre 2026
+
+Le candidat synchronisé `134ebe0dab1de7454a266c619e1d10ca98b1d29e` reprend B25/B26 corrigés. L'intégrateur a interrompu deux réceptions Integration B27 en erreur ; sa relance `--stop-on-error` a identifié dès `AccountMailDeliveryTest` la fonction `b27_guard_artifact` déjà présente, SQLSTATE `42723`, migration `2026_10_11_100000` ligne 18. Ces réceptions restent **NON TERMINÉES** et ne sont pas présentées comme réussies. La cause n'est pas une garde down à affaiblir : `migrate:fresh` enlève les tables et leurs triggers, mais conserve cette fonction PostgreSQL.
+
+Une nouvelle régression dédiée, `ArtifactFreshMigrationTest`, invoque explicitement deux vrais `migrate:fresh` sur la base B27 gardée. Après chaque cycle, elle crée uniquement un kit de fixture publié et tente de modifier son empreinte : refus SQL `23514` / `artifacts_published_immutable`, digest inchangé. Le nettoyage dépose les seules fixtures sous `TestDatabaseGuard` avant rollback du schéma vide ; il ne reçoit pas un downgrade destructif de production. Avant correction, le probe a réellement donné **1 test / 1 assertion / 1 erreur SQL42723**, JUnit `b27-fresh-migration-red.xml`.
+
+La seule modification de production est `CREATE OR REPLACE FUNCTION` au lieu de `CREATE FUNCTION` dans cette migration. Le corps de garde, l'ordre des verrous, le trigger, les contraintes et les refus down restent inchangés. Première relance du probe après ce correctif : **1 test / 11 assertions, réussi**, JUnit `b27-fresh-migration-green.xml`.
+
+PHPStan a ensuite trouvé trois alertes dans le nouveau test : retour `PendingCommand|int` du helper `artisan` et `errorInfo` potentiellement nul. Le ciblage plus large a été arrêté avant édition et reste **NON TERMINÉ** (`b27-fresh-migration-final-targeted.xml`). Le test appelle maintenant `Artisan::call`, vérifie son code entier et accède au SQLSTATE avec présence vérifiée, sans cast, ignore ou baseline. PHPStan niveau 8 et Pint `--test` sont verts sur cette version ; `../scripts/generate-api-types.php --check` constate **67 types à jour** sur les contrats composés.
+
+La réception complète et la CI du nouveau SHA restent à recevoir de l'intégrateur après le microcommit. ARB05 reste inactive ; aucune approbation humaine, publication, fusion de PR, DONE, gate ou livraison frontend n'est annoncée.
+
+Contrôles ciblés définitifs de cette correction, via le même runner B27 / PHP 8.5.10 / PostgreSQL 17 et la seule base `haas_b27_review_test` :
+
+- `vendor/bin/phpunit --testsuite Integration --filter 'ArtifactFreshMigrationTest|ArtifactPublicationSchemaTest|ArtifactDownloadHttpTest|ArtifactDownloadConcurrencyTest|ArtifactIssuanceAtomicityTest|AccountMailDeliveryTest' --colors=never --log-junit storage/logs/b27-fresh-migration-final-targeted-v2.xml` : **69 tests / 285 assertions, réussi**. Inclut les deux cycles frais, l'immuabilité kit/notices et les refus down, les accès HTTP/audit, les courses réelles PostgreSQL et le premier test initialement en erreur dans la réception globale.
+- `vendor/bin/phpstan analyse --memory-limit=1G --no-progress` : niveau 8, aucune erreur.
+- `vendor/bin/pint --test` : réussi.
+- `../scripts/generate-api-types.php --check` : 67 types à jour.
+- `node scripts/validate-pack.mjs` et `node scripts/check-deployment-docs.mjs` depuis le worktree : 18 et 7 contrôles documentaires réussis, aucun test applicatif ou serveur.
+
+Les ciblages précédents se recouvrent ; ne pas additionner leurs nombres. La lecture indépendante de `pr_capsule_versions` n'a trouvé aucun défaut concret dans le diff minimal et la nouvelle régression ; elle n'est pas comptée comme un test. Journaux et JUnit restent ignorés. Le SHA du microcommit sera transmis après sa création ; la suite complète B27 doit être relancée par l'intégrateur sur ce code corrigé.

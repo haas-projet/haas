@@ -16,7 +16,7 @@ return new class extends Migration
         });
         DB::statement("ALTER TABLE artifacts ADD CONSTRAINT artifacts_notices_integrity CHECK ((notices_sha256 IS NULL AND notices_size IS NULL) OR (notices_path IS NOT NULL AND notices_sha256 IS NOT NULL AND notices_sha256 ~ '^[0-9a-f]{64}$' AND notices_size IS NOT NULL AND notices_size > 0))");
         DB::unprepared(<<<'SQL'
-            CREATE FUNCTION b27_guard_artifact() RETURNS trigger LANGUAGE plpgsql AS $$
+            CREATE OR REPLACE FUNCTION b27_guard_artifact() RETURNS trigger LANGUAGE plpgsql AS $$
             DECLARE old_version uuid; new_version uuid; frozen boolean;
             BEGIN
                 IF TG_OP <> 'INSERT' THEN old_version := OLD.version_id; END IF;

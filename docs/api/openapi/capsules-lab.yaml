@@ -634,7 +634,10 @@ components:
             version_label: { type: string }
             body: { type: string }
             limits: { type: [string, 'null'] }
-            content_digest: { type: string, pattern: '^[0-9a-f]{64}$' }
+            content_digest:
+              type: [string, 'null']
+              pattern: '^[0-9a-f]{64}$'
+              description: 'SHA-256 figé par B25 lors de la publication ; null pour une publication historique antérieure sans empreinte, conservé sans recalcul ni backfill.'
             published_at: { type: [string, 'null'], format: date-time }
             technologies:
               type: array

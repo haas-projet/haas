@@ -21,4 +21,11 @@ final class GeneratedApiTypesTest extends TestCase
         $this->assertStringContainsString('readonly "limits": string | null;', $types);
         $this->assertStringContainsString('readonly "editorial_origin"?: string | null;', $types);
     }
+
+    public function test_catalogue_content_digest_type_preserves_legacy_null(): void
+    {
+        $types = file_get_contents(base_path('../docs/api/generated/haas-api.d.ts'));
+        $this->assertIsString($types);
+        $this->assertMatchesRegularExpression('/export type capsules_lab_CapsuleCatalogueDetail = .*readonly "content_digest": string \| null;/m', $types);
+    }
 }

@@ -66,3 +66,21 @@ Contrôles finaux avant transmission du code au parent, toujours via le runner B
 - `vendor/bin/pint --test` : réussi.
 
 Ce ciblage final remplace les nombres des relances ciblées précédentes, sans les additionner. Aucun SQL global ni réception complète n'est exécuté avant synchronisation du parent B25 final. PR #35 reste en brouillon et B26 reste partiel : badge/filtre laboratoire, `has_lab` et Q16 dépendant de B33 ne sont pas livrés. La CI exacte et la revue humaine demeurent à recevoir.
+
+## Empreintes historiques absentes : correctif après transmission
+
+La relecture de l'intégrateur a trouvé un dernier écart : la Resource conserve réellement `content_digest: null` pour une publication historique antérieure à B25 sans empreinte, alors que le schéma CatalogueDetail et son type généré exigeaient une chaîne. Les microcommits précédents sont `a56f0144fb104d07c52e51a5aa7c9019dc2f0e94` et `fe8b4cdab77acca4f9471a1d06cdce9aee956b11`.
+
+Trois nouveaux probes ont été exécutés avant correction du contrat : **3 tests / 12 assertions, 2 échecs réels**, JUnit `b26-legacy-digest-red.xml`. Les deux échecs concernaient OpenAPI et le type TypeScript. Le probe HTTP réussissait déjà : les deux routes de détail conservaient la clé présente avec `null`, le corps choisi et l'absence d'empreinte en base après lecture. Sa fixture représente uniquement cette publication historique ; elle ne reçoit pas le Service de publication B25 et n'invente aucun digest rétroactif.
+
+Le seul schéma corrigé est `CapsuleCatalogueDetail.version.content_digest` : union `[string, 'null']`, pattern SHA-256 conservé pour les chaînes, description explicite de l'historique sans recalcul ni backfill. Les 66 types API sont régénérés, avec `string | null` pour ce champ. Aucune Resource, donnée historique ou migration applicative n'est modifiée.
+
+Contrôles réellement terminés sur le runner B26, PHP 8.5.10 et la même base PostgreSQL dédiée :
+
+- `vendor/bin/phpunit --testsuite Unit,Feature,Integration --filter 'CapsuleCatalogueFilterDataTest|CapsuleCatalogueHttpTest|OpenApiContractTest|GeneratedApiTypesTest' --colors=never --log-junit storage/logs/b26-legacy-digest-final-targeted.xml` : **42 tests / 2635 assertions, réussi**.
+- `vendor/bin/phpstan analyse --memory-limit=512M --no-progress` : niveau 8, aucune erreur.
+- `vendor/bin/pint --test` : réussi.
+- `../scripts/generate-api-types.php` : 66 types générés ; leur vérification est incluse dans le ciblage.
+- `node scripts/validate-pack.mjs` et `node scripts/check-deployment-docs.mjs` depuis le worktree : respectivement 18 et 7 contrôles documentaires réussis ; aucun test applicatif ou serveur.
+
+Les 42 tests remplacent les nombres ciblés précédents ; ils ne s'y additionnent pas. La lecture indépendante finale des Queries/Resources par `pr_capsule_schema` n'a trouvé aucun autre défaut concret et n'est pas comptée comme un test. Parent B25 final, réception complète, CI exacte et revue humaine restent à recevoir. PR #35 reste Draft / B26 partiel pour B33, badge, `has_lab` et Q16. Aucun push ni fusion de PR par cet agent.

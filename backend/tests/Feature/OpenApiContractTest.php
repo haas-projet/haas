@@ -81,6 +81,17 @@ final class OpenApiContractTest extends TestCase
         $this->assertSame(['integer', 'null'], $schemas['PaginationMeta']['properties']['to']['type']);
     }
 
+    public function test_catalogue_content_digest_preserves_legacy_null_without_backfill(): void
+    {
+        $contract = Yaml::parseFile(base_path('../docs/api/openapi/capsules-lab.yaml'));
+        $digest = $contract['components']['schemas']['CapsuleCatalogueDetail']['properties']['version']['properties']['content_digest'];
+
+        $this->assertSame(['string', 'null'], $digest['type']);
+        $this->assertSame('^[0-9a-f]{64}$', $digest['pattern']);
+        $this->assertStringContainsString('B25', $digest['description']);
+        $this->assertStringContainsString('sans recalcul', $digest['description']);
+    }
+
     /** @param array<string, bool> $visited */
     private function checkReferences(mixed $node, string $path, array &$visited): void
     {

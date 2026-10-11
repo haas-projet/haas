@@ -286,6 +286,23 @@ final class CapsuleCatalogueHttpTest extends PostgresTestCase
         $this->assertCount(1, $detail->json('data.version.technologies'));
     }
 
+    public function test_legacy_published_content_digest_stays_null_on_both_detail_routes(): void
+    {
+        $owner = User::factory()->verified()->create();
+        $capsule = Capsule::factory()->create(['owner_id' => $owner->id, 'slug' => 'publication-historique']);
+        // Fixture de lecture d'une publication antérieure à B25 : aucun digest rétroactif.
+        $version = $this->seedPublishedVersion($capsule, $owner, '1.0.0', ContributionRole::Diagnosis, legacyPublication: true);
+
+        foreach (['/api/v1/capsules/publication-historique', '/api/v1/capsules/publication-historique/versions/1.0.0'] as $path) {
+            $response = $this->browserRequest('GET', $path)->assertOk();
+            $this->assertArrayHasKey('content_digest', $response->json('data.version'));
+            $response->assertJsonPath('data.version.content_digest', null)
+                ->assertJsonPath('data.version.body', $version->body);
+        }
+
+        $this->assertNull($version->refresh()->content_digest, 'La lecture ne doit pas fabriquer une empreinte historique.');
+    }
+
     public function test_catalogue_has_no_custom_headers(): void
     {
         $this->publishCapsule('entetes-neutres');
@@ -531,7 +548,7 @@ final class CapsuleCatalogueHttpTest extends PostgresTestCase
     }
 
     /** @param list<Technology> $technologies */
-    private function seedPublishedVersion(Capsule $capsule, User $owner, string $label, ContributionRole $role, ?\DateTimeInterface $publishedAt = null, array $technologies = []): CapsuleVersion
+    private function seedPublishedVersion(Capsule $capsule, User $owner, string $label, ContributionRole $role, ?\DateTimeInterface $publishedAt = null, array $technologies = [], bool $legacyPublication = false): CapsuleVersion
     {
         $moderator = User::factory()->verified()->create(['role' => Role::Moderator]);
         // Création en brouillon : le trigger B22 n'interdit les écritures sur
@@ -568,7 +585,7 @@ final class CapsuleCatalogueHttpTest extends PostgresTestCase
             'state' => CapsuleVersionState::Published->value,
             'reviewer_id' => $moderator->id,
             'published_at' => $effectivePublishedAt,
-            'content_digest' => hash('sha256', $capsule->slug.' / '.$label),
+            'content_digest' => $legacyPublication ? null : hash('sha256', $capsule->slug.' / '.$label),
             'lock_version' => 2,
         ]);
         $version->refresh();

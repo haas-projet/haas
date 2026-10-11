@@ -672,3 +672,7 @@ Dernier élément manquant du verify B38 (« Aucune session HAAS utilisée et do
 ## 2026-10-08 - B24 : reprise de B23 par merge local 1ce4f1a. Suite Integration (hors Demo) : OK 526 tests / 4063 assertions. Pint, PHPStan 8 et composer test (413 / 4090) verts.
 
 ## 2026-10-08 - B25 : reprise de B24 par merge local 83bd71a. Suite Integration (hors Demo) : OK 549 tests / 4127 assertions. Pint, PHPStan 8 et composer test (413 / 4129) verts.
+
+## 2026-10-11 — B25 : attribution avant publication
+
+Reprise isolée depuis PR34 `ce75045`, historiques préservés. Probe rouge réel : approbation de la révision 2 enregistrée à 3 (1 test / 2 assertions). Correction minimale du snapshot avant transition ; HTTP B25 vert 23 / 59 et Pint ciblé vert, sur base dédiée `haas_b25_review_test`. La publication Q12 et les protections de downgrade restent à corriger ; aucune réception globale ni approbation humaine déclarée. Preuve : `docs/quality/B25_RECEPTION_20261011.md`.

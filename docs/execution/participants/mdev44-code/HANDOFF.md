@@ -428,3 +428,7 @@ Deux envois d’un formulaire B2 avec la même clé stable (`Idempotency-Key`, U
 ## 2026-10-08 - B24 : reprise de B23 par merge local 1ce4f1a. Suite Integration (hors Demo) : OK 526 tests / 4063 assertions. Pint, PHPStan 8 et composer test (413 / 4090) verts.
 
 ## 2026-10-08 - B25 : reprise de B24 par merge local 83bd71a. Suite Integration (hors Demo) : OK 549 tests / 4127 assertions. Pint, PHPStan 8 et composer test (413 / 4129) verts.
+
+## Reprise B25 — 11 octobre 2026
+
+Worktree isolé `pr-ready-b25-20261011`, base PR34 `ce75045`. Snapshot de la révision approuvée corrigé après probe HTTP rouge ; suite HTTP 23 / 59 et Pint ciblé verts. Prochaines corrections : notification Q12 de publication et downgrade conservant empreintes/attributions. L’intégrateur publiera seulement après réception du code figé et CI exacte ; revue humaine en attente. Les anciens worktrees restent historiques.

@@ -94,6 +94,22 @@ final class CapsulePublishHttpTest extends PostgresTestCase
         $this->assertSame(CapsuleVersionState::InReview, $version->state);
     }
 
+    public function test_approval_records_the_revision_reviewed_before_publication_transition(): void
+    {
+        [, $capsule, $version] = $this->seedInReview();
+        $reviewedVersion = $version->lock_version;
+        $reviewer = User::factory()->verified()->create(['role' => Role::Moderator]);
+        $this->loginAs($reviewer);
+        $response = $this->publishRequest($capsule, $version, $reviewedVersion)->assertOk();
+
+        $review = DB::table('capsule_version_reviews')->sole();
+        $this->assertSame($reviewedVersion, $review->reviewed_lock_version);
+        $this->assertSame($reviewedVersion + 1, $version->refresh()->lock_version);
+        $this->assertSame($version->lock_version, $response->json('data.lock_version'));
+        $this->assertSame($reviewer->id, $review->reviewer_id);
+        $this->assertSame($version->id, $review->version_id);
+    }
+
     public function test_admin_who_is_contributor_is_refused(): void
     {
         [$owner, $capsule, $version] = $this->seedInReview();

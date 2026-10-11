@@ -92,6 +92,7 @@ final class PublishCapsuleVersionService
 
                 $publishedAt = now()->utc();
                 $digest = $this->computeContentDigest($locked);
+                $reviewedVersion = $locked->lock_version;
                 $locked->state = CapsuleVersionState::Published;
                 $locked->reviewer_id = $current->id;
                 $locked->published_at = $publishedAt;
@@ -104,7 +105,7 @@ final class PublishCapsuleVersionService
                     'reviewer_id' => $current->id,
                     'decision' => ReviewDecision::Approved,
                     'note' => null,
-                    'reviewed_lock_version' => $locked->lock_version,
+                    'reviewed_lock_version' => $reviewedVersion,
                     'created_at' => $publishedAt,
                 ]);
                 $review->save();

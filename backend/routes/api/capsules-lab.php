@@ -3,12 +3,14 @@
 // Responsable : capsules/laboratoire. Aucune exécution de code utilisateur.
 // B2 est déclaré exclusivement par le runtime backend/demo, jamais par HAAS.
 
+use App\Http\Controllers\Capsules\IssueArtifactDownloadController;
 use App\Http\Controllers\Capsules\ListVisibleCapsulesController;
 use App\Http\Controllers\Capsules\PublishCapsuleVersionController;
 use App\Http\Controllers\Capsules\RequestChangesController;
 use App\Http\Controllers\Capsules\ShowVisibleCapsuleController;
 use App\Http\Controllers\Capsules\StoreCapsuleDraftController;
 use App\Http\Controllers\Capsules\StoreCapsuleVersionDraftController;
+use App\Http\Controllers\Capsules\StreamArtifactDownloadController;
 use App\Http\Controllers\Capsules\SubmitCapsuleVersionForReviewController;
 use App\Http\Controllers\Capsules\UpdateCapsuleVersionDraftController;
 use Illuminate\Support\Facades\Route;
@@ -48,4 +50,22 @@ Route::prefix('admin/capsules')->group(function (): void {
     Route::post('{capsule}/versions/{version}/publish', PublishCapsuleVersionController::class)
         ->whereUuid(['capsule', 'version'])
         ->name('admin.capsules.versions.publish');
+});
+
+// Téléchargement contrôlé du kit (B27, CAHIER_DES_CHARGES.md:956). Membre
+// actif/vérifié obligatoire par ProtectSpaRequests + EnsureAccountIsActive +
+// `verified`. L'URL signée pointe vers une route distincte qui réévalue tous
+// les droits à chaque accès (AC15/AC25).
+Route::prefix('capsules')->middleware(['auth:sanctum', 'verified', 'throttle:artifact-downloads'])->group(function (): void {
+    Route::get('{capsule}/versions/{version}/artifact/{artifact}', IssueArtifactDownloadController::class)
+        ->whereUuid(['capsule', 'version', 'artifact'])
+        ->name('capsules.versions.artifact.issue');
+});
+Route::prefix('capsules')->middleware(['auth:sanctum', 'verified', 'throttle:artifact-downloads', 'signed:relative'])->group(function (): void {
+    Route::get('{capsule}/versions/{version}/artifact/{artifact}/stream', StreamArtifactDownloadController::class)
+        ->whereUuid(['capsule', 'version', 'artifact'])
+        ->name('capsules.versions.artifact.stream');
+    Route::get('{capsule}/versions/{version}/artifact/{artifact}/notices', StreamArtifactDownloadController::class)
+        ->whereUuid(['capsule', 'version', 'artifact'])
+        ->name('capsules.versions.artifact.notices');
 });

@@ -470,6 +470,44 @@ Deux envois d’un formulaire B2 avec la même clé stable (`Idempotency-Key`, U
 
 ## 2026-10-08 - B26 : reprise de B25 par merge local 1c81ae4. Suite Integration (hors Demo) : OK 564 tests / 4192 assertions. Pint, PHPStan 8 et composer test (413 / 4203) verts.
 
+## 2026-10-08 — HANDOFF B27 Téléchargement contrôlé
+
+Branche `backend/capsules-laboratoire-b27-telechargement` dérivée de B26 (603f43d). Préparé, PR en brouillon.
+
+### Résumé
+
+- `GET /artifact/{artifact}` : émet un lien signé courte durée (TTL 300 s) après vérification active+vérifié, visible, published, approved+notices (AC15/AC25/RM06).
+- `GET .../stream` : signed+verified, ré-évalue les mêmes gates. Policy ou chemin suspect = 404.
+- Aucun `private_path`, chemin disque ou champ privé n'est exposé.
+- Audit `capsule.version.artifact.download_issued` dans la transaction d'émission.
+
+### Preuves locales
+
+| Commande | Résultat |
+|---|---|
+| `composer lint` | `passed` |
+| `composer analyse` | `[OK] No errors` |
+| `composer test` | `OK (413 tests, 4233 assertions)` |
+| `vendor/bin/phpunit --testsuite Integration --filter ArtifactDownloadHttpTest` | `OK (12 tests, 27 assertions)` |
+
+### À reprendre
+
+- CI distante à constater sur le SHA du commit publié.
+- Q18 (conditions d'évaluation, ARB05) et Q19 (nommage nested) à relire.
+
+
+## 2026-10-11 - B27 : lecture de fichiers verifiee avant reception des acces
+
+Premiere tranche locale : ArtifactSnapshot et VerifiedArtifactFiles, registre serveur prive borne, fichiers canoniques reguliers, refus traversal/URL/liens, taille exacte et digest des octets copies, resources fermees. Unites reelles : 24 tests / 52 assertions OK sur PHP8.5.10 Windows, junctions reelles uniquement sous le storage de test de ce worktree. Linux/symlinks et CI restent a recevoir. Les incidents de fixtures et probes rouges sont conserves dans docs/quality/B27_ARTIFACT_READINESS.md. Les endpoints/audit/registreSQL puis les prerequis B24/B25/B26 attendent leur reception ; aucune readiness, approbation, fusion ou gate. Les anciennes entrees B27 sont historiques et ne valident pas cette reprise.
+
+## 11 octobre 2026 — Handoff B27 pour synchronisation des prérequis
+
+La première tranche est le commit local `13ae33e02f21b9a1a700647da50820ae88cd37b7`. La seconde contrôle le compte actuel, la visibilité, l'état publié et la distribution sous le verrou commun de version ; vérifie kit/notices et remet une copie bornée, jamais un chemin mutable. Liens relatifs signés pour membre/cible/version, origine configurée validée, notices accessibles, throttling commun ; génération des liens et audit dans la même transaction. Champs du registre figés après publication, désactivation possible et rollback refusant les données connues. Le retrait du verrou enfant évite le deadlock SQL réellement reproduit.
+
+Résultats réels : **66 / 258** ciblés SQL/HTTP/concurrence ; **33 / 69** unités fichiers/liens ; **7 / 127** atomicité/API/frontières/modèles après le dernier correctif ; Pint/PHPStan/Composer/66 types/documents 18/18 et déploiement 7/7 verts. Détails, probes rouges et commandes dans `docs/quality/B27_ARTIFACT_READINESS.md`. Ces totaux se recouvrent.
+
+Prochaine étape : l'intégrateur synchronise B24/B25/B26 corrigés, puis réception complète locale et CI du head exact. Vérifier les unions nullables du catalogue B26 lors de la régénération ; les réponses B27 nécessitent toutes les métadonnées de notices. Linux/symlinks et Qodana non reçus. Ancienne Q18 « verified suffit » historique : le registre `inactive` reste le défaut sans ARB05 approuvé. Aucun push, ready, merge, approbation humaine, BACKEND_GATE ou frontend par cet agent.
+
 
 ## 2026-10-11 — B26 : validation et attribution avant revue
 
@@ -481,6 +519,14 @@ Reprise du head b568a511 dans un nouveau worktree, historiques conservés. Trois
 Premier correctif local a56f0144fb104d07c52e51a5aa7c9019dc2f0e94. Sélection SQL déterministe de la dernière version publiée avant filtre technologie/tri/pagination ; une version par carte, sans corps ; détail limité au corps choisi et historique de métadonnées ; pseudonyme sélectionné sans champs privés ni owner inutile. Enveloppe data OpenAPI et limites communes décrites, 66 types API. Rouge réel : 3 tests / 6 assertions pour sélection/hydratation/enveloppe et 1 / 4 pour corps de l’historique. Ciblage final exact : 39 tests / 2620 assertions, PHPStan 8 sans erreur et Pint --test verts. Validation pack 18 et déploiement 7 contrôles documentaires verts. Relances non additionnées ; erreur de chemin dans le probe OpenAPI puis nullsafe redondant de fixture corrigés et consignés. Preuve : B26_CATALOGUE_READINESS.md. Parent B25 final, réception complète, CI exacte et revue humaine restent attendus. has_lab/Q16 dépend de B33 absent ; aucun DONE/gate, frontend, push, publication ou déploiement.
 
 Dernière relecture B26 : 2 probes de nullabilité 3.1 rouges (2 tests / 3 assertions), schémas catalogue en unions [T, null] et types régénérés (66), générateur inchangé. Les 39 tests / 2620 assertions finaux incluent les probes ; PHPStan 8 et Pint verts. PR35 reste Draft / B26 partiel pour badge, has_lab/Q16 et B33 absent. Aucun SQL global avant parent B25 final.
+
+## 2026-10-11 — B27 : fixture compatible avec l'immuabilité de publication
+
+Départ 8fe85fe, réception globale 245 / 1323 avec 1 erreur conservée par copie ignorée identique avant relance. Seul backend modifié : CapsulePublishHttpTest, qui enregistre maintenant le kit pendant InReview, publie réellement puis crée le brouillon suivant. Ancien contenu/digest et tous attributs du kit identiques, aucun héritage de preuve. Rouge réel 1 / 1 / erreur23514 puis vert 1 / 8 ; composition B25/B27 définitive 74 tests / 436 assertions, zéro erreur/échec/skip, PHPStan 8/Pint verts. Preuve B27_ARTIFACT_READINESS, relecture indépendante sans défaut non comptée comme test. Microcommit SHA à transmettre après création ; worktree rendu à l'intégrateur pour réception SQL complète puis CI exacte. Aucun autre worktree suivi modifié, production/down inchangés, aucune réception complète B27, approbation, push, DONE ou gate déclarée.
+
+## 2026-10-11 — B27 : reprise après erreur de fonction PostgreSQL persistante
+
+Départ 134ebe0 après parents synchronisés. Les réceptions globales interrompues restent NON TERMINÉES. Cause reproduite SQL42723 : migrate:fresh conserve b27_guard_artifact, corrigée par CREATE OR REPLACE seul changement production. Nouveau ArtifactFreshMigrationTest : deux cycles frais réels et immuabilité SQL toujours active, nettoyage des seules fixtures sous TestDatabaseGuard. Rouge 1 / 1 avec une erreur, probe vert 1 / 11 ; après correction des alertes statiques du nouveau test, ciblage final 69 tests / 285 assertions, PHPStan 8/Pint et 67 types verts. Preuve B27_ARTIFACT_READINESS ; nombres ciblés non additionnés, lecture indépendante distincte. Le SHA sera transmis après commit propre. Prochaine étape : l'intégrateur reprend toute la réception B27 puis CI du head exact ; aucun changement B24/B26, push, ready, approbation humaine ou affaiblissement down. ARB05 inactive, aucun DONE/gate/frontend.
 
 ## 2026-10-11 — B26 : empreinte historique absente et nouvelle transmission
 

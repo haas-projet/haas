@@ -731,6 +731,61 @@ Dernier élément manquant du verify B38 (« Aucune session HAAS utilisée et do
 
 ## 2026-10-08 - B26 : reprise de B25 par merge local 1c81ae4. Suite Integration (hors Demo) : OK 564 tests / 4192 assertions. Pint, PHPStan 8 et composer test (413 / 4203) verts.
 
+## 2026-10-08 — Lot B27 · Téléchargement contrôlé
+
+Statut proposé : B27 **préparé, PR en brouillon**, aucun DONE. Branche `backend/capsules-laboratoire-b27-telechargement`, dérivée de B26 (603f43d).
+
+### Décisions clefs (propriétaire du domaine)
+
+- **Deux routes** : `GET /api/v1/capsules/{capsule}/versions/{version}/artifact/{artifact}` (émission d'un lien signé) et `GET .../stream` (livraison du flux). Nommées suivant la convention B23-B26 nested (slug §26 `/versions/{id}/artifact` ouvert à l'interprétation ; nested conservé par cohérence avec B24/B25).
+- **Gates ré-évaluées à chaque requête** (émission ET stream) : actif+vérifié, visibility=visible, state=published, artefact `approved` avec `notices_path` renseigné. Un retrait ultérieur coupe les anciens liens (AC15, AC25).
+- **Jamais de `private_path` ni de chemin disque** dans Resource, logs ou erreur. Policy ou chemin suspect = 404 (RM06 : ne pas révéler l'existence des contenus masqués/retirés).
+- **Lien signé** : `URL::temporarySignedRoute` TTL 300 s + middleware `signed` sur la route de stream. `signed+verified` sur la stream.
+- **Audit** : `capsule.version.artifact.download_issued` dans `content_revisions`, sha256 et expires_at seulement.
+- **Services** : `IssueArtifactDownloadService` renvoie `{artifact, expires_at}` ; le Controller construit l'URL signée (séparation DomainBoundariesTest). `StreamArtifactService` renvoie `{disk, path, download_name}` ; le Controller appelle `Storage::disk('local')->download`.
+
+### Fichiers créés / modifiés
+
+- Policy : `App\Policies\ArtifactPolicy`.
+- Services : `IssueArtifactDownloadService`, `StreamArtifactService`.
+- Exception : `App\Exceptions\Capsules\ArtifactUnavailable` (404).
+- Controllers minces : `IssueArtifactDownloadController`, `StreamArtifactDownloadController`.
+- Resource : `ArtifactDownloadResource` (sans `private_path`).
+- Routes dans `routes/api/capsules-lab.php` (middleware `verified` sur émission ; `signed+verified` sur stream).
+- Fragment OpenAPI : deux paths + schéma `ArtifactDownload`.
+- Tests : `ArtifactDownloadHttpTest` (12 cas, 27 assertions).
+
+### Fichiers hors de mon domaine modifiés
+
+- `docs/OPENAPI.yaml` : **+4 lignes** (deux `$ref` : issue + stream).
+- `docs/api/generated/haas-api.d.ts` : régénéré (66 types, +3).
+
+Aucun autre fichier du socle n'a été touché.
+
+### Contrôles locaux
+
+- `composer lint` → `{"tool":"pint","result":"passed"}`.
+- `composer analyse` → `[OK] No errors`.
+- `composer test` → `OK (413 tests, 4233 assertions)`.
+- `vendor/bin/phpunit --testsuite Integration --filter ArtifactDownloadHttpTest` → `OK (12 tests, 27 assertions)` en 29,7 s.
+
+### Questions ouvertes
+
+- **Q18** — « Conditions d'évaluation approuvées » (§13:480, ARB05 §04:120) : pour P0 verified+actif suffit ; un drapeau explicite d'acceptation d'évaluation est consigné comme à venir (voir ARB05 non résolu).
+- **Q19** — Nommage §26 `/versions/{id}/artifact` : interprété comme nested `/capsules/{capsule}/versions/{version}/artifact/{artifact}` pour cohérence avec B23-B26. À confirmer.
+- Questions antérieures Q12–Q17 restent ouvertes.
+
+
+## 2026-10-11 - B27 : lecture de fichiers verifiee avant reception des acces
+
+Premiere tranche locale : ArtifactSnapshot et VerifiedArtifactFiles, registre serveur prive borne, fichiers canoniques reguliers, refus traversal/URL/liens, taille exacte et digest des octets copies, resources fermees. Unites reelles : 24 tests / 52 assertions OK sur PHP8.5.10 Windows, junctions reelles uniquement sous le storage de test de ce worktree. Linux/symlinks et CI restent a recevoir. Les incidents de fixtures et probes rouges sont conserves dans docs/quality/B27_ARTIFACT_READINESS.md. Les endpoints/audit/registreSQL puis les prerequis B24/B25/B26 attendent leur reception ; aucune readiness, approbation, fusion ou gate. Les anciennes entrees B27 sont historiques et ne valident pas cette reprise.
+
+## 11 octobre 2026 — B27 : accès et registre reçus en ciblage
+
+Bibliothèque initiale commitée localement en `13ae33e02f21b9a1a700647da50820ae88cd37b7`. Les services contrôlent maintenant les droits courants sous verrou, les rattachements, les octets du kit et des notices ; liens signés relatifs liés au membre et à la cible, notices accessibles sans chemin serveur, quota partagé, audit et génération des deux liens atomiques. Registre des notices additif et immutabilité après publication, désactivation conservée, rollback sans perte d'histoire. ARB05 reste sans approbation : aucune activation automatique et aucun vrai kit/licence de production ajouté.
+
+Ciblés PostgreSQL : **66 tests / 258 assertions OK**. Unités finales fichiers/liens : **33 / 69 OK**. Atomicité/API/frontières/modèles après validation finale de l'origine : **7 / 127 OK**. Pint et PHPStan 8 verts ; 66 types à jour, Composer validate/platform/audit réussis, documents 18/18 et déploiement 7/7. Probes rouges et incidents dans `docs/quality/B27_ARTIFACT_READINESS.md` ; totaux recouvrants, pas une suite complète. B27 reste partiel/en brouillon ; synchronisation normale B24/B25/B26 par l'intégrateur avant réception complète et CI exacte. Aucune approbation humaine, fusion, DONE ou gate.
+
 
 ## 2026-10-11 — B26 : validation et attribution avant revue
 
@@ -742,6 +797,14 @@ Reprise du head b568a511 dans un nouveau worktree, historiques conservés. Trois
 Premier correctif local a56f0144fb104d07c52e51a5aa7c9019dc2f0e94. Sélection SQL déterministe de la dernière version publiée avant filtre technologie/tri/pagination ; une version par carte, sans corps ; détail limité au corps choisi et historique de métadonnées ; pseudonyme sélectionné sans champs privés ni owner inutile. Enveloppe data OpenAPI et limites communes décrites, 66 types API. Rouge réel : 3 tests / 6 assertions pour sélection/hydratation/enveloppe et 1 / 4 pour corps de l’historique. Ciblage final exact : 39 tests / 2620 assertions, PHPStan 8 sans erreur et Pint --test verts. Validation pack 18 et déploiement 7 contrôles documentaires verts. Relances non additionnées ; erreur de chemin dans le probe OpenAPI puis nullsafe redondant de fixture corrigés et consignés. Preuve : B26_CATALOGUE_READINESS.md. Parent B25 final, réception complète, CI exacte et revue humaine restent attendus. has_lab/Q16 dépend de B33 absent ; aucun DONE/gate, frontend, push, publication ou déploiement.
 
 Dernière relecture B26 : 2 probes de nullabilité 3.1 rouges (2 tests / 3 assertions), schémas catalogue en unions [T, null] et types régénérés (66), générateur inchangé. Les 39 tests / 2620 assertions finaux incluent les probes ; PHPStan 8 et Pint verts. PR35 reste Draft / B26 partiel pour badge, has_lab/Q16 et B33 absent. Aucun SQL global avant parent B25 final.
+
+## 2026-10-11 — B27 : composition de la fixture de publication
+
+Reprise exclusive au parent documentaire 8fe85fe après réception globale en erreur : 245 tests / 1323 assertions / 1 erreur. JUnit rouge original conservé et copié à hash identique, preuve B27_ARTIFACT_READINESS.md. Probe ciblé rouge réel 1 / 1 avec SQL23514 : insertion Artifact après publication. Fixture corrigée : registre créé pendant InReview puis publication réelle par modérateur indépendant et nouveau brouillon ; attributs anciens vérifiés intégralement. Probe vert 1 / 8, composition courante 74 tests / 436 assertions réussie sans erreur/échec/skip, PHPStan 8/Pint verts. Aucun changement production ni affaiblissement des gardes ; autres fixtures d'artefacts relues, insertion négative intentionnelle conservée. Lecture indépendante distincte des tests. L'intégrateur reprend la réception SQL complète et la CI exacte après commit propre ; aucune suite complète B27 passée ni approbation/DONE/gate/frontend annoncé.
+
+## 2026-10-11 — B27 : fonction de garde répétable après migrate:fresh
+
+Après synchronisation des parents au candidat 134ebe0, deux réceptions globales Integration ont été interrompues par l'intégrateur ; stack SQL42723 sur la fonction b27_guard_artifact déjà présente, sans succès complet. Correction minimale CREATE OR REPLACE, corps/locks/contraintes/down inchangés. Nouveau probe réellement rouge 1 test / 1 assertion / 1 erreur ; relance 1 / 11 verte avec deux migrate:fresh et deux refus d'altération d'empreinte publiée. Alertes de typage du nouveau test corrigées sans ignore/baseline après arrêt du ciblage incomplet. Ciblage final courant 69 tests / 285 assertions réussi, PHPStan 8/Pint verts et 67 types à jour. Preuve B27_ARTIFACT_READINESS.md ; lecture indépendante non comptée comme test. Aucun fichier B24/B26 modifié, aucune garde de production affaiblie. Réception globale et CI exacte à relancer par l'intégrateur ; ARB05 inactive, aucune approbation/DONE/gate/frontend.
 
 ## 2026-10-11 — B26 : conserver l'absence d'empreinte historique
 

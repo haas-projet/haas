@@ -457,10 +457,13 @@ paths:
         B27 — Télécharger le kit d'une version publiée via contrôle serveur
         courant (CAHIER_DES_CHARGES.md:956). Les gates sont ré-évaluées à
         chaque appel : compte actif et vérifié, capsule visible, version
-        `published`, artefact `approved` avec `notices_path` renseigné.
+        `published`, artefact `approved`, kit et notices réellement présents
+        et conformes aux empreintes/taille enregistrées. Kit limité à 20 Mio,
+        notices à 1 Mio ; 30 accès par minute et membre et 60 par adresse IP,
+        partagés entre émission, flux et notices.
         La réponse ne porte NI `private_path`, NI chemin disque, NI champ
         privé. Le `download_url` est signé courte durée et pointe vers une
-        route de streaming qui reévalue les mêmes gates (un retrait
+        route liée au membre qui réévalue les mêmes droits (un retrait
         ultérieur coupe donc les anciens liens, AC15/AC25). `Cache-Control:
         no-store, private`.
       security:
@@ -484,22 +487,32 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ArtifactDownload'
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/ArtifactDownload' }
+        '401':
+          description: Session absente
         '403':
           description: Membre non autorisé, non vérifié, suspendu ou droits perdus
         '404':
           description: Capsule, version ou artefact introuvable, masqué, non publié, inactif ou chemin invalide
+        '429':
+          description: Quota partagé de téléchargement atteint
   /api/v1/capsules/{capsule}/versions/{version}/artifact/{artifact}/stream:
     get:
       operationId: streamArtifactDownload
       summary: Télécharger le fichier derrière un lien signé
       description: >
-        Route servie uniquement sous `signed` + `verified`. Les mêmes gates
+        Route servie sous session, compte vérifié et signature relative liée
+        au membre (`member`, `expires`, `signature`). Les mêmes droits
         qu'à l'émission sont ré-évaluées : si la version est retirée, la
         capsule masquée, l'artefact rendu inactif ou le compte dévérifié
         entre l'émission et l'accès, la requête est refusée. Aucune
         divulgation de chemin disque dans l'erreur. `Cache-Control:
-        no-store, private`.
+        no-store, private`. Les octets livrés proviennent de la copie bornée
+        effectivement vérifiée, jamais d'un chemin rouvert au callback.
+        Aucun code n'est exécuté ; le kit ne constitue pas un rapport de laboratoire.
       security:
         - SessionCookie: []
       parameters:
@@ -515,23 +528,74 @@ paths:
           in: path
           required: true
           schema: { type: string, format: uuid }
+        - name: member
+          in: query
+          required: true
+          schema: { type: string, format: uuid }
+        - name: expires
+          in: query
+          required: true
+          schema: { type: integer }
+        - name: signature
+          in: query
+          required: true
+          schema: { type: string, pattern: '^[0-9a-f]{64}$' }
       responses:
         '200':
           description: Fichier retourné en flux `application/octet-stream`
+          content:
+            application/octet-stream:
+              schema: { type: string, format: binary }
+        '401':
+          description: Session absente
         '403':
           description: Lien expiré, falsifié, membre non vérifié ou droits perdus
         '404':
           description: Capsule, version ou artefact introuvable, non publié, inactif ou fichier absent
+        '429':
+          description: Quota partagé de téléchargement atteint
+  /api/v1/capsules/{capsule}/versions/{version}/artifact/{artifact}/notices:
+    get:
+      operationId: streamArtifactNotices
+      summary: Télécharger les notices versionnées du kit
+      description: >
+        Même session, membre, signature relative, contrôle courant, quota et
+        relecture des empreintes que le flux du kit. Notices limitées à 1 Mio,
+        envoyées en pièce jointe inerte avec nosniff et no-store, private.
+        Aucun chemin du registre ou du disque n'est exposé. Disponibilité et
+        empreinte ne confèrent aucun droit de réutilisation : ARB05 reste requis.
+      security:
+        - SessionCookie: []
+      parameters:
+        - { name: capsule, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: version, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: artifact, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: member, in: query, required: true, schema: { type: string, format: uuid } }
+        - { name: expires, in: query, required: true, schema: { type: integer } }
+        - { name: signature, in: query, required: true, schema: { type: string, pattern: '^[0-9a-f]{64}$' } }
+      responses:
+        '200':
+          description: Notices effectivement vérifiées
+          content:
+            application/octet-stream:
+              schema: { type: string, format: binary }
+        '401': { description: Session absente }
+        '403': { description: 'Signature absente, expirée ou falsifiée, compte non vérifié ou origine refusée' }
+        '404': { description: 'Mauvais membre, kit indisponible, retiré, masqué, inactif, absent ou corrompu' }
+        '429': { description: Quota partagé de téléchargement atteint }
 components:
   schemas:
     ArtifactDownload:
       type: object
-      required: [id, sha256, size, notices_path, download_url, expires_at]
+      additionalProperties: false
+      required: [id, sha256, size, notices_url, notices_sha256, notices_size, download_url, expires_at]
       properties:
         id: { type: string, format: uuid }
         sha256: { type: string, pattern: '^[0-9a-f]{64}$' }
-        size: { type: integer, minimum: 1 }
-        notices_path: { type: string, description: 'Chemin public de notices (déclaré par B22). Ne pointe JAMAIS vers un chemin disque privé.' }
+        size: { type: integer, minimum: 1, maximum: 20971520 }
+        notices_url: { type: string, format: uri, description: 'URL signée des notices liée au membre ; droits et intégrité revérifiés.' }
+        notices_sha256: { type: string, pattern: '^[0-9a-f]{64}$' }
+        notices_size: { type: integer, minimum: 1, maximum: 1048576 }
         download_url: { type: string, format: uri, description: 'URL signée courte durée vers le flux ; chaque accès réévalue les gates.' }
         expires_at: { type: string, format: date-time }
     CapsuleDraftInput:

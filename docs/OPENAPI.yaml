@@ -63,6 +63,8 @@ paths:
     $ref: './api/openapi/capsules-lab.yaml#/paths/~1api~1v1~1capsules~1{capsule}~1versions~1{version}~1artifact~1{artifact}'
   /api/v1/capsules/{capsule}/versions/{version}/artifact/{artifact}/stream:
     $ref: './api/openapi/capsules-lab.yaml#/paths/~1api~1v1~1capsules~1{capsule}~1versions~1{version}~1artifact~1{artifact}~1stream'
+  /api/v1/capsules/{capsule}/versions/{version}/artifact/{artifact}/notices:
+    $ref: './api/openapi/capsules-lab.yaml#/paths/~1api~1v1~1capsules~1{capsule}~1versions~1{version}~1artifact~1{artifact}~1notices'
   /api/v1/members/{handle}:
     $ref: './api/openapi/identity.yaml#/paths/~1api~1v1~1members~1{handle}'
   /api/v1/me/profile:

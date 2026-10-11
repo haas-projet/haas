@@ -4,7 +4,7 @@
 
 Reprise de la PR #36 en brouillon, candidat initial `f5949de5ccf3dbaab7e21fdc8939996ab0464e2c`, base B26 `b568a511abf99ef606090816d5e9ad93d32c6335`. Cette preuve conserve les incidents et les étapes ; elle ne vaut ni approbation humaine, ni fusion, ni BACKEND_GATE.
 
-La première tranche livre la bibliothèque de lecture vérifiée et ses tests. La correction des routes, des permissions courantes, de l'audit et du registre SQL reste à recevoir dans les tranches suivantes, puis les prérequis B24/B25/B26 corrigés devront être synchronisés avant la réception complète.
+La première tranche, commit local `13ae33e02f21b9a1a700647da50820ae88cd37b7`, livre la bibliothèque de lecture vérifiée et ses tests. La seconde tranche corrige les accès, les notices et leur registre SQL ; ses contrôles ciblés sont reçus ci-dessous. Les prérequis B24/B25/B26 corrigés devront encore être synchronisés par l'intégrateur avant la réception complète.
 
 ## Bibliothèque de fichiers vérifiés — 11 octobre 2026
 
@@ -21,7 +21,33 @@ Les fichiers sont tous fictifs et limités au `storage/framework/testing` de ce 
 
 Cinq probes réels, **5 tests / 7 assertions, cinq échecs** sur le comportement initial : émission 200 pour kit absent, notice absente ou octets modifiés ; stream 200 pour fichier corrompu après émission ; exposition du champ de registre `notices_path`. La fixture initiale calculait en outre le digest du chemin au lieu des octets et ne créait aucun fichier de notices. Elle a été corrigée sans prétendre constituer un vrai kit de production ni une licence approuvée.
 
-La nouvelle garde de version avec un verrou enfant `FOR SHARE` a reproduit une désactivation SQL en deadlock **40P01**, 1 test / 3 assertions en échec. Le contrôle doit utiliser le verrou de version commun au trigger, puis lire le registre par MVCC sans attendre le tuple enfant détenu par le désactivateur. La réception de cette correction est à consigner après la suite ciblée finale.
+La nouvelle garde de version avec un verrou enfant `FOR SHARE` a reproduit une désactivation SQL en deadlock **40P01**, 1 test / 3 assertions en échec. Le contrôle utilise maintenant le verrou de version commun au trigger, puis lit le registre par MVCC sans attendre le tuple enfant détenu par le désactivateur. La course réelle passe dans les 66 ciblés finaux.
+
+## Accès, notices et audit — 11 octobre 2026
+
+- Le service relit le membre actuel sous `FOR SHARE`, puis la capsule et la version sous `FOR UPDATE`. La Policy contrôle les trois rattachements, le compte actif et vérifié, la capsule visible, la version publiée et la distribution approuvée. Aucun bypass administrateur ; compte supprimé, suspendu ou dévérifié et retrait/masquage/désactivation coupent les anciens liens.
+- Les signatures relatives concernent une cible, une version, un artefact et un membre précis, TTL 300 secondes. L'origine vient de `APP_URL` validé et pas du Host reçu. Les paramètres supplémentaires sont refusés. Authentification par session et règles SPA/CORS du socle conservées ; les trois routes partagent 30 accès/minute/membre et 60/minute/IP.
+- L'émission vérifie réellement le kit et les notices avant les liens et l'audit. Le stream recontrôle les deux fichiers et les permissions, puis transmet seulement la copie dont les octets ont été vérifiés. Les notices ont une route signée, une taille et un SHA-256 publics ; aucun chemin serveur ne sort de la Resource. Réponses privées sans cache, téléchargement en pièce jointe et `nosniff`.
+- Une migration additive enregistre l'empreinte et la taille des notices sans inventer celles des anciennes données. Les métadonnées du kit et des notices deviennent immuables dès la publication, y compris après retrait. La désactivation de distribution reste permise. Un ancien kit sans notices vérifiables reste indisponible. Le rollback verrouille les tables et refuse de perdre ces empreintes ou un historique de kit publié.
+- Le verrou de version sérialise les révisions d'audit. Un défaut d'origine ou de signature doit annuler toute l'émission : les deux liens sont construits dans la transaction avant l'audit. Aucun chemin ni lien signé n'est copié dans le journal.
+
+Défaut d'atomicité reproduit avant correction : **1 test / 2 assertions, un échec**, réponse 404 mais une révision `download_issued` conservée après l'échec de construction des liens. Le contrôle final vérifie réponse 404 et zéro révision. Autre probe : **9 tests / 17 assertions, cinq échecs** sur des origines avec espace, antislash, tabulation, saut de ligne ou hôte encodé ; `parse_url` seul était permissif. `FILTER_VALIDATE_URL` précède maintenant l'analyse ; les quatre origines valides, dont localhost et IPv6, restent admises.
+
+### Contrôles ciblés réels
+
+Toutes les commandes PHP passent par `node .worktrees/run-pr-review-20261011.cjs b27` depuis la racine ; le runner exporte explicitement PostgreSQL 17 à `127.0.0.1:55447`, base `haas_b27_review_test`, rôle `haas_test`. Aucun autre service ou base n'est modifié. Les totaux ci-dessous se recouvrent et ne s'additionnent pas en une réception complète.
+
+| Commande après le préfixe du runner | Résultat |
+|---|---|
+| `vendor/bin/phpunit tests/Integration/Capsules/ArtifactDownloadConcurrencyTest.php tests/Integration/Capsules/ArtifactPublicationSchemaTest.php tests/Integration/Capsules/ArtifactDownloadHttpTest.php tests/Integration/Capsules/ArtifactIssuanceAtomicityTest.php --log-junit storage/logs/b27-access-final.xml` | **66 tests / 258 assertions OK** : 14 courses PostgreSQL avec attentes réelles, 17 cas SQL, 34 HTTP et l'atomicité. |
+| `vendor/bin/phpunit tests/Unit/Capsules/ArtifactLinksTest.php tests/Unit/Capsules/VerifiedArtifactFilesTest.php --log-junit storage/logs/b27-files-links-final.xml` | **33 tests / 69 assertions OK**, après le durcissement final de l'origine. |
+| `vendor/bin/phpunit tests/Integration/Capsules/ArtifactIssuanceAtomicityTest.php tests/Feature/ApiInventoryTest.php tests/Architecture/DomainBoundariesTest.php tests/Feature/CapsuleModelProtectionTest.php` | **7 tests / 127 assertions OK**, après le durcissement final de l'origine. |
+| `vendor/bin/pint --dirty` | `passed`. |
+| `vendor/bin/phpstan analyse --memory-limit=1G --no-progress` | Aucun défaut, niveau 8 ; aucune baseline ajoutée. |
+| `../scripts/generate-api-types.php --check` | **66 types** à jour ; aucune réponse B27 nullable, car une notice manquante interdit l'émission. |
+| Composer PHAR absolu : `validate --strict`, `check-platform-reqs`, `audit --locked` | Réussis, aucun advisory ; messages de dépréciation du PHAR externe sous PHP 8.5 conservés. |
+
+`node scripts/validate-pack.mjs` : **18/18** ; `node scripts/check-deployment-docs.mjs` : **7/7**. Ces contrôles de documents ne constituent pas un contrôle du serveur hébergé. Des premiers ciblés perturbés par le disque de fixture commun, un chemin de fichier de test incorrect, un YAML non quoté puis les alertes PHPStan initiales ont été corrigés et relancés ; ils ne sont pas comptés comme réussis.
 
 ## Limites de distribution
 
@@ -31,4 +57,4 @@ La capsule documentaire publiée reste indépendante de l'état de son propriét
 
 ## Réception complète
 
-En attente des tranches d'accès, d'audit et SQL, de la synchronisation des prérequis corrigés, des suites complètes locales et de la CI du head exact. Publication et état de PR confiés à l'intégrateur. Revue humaine, BACKEND_GATE, GO_FRONTEND et GO_PRODUCTION non reçus.
+En attente de la synchronisation des prérequis corrigés, des suites complètes locales et de la CI du head exact, notamment les symlinks Linux. Publication et état de PR confiés à l'intégrateur. Revue humaine, Qodana, BACKEND_GATE, GO_FRONTEND et GO_PRODUCTION non reçus.

@@ -4,6 +4,10 @@
 
 B26 reçu sur `32347387536fa76f498ca21c62292c9b6ebfa80d` : hors SQL 421/4241, Integration 641/4758, total disjoint 1062/8999, erreurs/échecs/skips=0. PHPStan8, Pint, Composer, types66 et documents18/18 +7/7 réussis. B26 reste IN_PROGRESS et PR35 Draft : badge, has_lab et Q16 dépendent du registre B33 absent. La CI verte ne clôturera pas cette dépendance. Nouvelle CI du SHA publié et revue humaine encore attendues. Preuve : [B26_CATALOGUE_READINESS.md](../quality/B26_CATALOGUE_READINESS.md). Les mentions d’attente des étapes précédentes ci-dessous sont historiques.
 
+## Réception complète B25 — 11 octobre 2026
+
+B25 reçu sur `77d4147d18d1b5fb4f4cc8ed38b09840f978c46c` : hors SQL 413/4129, Integration 611/4607, total disjoint 1024/8736, erreurs/échecs/skips=0. PHPStan8, Pint, Composer, types61 et documents18/18 +7/7 réussis. Q12 utilise la cible propriétaire UX08 prévue ; aucun écran frontend livré ou testé. Publication corrigée, revue humaine des prérequis encore nécessaire. Nouvelle CI du SHA publié et revue humaine encore attendues. Preuve : [B25_RECEPTION_20261011.md](../quality/B25_RECEPTION_20261011.md). Les mentions d’attente des étapes précédentes ci-dessous sont historiques.
+
 ## État vérifié le 11 octobre 2026 — priorité aux PR
 
 - B27 f0df4d7 reçoit B26 3234738 et les corrections B25 par merge normal. Historiques IA/participant conservés ; types générés depuis les contrats composés, dont notices privées et empreinte historique nullable. Réception complète B27 à lancer sur sa base dédiée ; bilans finaux des parents à propager sans modifier le backend. Aucun statut DONE ni approbation humaine ; ARB05 reste inactive.

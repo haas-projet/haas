@@ -90,3 +90,25 @@ Reproduction ciblée réelle sur le runner/base B27 : **1 test / 1 assertion / 1
 La fixture corrigée enregistre maintenant son artefact sur la version en revue, puis publie réellement par le Service B25 avec un modérateur indépendant, et crée le brouillon suivant avec le propriétaire. Elle vérifie en plus la conservation de tous les attributs de l'ancien artefact ; le corps et l'empreinte publiés restent conservés, aucune preuve n'est recopiée sur le nouveau brouillon. Seul ce test est modifié dans le backend. Relance du scénario : **1 test / 8 assertions, réussi**, JUnit `b27-publication-artifact-fixture-green.xml`. PHPStan niveau 8 et Pint `--test` réussissent sur ce correctif. Les protections de production et les refus d'insertion après publication sont conservés.
 
 Ciblage de composition réellement terminé, via le runner B27 : `vendor/bin/phpunit --testsuite Integration --filter 'CapsulePublishHttpTest|CapsulePublicationNotificationsTest|CapsulePublicationSchemaTest|CapsuleWritesConcurrencyTest|ArtifactPublicationSchemaTest|ArtifactsSchemaTest|ArtifactFreshMigrationTest' --colors=never --log-junit storage/logs/b27-publication-artifact-composition-final.xml` : **74 tests / 436 assertions, zéro erreur, échec ou skip**. Inclut le scénario corrigé, la publication/notification/journal/concurrence B25 et les contraintes/immuabilité/fresh des artefacts B22/B27. Les résultats ciblés se recouvrent et ne s'additionnent pas. La lecture indépendante de `pr_capsule_versions` n'a trouvé aucun défaut concret dans cette fixture et n'est pas comptée comme un test. Réception SQL complète B27 et CI exacte restent à reprendre par l'intégrateur ; aucune approbation humaine, fusion, DONE ou gate.
+
+## Réception complète B27 sur la CI exacte — 11 octobre 2026
+
+Source reçue : `bef006c481ed8f2692277b3c91cab1a9de13fb1c`, [CI 38162823982](https://github.com/haas-projet/haas/actions/runs/38162823982). Les deux journaux PHP ont chacun été lus séparément et leur attribution aux étapes réussies vérifiée. Les trois jobs, y compris backend-ci, sont terminés avec succès.
+
+| Job | Unit/Feature/Architecture | Integration PostgreSQL | Total disjoint | Types | Empreintes couvertes |
+|---|---|---|---|---|---|
+| [PHP 8.4 / PostgreSQL 17](https://github.com/haas-projet/haas/actions/runs/38162823982/job/114539132244) | 454/4351 | 708/5028 | 1162/9379 | 67 | 798 |
+| [PHP 8.5 / PostgreSQL 17](https://github.com/haas-projet/haas/actions/runs/38162823982/job/114539132046) | 454/4351 | 708/5028 | 1162/9379 | 67 | 798 |
+
+Les suites complètes ont été exécutées sur les runners Linux avec PostgreSQL 17. Aucun ciblé antérieur n’est ajouté au total **1162 tests / 9379 assertions par version PHP**. PHPStan, Pint, Composer et les contrôles documentaires du workflow passent. Les 67 types et les 798 empreintes couvrant tous les fichiers suivis sont confirmés par chacun des journaux.
+
+### Résultats locaux distincts
+
+- PHP 8.5.10 : Unit/Feature/Architecture **454 tests / 4351 assertions**, erreurs/échecs/skips=0, JUnit ignoré b27-final-unit-20261011.xml. Commande via le runner dédié : vendor/bin/phpunit --testsuite Unit,Feature,Architecture --colors=never --log-junit storage/logs/b27-final-unit-20261011.xml.
+- Composition ciblée de la fixture corrigée : **74 tests / 436 assertions**, avec les statiques reçus, détaillée dans l’addendum précédent ; ces tests ne sont pas ajoutés à la CI.
+- Le premier résultat PostgreSQL en échec **245/1323/1 erreur** est conservé dans b27-final-integration-20261011-before-fixture-fix.xml. La nouvelle protection refusait l’insertion du kit après publication ; la fixture a été corrigée avant publication, sans modifier la protection de production.
+- La relance locale complète suivante a été **interrompue sans résultat final** : dernier suivi 189/708 puis 21 points, canal 33025 devenu inconnu, processus B27 absent, JUnit final vide (0 octet), puis pg_ctl status indique aucun serveur sur le cluster de tests. Cette exécution n’est pas reçue comme réussite. La cause de l’interruption du processus n’est pas déduite de ces observations. La récupération PostgreSQL conserve le répertoire existant ; elle est distincte des résultats CI.
+
+Les commandes locales de documentation passent : node scripts/validate-pack.mjs **18/18**, node scripts/check-deployment-docs.mjs **7/7**, node scripts/check-manifest.mjs **798**, git diff --check. Le commit de bilan conserve les octets applicatifs du candidat ; ses changements sont documentaires. Une nouvelle CI du SHA de bilan sera consignée dans #36 après publication.
+
+B27 IN_REVIEW pour le backend reçu sur CI. ARB05 reste inactive sans décision réelle ; la distribution est inactive par défaut. Le prérequis B26 reste partiel pour B33/badge/has_lab/Q16, et #35/#36 restent en brouillon. Aucun résultat complet PostgreSQL Windows, avis humain, fusion de PR, BACKEND_GATE, GO_FRONTEND, GO_PRODUCTION, Qodana ou déploiement n’est déclaré. Racine modifiée et travail B18 conservés.

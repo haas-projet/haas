@@ -1,5 +1,9 @@
 # Reprise de session
 
+## Réception B27 par CI complète — 11 octobre 2026
+
+Source `bef006c481ed8f2692277b3c91cab1a9de13fb1c`, [CI 38162823982](https://github.com/haas-projet/haas/actions/runs/38162823982) : PHP 8.4 et PHP 8.5, chacun 454/4351 hors SQL +708/5028 Integration =**1162 tests /9379 assertions** ; backend-ci, statiques, types67 et empreintes798 réussis. Deux journaux individuels lus. Local Windows : Unit 454/4351 et ciblés 74/436 reçus ; la suite SQL complète est interrompue sans résultat final et reste distincte des réussites CI. Preuve : [B27_ARTIFACT_READINESS.md](../quality/B27_ARTIFACT_READINESS.md). B27 IN_REVIEW ; #35/#36 brouillons pour prérequis B26 partiel/B33 et ARB05 inactive. Six PR sans conflit constaté ; aucun merge ou approbation humaine.
+
 ## Réception complète B26 — 11 octobre 2026
 
 B26 reçu sur `32347387536fa76f498ca21c62292c9b6ebfa80d` : hors SQL 421/4241, Integration 641/4758, total disjoint 1062/8999, erreurs/échecs/skips=0. PHPStan8, Pint, Composer, types66 et documents18/18 +7/7 réussis. B26 reste IN_PROGRESS et PR35 Draft : badge, has_lab et Q16 dépendent du registre B33 absent. La CI verte ne clôturera pas cette dépendance. Nouvelle CI du SHA publié et revue humaine encore attendues. Preuve : [B26_CATALOGUE_READINESS.md](../quality/B26_CATALOGUE_READINESS.md). Les mentions d’attente des étapes précédentes ci-dessous sont historiques.
@@ -28,7 +32,7 @@ Le checkout principal modifié et le travail B18 existant sont conservés. Les �
 
 Inspecter le dépôt, préserver les fichiers/commits/saisies existants, lire ADR-006. Appliquer F18 : projets ouverts, offres consenties, décision propriétaire, fil et projection publique contrôlés. Nouvelle recette avant GO_FRONTEND ; ne pas prendre un ancien gate pour un accord sur ce périmètre. Systalink/Vercel inchangé.
 
-État courant : B01–B09, B11–B17, B32 et B38 DONE (18 lots backend intégrés). B38 #28 est réellement fusionnée dans main d0d47c5 le 8 octobre à12:52:52 UTC ; CI exacte 37690142490 réussie, 770 tests /7291 assertions par version PHP8.4/8.5, backend identique au head0ad5a99. B22–B25 IN_REVIEW ; B26 IN_PROGRESS/Draft pour B33/badge/has_lab/Q16 ; B27 IN_PROGRESS. Six PR ouvertes, aucun merge ou avis humain simulé. Les trois permanentes suivent main ; dix branches distantes conservées. B18 préexistant à reprendre après préparation des PR prioritaires. B35 et S01/S02 restent partiels ; aucun gate frontend/production. Voir les preuves du 11 octobre ; les bilans datés précédents sont historiques.
+État courant : B01–B09, B11–B17, B32 et B38 DONE (18 lots backend intégrés). B38 #28 réellement fusionnée dans main d0d47c5, CI 37690142490 reçue. B22–B25 et B27 IN_REVIEW ; B26 IN_PROGRESS pour B33/badge/has_lab/Q16. Six PR ouvertes et sans conflit constaté : #29/#30/#33/#34 prêtes à la revue humaine, #35/#36 brouillons. B27 reçu sur CI complète PHP 8.4/8.5 (1162/9379 par version) ; suite SQL Windows interrompue, non reçue. Trois permanentes suivant main et six temporaires de PR, dix branches distantes. B18 socle en cours dans son worktree préservé ; endpoints et réception métier non livrés. B35/S01/S02 partiels ; aucun gate frontend ou production. Les mentions des bilans datés précédents sont historiques.
 
 ## Reprise après préparation GitHub — 2026-10-01
 

@@ -341,8 +341,8 @@
       "refs": "AC15/AC25 ; ARB05",
       "phase": "B",
       "execution_order": 29,
-      "status": "IN_PROGRESS",
-      "evidence": ["docs/quality/PR_MANIFEST_20261011.md"]
+      "status": "IN_REVIEW",
+      "evidence": ["docs/quality/PR_MANIFEST_20261011.md","docs/quality/B27_ARTIFACT_READINESS.md"]
     },
     {
       "id": "B28",

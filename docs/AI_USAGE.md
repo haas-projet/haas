@@ -185,6 +185,22 @@ Codex (GPT-6) : synchronisation normale de main b76612d (B14–B17), résolution
 
 Contrôles définitifs B38 synchronisé : 391 tests / 3850 assertions hors SQL et 379 / 3438 en intégration, total disjoint 770 / 7288 OK ; la lecture des JUnit isole 99 cas Demo / 432 assertions inclus dans le total. PHPStan, Pint, Composer, contrats et contrôles documentaires réussis. Les relances interrompues sont conservées comme NON TERMINÉES, la lecture indépendante n’est pas un test.
 
+
+## 11 octobre 2026 — Reprise B26, validation et attribution publiques
+
+Codex (GPT-6), préparation de PR avant approbation humaine, nouveau worktree au head b568a511. Lecture des contrats et revalidation réelle des défauts, corrections Unicode, tableaux q/sort et exposition du handle public. PostgreSQL 17 dédié haas_b26_review_test / PHP 8.5.10 : rouge 8 tests / 8 assertions avec 1 erreur et 6 échecs, puis vert 23 / 78 incluant les probes ; PHPStan 8 et Pint --test réussis. Preuve B26_CATALOGUE_READINESS.md ; aucune lecture indépendante comptée comme test. Aucun secret suivi, dépendance nouvelle, push, approbation, frontend ou déploiement. Contrat de dernière publication/enveloppe et réception parent B25 restent à terminer ; B33/has_lab/Q16 ne sont pas livrés.
+
+
+## 11 octobre 2026 — B26 : lectures bornées et contrat du catalogue
+
+Codex (GPT-6), correction après régressions réelles : technologie de dernière publication, hydratation une version par carte, corps unique au détail, historique metadata-only, projection des contributeurs id/handle. Deux retours rouges distincts 3 / 6 et 1 / 4 ; erreur de chemin de fixture OpenAPI et nullsafe de test corrigés avant ciblage final 39 tests / 2620 assertions. PHPStan 8 et Pint verts, 66 types API ; scripts documentaires 18 et 7 contrôles réussis, sans test serveur. Lecture indépendante de pr_capsule_schema non comptée comme test. Base haas_b26_review_test et runner explicite, journaux ignorés. Le microcommit précédent réel est a56f0144fb104d07c52e51a5aa7c9019dc2f0e94. Preuve B26_CATALOGUE_READINESS.md ; parent B25 final et réception complète encore attendus, B33/has_lab/Q16 absents. Aucun nouveau modèle de permissions propriétaire/source inventé, dépendance, exécution de code utilisateur, secret suivi, push, approbation, frontend ou déploiement.
+
+Relecture finale du contrat B26 : nullable hérité ignoré par la génération, 2 tests / 3 assertions réellement rouges, union de types 3.1 sur les seuls schémas catalogue, 66 types régénérés sans modifier le générateur. Ciblage final 39 / 2620, PHPStan 8 et Pint verts. Pas de réception globale avant parent B25, PR35 Draft et B26 partiel pour B33/badge/has_lab/Q16.
+
+## 11 octobre 2026 — B26 : type fidèle à l'empreinte historique absente
+
+Codex (GPT-6), après le signal de l'intégrateur : probes frais HTTP/contrat/types pour content_digest legacy réellement nul. Avant correction, 3 tests / 12 assertions avec 2 échecs OpenAPI/types ; HTTP conservait déjà null sur les deux routes et la base inchangée. Seul CatalogueDetail reçoit l'union string|null et une description sans recalcul/backfill, avec 66 types régénérés ; aucun digest fabriqué ni migration/runtime modifié. Ciblage final courant 42 tests / 2635 assertions réussi, PHPStan 8 et Pint verts via le runner/base B26 dédiés, journaux ignorés. Les nombres ciblés se remplacent sans addition ; la lecture indépendante ne compte pas comme test. Microcommit précédent fe8b4cdab77acca4f9471a1d06cdce9aee956b11, preuves/participant conservés. Pas de SQL global avant parent B25 final, CI exacte et revue humaine attendues, PR35 Draft/B26 partiel pour B33/badge/has_lab/Q16. Aucun push, approbation, frontend ou déploiement.
+
 ## 11 octobre 2026 — réception B25 avant approbation
 
 Codex (GPT-6), demande de préparation des PR restantes : audit du head PR34 `ce75045` dans un nouveau worktree, sans modifier les anciens. Probe HTTP réel rouge du snapshot puis correction minimale : la revue journalise la révision avant transition ; réponse et rejeu conservent la révision publiée. Suite ciblée HTTP 23 / 59 et Pint réussis sur base locale dédiée. Les défauts de notification Q12 et de downgrade sont revalidés sur le head actuel et restent en cours ; aucun résultat global, approbation, push ou frontend inventé. Preuve : `B25_RECEPTION_20261011.md`.
@@ -200,6 +216,10 @@ Deuxième étape B25 : défauts de downgrade confirmés puis locks et refus cons
 ## 11 octobre 2026 — Contrat Q12 nullable historique
 
 Codex (GPT-6), correction autorisée uniquement dans le worktree documentaire B24 : remplacer `nullable: true` par l'union OpenAPI 3.1 integer/null pour `CapsuleVersionReview.reviewed_lock_version`, puis régénérer son type number/null. Probe Node local ignoré sur les blobs initiaux puis les fichiers corrigés : deux assertions rouges puis deux vertes ; lecteur de bloc corrigé avant la comparaison finale. Les NULL historiques déjà prouvés en SQL restent conservés sans backfill. Aucun test HTTP, SQL ou PHPUnit exécuté ici ; aucun fichier backend ou tâche modifié. PHP 8.5.10 absolu et environnement système seul pour le générateur autonome : 59 types à jour ; documents 18/18 et déploiement 7/7 reçus. Vendor indépendant ignoré à lock identique, aucune dépendance ajoutée. Preuve B24_REVIEW_READINESS et empreintes actualisées ; propagation et CI du nouveau head confiées à l'intégrateur, sans push, approbation humaine, gate ni frontend.
+
+## 11 octobre 2026 — Intégration et réception complète B26
+
+Codex, préparation autorisée des PR avant approbation : merges normaux des prérequis, conflits documentaires conservant les historiques et types régénérés depuis les sources composées. Réception complète locale sur `32347387536fa76f498ca21c62292c9b6ebfa80d`, base dédiée b26 et B2 séparé : 421/4241 hors SQL +641/4758 Integration, total disjoint 1062/8999, aucune erreur/échec/skip. Contrôles statiques/Composer/types/documents réussis ; ancienne CI distincte du futur SHA publié. B38 fusion réelle et CI exactes consolidées sans compter l’absence de revue comme une approbation. B26 reste IN_PROGRESS et PR35 Draft : badge, has_lab et Q16 dépendent du registre B33 absent. La CI verte ne clôturera pas cette dépendance. Aucune donnée privée/secret/dépendance/identité ajoutée ; racine et B18 conservés, pas de merge de PR, frontend ou déploiement.
 
 ## 11 octobre 2026 — Intégration et réception complète B25
 

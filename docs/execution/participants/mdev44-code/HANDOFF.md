@@ -369,6 +369,45 @@ Aucun autre fichier du socle n'a été touché.
 - Décider en revue : Q13 (digest), Q14 (procédure), Q12 (notification `approved`).
 - B26 commence depuis cette branche seulement si la CI B25 est verte.
 
+## 2026-10-08 — HANDOFF B26 Catalogue de capsules
+
+Branche `backend/capsules-laboratoire-b26-catalogue` dérivée de B25. Préparé, PR en brouillon, aucun DONE.
+
+### Résumé du comportement livré
+
+- `GET /api/v1/capsules` : catalogue paginé (défaut 20, max 50) avec `q`, `technology`, `sort=date|relevance`. Seules les capsules `visible` ayant au moins une version `published` apparaissent. Les versions non publiées restent invisibles (AC15, AC25, RM06).
+- `GET /api/v1/capsules/{slug}` / `GET /api/v1/capsules/{slug}/versions/{version}` : détail par défaut (dernière version publiée) ou précis (version publiée demandée). Capsule masquée, sans version publiée, ou version non publiée → 404. Resources whitelist : handle public + rôle pour les contributeurs, aucune donnée privée.
+- Tri hors liste blanche, `relevance` sans `q`, `per_page>50` et paramètre inconnu → 422. Aucun en-tête personnalisé.
+
+### Fichiers hors de mon domaine modifiés (B26)
+
+- `docs/OPENAPI.yaml` : **+4 lignes** (`$ref` pour slug et slug+version).
+- `docs/api/generated/haas-api.d.ts` : **régénéré** (63 types, +4).
+
+Aucun autre fichier du socle n'a été touché.
+
+### Preuves locales (PHP 8.4.15 Laragon, base dédiée `haas_capsules_test`/`haas_test`)
+
+| Commande | Résultat observé |
+|---|---|
+| `composer lint` | `{"tool":"pint","result":"passed"}` |
+| `composer analyse` | `[OK] No errors` |
+| `composer test` | `OK (350 tests, 3913 assertions)` |
+| `vendor/bin/phpunit --testsuite Integration --filter CapsuleCatalogueHttpTest` | `OK (15 tests, 65 assertions)` |
+| `vendor/bin/phpunit --testsuite Integration` (suite entière) | `OK (566 tests, 4202 assertions)` en 16 min 50 s |
+
+### Décisions à relire
+
+- `latestPublished` hydratée explicitement (Laravel `ofMany` sur UUID impraticable, pas de `max(uuid)` côté PostgreSQL).
+- Recherche en ILIKE P0, sans index FTS (**Q15**).
+- `source_request_id` jamais exposé (RM06) — seul `source.kind` et `editorial_origin` sortent (**Q17**).
+- Filtre « présence de laboratoire » différé à B33 (**Q16**).
+
+### À reprendre
+
+- CI distante à constater après push.
+- Décider Q15 (index FTS), Q16 (filtre laboratoire), Q17 (résumé masqué de demande d'aide).
+
 ## Historique de la branche B38 avant intégration
 
 # HANDOFF — capsules/laboratoire (branche B38)
@@ -428,6 +467,24 @@ Deux envois d’un formulaire B2 avec la même clé stable (`Idempotency-Key`, U
 ## 2026-10-08 - B24 : reprise de B23 par merge local 1ce4f1a. Suite Integration (hors Demo) : OK 526 tests / 4063 assertions. Pint, PHPStan 8 et composer test (413 / 4090) verts.
 
 ## 2026-10-08 - B25 : reprise de B24 par merge local 83bd71a. Suite Integration (hors Demo) : OK 549 tests / 4127 assertions. Pint, PHPStan 8 et composer test (413 / 4129) verts.
+
+## 2026-10-08 - B26 : reprise de B25 par merge local 1c81ae4. Suite Integration (hors Demo) : OK 564 tests / 4192 assertions. Pint, PHPStan 8 et composer test (413 / 4203) verts.
+
+
+## 2026-10-11 — B26 : validation et attribution avant revue
+
+Reprise du head b568a511 dans un nouveau worktree, historiques conservés. Trois défauts corrigés : Unicode 200 caractères, q/sort tableaux refusés avant cast, pseudonyme public handle à la place du nom privé. Probes réellement rouges : 8 tests / 8 assertions, 1 erreur et 6 échecs ; ciblage vert incluant ces probes : 23 tests / 78 assertions. PHPStan 8 et Pint --test réussis. Base PostgreSQL dédiée haas_b26_review_test, runner explicite. Preuve : docs/quality/B26_CATALOGUE_READINESS.md. Sélection dernière publication, hydratation bornée et contrat data en cours ; parent B25 final puis réception complète et CI exacte encore attendus. has_lab/Q16 dépend de B33 absent : aucune déclaration DONE, gate ou approbation humaine.
+
+
+## 2026-10-11 — B26 : sélection et projection du catalogue
+
+Premier correctif local a56f0144fb104d07c52e51a5aa7c9019dc2f0e94. Sélection SQL déterministe de la dernière version publiée avant filtre technologie/tri/pagination ; une version par carte, sans corps ; détail limité au corps choisi et historique de métadonnées ; pseudonyme sélectionné sans champs privés ni owner inutile. Enveloppe data OpenAPI et limites communes décrites, 66 types API. Rouge réel : 3 tests / 6 assertions pour sélection/hydratation/enveloppe et 1 / 4 pour corps de l’historique. Ciblage final exact : 39 tests / 2620 assertions, PHPStan 8 sans erreur et Pint --test verts. Validation pack 18 et déploiement 7 contrôles documentaires verts. Relances non additionnées ; erreur de chemin dans le probe OpenAPI puis nullsafe redondant de fixture corrigés et consignés. Preuve : B26_CATALOGUE_READINESS.md. Parent B25 final, réception complète, CI exacte et revue humaine restent attendus. has_lab/Q16 dépend de B33 absent ; aucun DONE/gate, frontend, push, publication ou déploiement.
+
+Dernière relecture B26 : 2 probes de nullabilité 3.1 rouges (2 tests / 3 assertions), schémas catalogue en unions [T, null] et types régénérés (66), générateur inchangé. Les 39 tests / 2620 assertions finaux incluent les probes ; PHPStan 8 et Pint verts. PR35 reste Draft / B26 partiel pour badge, has_lab/Q16 et B33 absent. Aucun SQL global avant parent B25 final.
+
+## 2026-10-11 — B26 : empreinte historique absente et nouvelle transmission
+
+Dernier correctif après fe8b4cdab77acca4f9471a1d06cdce9aee956b11 : le catalogue conserve l'absence réelle de content_digest des publications pré-B25. Aucun recalcul/backfill ; seul CatalogueDetail et son type généré passent à string|null, avec pattern et description historique. Probe HTTP des deux routes positif avant correction ; probes contrat/types réellement rouges (ciblage 3 / 12, 2 échecs). Ciblage final courant 42 tests / 2635 assertions réussi, PHPStan 8/Pint verts, 66 types vérifiés. Voir B26_CATALOGUE_READINESS.md. Le SHA du microcommit sera transmis après commit. Prochaine étape : synchronisation normale du parent B25 final par l'intégrateur puis réception complète et CI du SHA exact ; aucun SQL global ni push ici. PR35 reste Draft / B26 partiel pour B33/badge/has_lab/Q16 ; revue humaine encore attendue.
 
 ## Reprise B25 — 11 octobre 2026
 

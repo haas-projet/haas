@@ -680,3 +680,7 @@ Reprise isolée depuis PR34 `ce75045`, historiques préservés. Probe rouge rée
 ### B25 — downgrade conservateur
 
 Snapshot commité localement en `18bfbe0`. Trois défauts de descente de schéma reproduits puis corrigés : locks transactionnels avant contrôle/DDL, refus des empreintes ou approbations connues ; vrai cycle legacy down/up sans purge ni attribution inventée. Ciblés schéma + concurrence réelle verts **10 / 79** ; seuls les helpers de fixtures sont adaptés au refus conservateur. Timeout transitoire d’une relance distingué du succès final. Q12 publication reste à terminer.
+
+### B25 — Q12 corrigée, code prêt à réception intégrateur
+
+Downgrade commité en `eceb4bc`. Intention de publication propriétaire/version stable dans transaction métier puis livraison après commit ; visibilité/état/droits courants avant liste, compteur et marquage ; migration composée conservant les autres types SQL, refus des événements stables. Probe rouge 1 / 1 puis ciblés définitifs **57 / 467** verts, APIInventory **1 / 81**, Pint complet/PHPStan8, types61, pack18/18 et déploiement documentaire7/7 verts. Code/fixtures figés ; root reprend le parent documentaire B24 puis les suites complètes et la CI exacte. Aucun test actif, push, ready ou approbation humaine par cet agent. Preuve détaillée `B25_RECEPTION_20261011.md`.

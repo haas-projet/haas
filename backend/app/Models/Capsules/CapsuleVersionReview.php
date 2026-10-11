@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property ReviewDecision $decision
+ * @property string|null $note
  * @property int|null $reviewed_lock_version
  */
 #[Fillable([])]

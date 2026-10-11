@@ -774,3 +774,8 @@ Aucun autre fichier du socle n'a été touché.
 - **Q18** — « Conditions d'évaluation approuvées » (§13:480, ARB05 §04:120) : pour P0 verified+actif suffit ; un drapeau explicite d'acceptation d'évaluation est consigné comme à venir (voir ARB05 non résolu).
 - **Q19** — Nommage §26 `/versions/{id}/artifact` : interprété comme nested `/capsules/{capsule}/versions/{version}/artifact/{artifact}` pour cohérence avec B23-B26. À confirmer.
 - Questions antérieures Q12–Q17 restent ouvertes.
+
+
+## 2026-10-11 - B27 : lecture de fichiers verifiee avant reception des acces
+
+Premiere tranche locale : ArtifactSnapshot et VerifiedArtifactFiles, registre serveur prive borne, fichiers canoniques reguliers, refus traversal/URL/liens, taille exacte et digest des octets copies, resources fermees. Unites reelles : 24 tests / 52 assertions OK sur PHP8.5.10 Windows, junctions reelles uniquement sous le storage de test de ce worktree. Linux/symlinks et CI restent a recevoir. Les incidents de fixtures et probes rouges sont conserves dans docs/quality/B27_ARTIFACT_READINESS.md. Les endpoints/audit/registreSQL puis les prerequis B24/B25/B26 attendent leur reception ; aucune readiness, approbation, fusion ou gate. Les anciennes entrees B27 sont historiques et ne valident pas cette reprise.

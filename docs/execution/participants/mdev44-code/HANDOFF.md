@@ -494,3 +494,8 @@ Branche `backend/capsules-laboratoire-b27-telechargement` dérivée de B26 (603f
 
 - CI distante à constater sur le SHA du commit publié.
 - Q18 (conditions d'évaluation, ARB05) et Q19 (nommage nested) à relire.
+
+
+## 2026-10-11 - B27 : lecture de fichiers verifiee avant reception des acces
+
+Premiere tranche locale : ArtifactSnapshot et VerifiedArtifactFiles, registre serveur prive borne, fichiers canoniques reguliers, refus traversal/URL/liens, taille exacte et digest des octets copies, resources fermees. Unites reelles : 24 tests / 52 assertions OK sur PHP8.5.10 Windows, junctions reelles uniquement sous le storage de test de ce worktree. Linux/symlinks et CI restent a recevoir. Les incidents de fixtures et probes rouges sont conserves dans docs/quality/B27_ARTIFACT_READINESS.md. Les endpoints/audit/registreSQL puis les prerequis B24/B25/B26 attendent leur reception ; aucune readiness, approbation, fusion ou gate. Les anciennes entrees B27 sont historiques et ne valident pas cette reprise.

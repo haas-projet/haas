@@ -1,5 +1,14 @@
 # Suivi — communauté et entraide / LamineGL
 
+## 12 octobre 2026 — Réception complète BC01
+
+Code `f2af47377bfc54e0c4bd35be5d6ae3ebd306d8f2`, [CI 38177740506](https://github.com/haas-projet/haas/actions/runs/38177740506) reçue dans chacun des deux journaux PHP 8.4/8.5 : **530/5167 hors SQL + 691/7493 Integration = 1221 tests / 12660 assertions par PHP**, 66 types et 722 empreintes, trois jobs réussis. PostgreSQL local complet reçu au même code, 691/7493, zéro erreur/échec/skip. Les anciens ciblés ne sont pas additionnés à la suite complète.
+
+BC01 **IN_REVIEW** pour son seul schéma ; PR #39 sur base temporaire B19 #38 après B18 #37. Les commandes projets, l’annuaire et les offres restent des lots distincts. Revue humaine et intégration encore nécessaires. Le commit documentaire suivant doit recevoir sa CI exacte avant toute qualification de ce nouveau SHA ou passage de la PR à ready. Aucun BACKEND_GATE, GO_FRONTEND ou GO_PRODUCTION.
+
+[Preuves et commandes](../../../quality/BC01_PROJECT_SCHEMA_20261011.md). Les entrées suivantes conservent l’historique des réceptions initiales.
+
+
 ## 11 octobre 2026 — BC01, schéma reçu sur contrôles ciblés
 
 BC01 **IN_PROGRESS** sur la branche isolée `backend/communaute-entraide-bc01-schema` depuis B19 39f96e9. Projets/pivot, préférences volontaires privées et lien facultatif avec propriétaire garanti reçus : 530/5167 hors SQL, 66/469 SQL ciblés/composition, PHPStan8/Pint et diff propres. Suite Integration complète en cours, CI exacte et revue humaine à recevoir. [Preuves et limites](../../../quality/BC01_PROJECT_SCHEMA_20261011.md). Préparation assistée par Codex, sans identité de Lamine ni validation humaine inventée. Prochain BC02, puis BC03/BC06 et raccords BC04/BC05 ; aucun gate, frontend ou déploiement.

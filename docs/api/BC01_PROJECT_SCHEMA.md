@@ -59,3 +59,9 @@ Premières preuves réelles :
 Les résultats finaux de composition et d'analyse seront ajoutés après exécution sur le code figé. Ces preuves locales ne valent ni CI distante, ni revue humaine, ni `BACKEND_GATE`, ni autorisation frontend/production.
 
 Réception du code figé : 66/469 SQL ciblés et composition, 530/5167 hors SQL, PHPStan niveau8 et Pint complets reçus. La suite SQL complète reste en cours, aucune CI distante reçue pour ce lot. [Bilan détaillé](../quality/BC01_PROJECT_SCHEMA_20261011.md).
+
+## 12 octobre 2026 — Réception complète BC01
+
+Code `f2af47377bfc54e0c4bd35be5d6ae3ebd306d8f2`, [CI 38177740506](https://github.com/haas-projet/haas/actions/runs/38177740506) reçue dans chacun des deux journaux PHP 8.4/8.5 : **530/5167 hors SQL + 691/7493 Integration = 1221 tests / 12660 assertions par PHP**, 66 types et 722 empreintes, trois jobs réussis. PostgreSQL local complet reçu au même code, 691/7493, zéro erreur/échec/skip. Les anciens ciblés ne sont pas additionnés à la suite complète.
+
+Les réceptions initiales ci-dessus sont historiques. Revue humaine et intégration requises ; aucune commande projets/annuaire ou gate validée par ce seul schéma.

@@ -1,5 +1,19 @@
 # BC01 — Réception du schéma projets, 11 octobre 2026
 
+## 12 octobre 2026 — Réception complète BC01
+
+Code `f2af47377bfc54e0c4bd35be5d6ae3ebd306d8f2`, [CI 38177740506](https://github.com/haas-projet/haas/actions/runs/38177740506) reçue dans chacun des deux journaux PHP 8.4/8.5 : **530/5167 hors SQL + 691/7493 Integration = 1221 tests / 12660 assertions par PHP**, 66 types et 722 empreintes, trois jobs réussis. PostgreSQL local complet reçu au même code, 691/7493, zéro erreur/échec/skip. Les anciens ciblés ne sont pas additionnés à la suite complète.
+
+| Job CI | Hors SQL | PostgreSQL | Total disjoint | Types | Empreintes |
+| --- | --- | --- | --- | --- | --- |
+| [PHP 8.4 / PostgreSQL 17](https://github.com/haas-projet/haas/actions/runs/38177740506/job/114583596393) | 530 / 5167 | 691 / 7493 | **1221 / 12660** | 66 | 722 |
+| [PHP 8.5 / PostgreSQL 17](https://github.com/haas-projet/haas/actions/runs/38177740506/job/114583596725) | 530 / 5167 | 691 / 7493 | **1221 / 12660** | 66 | 722 |
+
+BC01 **IN_REVIEW** pour son seul schéma ; PR #39 sur base temporaire B19 #38 après B18 #37. Les commandes projets, l’annuaire et les offres restent des lots distincts. Revue humaine et intégration encore nécessaires. Le commit documentaire suivant doit recevoir sa CI exacte avant toute qualification de ce nouveau SHA ou passage de la PR à ready. Aucun BACKEND_GATE, GO_FRONTEND ou GO_PRODUCTION.
+
+Les sections suivantes décrivent la préparation antérieure, y compris la suite alors en cours ; elles ne remplacent pas la réception ci-dessus.
+
+
 ## Livraison et provenance
 
 Branche isolée `backend/communaute-entraide-bc01-schema`, dérivée de B19 `39f96e94d8664bb39da4083a57fbd93ba295a643` (#38 sur B18 #37). Préparation autorisée pendant la revue des prérequis ; aucune fusion de PR distante. Identité Git existante conservée ; assistance Codex, aucun avis humain attribué à Lamine.

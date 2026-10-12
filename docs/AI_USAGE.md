@@ -156,3 +156,9 @@ Codex : PR #38 publiée en Draft sur B18 #37, applicatif d5bb2a580e6b21e8230b84f
 ## 11 octobre 2026 — BC01, projets et découverte volontaire
 
 Codex a préparé le schéma additive dans un worktree isolé ; un agent a implémenté modèles/enums/migration/factory/tests et un autre a relu le seul schéma en lecture seule. L'intégrateur a inspecté les diffs et reçu les journaux ciblés et hors SQL. [Commandes, rouge/vert, incidents et limites](quality/BC01_PROJECT_SCHEMA_20261011.md). Aucune revue humaine, identité de Lamine, réception complète SQL ou CI présumée. Aucune dépendance installée ; aucun frontend ni déploiement.
+
+## 12 octobre 2026 — Réception complète BC01
+
+Code `f2af47377bfc54e0c4bd35be5d6ae3ebd306d8f2`, [CI 38177740506](https://github.com/haas-projet/haas/actions/runs/38177740506) reçue dans chacun des deux journaux PHP 8.4/8.5 : **530/5167 hors SQL + 691/7493 Integration = 1221 tests / 12660 assertions par PHP**, 66 types et 722 empreintes, trois jobs réussis. PostgreSQL local complet reçu au même code, 691/7493, zéro erreur/échec/skip. Les anciens ciblés ne sont pas additionnés à la suite complète.
+
+Codex a lu les deux jobs individuels, vérifié le JUnit local et consolidé les preuves sans modifier le code backend testé. BC01 **IN_REVIEW** pour son seul schéma ; PR #39 sur base temporaire B19 #38 après B18 #37. Les commandes projets, l’annuaire et les offres restent des lots distincts. Revue humaine et intégration encore nécessaires. Le commit documentaire suivant doit recevoir sa CI exacte avant toute qualification de ce nouveau SHA ou passage de la PR à ready. Aucun BACKEND_GATE, GO_FRONTEND ou GO_PRODUCTION.

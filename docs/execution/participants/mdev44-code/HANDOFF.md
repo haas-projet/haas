@@ -1,5 +1,21 @@
 ﻿# Reprise — capsules/laboratoire
 
+## 12 octobre 2026 — Réception propre du registre sur B25
+
+Lot B33 isolé depuis le candidat historique `04385b6573f3c6d80a71dde6d4e1fce3fbe25449`, sur B25 `365e549b2be2d9f2fedb557e8309213b182bfbaa`. Ordre **B33 → B26 → B27**, aucun cycle de prérequis. Code de registre conservé, harness de test rendu indépendant du wrapper local.
+
+**439 tests /4215 assertions hors SQL +63 /392 SQL ciblés =502 /4607 reçus**, zéro erreur/échec/skip. Vraie liaison à deux processus1/11 incluse, sans double comptage. PHPStan8 sans erreur, Pint global, **64 types** reçus sur cette base. Base locale exclusive `haas_b33p25_review_test`, PostgreSQL17, 127.0.0.1:55447, runnerb33p25 ; composer.lock inchangé. Globale Integration locale et CI exacte à recevoir ; B33 **IN_PROGRESS** avant cette réception et revue humaine. Aucun gate, frontend ou déploiement.
+
+[Commandes et incidents](../../../quality/B33_LAB_REGISTRY_20261012.md). Préparation assistée par Codex, sans identité ou approbation humaine attribuée au pilote. Historique ci-dessous conservé.
+
+
+## 12 octobre 2026 — B33, registre reçu sur ciblés
+
+B33 **IN_PROGRESS**, code local depuis B27 figé : 480/4437 hors SQL +62/375 SQL ciblés, liaison concurrente réelle incluse, PHPStan8/Pint/70 types reçus. Report isolé sur B25 nécessaire pour l’ordre B33 → B26 → B27, puis réception générale/SQL complète/CI exacte et revue humaine. Les quatorze fichiers B1 épinglés sont identiques sur les deux bases. Aucun run lancé par le registre, switch fermé, B34/B36 à réaliser ; aucun gate, frontend ou déploiement. [Preuves et limites](../../../quality/B33_LAB_REGISTRY_20261012.md). Préparation Codex, aucune identité ou approbation humaine attribuée au pilote.
+
+Entrées suivantes historiques.
+
+
 Branche active : `backend/capsules-laboratoire`. HEAD local après Lot 1 : commit documentaire courant, précédé de `14c4579` (comparisons), `db1ed8d` (lab), `db30cf6` (capsules) et du merge `5e8fc46` de `origin/main`. Rien n'est poussé ni fusionné. Laravel 13.34.0, PHP de session 8.4.15 depuis `C:\laragon\bin\php\php-8.4.15-Win32-vs17-x64` ; le PHP natif 8.4 du PATH `C:\Program Files\php\php.exe` 8.4.3 ne charge pas `openssl` et doit être évité jusqu'à correction. PostgreSQL cible : 17 sur `127.0.0.1:5432`, aligné avec `phpunit.xml`, la CI `backend-ci.yml` et les preuves B01–B06.
 
 Base de test dédiée en place : rôle `haas_test` et base jetable `haas_capsules_test` sur PG 17, mot de passe fourni hors historique dans `~/.haas-test.env`. Charger ce fichier dans la même commande que les tests, sans jamais lire son contenu : `bash -c 'set -a; source ~/.haas-test.env; set +a; cd backend && composer test:integration'`. Les valeurs de `phpunit.xml` priment sur `backend/.env` dans ce processus (PHPUnit pose `DB_*` avant que Laravel ne lise `.env` via Dotenv immutable) ; aucune exécution ne pointe vers `haas_app`. `TestDatabaseGuard` reste la protection : ne pas la contourner.

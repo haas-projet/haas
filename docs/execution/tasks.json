@@ -412,7 +412,11 @@
       "refs": "AC16/AC18 ; F08",
       "phase": "B",
       "execution_order": 35,
-      "status": "TODO"
+      "status": "IN_PROGRESS",
+      "evidence": [
+        "docs/api/LAB_REGISTRY.md",
+        "docs/quality/B33_LAB_REGISTRY_20261012.md"
+      ]
     },
     {
       "id": "B34",

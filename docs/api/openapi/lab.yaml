@@ -1,0 +1,85 @@
+openapi: 3.1.0
+info:
+  title: HAAS — Registre du laboratoire
+  version: 0.1.0
+paths:
+  /api/v1/versions/{id}/lab-definition:
+    get:
+      operationId: showLabDefinition
+      summary: Consulter les scénarios disponibles pour une version publiée
+      description: >
+        Lecture publique sans effet, Cache-Control no-store. UUID d'une version
+        publiée, capsule visible, propriétaire actif et vérifié, et demande
+        source actuellement publique lorsqu'elle existe. Une version retirée,
+        un parent inaccessible ou une demande source privée donne 404.
+        available=false et definition=null lorsque le laboratoire est désactivé,
+        qu'aucune définition active n'est liée à cette version ou que les
+        empreintes de la release ne correspondent plus aux octets approuvés.
+        Aucun run, quota ou résultat n'est créé. Aucun corps ni paramètre de
+        requête n'est accepté. Les scénarios sont une liste fermée de la release,
+        sans classe, chemin, code ou URL fourni par un membre. B1-05 est réservé
+        aux tests CI et n'est pas un scénario web.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: {type: string, format: uuid}
+      responses:
+        '200':
+          description: Capacité actuelle de la version, sans lancement
+          headers:
+            Cache-Control:
+              schema: {type: string, pattern: '(^|,\s*)no-store(,|$)'}
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [data]
+                properties:
+                  data: {$ref: '#/components/schemas/LabDefinitionAvailability'}
+        '404':
+          description: Version ou parent inaccessible, non publié ou retiré
+        '422':
+          description: Corps ou paramètre de requête non accepté
+components:
+  schemas:
+    LabDefinitionAvailability:
+      oneOf:
+        - type: object
+          additionalProperties: false
+          required: [version_id, available, definition]
+          properties:
+            version_id: {type: string, format: uuid}
+            available: {type: boolean, const: false}
+            definition: {type: 'null'}
+        - type: object
+          additionalProperties: false
+          required: [version_id, available, definition]
+          properties:
+            version_id: {type: string, format: uuid}
+            available: {type: boolean, const: true}
+            definition: {$ref: '#/components/schemas/LabReleasedDefinition'}
+    LabReleasedDefinition:
+      type: object
+      additionalProperties: false
+      required: [id, release, module_version, code_digest, suite_digest, version_digest, scenarios]
+      properties:
+        id: {type: string, format: uuid}
+        release: {type: string, minLength: 1, maxLength: 80}
+        module_version: {type: string, minLength: 1, maxLength: 80}
+        code_digest: {type: string, pattern: '^[a-f0-9]{64}$'}
+        suite_digest: {type: string, pattern: '^[a-f0-9]{64}$'}
+        version_digest: {type: string, pattern: '^[a-f0-9]{64}$'}
+        scenarios:
+          type: array
+          minItems: 4
+          maxItems: 4
+          items: {$ref: '#/components/schemas/LabScenario'}
+    LabScenario:
+      type: object
+      additionalProperties: false
+      required: [key, label]
+      properties:
+        key: {type: string, enum: [nominal_event, duplicate_event, distinct_events, invalid_event]}
+        label: {type: string, minLength: 1, maxLength: 160}

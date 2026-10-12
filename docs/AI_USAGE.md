@@ -204,3 +204,18 @@ Codex (GPT-6), correction autorisée uniquement dans le worktree documentaire B2
 ## 11 octobre 2026 — Intégration et réception complète B25
 
 Codex, préparation autorisée des PR avant approbation : merges normaux des prérequis, conflits documentaires conservant les historiques et types régénérés depuis les sources composées. Réception complète locale sur `77d4147d18d1b5fb4f4cc8ed38b09840f978c46c`, base dédiée b25 et B2 séparé : 413/4129 hors SQL +611/4607 Integration, total disjoint 1024/8736, aucune erreur/échec/skip. Contrôles statiques/Composer/types/documents réussis ; ancienne CI distincte du futur SHA publié. B38 fusion réelle et CI exactes consolidées sans compter l’absence de revue comme une approbation. Q12 utilise la cible propriétaire UX08 prévue ; aucun écran frontend livré ou testé. Publication corrigée, revue humaine des prérequis encore nécessaire. Aucune donnée privée/secret/dépendance/identité ajoutée ; racine et B18 conservés, pas de merge de PR, frontend ou déploiement.
+
+
+## 11 octobre 2026 — Réception B27 par les deux jobs CI exacts
+
+Codex, préparation autorisée avant approbation : publication normale du candidat `bef006c481ed8f2692277b3c91cab1a9de13fb1c`, résolution du dernier conflit distant par conservation des prérequis. CI 38162823982 et deux journaux PHP individuels lus : chacun 454/4351 +708/5028 =1162/9379 ; types67/empreintes798 et trois jobs réussis. Unit locale454/4351 et ciblés74/436 distincts. Relance SQL locale interrompue avec JUnit vide/service de tests arrêté : aucun succès Windows complet inventé. B27 IN_REVIEW ; prérequis B26/B33 partiel et ARB05 inactive, brouillons #35/#36 conservés. Six PR sans conflit, aucune approbation ou fusion effectuée ; aucune identité, dépendance, frontend ou publication de service ajoutée. Racine et neuf fichiers B18 initiaux conservés, socle B18 reçu séparément lorsqu’il sera testé.
+
+## 12 octobre 2026 — B33, registre reçu sur ciblés
+
+B33 **IN_PROGRESS**, code local depuis B27 figé : 480/4437 hors SQL +62/375 SQL ciblés, liaison concurrente réelle incluse, PHPStan8/Pint/70 types reçus. Report isolé sur B25 nécessaire pour l’ordre B33 → B26 → B27, puis réception générale/SQL complète/CI exacte et revue humaine. Les quatorze fichiers B1 épinglés sont identiques sur les deux bases. Aucun run lancé par le registre, switch fermé, B34/B36 à réaliser ; aucun gate, frontend ou déploiement. [Preuves](quality/B33_LAB_REGISTRY_20261012.md). Codex prépare le report ; aucune revue humaine ou exécution réelle de laboratoire inventée.
+
+## 12 octobre 2026 — Réception propre du registre sur B25
+
+Lot B33 isolé depuis le candidat historique `04385b6573f3c6d80a71dde6d4e1fce3fbe25449`, sur B25 `365e549b2be2d9f2fedb557e8309213b182bfbaa`. Ordre **B33 → B26 → B27**, aucun cycle de prérequis. Code de registre conservé, harness de test rendu indépendant du wrapper local.
+
+**439 tests /4215 assertions hors SQL +63 /392 SQL ciblés =502 /4607 reçus**, zéro erreur/échec/skip. Vraie liaison à deux processus1/11 incluse, sans double comptage. PHPStan8 sans erreur, Pint global, **64 types** reçus sur cette base. Base locale exclusive `haas_b33p25_review_test`, PostgreSQL17, 127.0.0.1:55447, runnerb33p25 ; composer.lock inchangé. Globale Integration locale et CI exacte à recevoir ; B33 **IN_PROGRESS** avant cette réception et revue humaine. Aucun gate, frontend ou déploiement.

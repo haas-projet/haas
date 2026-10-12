@@ -105,6 +105,12 @@ export type identity_SessionMember = { readonly "id": string; readonly "handle":
 
 export type identity_TechnologyId = string;
 
+export type lab_LabDefinitionAvailability = ({ readonly "version_id": string; readonly "available": false; readonly "definition": null; } | { readonly "version_id": string; readonly "available": true; readonly "definition": lab_LabReleasedDefinition; });
+
+export type lab_LabReleasedDefinition = { readonly "id": string; readonly "release": string; readonly "module_version": string; readonly "code_digest": string; readonly "suite_digest": string; readonly "version_digest": string; readonly "scenarios": ReadonlyArray<lab_LabScenario>; };
+
+export type lab_LabScenario = { readonly "key": "nominal_event" | "duplicate_event" | "distinct_events" | "invalid_event"; readonly "label": string; };
+
 export type moderation_Category = "secret_exposed" | "abuse" | "uncertain_rights" | "misleading_solution" | "other";
 
 export type moderation_ModerationReport = (moderation_ReportFields & { readonly "category": moderation_Category; readonly "detail": string; readonly "reporter_id": string | null; readonly "context": { readonly "bio": string; readonly "country": string | null; readonly "github_url": string | null; readonly "hidden": boolean; readonly "lock_version": number; } | null; [key: string]: unknown; });

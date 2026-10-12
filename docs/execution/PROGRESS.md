@@ -1,6 +1,15 @@
 # Suivi du dépôt HAAS
 
-**Statut actif :** Intégration locale P0 en préparation : B19 39f96e9 et B27 524067b3 réunis sur une branche de contrôle isolée. Les 15 conflits sont résolus ; 586 tests / 5605 assertions hors SQL, PHPStan8/Pint, Composer, 82 types et documents reçus. Integration PostgreSQL complète en cours : aucune réussite finale présumée. Les 18 lots intégrés dans main d0d47c5 restent DONE ; les PR B18/B19 et capsules conservent leurs statuts et prérequis. B20, BC01 et B33 sont préparés séparément. Aucun merge de PR distante, avis humain ou gate.
+## 12 octobre 2026 — Réception complète du code composé
+
+Code `0435bdbdd7b45d4edf6465421bb58c60c5b0c694`, [CI 38177876071](https://github.com/haas-projet/haas/actions/runs/38177876071) reçue dans chacun des deux journaux PHP 8.4/8.5 : **586/5605 hors SQL + 961/8681 Integration = 1547 tests / 14286 assertions par PHP**, 82 types et 856 empreintes, trois jobs réussis. PostgreSQL local complet reçu au même code, 961/8681, zéro erreur/échec/skip. Les anciens ciblés ne sont pas additionnés à la suite complète.
+
+La composition est reçue techniquement ; les PR de chaque domaine restent soumises à la revue humaine et à leurs prérequis. B20, BC02/BC06 et B33 sont préparés sur des branches distinctes ; B26 reste partiel. Le commit documentaire suivant doit recevoir sa CI exacte avant toute qualification de ce nouveau SHA ou passage de la PR à ready. Aucun BACKEND_GATE, GO_FRONTEND ou GO_PRODUCTION.
+
+[Preuves et commandes](../quality/BACKEND_INTEGRATION_20261011.md). Les entrées suivantes conservent l’historique des réceptions initiales.
+
+
+**État historique :** réception initiale ci-dessous.
 
 ## 11 octobre 2026 — Composition locale des domaines P0
 

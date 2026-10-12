@@ -1,5 +1,19 @@
 # Composition locale du backend P0 — 11 octobre 2026
 
+## 12 octobre 2026 — Réception complète du code composé
+
+Code `0435bdbdd7b45d4edf6465421bb58c60c5b0c694`, [CI 38177876071](https://github.com/haas-projet/haas/actions/runs/38177876071) reçue dans chacun des deux journaux PHP 8.4/8.5 : **586/5605 hors SQL + 961/8681 Integration = 1547 tests / 14286 assertions par PHP**, 82 types et 856 empreintes, trois jobs réussis. PostgreSQL local complet reçu au même code, 961/8681, zéro erreur/échec/skip. Les anciens ciblés ne sont pas additionnés à la suite complète.
+
+| Job CI | Hors SQL | PostgreSQL | Total disjoint | Types | Empreintes |
+| --- | --- | --- | --- | --- | --- |
+| [PHP 8.4 / PostgreSQL 17](https://github.com/haas-projet/haas/actions/runs/38177876071/job/114584011004) | 586 / 5605 | 961 / 8681 | **1547 / 14286** | 82 | 856 |
+| [PHP 8.5 / PostgreSQL 17](https://github.com/haas-projet/haas/actions/runs/38177876071/job/114584011207) | 586 / 5605 | 961 / 8681 | **1547 / 14286** | 82 | 856 |
+
+La composition est reçue techniquement ; les PR de chaque domaine restent soumises à la revue humaine et à leurs prérequis. B20, BC02/BC06 et B33 sont préparés sur des branches distinctes ; B26 reste partiel. Le commit documentaire suivant doit recevoir sa CI exacte avant toute qualification de ce nouveau SHA ou passage de la PR à ready. Aucun BACKEND_GATE, GO_FRONTEND ou GO_PRODUCTION.
+
+Les sections suivantes décrivent la préparation antérieure, y compris la suite alors en cours ; elles ne remplacent pas la réception ci-dessus.
+
+
 ## Sources et périmètre
 
 Branche isolée `backend/integration-p0-20261011`, merge local normal B19 `39f96e94d8664bb39da4083a57fbd93ba295a643` + B27 `524067b3eda56b0f6f04098423d707f6ebee4087`. Main reste `d0d47c5dd62887fcf18361f499a33a800538b2b1`. Les PR #29/#30/#33/#34/#35/#36/#37/#38 restent ouvertes à la revue humaine dans leur ordre de prérequis ; #35/#36 conservent leur Draft et leurs limites B33/Q16/ARB05.

@@ -270,3 +270,9 @@ Codex, préparation autorisée avant approbation : publication normale du candid
 ## 11 octobre 2026 — Composition locale P0
 
 Codex a préparé une branche isolée depuis B19 puis intégré B27 par merge normal local. Un agent a résolu les cinq conflits PHP des notifications et du cleanup Identity ; l'intégrateur a relu ces diffs, résolu les dix conflits de contrat/suivi et régénéré les types et empreintes. Les historiques des deux côtés restent conservés. [Contrôles et limites](quality/BACKEND_INTEGRATION_20261011.md). Aucune approbation humaine, fusion distante, suite SQL encore en cours ou licence Qodana présumée.
+
+## 12 octobre 2026 — Réception complète du code composé
+
+Code `0435bdbdd7b45d4edf6465421bb58c60c5b0c694`, [CI 38177876071](https://github.com/haas-projet/haas/actions/runs/38177876071) reçue dans chacun des deux journaux PHP 8.4/8.5 : **586/5605 hors SQL + 961/8681 Integration = 1547 tests / 14286 assertions par PHP**, 82 types et 856 empreintes, trois jobs réussis. PostgreSQL local complet reçu au même code, 961/8681, zéro erreur/échec/skip. Les anciens ciblés ne sont pas additionnés à la suite complète.
+
+Codex a lu les deux jobs individuels, vérifié le JUnit local et consolidé les preuves sans modifier le code backend testé. La composition est reçue techniquement ; les PR de chaque domaine restent soumises à la revue humaine et à leurs prérequis. B20, BC02/BC06 et B33 sont préparés sur des branches distinctes ; B26 reste partiel. Le commit documentaire suivant doit recevoir sa CI exacte avant toute qualification de ce nouveau SHA ou passage de la PR à ready. Aucun BACKEND_GATE, GO_FRONTEND ou GO_PRODUCTION.

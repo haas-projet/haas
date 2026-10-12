@@ -1,5 +1,19 @@
 # B20 — Réouverture et historique, 12 octobre 2026
 
+## 12 octobre 2026 — Réception complète B20
+
+Code `11bf46a53d7e3faaac1615edc957c0daaaaafbd4`, [CI 38252341878](https://github.com/haas-projet/haas/actions/runs/38252341878) reçue dans chacun des deux journaux PHP 8.4/8.5 : **542/5375 hors SQL + 719/8121 Integration = 1261 tests / 13496 assertions par PHP**, 71 types et 738 empreintes, trois jobs réussis. PostgreSQL local complet reçu au même code, 719/8121, zéro erreur/échec/skip. Les anciens ciblés ne sont pas additionnés à la suite complète.
+
+| Job CI | Hors SQL | PostgreSQL | Total disjoint | Types | Empreintes |
+| --- | --- | --- | --- | --- | --- |
+| [PHP 8.4 / PostgreSQL 17](https://github.com/haas-projet/haas/actions/runs/38252341878/job/114821577692) | 542 / 5375 | 719 / 8121 | **1261 / 13496** | 71 | 738 |
+| [PHP 8.5 / PostgreSQL 17](https://github.com/haas-projet/haas/actions/runs/38252341878/job/114821577930) | 542 / 5375 | 719 / 8121 | **1261 / 13496** | 71 | 738 |
+
+B20 **IN_PROGRESS** : commandes, historique et notifications reçus sur leurs suites complètes ; PR #41 Draft sur B19 #38, après B18 #37. AC11 reste partiel avant réception du signal externe sur la composition réelle des capsules. La CI verte seule ne clôture pas ce raccord ; revue humaine et intégration requises. Le commit documentaire suivant doit recevoir sa CI exacte avant toute qualification de ce nouveau SHA ou passage de la PR à ready. Aucun BACKEND_GATE, GO_FRONTEND ou GO_PRODUCTION.
+
+Les sections suivantes décrivent la préparation antérieure, y compris la suite alors en cours ; elles ne remplacent pas la réception ci-dessus.
+
+
 ## Périmètre et provenance
 
 Branche isolée `backend/communaute-entraide-b20-reouverture` depuis B19 `39f96e94d8664bb39da4083a57fbd93ba295a643` (#38). Préparation autorisée pendant la revue, identité Git existante et auteur humain distincts de l'assistance Codex. Aucun avis humain ni fusion distante.

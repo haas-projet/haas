@@ -56,3 +56,9 @@ Les tests qui rendent leur base dédiée vide nettoient seulement les UUID de le
 Cette branche part de B19 et livre le fait de réouverture, son historique et sa notification, sans fichier capsule ni modification de version publiée. Le signal **« Source rouverte — revue nécessaire »** sera raccordé après intégration réelle de B22–B27 ; versions publiées et digests restent immuables. **AC11 reste partiel tant que ce raccord n'est pas reçu.** Aucun frontend, BACKEND_GATE, déploiement ou revue humaine déclaré ici.
 
 Les contrôles locaux réellement exécutés sont transmis à l'intégrateur, distincts de la future CI. Aucun succès de CI ni SHA auto-référencé n'est inventé dans ce contrat.
+
+## 12 octobre 2026 — Réception complète B20
+
+Code `11bf46a53d7e3faaac1615edc957c0daaaaafbd4`, [CI 38252341878](https://github.com/haas-projet/haas/actions/runs/38252341878) reçue dans chacun des deux journaux PHP 8.4/8.5 : **542/5375 hors SQL + 719/8121 Integration = 1261 tests / 13496 assertions par PHP**, 71 types et 738 empreintes, trois jobs réussis. PostgreSQL local complet reçu au même code, 719/8121, zéro erreur/échec/skip. Les anciens ciblés ne sont pas additionnés à la suite complète.
+
+Les réceptions initiales ci-dessus sont historiques. B20 **IN_PROGRESS** : commandes, historique et notifications reçus sur leurs suites complètes ; PR #41 Draft sur B19 #38, après B18 #37. AC11 reste partiel avant réception du signal externe sur la composition réelle des capsules. La CI verte seule ne clôture pas ce raccord ; revue humaine et intégration requises.

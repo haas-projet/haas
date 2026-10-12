@@ -156,3 +156,9 @@ Codex : PR #38 publiée en Draft sur B18 #37, applicatif d5bb2a580e6b21e8230b84f
 ## 12 octobre 2026 — B20, réouverture reçue sur ciblés
 
 B20 **IN_PROGRESS**, branche isolée après B19 #38. Réouverture par l'auteur, historique immuable, filtres de cohérence et notifications reçus : 542/5375 hors SQL +94/1097 SQL ciblés, dont sept courses réelles ; PHPStan8/Pint/71 types. Globale Integration en cours, CI et revue humaine à recevoir. AC11 reste partiel avant signal externe des capsules sur code composé. Aucun gate, frontend ou déploiement. [Preuves](quality/B20_REOPENINGS_20261012.md). Codex a préparé et relu le code ; aucune identité ou revue humaine attribuée à Lamine.
+
+## 12 octobre 2026 — Réception complète B20
+
+Code `11bf46a53d7e3faaac1615edc957c0daaaaafbd4`, [CI 38252341878](https://github.com/haas-projet/haas/actions/runs/38252341878) reçue dans chacun des deux journaux PHP 8.4/8.5 : **542/5375 hors SQL + 719/8121 Integration = 1261 tests / 13496 assertions par PHP**, 71 types et 738 empreintes, trois jobs réussis. PostgreSQL local complet reçu au même code, 719/8121, zéro erreur/échec/skip. Les anciens ciblés ne sont pas additionnés à la suite complète.
+
+Codex a lu les deux jobs individuels, vérifié le JUnit local et consolidé les preuves sans modifier le code backend testé. B20 **IN_PROGRESS** : commandes, historique et notifications reçus sur leurs suites complètes ; PR #41 Draft sur B19 #38, après B18 #37. AC11 reste partiel avant réception du signal externe sur la composition réelle des capsules. La CI verte seule ne clôture pas ce raccord ; revue humaine et intégration requises. Le commit documentaire suivant doit recevoir sa CI exacte avant toute qualification de ce nouveau SHA ou passage de la PR à ready. Aucun BACKEND_GATE, GO_FRONTEND ou GO_PRODUCTION.

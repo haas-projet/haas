@@ -58,6 +58,12 @@ class HelpRequest extends Model
         return $this->hasMany(Resolution::class, 'request_id');
     }
 
+    /** @return HasMany<RequestReopening, $this> */
+    public function reopenings(): HasMany
+    {
+        return $this->hasMany(RequestReopening::class, 'request_id');
+    }
+
     /**
      * @return array<string, string>
      */

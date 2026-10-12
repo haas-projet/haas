@@ -267,7 +267,11 @@
       "refs": "AC11 ; F04",
       "phase": "B",
       "execution_order": 22,
-      "status": "TODO"
+      "status": "IN_PROGRESS",
+      "evidence": [
+        "docs/api/REOPENINGS.md",
+        "docs/quality/B20_REOPENINGS_20261012.md"
+      ]
     },
     {
       "id": "B21",

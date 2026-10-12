@@ -768,7 +768,7 @@ paths:
         l'auto-résolution sans annoncer une validation indépendante ni un test machine.
         environment/proposal_version legacy inconnus restent null ; aucune reconstruction inventée.
         request_lock_version est la version courante du parent, pas un numéro historique inventé.
-        Aucun historique de résolutions ni parcours de réouverture ajouté. Cache-Control no-store.
+        Historique et réouverture B20 ont leurs routes distinctes dans reopenings.yaml. Cache-Control no-store.
       security:
         - {}
         - SessionCookie: []

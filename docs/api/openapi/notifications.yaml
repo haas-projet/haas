@@ -6,7 +6,7 @@ paths:
       description: >-
         Session active requise, projection privée no-store. Ordre date/UUID décroissant.
         Aucun courriel, texte de contenu, code, motif de signalement ou lien public retiré.
-        Types pris en charge : profile.moderated, comment.created, proposal.created et resolution.accepted.
+        Types pris en charge : profile.moderated, comment.created, proposal.created, resolution.accepted et request.reopened.
         Pour les commentaires, la visibilité courante du commentaire, de son auteur et du parent
         filtre liste et compteur avant pagination ; aucun extrait n'est exposé.
         Pour les propositions, vérifier aussi le contributeur, le parent et son propriétaire courant
@@ -15,6 +15,9 @@ paths:
         avec événement stable par UUID de résolution. Résolution active, parent et proposition actuellement
         visibles et destinataire encore contributeur actif sont vérifiés avant liste, compteur et marquage.
         Aucun contexte déclaré, note de validation, code ou contact n'est copié dans le message.
+        request.reopened notifie l'ancien contributeur sauf soi avec UUID du journal stable,
+        sans motif. Parent, proposition, acceptant et destinataire courants sont filtrés avant
+        liste, compteur et marquage ; le fait historique peut rester visible après une nouvelle acceptation.
       security: [{ SessionCookie: [] }]
       parameters:
         - $ref: '../../OPENAPI.yaml#/components/parameters/Page'
@@ -84,11 +87,11 @@ components:
       required: [id, kind, message, target_path, read_at, created_at]
       properties:
         id: { type: string, format: uuid }
-        kind: { type: string, enum: [profile.moderated, comment.created, proposal.created, resolution.accepted] }
+        kind: { type: string, enum: [profile.moderated, comment.created, proposal.created, resolution.accepted, request.reopened] }
         message: { type: string }
         target_path:
           type: string
           pattern: '^/(?:me/profile|requests/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$'
-          description: Chemin interne /me/profile pour profile.moderated ou /requests/<UUID> pour comment.created/proposal.created/resolution.accepted ; aucune URL externe.
+          description: Chemin interne /me/profile pour profile.moderated ou /requests/<UUID> pour comment.created/proposal.created/resolution.accepted/request.reopened ; aucune URL externe.
         read_at: { type: [string, 'null'], format: date-time }
         created_at: { type: string, format: date-time }

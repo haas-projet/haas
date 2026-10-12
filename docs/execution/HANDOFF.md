@@ -1,8 +1,22 @@
 # Reprise de session
 
+## 12 octobre 2026 — Réception complète BC01
+
+Code `f2af47377bfc54e0c4bd35be5d6ae3ebd306d8f2`, [CI 38177740506](https://github.com/haas-projet/haas/actions/runs/38177740506) reçue dans chacun des deux journaux PHP 8.4/8.5 : **530/5167 hors SQL + 691/7493 Integration = 1221 tests / 12660 assertions par PHP**, 66 types et 722 empreintes, trois jobs réussis. PostgreSQL local complet reçu au même code, 691/7493, zéro erreur/échec/skip. Les anciens ciblés ne sont pas additionnés à la suite complète.
+
+BC01 **IN_REVIEW** pour son seul schéma ; PR #39 sur base temporaire B19 #38 après B18 #37. Les commandes projets, l’annuaire et les offres restent des lots distincts. Revue humaine et intégration encore nécessaires. Le commit documentaire suivant doit recevoir sa CI exacte avant toute qualification de ce nouveau SHA ou passage de la PR à ready. Aucun BACKEND_GATE, GO_FRONTEND ou GO_PRODUCTION.
+
+[Preuves et commandes](../quality/BC01_PROJECT_SCHEMA_20261011.md). Les entrées suivantes conservent l’historique des réceptions initiales.
+
+
+## 11 octobre 2026 — BC01, schéma reçu sur contrôles ciblés
+
+BC01 **IN_PROGRESS** sur la branche isolée `backend/communaute-entraide-bc01-schema` depuis B19 39f96e9. Projets/pivot, préférences volontaires privées et lien facultatif avec propriétaire garanti reçus : 530/5167 hors SQL, 66/469 SQL ciblés/composition, PHPStan8/Pint et diff propres. Suite Integration complète en cours, CI exacte et revue humaine à recevoir. [Preuves et limites](../quality/BC01_PROJECT_SCHEMA_20261011.md). Préparation assistée par Codex, sans identité de Lamine ni validation humaine inventée. Prochain BC02, puis BC03/BC06 et raccords BC04/BC05 ; aucun gate, frontend ou déploiement.
+
+
 Inspecter le dépôt, préserver les fichiers/commits/saisies existants, lire ADR-006. Appliquer F18 : projets ouverts, offres consenties, décision propriétaire, fil et projection publique contrôlés. Nouvelle recette avant GO_FRONTEND ; ne pas prendre un ancien gate pour un accord sur ce périmètre. Systalink/Vercel inchangé.
 
-État courant : B01–B09, B11–B17, B32 et B38 intégrés dans main d0d47c5 (18 lots entiers). B18 IN_REVIEW, PR #37 ready : head d4db146 et CI finale 38169301011 reçue, 991 / 9968 par PHP 8.4/8.5. B19 IN_REVIEW, PR #38 sur base temporaire B18 : applicatif d5bb2a5, CI 38174008525 complète reçue, 1155 tests / 12198 assertions par PHP 8.4/8.5, dont 632 / 7091 PostgreSQL complet, 66 types et 710 empreintes. CI documentaire finale à recevoir avant ready. Huit PR sans conflit au dernier constat ; #29 → #30 → #33 → #34 et #37 → #38 dans leur ordre de prérequis. #35/#36 restent Draft (B26 partiel sans B33). Aucun avis humain ou merge simulé ; 122 lots et historiques conservés. Aucun gate, frontend ou déploiement. Voir B19_RESOLUTIONS_20261011.md et le suivi de Lamine ; entrées suivantes historiques.
+État historique : réception initiale ci-dessous.
 
 ## Reprise après préparation GitHub — 2026-10-01
 

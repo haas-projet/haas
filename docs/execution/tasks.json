@@ -498,7 +498,7 @@
       "verify": "Tests ownership, mass assignment, validation, double création, conflit 409 et absence de fetch/clonage serveur. Aucune identité client acceptée.",
       "refs": "F16 ; AC53/AC54/AC56/AC57",
       "phase": "B",
-      "status": "IN_PROGRESS",
+      "status": "IN_REVIEW",
       "execution_order": 42,
       "evidence": [
         "docs/api/PROJECTS.md",

@@ -22,3 +22,9 @@ Acteur relu/verrouillé par le socle, puis projet et références verrouillés. 
 Resource fermée : UUID, propriétaire{id,handle}, textes et liens autorisés, deux états, lock_version, date de publication nullable, technologies{id,slug,name}, created_at/updated_at UTC. Aucun courriel, rôle, statut, motif de modération ou version d'audit privé. La réponse201 n'atteste aucune publication.
 
 [Contrat OpenAPI](openapi/projects.yaml) et [preuves réelles](../quality/BC02_PROJECT_COMMANDS_20261012.md). Catalogue/publication/archivage BC03, rattachement BC04 et modération BC05 encore séparés ; aucun gate reçu.
+
+## 12 octobre 2026 — Réception complète BC02
+
+Code `7d0d569cb0f5f13ac1962949957b096cf1405df7`, [CI 38195772198](https://github.com/haas-projet/haas/actions/runs/38195772198) reçue dans chacun des deux journaux PHP 8.4/8.5 : **558/5276 hors SQL + 733/7848 Integration = 1291 tests / 13124 assertions par PHP**, 69 types et 747 empreintes, trois jobs réussis. PostgreSQL local complet reçu au même code, 733/7848, zéro erreur/échec/skip. Les anciens ciblés ne sont pas additionnés à la suite complète.
+
+Les réceptions initiales ci-dessus sont historiques. BC02 **IN_REVIEW**, PR #40 sur base temporaire BC01 #39, après B18 #37 et B19 #38. Création et édition des projets reçues ; publication, historique public, catalogue, archivage et liens de demandes restent BC03/BC04. Revue humaine et intégration nécessaires.

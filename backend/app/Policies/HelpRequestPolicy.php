@@ -34,4 +34,12 @@ final class HelpRequestPolicy
         return $this->access->owns($actor, $request->author_id) && $request->hidden_at === null
             && in_array($request->state, [HelpRequestState::Open, HelpRequestState::InProgress, HelpRequestState::Resolved], true);
     }
+
+    public function reopen(User $actor, HelpRequest $request): bool
+    {
+        // Open/InProgress permit the authorization of a replay; only the Service
+        // may apply the Resolved→Open transition or reject a changed result.
+        return $this->access->owns($actor, $request->author_id) && $request->hidden_at === null
+            && in_array($request->state, [HelpRequestState::Resolved, HelpRequestState::Open, HelpRequestState::InProgress], true);
+    }
 }

@@ -1,5 +1,12 @@
 # Suivi — communauté et entraide / LamineGL
 
+## 12 octobre 2026 — B20, réouverture reçue sur ciblés
+
+B20 **IN_PROGRESS**, branche isolée après B19 #38. Réouverture par l'auteur, historique immuable, filtres de cohérence et notifications reçus : 542/5375 hors SQL +94/1097 SQL ciblés, dont sept courses réelles ; PHPStan8/Pint/71 types. Globale Integration en cours, CI et revue humaine à recevoir. AC11 reste partiel avant signal externe des capsules sur code composé. Aucun gate, frontend ou déploiement. [Preuves et incidents](../../../quality/B20_REOPENINGS_20261012.md).
+
+Les entrées suivantes conservent l'historique des réceptions antérieures.
+
+
 
 
 ## 11 octobre 2026 — B19, CI complète reçue pour revue

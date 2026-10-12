@@ -152,3 +152,7 @@ Assistance Codex sur branche isolée issue de B18 d4db146 : service transactionn
 ## 11 octobre 2026 — Réception CI complète B19
 
 Codex : PR #38 publiée en Draft sur B18 #37, applicatif d5bb2a580e6b21e8230b84f8f85479997bbb69ec. Journaux individuels du run 38174008525 lus : 1155 tests / 12198 assertions par PHP 8.4/8.5, dont 632 / 7091 PostgreSQL complet, types 66 et empreintes 710. Relecture automatisée distincte du journal PHP 8.5, sans avis humain inventé. B19 IN_REVIEW ; ce complément porte seulement les preuves/suivis/README/empreintes. Sa CI exacte doit être reçue avant ready. Aucune fusion, tâche B20, frontend ou déploiement.
+
+## 12 octobre 2026 — B20, réouverture reçue sur ciblés
+
+B20 **IN_PROGRESS**, branche isolée après B19 #38. Réouverture par l'auteur, historique immuable, filtres de cohérence et notifications reçus : 542/5375 hors SQL +94/1097 SQL ciblés, dont sept courses réelles ; PHPStan8/Pint/71 types. Globale Integration en cours, CI et revue humaine à recevoir. AC11 reste partiel avant signal externe des capsules sur code composé. Aucun gate, frontend ou déploiement. [Preuves](quality/B20_REOPENINGS_20261012.md). Codex a préparé et relu le code ; aucune identité ou revue humaine attribuée à Lamine.

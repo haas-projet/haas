@@ -1,5 +1,12 @@
 # Suivi du dépôt HAAS
 
+## 12 octobre 2026 — B20, réouverture reçue sur ciblés
+
+B20 **IN_PROGRESS**, branche isolée après B19 #38. Réouverture par l'auteur, historique immuable, filtres de cohérence et notifications reçus : 542/5375 hors SQL +94/1097 SQL ciblés, dont sept courses réelles ; PHPStan8/Pint/71 types. Globale Integration en cours, CI et revue humaine à recevoir. AC11 reste partiel avant signal externe des capsules sur code composé. Aucun gate, frontend ou déploiement. [Preuves et incidents](../quality/B20_REOPENINGS_20261012.md).
+
+Les entrées suivantes conservent l'historique des réceptions antérieures.
+
+
 **Statut actif :** B01–B09, B11–B17, B32 et B38 intégrés dans main d0d47c5 (18 lots entiers). B18 IN_REVIEW, PR #37 ready : head d4db146 et CI finale 38169301011 reçue, 991 / 9968 par PHP 8.4/8.5. B19 IN_REVIEW, PR #38 sur base temporaire B18 : applicatif d5bb2a5, CI 38174008525 complète reçue, 1155 tests / 12198 assertions par PHP 8.4/8.5, dont 632 / 7091 PostgreSQL complet, 66 types et 710 empreintes. CI documentaire finale à recevoir avant ready. Huit PR sans conflit au dernier constat ; #29 → #30 → #33 → #34 et #37 → #38 dans leur ordre de prérequis. #35/#36 restent Draft (B26 partiel sans B33). Aucun avis humain ou merge simulé ; 122 lots et historiques conservés. Aucun gate, frontend ou déploiement. Voir B19_RESOLUTIONS_20261011.md et le suivi de Lamine ; entrées suivantes historiques.
 
 À renseigner après commandes réelles : date / lot / responsable / fichiers / commandes / observé / commit ou raison de non-commit / blocage / prochaine action. Les contrôles documentaires de ce pack ne valident pas BACKEND_GATE, FRONTEND_GATE ou RELEASE_GATE.

@@ -132,3 +132,9 @@ export type profiles_ProfilePatch = { readonly "lock_version": number; readonly 
 export type profiles_PublicProfile = (profiles_ProfileFields);
 
 export type profiles_Technology = { readonly "id": string; readonly "slug": string; readonly "name": string; };
+
+export type projects_Project = { readonly "id": string; readonly "owner": { readonly "id": string; readonly "handle": identity_Handle; }; readonly "name": string | null; readonly "summary": string | null; readonly "description": string | null; readonly "project_stage": "idea" | "prototype" | "in_development" | "launched"; readonly "publication_state": "draft" | "published" | "archived"; readonly "help_sought": string | null; readonly "demo_url": string | null; readonly "repository_url": string | null; readonly "lock_version": number; readonly "published_at": string | null; readonly "technologies": ReadonlyArray<profiles_Technology>; readonly "created_at": string; readonly "updated_at": string; };
+
+export type projects_ProjectCreateInput = { readonly "name"?: string | null; readonly "summary"?: string | null; readonly "description"?: string | null; readonly "project_stage"?: "idea" | "prototype" | "in_development" | "launched"; readonly "help_sought"?: string | null; readonly "demo_url"?: string | null; readonly "repository_url"?: string | null; readonly "technology_ids"?: ReadonlyArray<string>; };
+
+export type projects_ProjectUpdateInput = { readonly "lock_version": number; readonly "name"?: string | null; readonly "summary"?: string | null; readonly "description"?: string | null; readonly "project_stage"?: "idea" | "prototype" | "in_development" | "launched"; readonly "help_sought"?: string | null; readonly "demo_url"?: string | null; readonly "repository_url"?: string | null; readonly "technology_ids"?: ReadonlyArray<string>; };

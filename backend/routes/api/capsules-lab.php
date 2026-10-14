@@ -9,6 +9,7 @@ use App\Http\Controllers\Capsules\StoreCapsuleDraftController;
 use App\Http\Controllers\Capsules\StoreCapsuleVersionDraftController;
 use App\Http\Controllers\Capsules\SubmitCapsuleVersionForReviewController;
 use App\Http\Controllers\Capsules\UpdateCapsuleVersionDraftController;
+use App\Http\Controllers\Lab\ShowLabDefinitionController;
 use Illuminate\Support\Facades\Route;
 
 // Brouillons de capsule (lots B23/B24). Membre actif/vérifié requis par
@@ -35,3 +36,5 @@ Route::prefix('admin/capsules')->group(function (): void {
         ->whereUuid(['capsule', 'version'])
         ->name('admin.capsules.versions.publish');
 });
+
+Route::get('/versions/{id}/lab-definition', ShowLabDefinitionController::class)->whereUuid('id')->name('versions.lab-definition');

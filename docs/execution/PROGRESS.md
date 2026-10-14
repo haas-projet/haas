@@ -1,5 +1,33 @@
 # Suivi du dépôt HAAS
 
+## 12 octobre 2026 — Réception propre du registre sur B25
+
+Lot B33 isolé depuis le candidat historique `04385b6573f3c6d80a71dde6d4e1fce3fbe25449`, sur B25 `365e549b2be2d9f2fedb557e8309213b182bfbaa`. Ordre **B33 → B26 → B27**, aucun cycle de prérequis. Code de registre conservé, harness de test rendu indépendant du wrapper local.
+
+**439 tests /4215 assertions hors SQL +63 /392 SQL ciblés =502 /4607 reçus**, zéro erreur/échec/skip. Vraie liaison à deux processus1/11 incluse, sans double comptage. PHPStan8 sans erreur, Pint global, **64 types** reçus sur cette base. Base locale exclusive `haas_b33p25_review_test`, PostgreSQL17, 127.0.0.1:55447, runnerb33p25 ; composer.lock inchangé. Globale Integration locale et CI exacte à recevoir ; B33 **IN_PROGRESS** avant cette réception et revue humaine. Aucun gate, frontend ou déploiement.
+
+[Commandes et incidents](../quality/B33_LAB_REGISTRY_20261012.md). Préparation assistée par Codex, sans identité ou approbation humaine attribuée au pilote. Historique ci-dessous conservé.
+
+
+**État actif :** B33 reporté sur B25, ordre de prérequis B33 → B26 → B27 sans cycle. Contrôles de cette base à recevoir ; premières preuves ci-dessous historiques. Aucun gate ni approbation humaine.
+
+
+
+## 12 octobre 2026 — B33, registre reçu sur ciblés
+
+B33 **IN_PROGRESS**, code local depuis B27 figé : 480/4437 hors SQL +62/375 SQL ciblés, liaison concurrente réelle incluse, PHPStan8/Pint/70 types reçus. Report isolé sur B25 nécessaire pour l’ordre B33 → B26 → B27, puis réception générale/SQL complète/CI exacte et revue humaine. Les quatorze fichiers B1 épinglés sont identiques sur les deux bases. Aucun run lancé par le registre, switch fermé, B34/B36 à réaliser ; aucun gate, frontend ou déploiement. [Preuves et limites](../quality/B33_LAB_REGISTRY_20261012.md). Préparation Codex, aucune identité ou approbation humaine attribuée au pilote.
+
+Entrées suivantes historiques.
+
+
+## Réception B27 par CI complète — 11 octobre 2026
+
+Source `bef006c481ed8f2692277b3c91cab1a9de13fb1c`, [CI 38162823982](https://github.com/haas-projet/haas/actions/runs/38162823982) : PHP 8.4 et PHP 8.5, chacun 454/4351 hors SQL +708/5028 Integration =**1162 tests /9379 assertions** ; backend-ci, statiques, types67 et empreintes798 réussis. Deux journaux individuels lus. Local Windows : Unit 454/4351 et ciblés 74/436 reçus ; la suite SQL complète est interrompue sans résultat final et reste distincte des réussites CI. Preuve : [B27_ARTIFACT_READINESS.md](../quality/B27_ARTIFACT_READINESS.md). B27 IN_REVIEW ; #35/#36 brouillons pour prérequis B26 partiel/B33 et ARB05 inactive. Six PR sans conflit constaté ; aucun merge ou approbation humaine.
+
+## Réception complète B26 — 11 octobre 2026
+
+B26 reçu sur `32347387536fa76f498ca21c62292c9b6ebfa80d` : hors SQL 421/4241, Integration 641/4758, total disjoint 1062/8999, erreurs/échecs/skips=0. PHPStan8, Pint, Composer, types66 et documents18/18 +7/7 réussis. B26 reste IN_PROGRESS et PR35 Draft : badge, has_lab et Q16 dépendent du registre B33 absent. La CI verte ne clôturera pas cette dépendance. Nouvelle CI du SHA publié et revue humaine encore attendues. Preuve : [B26_CATALOGUE_READINESS.md](../quality/B26_CATALOGUE_READINESS.md). Les mentions d’attente des étapes précédentes ci-dessous sont historiques.
+
 ## Réception complète B25 — 11 octobre 2026
 
 B25 reçu sur `77d4147d18d1b5fb4f4cc8ed38b09840f978c46c` : hors SQL 413/4129, Integration 611/4607, total disjoint 1024/8736, erreurs/échecs/skips=0. PHPStan8, Pint, Composer, types61 et documents18/18 +7/7 réussis. Q12 utilise la cible propriétaire UX08 prévue ; aucun écran frontend livré ou testé. Publication corrigée, revue humaine des prérequis encore nécessaire. Nouvelle CI du SHA publié et revue humaine encore attendues. Preuve : [B25_RECEPTION_20261011.md](../quality/B25_RECEPTION_20261011.md). Les mentions d’attente des étapes précédentes ci-dessous sont historiques.

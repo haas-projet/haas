@@ -1,5 +1,21 @@
 ﻿# Progression — capsules/laboratoire
 
+## 12 octobre 2026 — Réception propre du registre sur B25
+
+Lot B33 isolé depuis le candidat historique `04385b6573f3c6d80a71dde6d4e1fce3fbe25449`, sur B25 `365e549b2be2d9f2fedb557e8309213b182bfbaa`. Ordre **B33 → B26 → B27**, aucun cycle de prérequis. Code de registre conservé, harness de test rendu indépendant du wrapper local.
+
+**439 tests /4215 assertions hors SQL +63 /392 SQL ciblés =502 /4607 reçus**, zéro erreur/échec/skip. Vraie liaison à deux processus1/11 incluse, sans double comptage. PHPStan8 sans erreur, Pint global, **64 types** reçus sur cette base. Base locale exclusive `haas_b33p25_review_test`, PostgreSQL17, 127.0.0.1:55447, runnerb33p25 ; composer.lock inchangé. Globale Integration locale et CI exacte à recevoir ; B33 **IN_PROGRESS** avant cette réception et revue humaine. Aucun gate, frontend ou déploiement.
+
+[Commandes et incidents](../../../quality/B33_LAB_REGISTRY_20261012.md). Préparation assistée par Codex, sans identité ou approbation humaine attribuée au pilote. Historique ci-dessous conservé.
+
+
+## 12 octobre 2026 — B33, registre reçu sur ciblés
+
+B33 **IN_PROGRESS**, code local depuis B27 figé : 480/4437 hors SQL +62/375 SQL ciblés, liaison concurrente réelle incluse, PHPStan8/Pint/70 types reçus. Report isolé sur B25 nécessaire pour l’ordre B33 → B26 → B27, puis réception générale/SQL complète/CI exacte et revue humaine. Les quatorze fichiers B1 épinglés sont identiques sur les deux bases. Aucun run lancé par le registre, switch fermé, B34/B36 à réaliser ; aucun gate, frontend ou déploiement. [Preuves et limites](../../../quality/B33_LAB_REGISTRY_20261012.md). Préparation Codex, aucune identité ou approbation humaine attribuée au pilote.
+
+Entrées suivantes historiques.
+
+
 ## 2026-10-02 — Prise en main et phase 0
 
 Première session sur `backend/capsules-laboratoire`. Inspection du dépôt, des 23 lots pilotés (B22–B28, B33–B38, BV201–BV210) et des documents de référence : `backend/AGENTS.md`, `docs/architecture/ARCHITECTURE.md`, `docs/api/HTTP_CONTRACT.md`, `docs/execution/BACKEND_A_TROIS.md`, `docs/product/{ATELIER_COLLABORATIF,CAHIER_DES_CHARGES}.md` et les PROGRESS/HANDOFF de `ousseynoufayeisidk-sys`. Aucun code métier capsules/lab livré avant cette session.
@@ -684,3 +700,8 @@ Snapshot commité localement en `18bfbe0`. Trois défauts de descente de schéma
 ### B25 — Q12 corrigée, code prêt à réception intégrateur
 
 Downgrade commité en `eceb4bc`. Intention de publication propriétaire/version stable dans transaction métier puis livraison après commit ; visibilité/état/droits courants avant liste, compteur et marquage ; migration composée conservant les autres types SQL, refus des événements stables. Probe rouge 1 / 1 puis ciblés définitifs **57 / 467** verts, APIInventory **1 / 81**, Pint complet/PHPStan8, types61, pack18/18 et déploiement documentaire7/7 verts. Code/fixtures figés ; root reprend le parent documentaire B24 puis les suites complètes et la CI exacte. Aucun test actif, push, ready ou approbation humaine par cet agent. Preuve détaillée `B25_RECEPTION_20261011.md`.
+
+## 2026-10-14 — Correctif rollback B33
+
+Test `CapsulesMigrationTest::test_down_rollback_removes_all_capsule_schema_tables` étendu : dépose explicite de `lab_results`, `lab_runs`, `lab_definitions` (ordre des FK) avant la boucle de rollback des migrations capsules. Aucune migration ni logique de production modifiée, pas de CASCADE. Local : rollback seul OK (1,27), `tests/Integration/Capsules` OK (234,1178), `tests/Integration/Lab` OK (81,455), `composer lint` passed, `composer analyse` [OK]. Correctif à committer sur `backend/capsules-laboratoire-b33-release` (base distante 6951bb7).
+

@@ -7,15 +7,20 @@ namespace Tests\Integration\Capsules;
 use App\Enums\Capsules\CapsuleVersionState;
 use App\Enums\Capsules\CapsuleVisibility;
 use App\Enums\Capsules\ContributionRole;
+use App\Enums\HelpRequests\HelpRequestState;
+use App\Enums\Identity\AccountStatus;
 use App\Enums\Identity\Role;
 use App\Models\Capsules\Capsule;
 use App\Models\Capsules\CapsuleVersion;
+use App\Models\HelpRequest;
 use App\Models\Technology;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\PostgresTestCase;
 use Tests\Support\Mdev44\DomainTables;
 use Tests\Support\SpaHttpRequests;
@@ -184,6 +189,40 @@ final class CapsuleCatalogueHttpTest extends PostgresTestCase
         $this->assertEmpty(array_intersect($firstPageSlugs, $secondPageSlugs));
     }
 
+    public function test_unicode_search_accepts_two_hundred_characters_and_refuses_more(): void
+    {
+        $query = rawurlencode(str_repeat('é', 200));
+        $this->browserRequest('GET', '/api/v1/capsules?q='.$query)->assertOk()->assertJsonPath('meta.total', 0);
+        $query = rawurlencode(str_repeat('é', 201));
+        $this->browserRequest('GET', '/api/v1/capsules?q='.$query)->assertStatus(422);
+    }
+
+    /** @return iterable<string, array{string}> */
+    public static function arrayFilters(): iterable
+    {
+        yield 'q list' => ['q[]=x'];
+        yield 'q object' => ['q[key]=x'];
+        yield 'sort list' => ['sort[]=date'];
+        yield 'sort object' => ['sort[key]=relevance'];
+    }
+
+    #[DataProvider('arrayFilters')]
+    public function test_array_filters_are_validation_errors_without_string_casts(string $query): void
+    {
+        $this->browserRequest('GET', '/api/v1/capsules?'.$query)->assertStatus(422);
+    }
+
+    public function test_detail_attributes_the_public_handle_without_legacy_private_name(): void
+    {
+        [$owner] = $this->publishCapsule('attribution-publique');
+        $owner->forceFill(['name' => 'Nom personnel fictif privé', 'handle' => 'pseudonyme_public'])->save();
+        $response = $this->browserRequest('GET', '/api/v1/capsules/attribution-publique')
+            ->assertOk()->assertJsonPath('data.version.contributors.0.handle', 'pseudonyme_public');
+        $content = $response->getContent();
+        $this->assertIsString($content);
+        $this->assertStringNotContainsString('Nom personnel fictif privé', $content);
+    }
+
     public function test_empty_result_returns_empty_list_never_fabricated(): void
     {
         $response = $this->browserRequest('GET', '/api/v1/capsules');
@@ -247,6 +286,23 @@ final class CapsuleCatalogueHttpTest extends PostgresTestCase
         $this->assertCount(1, $detail->json('data.version.technologies'));
     }
 
+    public function test_legacy_published_content_digest_stays_null_on_both_detail_routes(): void
+    {
+        $owner = User::factory()->verified()->create();
+        $capsule = Capsule::factory()->create(['owner_id' => $owner->id, 'slug' => 'publication-historique']);
+        // Fixture de lecture d'une publication antérieure à B25 : aucun digest rétroactif.
+        $version = $this->seedPublishedVersion($capsule, $owner, '1.0.0', ContributionRole::Diagnosis, legacyPublication: true);
+
+        foreach (['/api/v1/capsules/publication-historique', '/api/v1/capsules/publication-historique/versions/1.0.0'] as $path) {
+            $response = $this->browserRequest('GET', $path)->assertOk();
+            $this->assertArrayHasKey('content_digest', $response->json('data.version'));
+            $response->assertJsonPath('data.version.content_digest', null)
+                ->assertJsonPath('data.version.body', $version->body);
+        }
+
+        $this->assertNull($version->refresh()->content_digest, 'La lecture ne doit pas fabriquer une empreinte historique.');
+    }
+
     public function test_catalogue_has_no_custom_headers(): void
     {
         $this->publishCapsule('entetes-neutres');
@@ -274,6 +330,45 @@ final class CapsuleCatalogueHttpTest extends PostgresTestCase
         $this->assertSame(30, count($response->json('data')));
     }
 
+    public function test_technology_filter_matches_only_the_latest_published_version(): void
+    {
+        $owner = User::factory()->verified()->create();
+        $capsule = Capsule::factory()->create(['owner_id' => $owner->id, 'slug' => 'technologie-courante']);
+        $oldTechnology = Technology::factory()->create();
+        $currentTechnology = Technology::factory()->create();
+        $this->seedPublishedVersion($capsule, $owner, '1.0.0', ContributionRole::Diagnosis, now()->utc()->subDay(), [$oldTechnology]);
+        $this->seedPublishedVersion($capsule, $owner, '2.0.0', ContributionRole::Fix, now()->utc(), [$currentTechnology]);
+
+        $this->browserRequest('GET', '/api/v1/capsules?technology='.$oldTechnology->id)
+            ->assertOk()->assertJsonPath('meta.total', 0)->assertJsonCount(0, 'data');
+        $this->browserRequest('GET', '/api/v1/capsules?technology='.$currentTechnology->id)
+            ->assertOk()->assertJsonPath('meta.total', 1)
+            ->assertJsonPath('data.0.version.version_label', '2.0.0')
+            ->assertJsonPath('data.0.version.technologies.0.id', $currentTechnology->id);
+    }
+
+    public function test_list_hydrates_only_one_published_version_per_card(): void
+    {
+        [$owner, $capsule] = $this->publishCapsule('historique-long');
+        $last = null;
+        for ($i = 1; $i <= 14; $i++) {
+            $last = $this->seedPublishedVersion($capsule, $owner, '1.0.'.$i, ContributionRole::Fix, now()->utc()->subMinutes(14 - $i));
+        }
+        $retrieved = [];
+        $event = 'eloquent.retrieved: '.CapsuleVersion::class;
+        Event::listen($event, static function (CapsuleVersion $version) use (&$retrieved): void {
+            $retrieved[] = $version->id;
+        });
+        try {
+            $response = $this->browserRequest('GET', '/api/v1/capsules?per_page=1');
+            $response->assertOk()->assertJsonPath('data.0.version.version_label', '1.0.14');
+            $this->assertSame([$last->id], $retrieved, 'Une carte ne doit pas hydrater tout son historique.');
+            $this->assertArrayNotHasKey('latest_published_version_id', $response->json('data.0'));
+        } finally {
+            Event::forget($event);
+        }
+    }
+
     public function test_direct_slug_on_capsule_without_published_version_is_404(): void
     {
         $capsule = Capsule::factory()->create(['slug' => 'brouillon-privee']);
@@ -291,6 +386,112 @@ final class CapsuleCatalogueHttpTest extends PostgresTestCase
         $relevant->assertOk();
         $slugs = array_column($relevant->json('data'), 'slug');
         $this->assertSame(['cible-exacte-recherchee'], $slugs);
+    }
+
+    public function test_detail_loads_bodies_only_for_the_selected_version(): void
+    {
+        [$owner, $capsule] = $this->publishCapsule('historique-documentaire');
+        $this->publishAdditionalVersion($capsule, $owner, '1.0.1');
+        $this->publishAdditionalVersion($capsule, $owner, '1.0.2');
+        $bodies = [];
+        $event = 'eloquent.retrieved: '.CapsuleVersion::class;
+        Event::listen($event, static function (CapsuleVersion $version) use (&$bodies): void {
+            if (array_key_exists('body', $version->getAttributes())) {
+                $bodies[] = $version->id;
+            }
+        });
+        try {
+            $this->browserRequest('GET', '/api/v1/capsules/historique-documentaire/versions/1.0.0')
+                ->assertOk()->assertJsonCount(3, 'data.history')
+                ->assertJsonPath('data.version.version_label', '1.0.0');
+            $this->assertCount(1, $bodies, 'L’historique de labels ne doit pas charger les corps de toutes les versions.');
+        } finally {
+            Event::forget($event);
+        }
+    }
+
+    public function test_search_treats_wildcards_and_sql_text_as_literal_input(): void
+    {
+        $this->publishCapsule('document-ordinaire');
+        foreach (['%', '_', '!', "' OR 1=1 --"] as $search) {
+            $this->browserRequest('GET', '/api/v1/capsules?q='.rawurlencode($search).'&sort=relevance')
+                ->assertOk()->assertJsonPath('meta.total', 0)->assertJsonCount(0, 'data');
+        }
+    }
+
+    public function test_visibility_is_applied_before_pagination_and_repeated_reads_are_stable(): void
+    {
+        $this->publishCapsule('reste-visible');
+        [, $hidden] = $this->publishCapsule('masquee-avant-page');
+        $hidden->forceFill(['visibility' => CapsuleVisibility::Hidden])->save();
+        [, , $withdrawn] = $this->publishCapsule('retiree-avant-page');
+        $withdrawn->forceFill(['state' => CapsuleVersionState::Withdrawn])->save();
+
+        $first = $this->browserRequest('GET', '/api/v1/capsules?per_page=1')->assertOk()
+            ->assertJsonPath('meta.total', 1)->assertJsonPath('data.0.slug', 'reste-visible');
+        $again = $this->browserRequest('GET', '/api/v1/capsules?per_page=1')->assertOk();
+        $this->assertSame($first->json(), $again->json());
+        $this->browserRequest('GET', '/api/v1/capsules?per_page=1&page=2')->assertOk()
+            ->assertJsonPath('meta.total', 1)->assertJsonCount(0, 'data');
+    }
+
+    public function test_pagination_bounds_and_foreign_version_labels_are_refused(): void
+    {
+        foreach (['page=0', 'page=2147483648', 'page[]=1', 'per_page=0', 'per_page=51', 'technology[]=x'] as $query) {
+            $this->browserRequest('GET', '/api/v1/capsules?'.$query)->assertStatus(422);
+        }
+        [$owner, $other] = $this->publishCapsule('autre-capsule');
+        $this->publishAdditionalVersion($other, $owner, '9.0.0');
+        $this->publishCapsule('capsule-demandee');
+        $this->browserRequest('GET', '/api/v1/capsules/capsule-demandee/versions/9.0.0')->assertNotFound();
+    }
+
+    public function test_equal_publication_dates_have_deterministic_capsule_and_version_order(): void
+    {
+        $publishedAt = now()->utc()->subHour();
+        $capsules = [];
+        foreach (['egalite-a', 'egalite-b', 'egalite-c'] as $slug) {
+            $owner = User::factory()->verified()->create();
+            $capsule = Capsule::factory()->create(['owner_id' => $owner->id, 'slug' => $slug]);
+            $firstVersion = $this->seedPublishedVersion($capsule, $owner, '1.0.0', ContributionRole::Diagnosis, $publishedAt);
+            $secondVersion = $this->seedPublishedVersion($capsule, $owner, '2.0.0', ContributionRole::Fix, $publishedAt);
+            $expectedVersion = strcmp($firstVersion->id, $secondVersion->id) < 0 ? '1.0.0' : '2.0.0';
+            $capsules[$capsule->id] = [$slug, $expectedVersion];
+        }
+        ksort($capsules);
+        foreach (array_values($capsules) as $index => [$slug, $label]) {
+            $this->browserRequest('GET', '/api/v1/capsules?per_page=1&page='.($index + 1))
+                ->assertOk()->assertJsonPath('data.0.slug', $slug)
+                ->assertJsonPath('data.0.version.version_label', $label);
+            $this->browserRequest('GET', '/api/v1/capsules/'.$slug)->assertOk()
+                ->assertJsonPath('data.version.version_label', $label);
+        }
+    }
+
+    public function test_documentary_capsule_stays_independent_without_exposing_hidden_source_or_account(): void
+    {
+        $owner = User::factory()->verified()->create();
+        $source = HelpRequest::factory()->create([
+            'author_id' => $owner->id,
+            'state' => HelpRequestState::Resolved,
+            'title' => 'Titre fictif réservé de la demande source',
+        ]);
+        $capsule = Capsule::factory()->fromResolvedRequest($source->id)
+            ->create(['owner_id' => $owner->id, 'slug' => 'document-independant']);
+        // Fixture de lecture uniquement : ceci ne reçoit pas la publication du Service B25.
+        $this->seedPublishedVersion($capsule, $owner, '1.0.0', ContributionRole::Diagnosis);
+        $source->forceFill(['hidden_at' => now()->utc()])->save();
+        $owner->forceFill(['status' => AccountStatus::Suspended, 'email_verified_at' => null])->save();
+
+        $this->browserRequest('GET', '/api/v1/capsules')->assertOk()
+            ->assertJsonPath('meta.total', 1)->assertJsonPath('data.0.source.kind', 'help_request');
+        $detail = $this->browserRequest('GET', '/api/v1/capsules/document-independant')->assertOk();
+        $this->assertSame(['kind' => 'help_request', 'editorial_origin' => null], $detail->json('data.source'));
+        $body = $detail->getContent();
+        $this->assertIsString($body);
+        foreach ([$source->id, $source->title, $owner->email] as $privateValue) {
+            $this->assertStringNotContainsString($privateValue, $body);
+        }
     }
 
     /** @return array{User, Capsule, CapsuleVersion} */
@@ -346,7 +547,8 @@ final class CapsuleCatalogueHttpTest extends PostgresTestCase
         $version->refresh();
     }
 
-    private function seedPublishedVersion(Capsule $capsule, User $owner, string $label, ContributionRole $role, ?\DateTimeInterface $publishedAt = null): CapsuleVersion
+    /** @param list<Technology> $technologies */
+    private function seedPublishedVersion(Capsule $capsule, User $owner, string $label, ContributionRole $role, ?\DateTimeInterface $publishedAt = null, array $technologies = [], bool $legacyPublication = false): CapsuleVersion
     {
         $moderator = User::factory()->verified()->create(['role' => Role::Moderator]);
         // Création en brouillon : le trigger B22 n'interdit les écritures sur
@@ -368,13 +570,22 @@ final class CapsuleCatalogueHttpTest extends PostgresTestCase
             'created_at' => now()->utc(),
             'updated_at' => now()->utc(),
         ]);
+        foreach ($technologies as $technology) {
+            DB::table('capsule_version_technologies')->insert([
+                'version_id' => $version->id,
+                'technology_id' => $technology->id,
+                'version_label' => '^1.0',
+                'created_at' => now()->utc(),
+                'updated_at' => now()->utc(),
+            ]);
+        }
         // Horodatages déterministes : 1.0.0 est plus ancien, 1.0.1 plus récent.
         $effectivePublishedAt = $publishedAt ?? now()->utc()->subDay();
         CapsuleVersion::whereKey($version->id)->update([
             'state' => CapsuleVersionState::Published->value,
             'reviewer_id' => $moderator->id,
             'published_at' => $effectivePublishedAt,
-            'content_digest' => hash('sha256', $capsule->slug.' / '.$label),
+            'content_digest' => $legacyPublication ? null : hash('sha256', $capsule->slug.' / '.$label),
             'lock_version' => 2,
         ]);
         $version->refresh();

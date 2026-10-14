@@ -59,15 +59,18 @@ Route::prefix('admin/capsules')->group(function (): void {
 // actif/vérifié obligatoire par ProtectSpaRequests + EnsureAccountIsActive +
 // `verified`. L'URL signée pointe vers une route distincte qui réévalue tous
 // les droits à chaque accès (AC15/AC25).
-Route::prefix('capsules')->middleware(['verified'])->group(function (): void {
+Route::prefix('capsules')->middleware(['auth:sanctum', 'verified', 'throttle:artifact-downloads'])->group(function (): void {
     Route::get('{capsule}/versions/{version}/artifact/{artifact}', IssueArtifactDownloadController::class)
         ->whereUuid(['capsule', 'version', 'artifact'])
         ->name('capsules.versions.artifact.issue');
 });
-Route::prefix('capsules')->middleware(['signed', 'verified'])->group(function (): void {
+Route::prefix('capsules')->middleware(['auth:sanctum', 'verified', 'throttle:artifact-downloads', 'signed:relative'])->group(function (): void {
     Route::get('{capsule}/versions/{version}/artifact/{artifact}/stream', StreamArtifactDownloadController::class)
         ->whereUuid(['capsule', 'version', 'artifact'])
         ->name('capsules.versions.artifact.stream');
+    Route::get('{capsule}/versions/{version}/artifact/{artifact}/notices', StreamArtifactDownloadController::class)
+        ->whereUuid(['capsule', 'version', 'artifact'])
+        ->name('capsules.versions.artifact.notices');
 });
 
 // Favoris privés et retours humains (B28). Membre actif/vérifié requis.

@@ -24,11 +24,11 @@ paths:
         - name: page
           in: query
           required: false
-          schema: { type: integer, minimum: 1 }
+          schema: { type: integer, minimum: 1, maximum: 2147483647, default: 1 }
         - name: per_page
           in: query
           required: false
-          schema: { type: integer, minimum: 1, maximum: 50 }
+          schema: { type: integer, minimum: 1, maximum: 50, default: 20 }
         - name: q
           in: query
           required: false
@@ -279,7 +279,13 @@ paths:
         `published_at` serveur et un `content_digest` SHA-256 des
         champs canoniques (`version_label`, `body`, `limits`,
         `technologies` triées). Une décision `approved` est écrite dans
-        `capsule_version_reviews` ; aucune note. Une version publiée
+        `capsule_version_reviews` ; aucune note. Le journal
+        conserve reviewed_lock_version de la révision avant transition.
+        L'intention capsule.version.published au propriétaire de la capsule
+        est écrite dans la même transaction ; livraison après commit,
+        chemin vers cette version précise, aucun corps ni note copié.
+        Le rôle, le compte vérifié actif et la visibilité sont recontrôlés
+        avant tout rejeu ; retrait ou révision ultérieure donne 409. Une version publiée
         devient immuable par trigger SQL (B22 étendu). AC13 appliqué :
         la publication n'hérite d'aucune preuve ni définition de
         laboratoire ; une correction ultérieure est une nouvelle version.
@@ -339,7 +345,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CapsuleCatalogueDetail'
+                $ref: '#/components/schemas/CapsuleCatalogueDetailResponse'
         '404':
           description: Capsule introuvable, masquée ou sans version publiée
   /api/v1/capsules/{slug}/versions/{version}:
@@ -366,7 +372,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CapsuleCatalogueDetail'
+                $ref: '#/components/schemas/CapsuleCatalogueDetailResponse'
         '404':
           description: Capsule introuvable, masquée, ou version non publiée
   /api/v1/b2/demo-orders:
@@ -457,10 +463,13 @@ paths:
         B27 — Télécharger le kit d'une version publiée via contrôle serveur
         courant (CAHIER_DES_CHARGES.md:956). Les gates sont ré-évaluées à
         chaque appel : compte actif et vérifié, capsule visible, version
-        `published`, artefact `approved` avec `notices_path` renseigné.
+        `published`, artefact `approved`, kit et notices réellement présents
+        et conformes aux empreintes/taille enregistrées. Kit limité à 20 Mio,
+        notices à 1 Mio ; 30 accès par minute et membre et 60 par adresse IP,
+        partagés entre émission, flux et notices.
         La réponse ne porte NI `private_path`, NI chemin disque, NI champ
         privé. Le `download_url` est signé courte durée et pointe vers une
-        route de streaming qui reévalue les mêmes gates (un retrait
+        route liée au membre qui réévalue les mêmes droits (un retrait
         ultérieur coupe donc les anciens liens, AC15/AC25). `Cache-Control:
         no-store, private`.
       security:
@@ -484,22 +493,32 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ArtifactDownload'
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/ArtifactDownload' }
+        '401':
+          description: Session absente
         '403':
           description: Membre non autorisé, non vérifié, suspendu ou droits perdus
         '404':
           description: Capsule, version ou artefact introuvable, masqué, non publié, inactif ou chemin invalide
+        '429':
+          description: Quota partagé de téléchargement atteint
   /api/v1/capsules/{capsule}/versions/{version}/artifact/{artifact}/stream:
     get:
       operationId: streamArtifactDownload
       summary: Télécharger le fichier derrière un lien signé
       description: >
-        Route servie uniquement sous `signed` + `verified`. Les mêmes gates
+        Route servie sous session, compte vérifié et signature relative liée
+        au membre (`member`, `expires`, `signature`). Les mêmes droits
         qu'à l'émission sont ré-évaluées : si la version est retirée, la
         capsule masquée, l'artefact rendu inactif ou le compte dévérifié
         entre l'émission et l'accès, la requête est refusée. Aucune
         divulgation de chemin disque dans l'erreur. `Cache-Control:
-        no-store, private`.
+        no-store, private`. Les octets livrés proviennent de la copie bornée
+        effectivement vérifiée, jamais d'un chemin rouvert au callback.
+        Aucun code n'est exécuté ; le kit ne constitue pas un rapport de laboratoire.
       security:
         - SessionCookie: []
       parameters:
@@ -515,13 +534,61 @@ paths:
           in: path
           required: true
           schema: { type: string, format: uuid }
+        - name: member
+          in: query
+          required: true
+          schema: { type: string, format: uuid }
+        - name: expires
+          in: query
+          required: true
+          schema: { type: integer }
+        - name: signature
+          in: query
+          required: true
+          schema: { type: string, pattern: '^[0-9a-f]{64}$' }
       responses:
         '200':
           description: Fichier retourné en flux `application/octet-stream`
+          content:
+            application/octet-stream:
+              schema: { type: string, format: binary }
+        '401':
+          description: Session absente
         '403':
           description: Lien expiré, falsifié, membre non vérifié ou droits perdus
         '404':
           description: Capsule, version ou artefact introuvable, non publié, inactif ou fichier absent
+        '429':
+          description: Quota partagé de téléchargement atteint
+  /api/v1/capsules/{capsule}/versions/{version}/artifact/{artifact}/notices:
+    get:
+      operationId: streamArtifactNotices
+      summary: Télécharger les notices versionnées du kit
+      description: >
+        Même session, membre, signature relative, contrôle courant, quota et
+        relecture des empreintes que le flux du kit. Notices limitées à 1 Mio,
+        envoyées en pièce jointe inerte avec nosniff et no-store, private.
+        Aucun chemin du registre ou du disque n'est exposé. Disponibilité et
+        empreinte ne confèrent aucun droit de réutilisation : ARB05 reste requis.
+      security:
+        - SessionCookie: []
+      parameters:
+        - { name: capsule, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: version, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: artifact, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: member, in: query, required: true, schema: { type: string, format: uuid } }
+        - { name: expires, in: query, required: true, schema: { type: integer } }
+        - { name: signature, in: query, required: true, schema: { type: string, pattern: '^[0-9a-f]{64}$' } }
+      responses:
+        '200':
+          description: Notices effectivement vérifiées
+          content:
+            application/octet-stream:
+              schema: { type: string, format: binary }
+        '401': { description: Session absente }
+        '403': { description: 'Signature absente, expirée ou falsifiée, compte non vérifié ou origine refusée' }
+        '404': { description: 'Mauvais membre, kit indisponible, retiré, masqué, inactif, absent ou corrompu' }
+        '429': { description: Quota partagé de téléchargement atteint }
   /api/v1/capsules/{capsule}/favorite:
     put:
       operationId: putCapsuleFavorite
@@ -645,12 +712,15 @@ components:
           description: 'Marque explicite ; jamais un résultat machine.'
     ArtifactDownload:
       type: object
-      required: [id, sha256, size, notices_path, download_url, expires_at]
+      additionalProperties: false
+      required: [id, sha256, size, notices_url, notices_sha256, notices_size, download_url, expires_at]
       properties:
         id: { type: string, format: uuid }
         sha256: { type: string, pattern: '^[0-9a-f]{64}$' }
-        size: { type: integer, minimum: 1 }
-        notices_path: { type: string, description: 'Chemin public de notices (déclaré par B22). Ne pointe JAMAIS vers un chemin disque privé.' }
+        size: { type: integer, minimum: 1, maximum: 20971520 }
+        notices_url: { type: string, format: uri, description: 'URL signée des notices liée au membre ; droits et intégrité revérifiés.' }
+        notices_sha256: { type: string, pattern: '^[0-9a-f]{64}$' }
+        notices_size: { type: integer, minimum: 1, maximum: 1048576 }
         download_url: { type: string, format: uri, description: 'URL signée courte durée vers le flux ; chaque accès réévalue les gates.' }
         expires_at: { type: string, format: date-time }
     CapsuleDraftInput:
@@ -767,7 +837,7 @@ components:
       properties:
         id: { type: string, format: uuid }
         version_id: { type: string, format: uuid }
-        reviewed_lock_version: { type: integer, minimum: 1, nullable: true, description: 'Version relue ; null uniquement pour le journal antérieur à cette migration, sans attribution inventée.' }
+        reviewed_lock_version: { type: [integer, 'null'], minimum: 1, description: 'Version relue ; null uniquement pour le journal antérieur à cette migration, sans attribution inventée.' }
         decision: { type: string, enum: [request_changes] }
         note: { type: string }
         created_at: { type: string, format: date-time, nullable: true }
@@ -797,13 +867,12 @@ components:
           required: [kind]
           properties:
             kind: { type: string, enum: [help_request, editorial] }
-            editorial_origin: { type: string, nullable: true }
+            editorial_origin: { type: [string, 'null'] }
         version:
-          type: object
-          nullable: true
+          type: [object, 'null']
           properties:
             version_label: { type: string }
-            published_at: { type: string, format: date-time, nullable: true }
+            published_at: { type: [string, 'null'], format: date-time }
             technologies:
               type: array
               items:
@@ -811,8 +880,14 @@ components:
                 properties:
                   id: { type: string, format: uuid }
                   slug: { type: string }
-                  version_label: { type: string, nullable: true }
-        last_published_at: { type: string, format: date-time, nullable: true }
+                  version_label: { type: [string, 'null'] }
+        last_published_at: { type: [string, 'null'], format: date-time }
+    CapsuleCatalogueDetailResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/CapsuleCatalogueDetail'
     CapsuleCatalogueDetail:
       type: object
       required: [slug, source, version, history]
@@ -823,16 +898,19 @@ components:
           required: [kind]
           properties:
             kind: { type: string, enum: [help_request, editorial] }
-            editorial_origin: { type: string, nullable: true }
+            editorial_origin: { type: [string, 'null'] }
         version:
           type: object
           required: [version_label, body, limits, content_digest, published_at, technologies, contributors]
           properties:
             version_label: { type: string }
             body: { type: string }
-            limits: { type: string, nullable: true }
-            content_digest: { type: string, pattern: '^[0-9a-f]{64}$' }
-            published_at: { type: string, format: date-time, nullable: true }
+            limits: { type: [string, 'null'] }
+            content_digest:
+              type: [string, 'null']
+              pattern: '^[0-9a-f]{64}$'
+              description: 'SHA-256 figé par B25 lors de la publication ; null pour une publication historique antérieure sans empreinte, conservé sans recalcul ni backfill.'
+            published_at: { type: [string, 'null'], format: date-time }
             technologies:
               type: array
               items:
@@ -840,13 +918,13 @@ components:
                 properties:
                   id: { type: string, format: uuid }
                   slug: { type: string }
-                  version_label: { type: string, nullable: true }
+                  version_label: { type: [string, 'null'] }
             contributors:
               type: array
               items:
                 type: object
                 properties:
-                  handle: { type: string, nullable: true }
+                  handle: { type: [string, 'null'] }
                   role: { type: string, enum: [diagnosis, fix, documentation, test, case] }
         history:
           type: array
@@ -854,7 +932,7 @@ components:
             type: object
             properties:
               version_label: { type: string }
-              published_at: { type: string, format: date-time, nullable: true }
+              published_at: { type: [string, 'null'], format: date-time }
     PaginationMeta:
       type: object
       properties:
@@ -862,8 +940,8 @@ components:
         per_page: { type: integer, minimum: 1, maximum: 50 }
         last_page: { type: integer, minimum: 1 }
         total: { type: integer, minimum: 0 }
-        from: { type: integer, nullable: true }
-        to: { type: integer, nullable: true }
+        from: { type: [integer, 'null'] }
+        to: { type: [integer, 'null'] }
     CapsuleVersionPublishInput:
       type: object
       additionalProperties: false

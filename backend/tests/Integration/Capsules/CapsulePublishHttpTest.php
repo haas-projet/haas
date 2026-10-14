@@ -56,7 +56,7 @@ final class CapsulePublishHttpTest extends PostgresTestCase
             // sans rencontrer les gardes.
             foreach (['internal_notifications', 'notification_outbox'] as $table) {
                 if (Schema::hasTable($table)) {
-                    DB::table($table)->where('kind', 'capsule.review.changes_requested')->delete();
+                    DB::table($table)->whereIn('kind', ['capsule.review.changes_requested', 'capsule.version.published'])->delete();
                 }
             }
             DomainTables::dropAll();
@@ -92,6 +92,49 @@ final class CapsulePublishHttpTest extends PostgresTestCase
         $this->publishRequest($capsule, $version)->assertStatus(403);
         $version->refresh();
         $this->assertSame(CapsuleVersionState::InReview, $version->state);
+    }
+
+    public function test_approval_records_the_revision_reviewed_before_publication_transition(): void
+    {
+        [, $capsule, $version] = $this->seedInReview();
+        $reviewedVersion = $version->lock_version;
+        $reviewer = User::factory()->verified()->create(['role' => Role::Moderator]);
+        $this->loginAs($reviewer);
+        $response = $this->publishRequest($capsule, $version, $reviewedVersion)->assertOk();
+
+        $review = DB::table('capsule_version_reviews')->sole();
+        $this->assertSame($reviewedVersion, $review->reviewed_lock_version);
+        $this->assertSame($reviewedVersion + 1, $version->refresh()->lock_version);
+        $this->assertSame($version->lock_version, $response->json('data.lock_version'));
+        $this->assertSame($reviewer->id, $review->reviewer_id);
+        $this->assertSame($version->id, $review->version_id);
+    }
+
+    #[DataProvider('invalidPublicationLockVersions')]
+    public function test_publication_rejects_invalid_json_lock_versions_before_writing(mixed $lockVersion): void
+    {
+        [, $capsule, $version] = $this->seedInReview();
+        $this->loginAs(User::factory()->verified()->create(['role' => Role::Moderator]));
+        $this->browserRequest('POST', $this->publishUrl($capsule, $version), ['lock_version' => $lockVersion], ['Idempotency-Key' => (string) Str::uuid()])->assertUnprocessable();
+        $this->assertSame(CapsuleVersionState::InReview, $version->refresh()->state);
+        $this->assertSame(2, $version->lock_version);
+        $this->assertNull($version->published_at);
+        $this->assertNull($version->content_digest);
+        foreach (['capsule_version_reviews', 'content_revisions', 'notification_outbox', 'api_idempotency'] as $table) {
+            $this->assertDatabaseCount($table, 0);
+        }
+    }
+
+    /** @return iterable<string, array{mixed}> */
+    public static function invalidPublicationLockVersions(): iterable
+    {
+        yield 'numeric string' => ['2'];
+        yield 'fraction' => [2.5];
+        yield 'boolean' => [true];
+        yield 'null' => [null];
+        yield 'zero' => [0];
+        yield 'negative' => [-1];
+        yield 'overflow' => [2147483647];
     }
 
     public function test_admin_who_is_contributor_is_refused(): void
@@ -266,14 +309,20 @@ final class CapsulePublishHttpTest extends PostgresTestCase
 
     public function test_new_draft_after_publication_preserves_old_digest_and_proofs(): void
     {
-        [$owner, $capsule, $publishedVersion] = $this->publishedVersion();
-        $priorDigest = $publishedVersion->content_digest;
-        $priorBody = $publishedVersion->body;
-        Artifact::factory()->create([
+        [$owner, $capsule, $publishedVersion] = $this->seedInReview('brouillon-publie');
+        // Le registre du kit appartient à la version relue, avant son gel à la publication.
+        $artifact = Artifact::factory()->create([
             'version_id' => $publishedVersion->id,
             'distribution_status' => ArtifactDistributionStatus::Approved,
             'notices_path' => '/notices/kit.md',
         ]);
+        $this->loginAs(User::factory()->verified()->create(['role' => Role::Moderator]));
+        $this->publishRequest($capsule, $publishedVersion)->assertOk();
+        $this->logoutBrowser();
+        $publishedVersion->refresh();
+        $priorDigest = $publishedVersion->content_digest;
+        $priorBody = $publishedVersion->body;
+        $priorArtifact = $artifact->refresh()->getAttributes();
         $this->loginAs($owner);
         $response = $this->browserRequest('POST', "/api/v1/capsules/{$capsule->id}/versions", [
             'version_label' => '1.0.1',
@@ -285,6 +334,7 @@ final class CapsulePublishHttpTest extends PostgresTestCase
         $publishedVersion->refresh();
         $this->assertSame($priorDigest, $publishedVersion->content_digest);
         $this->assertSame($priorBody, $publishedVersion->body);
+        $this->assertSame($priorArtifact, $artifact->refresh()->getAttributes());
         // La nouvelle version n'hérite d'aucune preuve.
         $this->assertSame(1, DB::table('artifacts')->where('version_id', $publishedVersion->id)->count());
         $newVersionId = $response->json('data.id');

@@ -775,6 +775,53 @@ Aucun autre fichier du socle n'a été touché.
 - **Q19** — Nommage §26 `/versions/{id}/artifact` : interprété comme nested `/capsules/{capsule}/versions/{version}/artifact/{artifact}` pour cohérence avec B23-B26. À confirmer.
 - Questions antérieures Q12–Q17 restent ouvertes.
 
+
+## 2026-10-11 - B27 : lecture de fichiers verifiee avant reception des acces
+
+Premiere tranche locale : ArtifactSnapshot et VerifiedArtifactFiles, registre serveur prive borne, fichiers canoniques reguliers, refus traversal/URL/liens, taille exacte et digest des octets copies, resources fermees. Unites reelles : 24 tests / 52 assertions OK sur PHP8.5.10 Windows, junctions reelles uniquement sous le storage de test de ce worktree. Linux/symlinks et CI restent a recevoir. Les incidents de fixtures et probes rouges sont conserves dans docs/quality/B27_ARTIFACT_READINESS.md. Les endpoints/audit/registreSQL puis les prerequis B24/B25/B26 attendent leur reception ; aucune readiness, approbation, fusion ou gate. Les anciennes entrees B27 sont historiques et ne valident pas cette reprise.
+
+## 11 octobre 2026 — B27 : accès et registre reçus en ciblage
+
+Bibliothèque initiale commitée localement en `13ae33e02f21b9a1a700647da50820ae88cd37b7`. Les services contrôlent maintenant les droits courants sous verrou, les rattachements, les octets du kit et des notices ; liens signés relatifs liés au membre et à la cible, notices accessibles sans chemin serveur, quota partagé, audit et génération des deux liens atomiques. Registre des notices additif et immutabilité après publication, désactivation conservée, rollback sans perte d'histoire. ARB05 reste sans approbation : aucune activation automatique et aucun vrai kit/licence de production ajouté.
+
+Ciblés PostgreSQL : **66 tests / 258 assertions OK**. Unités finales fichiers/liens : **33 / 69 OK**. Atomicité/API/frontières/modèles après validation finale de l'origine : **7 / 127 OK**. Pint et PHPStan 8 verts ; 66 types à jour, Composer validate/platform/audit réussis, documents 18/18 et déploiement 7/7. Probes rouges et incidents dans `docs/quality/B27_ARTIFACT_READINESS.md` ; totaux recouvrants, pas une suite complète. B27 reste partiel/en brouillon ; synchronisation normale B24/B25/B26 par l'intégrateur avant réception complète et CI exacte. Aucune approbation humaine, fusion, DONE ou gate.
+
+
+## 2026-10-11 — B26 : validation et attribution avant revue
+
+Reprise du head b568a511 dans un nouveau worktree, historiques conservés. Trois défauts corrigés : Unicode 200 caractères, q/sort tableaux refusés avant cast, pseudonyme public handle à la place du nom privé. Probes réellement rouges : 8 tests / 8 assertions, 1 erreur et 6 échecs ; ciblage vert incluant ces probes : 23 tests / 78 assertions. PHPStan 8 et Pint --test réussis. Base PostgreSQL dédiée haas_b26_review_test, runner explicite. Preuve : docs/quality/B26_CATALOGUE_READINESS.md. Sélection dernière publication, hydratation bornée et contrat data en cours ; parent B25 final puis réception complète et CI exacte encore attendus. has_lab/Q16 dépend de B33 absent : aucune déclaration DONE, gate ou approbation humaine.
+
+
+## 2026-10-11 — B26 : sélection et projection du catalogue
+
+Premier correctif local a56f0144fb104d07c52e51a5aa7c9019dc2f0e94. Sélection SQL déterministe de la dernière version publiée avant filtre technologie/tri/pagination ; une version par carte, sans corps ; détail limité au corps choisi et historique de métadonnées ; pseudonyme sélectionné sans champs privés ni owner inutile. Enveloppe data OpenAPI et limites communes décrites, 66 types API. Rouge réel : 3 tests / 6 assertions pour sélection/hydratation/enveloppe et 1 / 4 pour corps de l’historique. Ciblage final exact : 39 tests / 2620 assertions, PHPStan 8 sans erreur et Pint --test verts. Validation pack 18 et déploiement 7 contrôles documentaires verts. Relances non additionnées ; erreur de chemin dans le probe OpenAPI puis nullsafe redondant de fixture corrigés et consignés. Preuve : B26_CATALOGUE_READINESS.md. Parent B25 final, réception complète, CI exacte et revue humaine restent attendus. has_lab/Q16 dépend de B33 absent ; aucun DONE/gate, frontend, push, publication ou déploiement.
+
+Dernière relecture B26 : 2 probes de nullabilité 3.1 rouges (2 tests / 3 assertions), schémas catalogue en unions [T, null] et types régénérés (66), générateur inchangé. Les 39 tests / 2620 assertions finaux incluent les probes ; PHPStan 8 et Pint verts. PR35 reste Draft / B26 partiel pour badge, has_lab/Q16 et B33 absent. Aucun SQL global avant parent B25 final.
+
+## 2026-10-11 — B27 : composition de la fixture de publication
+
+Reprise exclusive au parent documentaire 8fe85fe après réception globale en erreur : 245 tests / 1323 assertions / 1 erreur. JUnit rouge original conservé et copié à hash identique, preuve B27_ARTIFACT_READINESS.md. Probe ciblé rouge réel 1 / 1 avec SQL23514 : insertion Artifact après publication. Fixture corrigée : registre créé pendant InReview puis publication réelle par modérateur indépendant et nouveau brouillon ; attributs anciens vérifiés intégralement. Probe vert 1 / 8, composition courante 74 tests / 436 assertions réussie sans erreur/échec/skip, PHPStan 8/Pint verts. Aucun changement production ni affaiblissement des gardes ; autres fixtures d'artefacts relues, insertion négative intentionnelle conservée. Lecture indépendante distincte des tests. L'intégrateur reprend la réception SQL complète et la CI exacte après commit propre ; aucune suite complète B27 passée ni approbation/DONE/gate/frontend annoncé.
+
+## 2026-10-11 — B27 : fonction de garde répétable après migrate:fresh
+
+Après synchronisation des parents au candidat 134ebe0, deux réceptions globales Integration ont été interrompues par l'intégrateur ; stack SQL42723 sur la fonction b27_guard_artifact déjà présente, sans succès complet. Correction minimale CREATE OR REPLACE, corps/locks/contraintes/down inchangés. Nouveau probe réellement rouge 1 test / 1 assertion / 1 erreur ; relance 1 / 11 verte avec deux migrate:fresh et deux refus d'altération d'empreinte publiée. Alertes de typage du nouveau test corrigées sans ignore/baseline après arrêt du ciblage incomplet. Ciblage final courant 69 tests / 285 assertions réussi, PHPStan 8/Pint verts et 67 types à jour. Preuve B27_ARTIFACT_READINESS.md ; lecture indépendante non comptée comme test. Aucun fichier B24/B26 modifié, aucune garde de production affaiblie. Réception globale et CI exacte à relancer par l'intégrateur ; ARB05 inactive, aucune approbation/DONE/gate/frontend.
+
+## 2026-10-11 — B26 : conserver l'absence d'empreinte historique
+
+Après les microcommits a56f0144 et fe8b4cda, l'intégrateur a relevé le contrat non nullable d'un content_digest historique réellement nul. Trois probes frais avant correction : 3 tests / 12 assertions, 2 échecs OpenAPI/types ; le probe HTTP réussissait déjà sur les deux routes, sans modification du digest en base. CatalogueDetail décrit maintenant string|null, pattern64 et absence historique sans recalcul/backfill ; 66 types régénérés. Ciblage courant terminé : 42 tests / 2635 assertions, PHPStan 8 sans erreur et Pint --test verts. Preuve B26_CATALOGUE_READINESS.md. Les nombres ciblés remplacent les précédents sans addition. Aucun SQL global avant parent B25 final ; CI exacte et revue humaine à recevoir. B33/badge/has_lab/Q16 absents : PR35 reste Draft, aucun B26 DONE/gate.
+
+## 2026-10-11 — B25 : attribution avant publication
+
+Reprise isolée depuis PR34 `ce75045`, historiques préservés. Probe rouge réel : approbation de la révision 2 enregistrée à 3 (1 test / 2 assertions). Correction minimale du snapshot avant transition ; HTTP B25 vert 23 / 59 et Pint ciblé vert, sur base dédiée `haas_b25_review_test`. La publication Q12 et les protections de downgrade restent à corriger ; aucune réception globale ni approbation humaine déclarée. Preuve : `docs/quality/B25_RECEPTION_20261011.md`.
+
+### B25 — downgrade conservateur
+
+Snapshot commité localement en `18bfbe0`. Trois défauts de descente de schéma reproduits puis corrigés : locks transactionnels avant contrôle/DDL, refus des empreintes ou approbations connues ; vrai cycle legacy down/up sans purge ni attribution inventée. Ciblés schéma + concurrence réelle verts **10 / 79** ; seuls les helpers de fixtures sont adaptés au refus conservateur. Timeout transitoire d’une relance distingué du succès final. Q12 publication reste à terminer.
+
+### B25 — Q12 corrigée, code prêt à réception intégrateur
+
+Downgrade commité en `eceb4bc`. Intention de publication propriétaire/version stable dans transaction métier puis livraison après commit ; visibilité/état/droits courants avant liste, compteur et marquage ; migration composée conservant les autres types SQL, refus des événements stables. Probe rouge 1 / 1 puis ciblés définitifs **57 / 467** verts, APIInventory **1 / 81**, Pint complet/PHPStan8, types61, pack18/18 et déploiement documentaire7/7 verts. Code/fixtures figés ; root reprend le parent documentaire B24 puis les suites complètes et la CI exacte. Aucun test actif, push, ready ou approbation humaine par cet agent. Preuve détaillée `B25_RECEPTION_20261011.md`.
+
 ## 2026-10-14 — Lot B28 · Favoris et retours de réutilisation
 
 Statut proposé : B28 **préparé, PR en brouillon**, aucun DONE. Branche `backend/capsules-laboratoire-b28-favoris-retours`, dérivée de B27 (524067b distant).

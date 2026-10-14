@@ -38,16 +38,18 @@ final class ArtifactPolicy
         if ($version->state !== CapsuleVersionState::Published) {
             return false;
         }
-        if ($artifact->version_id !== $version->id) {
+        if ($version->capsule_id !== $capsule->id || $artifact->version_id !== $version->id) {
             return false;
         }
 
-        // §13 : artefact actif ET notices fournies. Le sha256 est non nul
-        // par contrainte de B22 ; le trigger B22+B25 fige la version publiée.
+        // Approved records the server approval; availability grants no license.
         if ($artifact->distribution_status !== ArtifactDistributionStatus::Approved) {
             return false;
         }
         if ($artifact->notices_path === null || trim((string) $artifact->notices_path) === '') {
+            return false;
+        }
+        if ($artifact->notices_sha256 === null || $artifact->notices_size === null) {
             return false;
         }
 

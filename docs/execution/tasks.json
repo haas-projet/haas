@@ -281,8 +281,8 @@
       "refs": "F05/F06 ; AC13",
       "phase": "B",
       "execution_order": 24,
-      "status": "IN_PROGRESS",
-      "evidence": ["docs/quality/MERGE_MADINA.md"]
+      "status": "IN_REVIEW",
+      "evidence": ["docs/quality/MERGE_MADINA.md","docs/quality/PR_MANIFEST_20261011.md"]
     },
     {
       "id": "B23",
@@ -293,8 +293,8 @@
       "refs": "F05 ; AC03/AC12",
       "phase": "B",
       "execution_order": 25,
-      "status": "IN_PROGRESS",
-      "evidence": ["docs/quality/MERGE_MADINA.md"]
+      "status": "IN_REVIEW",
+      "evidence": ["docs/quality/MERGE_MADINA.md","docs/quality/PR_MANIFEST_20261011.md"]
     },
     {
       "id": "B24",
@@ -305,7 +305,8 @@
       "refs": "AC12 ; F06",
       "phase": "B",
       "execution_order": 26,
-      "status": "TODO"
+      "status": "IN_REVIEW",
+      "evidence": ["docs/quality/B24_REVIEW_READINESS.md"]
     },
     {
       "id": "B25",
@@ -316,7 +317,8 @@
       "refs": "AC12/AC13 ; RM03",
       "phase": "B",
       "execution_order": 27,
-      "status": "TODO"
+      "status": "IN_REVIEW",
+      "evidence": ["docs/quality/B25_RECEPTION_20261011.md"]
     },
     {
       "id": "B26",
@@ -327,7 +329,8 @@
       "refs": "AC15/AC25 ; F12",
       "phase": "B",
       "execution_order": 28,
-      "status": "TODO"
+      "status": "IN_PROGRESS",
+      "evidence": ["docs/quality/B26_CATALOGUE_READINESS.md", "docs/quality/PR_MANIFEST_20261011.md"]
     },
     {
       "id": "B27",
@@ -338,7 +341,8 @@
       "refs": "AC15/AC25 ; ARB05",
       "phase": "B",
       "execution_order": 29,
-      "status": "TODO"
+      "status": "IN_REVIEW",
+      "evidence": ["docs/quality/PR_MANIFEST_20261011.md","docs/quality/B27_ARTIFACT_READINESS.md"]
     },
     {
       "id": "B28",
@@ -464,7 +468,7 @@
       "refs": "AC23 ; B2 backend ; ADR-004 / DEP",
       "phase": "B",
       "execution_order": 40,
-      "status": "IN_REVIEW",
+      "status": "DONE",
       "evidence": ["docs/quality/MERGE_MADINA.md", "docs/quality/B38_ISOLATION_20261007.md"]
     },
     {
@@ -1457,6 +1461,6 @@
   ],
   "deployment_decision": "ADR-004",
   "source_alignment": "Mail CADEV fourni ; décisions de conception ADR-005",
-  "updated_at": "2026-10-07",
+  "updated_at": "2026-10-11",
   "latest_decision": "ADR-006"
 }

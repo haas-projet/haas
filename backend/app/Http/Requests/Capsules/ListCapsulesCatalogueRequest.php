@@ -13,7 +13,7 @@ use Illuminate\Validation\Validator;
 /**
  * Filtre public du catalogue (B26).
  *
- * `page_size` par défaut 20, maximum 50 (`PaginatedRequest`).
+ * `per_page` par défaut 20, maximum 50 (`PaginatedRequest`).
  * `sort` en liste blanche ; `relevance` sans `q` est refusée en 422
  * côté `CapsuleCatalogueFilterData`.
  */
@@ -43,9 +43,12 @@ final class ListCapsulesCatalogueRequest extends PaginatedRequest
     {
         parent::withValidator($validator);
         $validator->after(function (Validator $validator): void {
-            $sort = (string) $this->input('sort', 'date');
-            $search = trim((string) $this->input('q', ''));
-            if ($sort === 'relevance' && $search === '') {
+            if ($validator->errors()->isNotEmpty()) {
+                return;
+            }
+            $sort = $this->input('sort', 'date');
+            $search = $this->input('q');
+            if ($sort === 'relevance' && (! is_string($search) || trim($search) === '')) {
                 $validator->errors()->add('sort', 'Le tri par pertinence exige une recherche textuelle.');
             }
         });

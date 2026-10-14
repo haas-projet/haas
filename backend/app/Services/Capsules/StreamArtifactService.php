@@ -4,62 +4,37 @@ declare(strict_types=1);
 
 namespace App\Services\Capsules;
 
-use App\Exceptions\Capsules\ArtifactUnavailable;
-use App\Models\Capsules\Artifact;
-use App\Models\Capsules\Capsule;
-use App\Models\Capsules\CapsuleVersion;
+use App\Data\Capsules\ArtifactSnapshot;
 use App\Models\User;
-use App\Policies\ArtifactPolicy;
-use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Support\Facades\Storage;
+use App\Queries\Capsules\LockedArtifactQuery;
+use App\Support\Capsules\VerifiedArtifactFiles;
+use Illuminate\Support\Facades\DB;
 
-/**
- * B27 — Valide l'accès à l'artefact et renvoie les éléments de
- * livraison (disque local, chemin privé déjà vérifié, nom public).
- * Le Controller construit la réponse HTTP ; le Service reste couche
- * métier (`DomainBoundariesTest`).
- */
 final class StreamArtifactService
 {
-    public function __construct(private readonly ArtifactPolicy $policy) {}
+    public function __construct(private readonly LockedArtifactQuery $targets, private readonly VerifiedArtifactFiles $files) {}
 
-    /**
-     * @return array{disk: string, path: string, download_name: string}
-     */
-    public function handle(User $actor, Capsule $capsule, CapsuleVersion $version, Artifact $artifact): array
+    public function handle(User $actor, string $capsuleId, string $versionId, string $artifactId, bool $notices = false): ArtifactSnapshot
     {
-        if (! $this->policy->download($actor, $capsule, $version, $artifact)) {
-            throw new AuthorizationException;
-        }
-        $privatePath = (string) $artifact->getAttribute('private_path');
-        if (! $this->looksLikeSafePath($privatePath)) {
-            throw new ArtifactUnavailable;
-        }
-        if (! Storage::disk('local')->exists($privatePath)) {
-            throw new ArtifactUnavailable;
-        }
+        return DB::transaction(function () use ($actor, $capsuleId, $versionId, $artifactId, $notices): ArtifactSnapshot {
+            $target = $this->targets->get($actor, $capsuleId, $versionId, $artifactId);
+            $name = $target['capsule']->slug.'-'.$target['version']->version_label;
+            // Check both files: registry approval alone proves neither integrity nor availability.
+            $kit = $this->files->kit($target['artifact'], $name.'.zip');
+            try {
+                $notice = $this->files->notices($target['artifact'], $name.'-notices.txt');
+            } catch (\Throwable $e) {
+                $kit->close();
+                throw $e;
+            }
+            if ($notices) {
+                $kit->close();
 
-        return [
-            'disk' => 'local',
-            'path' => $privatePath,
-            'download_name' => $this->downloadName($capsule, $version, $privatePath),
-        ];
-    }
+                return $notice;
+            }
+            $notice->close();
 
-    private function looksLikeSafePath(string $path): bool
-    {
-        if ($path === '' || str_contains($path, '..')) {
-            return false;
-        }
-
-        return preg_match('#^(?:[a-zA-Z]:|/|\\\\)#', $path) !== 1 && preg_match('#[\x00-\x1F]#u', $path) !== 1;
-    }
-
-    private function downloadName(Capsule $capsule, CapsuleVersion $version, string $privatePath): string
-    {
-        $extension = pathinfo($privatePath, PATHINFO_EXTENSION);
-        $base = $capsule->slug.'-'.$version->version_label;
-
-        return $extension === '' ? $base : $base.'.'.$extension;
+            return $kit;
+        });
     }
 }

@@ -1,6 +1,34 @@
 # Suivi du dépôt HAAS
 
-**Statut actif :** B01–B09, B11–B17 et B32 DONE (17 lots entiers). #24 est réellement fusionnée dans main b76612d le 7 octobre à 20:24:58 UTC ; CI du head 2addb4d et CI de main vertes (671 tests / 6805 assertions sur PHP 8.4 et 8.5). GitHub ne contient aucune revue enregistrée sur #24 ; aucune approbation humaine n’est inventée. #31 (README et bilan) est fusionnée dans main e3bd34c. B22/B23/B24 sont préparés dans #29/#30/#33, corrections et synchronisations en cours ; B38 #28 attend les preuves finales de son isolation corrigée. B35 reste partiel. Les 22 autres lots de Lamine restent à faire. B10/B29/B30/B31 et B39–B42 IN_PROGRESS ; B43/B44 BLOCKED. S01/S02 partiels. Aucun BACKEND_GATE, GO_FRONTEND ou GO_PRODUCTION. Voir PR_READINESS_20261007.md et les preuves métier. Les entrées suivantes sont historiques.
+## Réception B27 par CI complète — 11 octobre 2026
+
+Source `bef006c481ed8f2692277b3c91cab1a9de13fb1c`, [CI 38162823982](https://github.com/haas-projet/haas/actions/runs/38162823982) : PHP 8.4 et PHP 8.5, chacun 454/4351 hors SQL +708/5028 Integration =**1162 tests /9379 assertions** ; backend-ci, statiques, types67 et empreintes798 réussis. Deux journaux individuels lus. Local Windows : Unit 454/4351 et ciblés 74/436 reçus ; la suite SQL complète est interrompue sans résultat final et reste distincte des réussites CI. Preuve : [B27_ARTIFACT_READINESS.md](../quality/B27_ARTIFACT_READINESS.md). B27 IN_REVIEW ; #35/#36 brouillons pour prérequis B26 partiel/B33 et ARB05 inactive. Six PR sans conflit constaté ; aucun merge ou approbation humaine.
+
+## Réception complète B26 — 11 octobre 2026
+
+B26 reçu sur `32347387536fa76f498ca21c62292c9b6ebfa80d` : hors SQL 421/4241, Integration 641/4758, total disjoint 1062/8999, erreurs/échecs/skips=0. PHPStan8, Pint, Composer, types66 et documents18/18 +7/7 réussis. B26 reste IN_PROGRESS et PR35 Draft : badge, has_lab et Q16 dépendent du registre B33 absent. La CI verte ne clôturera pas cette dépendance. Nouvelle CI du SHA publié et revue humaine encore attendues. Preuve : [B26_CATALOGUE_READINESS.md](../quality/B26_CATALOGUE_READINESS.md). Les mentions d’attente des étapes précédentes ci-dessous sont historiques.
+
+## Réception complète B25 — 11 octobre 2026
+
+B25 reçu sur `77d4147d18d1b5fb4f4cc8ed38b09840f978c46c` : hors SQL 413/4129, Integration 611/4607, total disjoint 1024/8736, erreurs/échecs/skips=0. PHPStan8, Pint, Composer, types61 et documents18/18 +7/7 réussis. Q12 utilise la cible propriétaire UX08 prévue ; aucun écran frontend livré ou testé. Publication corrigée, revue humaine des prérequis encore nécessaire. Nouvelle CI du SHA publié et revue humaine encore attendues. Preuve : [B25_RECEPTION_20261011.md](../quality/B25_RECEPTION_20261011.md). Les mentions d’attente des étapes précédentes ci-dessous sont historiques.
+
+## État vérifié le 11 octobre 2026 — priorité aux PR
+
+- B27 f0df4d7 reçoit B26 3234738 et les corrections B25 par merge normal. Historiques IA/participant conservés ; types générés depuis les contrats composés, dont notices privées et empreinte historique nullable. Réception complète B27 à lancer sur sa base dédiée ; bilans finaux des parents à propager sans modifier le backend. Aucun statut DONE ni approbation humaine ; ARB05 reste inactive.
+
+- B26 0632510 reçoit le code figé B25 77d4147 par merge normal. Les conflits concernent uniquement les empreintes et les historiques IA/participant ; les deux contributions sont conservées. Types API composés et 776 empreintes vérifiés. Réception complète sur la base B26 dédiée à lancer ; la preuve finale B25 sera propagée sans changement backend. PR35 reste Draft : badge/has_lab/Q16 attend B33.
+
+- B25 reçoit le prérequis documentaire B24 2463e4b par merge normal après gel des corrections 6a7d16c. Seuls SHA256SUMS et le journal IA demandaient une résolution : les deux historiques sont conservés, les empreintes régénérées. Backend inchangé pendant ce merge ; réception complète locale et nouvelle CI à recevoir.
+
+- Propagation B24 : B23 c753017 reçu par merge normal avec le contrôle d’intégrité, couverture complète vérifiée et backend inchangé ; nouvelle CI du head publié à recevoir.
+
+- Propagation B23 : prérequis documentaire B22 6021968 reçu par merge normal, manifeste complet contrôlé et backend inchangé ; nouvelle CI à recevoir sur le head publié.
+
+B38 #28 est fusionnée dans main d0d47c5. Les trois branches permanentes sont alignées sur main ; 10 branches distantes restent nécessaires, dont les six PR ouvertes. #29/#30/#33 n’ont pas de conflit et ont une CI verte sur leurs heads contrôlés ; #29 attend une revue humaine. Leurs manifestes périmés sont corrigés et un contrôle CI dédié est ajouté. B25–B27 sont encore en correction ; B26 reste partiel sans Q16/B33. Les lots non fusionnés ne sont pas DONE. Aucun gate ni accord frontend/production. Voir [PR_MANIFEST_20261011.md](../quality/PR_MANIFEST_20261011.md). Le bilan ci-dessous du 7 octobre et les entrées antérieures sont historiques.
+
+- Lot documentaire d’intégration : empreintes complètes et vérifiées, pack 18/18, déploiement documentaire 7/7 et diff propre ; octets backend inchangés. Nouvelle CI à recevoir après publication. SHA réel à consulter dans le bilan/PR après création du commit.
+
+**Statut actif :** B01–B09, B11–B17, B32 et B38 DONE (18 lots backend intégrés). B38 #28 réellement fusionnée dans main d0d47c5, CI 37690142490 reçue. B22–B25 et B27 IN_REVIEW ; B26 IN_PROGRESS pour B33/badge/has_lab/Q16. Six PR ouvertes et sans conflit constaté : #29/#30/#33/#34 prêtes à la revue humaine, #35/#36 brouillons. B27 reçu sur CI complète PHP 8.4/8.5 (1162/9379 par version) ; suite SQL Windows interrompue, non reçue. Trois permanentes suivant main et six temporaires de PR, dix branches distantes. B18 socle en cours dans son worktree préservé ; endpoints et réception métier non livrés. B35/S01/S02 partiels ; aucun gate frontend ou production. Les mentions des bilans datés précédents sont historiques.
 
 À renseigner après commandes réelles : date / lot / responsable / fichiers / commandes / observé / commit ou raison de non-commit / blocage / prochaine action. Les contrôles documentaires de ce pack ne valident pas BACKEND_GATE, FRONTEND_GATE ou RELEASE_GATE.
 
@@ -270,3 +298,7 @@ B11 DONE (13 lots backend entiers terminés). B35 IN_PROGRESS : isolation/connex
 ### B38 — correction terminée localement, revue à recevoir
 
 Runtime et données B2 séparés ; garde DNS/configuration et permissions PostgreSQL avant cache/écritures ; cache partagé obligatoire hors testing, bornes atomiques 1000 entrées / 100 verrous, TTL24h et purge complète. Synchronisation normale de main b76612d (B14–B17), historiques et statuts conservés. Suites finales : 391 / 3850 et 379 / 3438, soit 770 tests / 7288 assertions OK. PHPStan niveau 8, Pint, Composer et contrats/documents réussis ; preuve B38_ISOLATION_20261007.md. Statut local IN_REVIEW : CI du SHA exact et revue humaine restent nécessaires ; aucun DONE/gate ni frontend/déploiement. L’intégrateur publiera le commit réel après ce bilan.
+
+## 11 octobre 2026 — Contrat Q12 : snapshot historique nullable
+
+Micro-lot documentaire depuis B24 `2463e4b` : union OpenAPI integer/null et type `number | null` pour `CapsuleVersionReview.reviewed_lock_version`. Probe Node ignoré réel : deux assertions rouges sur le head initial, puis deux vertes ; 59 types à jour, documents 18/18 et déploiement 7/7. Backend et 122 tâches inchangés, aucun HTTP/SQL/PHPUnit nouveau. Preuve : `docs/quality/B24_REVIEW_READINESS.md`. Propagation normale et CI exacte par l'intégrateur ; aucun statut de lot ou gate changé.

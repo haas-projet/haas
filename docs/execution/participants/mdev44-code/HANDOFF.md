@@ -543,3 +543,30 @@ Downgrade B25 corrigé sous verrou transactionnel : refus explicite des empreint
 Worktree `C:/laragon/www/HAAS_Projet/.worktrees/pr-ready-b25-20261011`, branche `review/pr-b25-20261011`. Microcommits précédents : snapshot `18bfbe0a460c4e82608dfdc8c02c84f6f35f9551`, downgrade `eceb4bcb2f5387891c98de00ce641894d27ed6c4`. Le SHA du commit Q12 est transmis dans le bilan réel, jamais inscrit dans lui-même.
 
 Q12 prête à réception : événement UUID de revue, owner sous verrou, cible propriétaire UX08 future `/capsules/<UUID>/versions/<UUID>/edition`, aucune note/corps projeté, état publié visible et compte courant avant lecture/compteur/marquage ; retrait exclu. Migrateur conserve les types SQL installés et refuse de perdre les événements stables. Ciblés SQL57/467, APIInventory1/81, Pint complet/PHPStan8, 61 types API, docs18/18 et7/7 réussis. Code figé, aucun test B25 actif ; env/vendor ignorés conservés, runner racine obligatoire pour PHP. Root fusionne B24 documentaire `2463e4b`, vérifie manifest/backend, puis Unit+Integration complètes sur les bases B25 dédiées et CI exacte. Aucun push/ready/merge de PR/revue humaine par cet agent ; parent en attente de revue humaine.
+
+## 2026-10-14 — HANDOFF B28 Favoris et retours
+
+Branche `backend/capsules-laboratoire-b28-favoris-retours` dérivée de B27 (524067b distant). Préparé, PR en brouillon.
+
+### Résumé
+
+- Trois tables (favorites, reuse_reports, reuse_report_revisions) + enum ReuseReportOutcome ; DomainTables étendu.
+- `PUT/DELETE /capsules/{capsule}/favorite` idempotents, privés.
+- `POST /capsules/{capsule}/versions/{version}/reuse-reports` : un actif par (membre, version), révision archivée au second POST, is_internal serveur, kind=human_declaration, pas de score.
+- Idempotency-Key obligatoire via IdempotencyService.
+
+### Preuves locales
+
+| Commande | Résultat |
+|---|---|
+| `composer lint` | `passed` |
+| `composer analyse` | `[OK] No errors` |
+| `composer test` | `OK (413 tests, 4289 assertions)` |
+| `phpunit --filter "FavoriteHttpTest|ReuseReportHttpTest|ReuseReportConcurrencyTest"` | `OK (15 tests, 61 assertions)` |
+
+### À reprendre
+
+- CI distante à constater sur le SHA du commit publié.
+- Q20 (pas de GET favoris) à relire.
+
+Reprise de b27 (524067b distant) dans B28 par merge `f3d8325` : lint `passed`, analyse `[OK]`, `composer test` 454/4407 verts, Integration ciblée Capsules 71 tests non exécutés localement (PostgreSQL non authentifié).

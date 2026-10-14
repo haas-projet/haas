@@ -59,6 +59,10 @@ export type capsules_lab_DemoOrderInput = { readonly "order_ref": string; readon
 
 export type capsules_lab_PaginationMeta = { readonly "current_page"?: number; readonly "per_page"?: number; readonly "last_page"?: number; readonly "total"?: number; readonly "from"?: number | null; readonly "to"?: number | null; [key: string]: unknown; };
 
+export type capsules_lab_ReuseReport = { readonly "id": string; readonly "version_id": string; readonly "environment": string; readonly "reported_at": string; readonly "outcome": "reproduced" | "partial" | "failed"; readonly "observation": string; readonly "is_internal": boolean; readonly "revision": number; readonly "kind": "human_declaration"; [key: string]: unknown; };
+
+export type capsules_lab_ReuseReportInput = { readonly "environment": string; readonly "reported_at": string; readonly "outcome": "reproduced" | "partial" | "failed"; readonly "observation": string; };
+
 export type community_Comment = { readonly "id": string; readonly "request_id": string; readonly "author": { readonly "id": string; readonly "handle": string; }; readonly "body": string; readonly "body_html": string; readonly "lock_version": number; readonly "created_at": string | null; readonly "edited_at": string | null; };
 
 export type community_CommentCreateInput = { readonly "body": string; };

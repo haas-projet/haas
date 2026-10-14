@@ -589,8 +589,127 @@ paths:
         '403': { description: 'Signature absente, expirée ou falsifiée, compte non vérifié ou origine refusée' }
         '404': { description: 'Mauvais membre, kit indisponible, retiré, masqué, inactif, absent ou corrompu' }
         '429': { description: Quota partagé de téléchargement atteint }
+  /api/v1/capsules/{capsule}/favorite:
+    put:
+      operationId: putCapsuleFavorite
+      summary: Marquer la capsule en favori (idempotent)
+      description: >
+        B28 — Ajoute un favori privé pour le membre connecté. Deux PUT
+        donnent une seule ligne (unique sur `(user_id, capsule_id)`).
+        Membre actif et vérifié obligatoire ; capsule `visible`.
+        Aucune Resource publique ni route tierce ne révèle le favori
+        (CAHIER_DES_CHARGES.md:506).
+      security:
+        - SessionCookie: []
+      parameters:
+        - name: capsule
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Favori marqué (ou déjà présent) ; Cache-Control no-store
+        '403':
+          description: Capsule masquée, non autorisée ou membre non vérifié
+        '404':
+          description: Capsule inexistante
+    delete:
+      operationId: deleteCapsuleFavorite
+      summary: Retirer la capsule des favoris (idempotent)
+      description: >
+        B28 — Supprime le favori privé s'il existe. L'absence de ligne
+        reste un succès sans effet, sans leak sur l'existence du favori.
+      security:
+        - SessionCookie: []
+      parameters:
+        - name: capsule
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Favori retiré (ou déjà absent) ; Cache-Control no-store
+        '403':
+          description: Membre non vérifié
+        '404':
+          description: Capsule inexistante
+  /api/v1/capsules/{capsule}/versions/{version}/reuse-reports:
+    post:
+      operationId: recordReuseReport
+      summary: Enregistrer un retour humain sur une version publiée
+      description: >
+        B28 — Déclare un retour versionné (CAHIER_DES_CHARGES.md:500-502).
+        Un retour actif par (membre, version) ; un second POST produit
+        une révision dans l'historique append-only `reuse_report_revisions`.
+        `is_internal` est renseigné par le serveur si l'auteur est owner
+        ou contributeur. `Idempotency-Key` obligatoire. Aucun score :
+        marqué `kind=human_declaration`.
+      security:
+        - SessionCookie: []
+      parameters:
+        - name: capsule
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - name: version
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - $ref: '../../OPENAPI.yaml#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReuseReportInput'
+      responses:
+        '201':
+          description: Nouveau retour humain enregistré
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReuseReport'
+        '200':
+          description: Retour mis à jour avec révision ou rejeu identique
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReuseReport'
+        '403':
+          description: Version non publiée ou capsule masquée
+        '404':
+          description: Version inexistante
+        '409':
+          description: Clé réutilisée avec une autre charge
+        '422':
+          description: Validation (environnement, date, outcome, observation ou clé invalide)
 components:
   schemas:
+    ReuseReportInput:
+      type: object
+      additionalProperties: false
+      required: [environment, reported_at, outcome, observation]
+      properties:
+        environment: { type: string, minLength: 1, maxLength: 200 }
+        reported_at: { type: string, format: date }
+        outcome: { type: string, enum: [reproduced, partial, failed] }
+        observation: { type: string, minLength: 20, maxLength: 2000 }
+    ReuseReport:
+      type: object
+      required: [id, version_id, environment, reported_at, outcome, observation, is_internal, revision, kind]
+      properties:
+        id: { type: string, format: uuid }
+        version_id: { type: string, format: uuid }
+        environment: { type: string }
+        reported_at: { type: string, format: date }
+        outcome: { type: string, enum: [reproduced, partial, failed] }
+        observation: { type: string }
+        is_internal: { type: boolean, description: 'Renseigné par le serveur ; vrai pour owner/contributeur de la version.' }
+        revision: { type: integer, minimum: 1 }
+        kind:
+          type: string
+          enum: [human_declaration]
+          description: 'Marque explicite ; jamais un résultat machine.'
     ArtifactDownload:
       type: object
       additionalProperties: false

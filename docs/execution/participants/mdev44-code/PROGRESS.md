@@ -821,3 +821,52 @@ Snapshot commité localement en `18bfbe0`. Trois défauts de descente de schéma
 ### B25 — Q12 corrigée, code prêt à réception intégrateur
 
 Downgrade commité en `eceb4bc`. Intention de publication propriétaire/version stable dans transaction métier puis livraison après commit ; visibilité/état/droits courants avant liste, compteur et marquage ; migration composée conservant les autres types SQL, refus des événements stables. Probe rouge 1 / 1 puis ciblés définitifs **57 / 467** verts, APIInventory **1 / 81**, Pint complet/PHPStan8, types61, pack18/18 et déploiement documentaire7/7 verts. Code/fixtures figés ; root reprend le parent documentaire B24 puis les suites complètes et la CI exacte. Aucun test actif, push, ready ou approbation humaine par cet agent. Preuve détaillée `B25_RECEPTION_20261011.md`.
+
+## 2026-10-14 — Lot B28 · Favoris et retours de réutilisation
+
+Statut proposé : B28 **préparé, PR en brouillon**, aucun DONE. Branche `backend/capsules-laboratoire-b28-favoris-retours`, dérivée de B27 (524067b distant).
+
+### Décisions clefs
+
+- Trois tables (CAHIER_DES_CHARGES.md:875) : `favorites` (unique user_id+capsule_id), `reuse_reports` (unique user_id+version_id, environment/reported_at/outcome/observation/is_internal/revision), `reuse_report_revisions` (append-only, unique report_id+revision).
+- Enum `ReuseReportOutcome` reproduit littéralement les 3 états humains du §14 : `reproduced`, `partial`, `failed`.
+- Favoris strictement privés : aucune route de lecture n'est fournie (§26 ne la nomme pas). **Q20** ouverte si une route `GET /me/favorites` doit être livrée plus tard.
+- Retour de réutilisation : un actif par (membre, version). Second POST crée une révision archivée, incrémente `revision` ; aucun DELETE. `is_internal` calculé serveur (owner ou contributeur de la version) ; aucun client ne peut forcer sa valeur. Pas de score, pas de badge ; `kind=human_declaration` explicite dans la Resource (§14:502, §14:508).
+- Idempotence : `RecordReuseReportService` passe par `IdempotencyService` (verrou acteur). Même clé + même charge → rejeu identique sans révision. Clés distinctes → révision archivée.
+
+### Fichiers créés / modifiés
+
+- Migrations : `create_favorites_table`, `create_reuse_reports_table`, `create_reuse_report_revisions_table`.
+- Enum : `ReuseReportOutcome`.
+- Modèles : `Favorite`, `ReuseReport`, `ReuseReportRevision`.
+- Policies : `FavoritePolicy`, `ReuseReportPolicy`.
+- Data : `ReuseReportData`.
+- Services : `MarkFavoriteService`, `UnmarkFavoriteService`, `RecordReuseReportService`.
+- FormRequest : `RecordReuseReportRequest`.
+- Resource : `ReuseReportResource` (kind=human_declaration, pas de user_id).
+- Controllers : `PutFavoriteController`, `DeleteFavoriteController`, `RecordReuseReportController`.
+- Routes dans `routes/api/capsules-lab.php` (middleware `verified`).
+- Fragment OpenAPI, `$ref` racine, types régénérés.
+- DomainTables étendu à `favorites`, `reuse_reports`, `reuse_report_revisions`.
+- Tests : `FavoriteHttpTest` (7), `ReuseReportHttpTest` (6), `ReuseReportConcurrencyTest` (2). Fixture `record-reuse-report-concurrently.php`.
+
+### Fichiers hors de mon domaine modifiés
+
+- `docs/OPENAPI.yaml` : **+4 lignes** (`$ref` favori + reuse-reports).
+- `docs/api/generated/haas-api.d.ts` : régénéré (68 types, +2 vs B27).
+
+Aucun autre fichier du socle n'a été touché.
+
+### Contrôles locaux
+
+- `composer lint` → `{"tool":"pint","result":"passed"}`.
+- `composer analyse` → `[OK] No errors`.
+- `composer test` → `OK (413 tests, 4289 assertions)`.
+- `vendor/bin/phpunit --testsuite Integration --filter "FavoriteHttpTest|ReuseReportHttpTest|ReuseReportConcurrencyTest"` → `OK (15 tests, 61 assertions)` en 29,2 s.
+
+### Questions ouvertes
+
+- **Q20 (nouvelle)** — Pas de route de lecture de ses propres favoris (§26 muet). À décider si `GET /me/favorites` ou un `favorited` sur la Resource catalogue est désirable plus tard.
+- Q12-Q19 restent ouvertes.
+
+Reprise de b27 (524067b distant) dans B28 par merge `f3d8325` : lint `passed`, analyse `[OK]`, `composer test` 454/4407 verts, Integration ciblée Capsules 71 tests non exécutés localement (PostgreSQL non authentifié).

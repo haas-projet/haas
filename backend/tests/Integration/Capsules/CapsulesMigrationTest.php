@@ -81,6 +81,11 @@ final class CapsulesMigrationTest extends PostgresTestCase
             'migrations/2026_10_07_174813_create_capsule_version_reviews_table.php',
             'migrations/2026_10_07_195000_b24_preserve_review_history.php',
             'migrations/2026_10_07_200000_b22_preserve_published_capsule_versions.php',
+            // B28 : les retours et favoris citent capsule_versions / capsules, donc
+            // leurs down() doivent passer avant la dépose des parents.
+            'migrations/2026_10_08_120000_create_favorites_table.php',
+            'migrations/2026_10_08_120500_create_reuse_reports_table.php',
+            'migrations/2026_10_08_121000_create_reuse_report_revisions_table.php',
         ]);
         foreach (array_reverse($paths) as $path) {
             $this->assertFileExists($path);
@@ -89,6 +94,9 @@ final class CapsulesMigrationTest extends PostgresTestCase
             (new ReflectionMethod($migration, 'down'))->invoke($migration);
         }
 
+        $this->assertFalse(Schema::hasTable('reuse_report_revisions'));
+        $this->assertFalse(Schema::hasTable('reuse_reports'));
+        $this->assertFalse(Schema::hasTable('favorites'));
         $this->assertFalse(Schema::hasTable('capsule_version_reviews'));
         $this->assertFalse(Schema::hasTable('capsule_version_technologies'));
         $this->assertFalse(Schema::hasTable('artifacts'));

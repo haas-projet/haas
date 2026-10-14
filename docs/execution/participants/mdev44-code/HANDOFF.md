@@ -494,3 +494,28 @@ Branche `backend/capsules-laboratoire-b27-telechargement` dérivée de B26 (603f
 
 - CI distante à constater sur le SHA du commit publié.
 - Q18 (conditions d'évaluation, ARB05) et Q19 (nommage nested) à relire.
+
+## 2026-10-14 — HANDOFF B28 Favoris et retours
+
+Branche `backend/capsules-laboratoire-b28-favoris-retours` dérivée de B27 (524067b distant). Préparé, PR en brouillon.
+
+### Résumé
+
+- Trois tables (favorites, reuse_reports, reuse_report_revisions) + enum ReuseReportOutcome ; DomainTables étendu.
+- `PUT/DELETE /capsules/{capsule}/favorite` idempotents, privés.
+- `POST /capsules/{capsule}/versions/{version}/reuse-reports` : un actif par (membre, version), révision archivée au second POST, is_internal serveur, kind=human_declaration, pas de score.
+- Idempotency-Key obligatoire via IdempotencyService.
+
+### Preuves locales
+
+| Commande | Résultat |
+|---|---|
+| `composer lint` | `passed` |
+| `composer analyse` | `[OK] No errors` |
+| `composer test` | `OK (413 tests, 4289 assertions)` |
+| `phpunit --filter "FavoriteHttpTest|ReuseReportHttpTest|ReuseReportConcurrencyTest"` | `OK (15 tests, 61 assertions)` |
+
+### À reprendre
+
+- CI distante à constater sur le SHA du commit publié.
+- Q20 (pas de GET favoris) à relire.

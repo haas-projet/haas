@@ -3,9 +3,12 @@
 // Responsable : capsules/laboratoire. Aucune exécution de code utilisateur.
 // B2 est déclaré exclusivement par le runtime backend/demo, jamais par HAAS.
 
+use App\Http\Controllers\Capsules\DeleteFavoriteController;
 use App\Http\Controllers\Capsules\IssueArtifactDownloadController;
 use App\Http\Controllers\Capsules\ListVisibleCapsulesController;
 use App\Http\Controllers\Capsules\PublishCapsuleVersionController;
+use App\Http\Controllers\Capsules\PutFavoriteController;
+use App\Http\Controllers\Capsules\RecordReuseReportController;
 use App\Http\Controllers\Capsules\RequestChangesController;
 use App\Http\Controllers\Capsules\ShowVisibleCapsuleController;
 use App\Http\Controllers\Capsules\StoreCapsuleDraftController;
@@ -65,4 +68,17 @@ Route::prefix('capsules')->middleware(['signed', 'verified'])->group(function ()
     Route::get('{capsule}/versions/{version}/artifact/{artifact}/stream', StreamArtifactDownloadController::class)
         ->whereUuid(['capsule', 'version', 'artifact'])
         ->name('capsules.versions.artifact.stream');
+});
+
+// Favoris privés et retours humains (B28). Membre actif/vérifié requis.
+Route::prefix('capsules')->middleware(['verified'])->group(function (): void {
+    Route::put('{capsule}/favorite', PutFavoriteController::class)
+        ->whereUuid('capsule')
+        ->name('capsules.favorite.put');
+    Route::delete('{capsule}/favorite', DeleteFavoriteController::class)
+        ->whereUuid('capsule')
+        ->name('capsules.favorite.delete');
+    Route::post('{capsule}/versions/{version}/reuse-reports', RecordReuseReportController::class)
+        ->whereUuid(['capsule', 'version'])
+        ->name('capsules.versions.reuse-reports.store');
 });

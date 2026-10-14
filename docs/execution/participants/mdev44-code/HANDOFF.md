@@ -568,3 +568,5 @@ Branche `backend/capsules-laboratoire-b28-favoris-retours` dérivée de B27 (524
 
 - CI distante à constater sur le SHA du commit publié.
 - Q20 (pas de GET favoris) à relire.
+
+Reprise de b27 (524067b distant) dans B28 par merge `f3d8325` : lint `passed`, analyse `[OK]`, `composer test` 454/4407 verts, Integration ciblée Capsules 71 tests non exécutés localement (PostgreSQL non authentifié).

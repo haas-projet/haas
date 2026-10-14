@@ -868,3 +868,5 @@ Aucun autre fichier du socle n'a été touché.
 
 - **Q20 (nouvelle)** — Pas de route de lecture de ses propres favoris (§26 muet). À décider si `GET /me/favorites` ou un `favorited` sur la Resource catalogue est désirable plus tard.
 - Q12-Q19 restent ouvertes.
+
+Reprise de b27 (524067b distant) dans B28 par merge `f3d8325` : lint `passed`, analyse `[OK]`, `composer test` 454/4407 verts, Integration ciblée Capsules 71 tests non exécutés localement (PostgreSQL non authentifié).

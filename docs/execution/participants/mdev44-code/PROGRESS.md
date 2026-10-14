@@ -700,3 +700,8 @@ Snapshot commité localement en `18bfbe0`. Trois défauts de descente de schéma
 ### B25 — Q12 corrigée, code prêt à réception intégrateur
 
 Downgrade commité en `eceb4bc`. Intention de publication propriétaire/version stable dans transaction métier puis livraison après commit ; visibilité/état/droits courants avant liste, compteur et marquage ; migration composée conservant les autres types SQL, refus des événements stables. Probe rouge 1 / 1 puis ciblés définitifs **57 / 467** verts, APIInventory **1 / 81**, Pint complet/PHPStan8, types61, pack18/18 et déploiement documentaire7/7 verts. Code/fixtures figés ; root reprend le parent documentaire B24 puis les suites complètes et la CI exacte. Aucun test actif, push, ready ou approbation humaine par cet agent. Preuve détaillée `B25_RECEPTION_20261011.md`.
+
+## 2026-10-14 — Correctif rollback B33
+
+Test `CapsulesMigrationTest::test_down_rollback_removes_all_capsule_schema_tables` étendu : dépose explicite de `lab_results`, `lab_runs`, `lab_definitions` (ordre des FK) avant la boucle de rollback des migrations capsules. Aucune migration ni logique de production modifiée, pas de CASCADE. Local : rollback seul OK (1,27), `tests/Integration/Capsules` OK (234,1178), `tests/Integration/Lab` OK (81,455), `composer lint` passed, `composer analyse` [OK]. Correctif à committer sur `backend/capsules-laboratoire-b33-release` (base distante 6951bb7).
+

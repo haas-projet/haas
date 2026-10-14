@@ -456,3 +456,8 @@ Downgrade B25 corrigé sous verrou transactionnel : refus explicite des empreint
 Worktree `C:/laragon/www/HAAS_Projet/.worktrees/pr-ready-b25-20261011`, branche `review/pr-b25-20261011`. Microcommits précédents : snapshot `18bfbe0a460c4e82608dfdc8c02c84f6f35f9551`, downgrade `eceb4bcb2f5387891c98de00ce641894d27ed6c4`. Le SHA du commit Q12 est transmis dans le bilan réel, jamais inscrit dans lui-même.
 
 Q12 prête à réception : événement UUID de revue, owner sous verrou, cible propriétaire UX08 future `/capsules/<UUID>/versions/<UUID>/edition`, aucune note/corps projeté, état publié visible et compte courant avant lecture/compteur/marquage ; retrait exclu. Migrateur conserve les types SQL installés et refuse de perdre les événements stables. Ciblés SQL57/467, APIInventory1/81, Pint complet/PHPStan8, 61 types API, docs18/18 et7/7 réussis. Code figé, aucun test B25 actif ; env/vendor ignorés conservés, runner racine obligatoire pour PHP. Root fusionne B24 documentaire `2463e4b`, vérifie manifest/backend, puis Unit+Integration complètes sur les bases B25 dédiées et CI exacte. Aucun push/ready/merge de PR/revue humaine par cet agent ; parent en attente de revue humaine.
+
+## 2026-10-14 — Correctif rollback B33
+
+Test `CapsulesMigrationTest::test_down_rollback_removes_all_capsule_schema_tables` étendu aux tables du laboratoire. Avant la boucle de rollback, le test dépose `lab_results`, `lab_runs` et `lab_definitions` dans l'ordre des FK (restrictOnDelete depuis ces tables vers `capsule_versions`). Rollback seul OK (1,27), Capsules OK (234,1178), Lab OK (81,455), lint passed, analyse [OK]. Tête distante `backend/capsules-laboratoire-b33-release` à 6951bb7 au départ ; PR #42.
+

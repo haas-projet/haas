@@ -13,6 +13,7 @@ use Symfony\Component\Process\InputStream;
 use Symfony\Component\Process\Process;
 use Tests\PostgresTestCase;
 use Tests\Support\Lab\RegistryFixtures;
+use Tests\Support\Mdev44\DomainTables;
 
 final class ConcurrentLabRunTest extends PostgresTestCase
 {
@@ -20,18 +21,18 @@ final class ConcurrentLabRunTest extends PostgresTestCase
 
     protected function tearDown(): void
     {
-        // Les processus de concurrence écrivent dans leur propre transaction
-        // non comprise dans la transaction de test ; le rollback B33 refuse
-        // tout retour si des lignes persistent. On nettoie dans l'ordre des
-        // FK avant que DatabaseMigrations ne joue le rollback.
-        foreach (['lab_results', 'lab_runs', 'lab_definitions', 'api_idempotency'] as $table) {
-            try {
-                DB::connection('pgsql')->table($table)->delete();
-            } catch (\Throwable) {
-                // Table absente : rien à nettoyer.
-            }
+        try {
+            // Les processus de concurrence écrivent lab_runs/lab_results hors de
+            // la transaction de test. Le down() de B33 refuse à la fois les
+            // DELETE (trigger b33_guard_run, voir B33 ligne 111) et les lignes
+            // résiduelles (ligne 213). On déplace donc les tables du domaine
+            // via DomainTables::dropAll(), même approche que B33 lui-même pour
+            // Tests\Integration\Lab\ConcurrentLabDefinitionBindingTest, avant
+            // que DatabaseMigrations ne joue le rollback.
+            DomainTables::dropAll();
+        } finally {
+            parent::tearDown();
         }
-        parent::tearDown();
     }
 
     /** @return iterable<string, array{bool}> */

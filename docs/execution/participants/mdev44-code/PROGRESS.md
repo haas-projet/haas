@@ -1,5 +1,18 @@
 ﻿# Progression — capsules/laboratoire
 
+## 15 octobre 2026 — BV201, schéma des cas préparé
+
+Branche `backend/capsules-laboratoire-bv201-schema-cas` ouverte depuis B34 vert `0a5cb95`. Deux migrations additives livrées : `2026_10_15_120000_bv201_create_verification_cases_table.php` et `2026_10_15_120100_bv201_create_verification_case_revisions_table.php`. CHECK sur l'état, XOR du parent (`help_request_id` ou `capsule_version_id` exactement un), unicité (`case_id`, `revision_no`), digest sha256 hex, body jsonb object. FK RESTRICT vers `users`, `help_requests`, `capsule_versions`, aucune cascade. Enum `App\Enums\VerificationCases\VerificationCaseState` (6 valeurs du cahier). Modèles `VerificationCase` et `VerificationCaseRevision` avec `$fillable = []` explicite. `Tests\Support\Mdev44\DomainTables` étendu enfants-avant-parents. `Tests\Integration\Capsules\CapsulesMigrationTest::test_down_rollback_removes_all_capsule_schema_tables` étendu pour déposer `verification_case_revisions` puis `verification_cases` sans CASCADE. Nouveaux tests schéma + migration + anti-affectation en masse ajoutés dans `tests/Integration/VerificationCases/`.
+
+Tests locaux non exécutés : le PHP du PATH `C:\Program Files\php\php.exe` 8.4.3 ne charge ni `openssl` ni `pdo_pgsql` et refuse `composer`. La CI backend-ci arbitre après push. BV201 **préparé, PR en brouillon** ; jamais DONE sans revue humaine et CI exacte reçues.
+
+Fichiers hors de mon domaine modifiés : aucun. `backend/routes/api.php`, `backend/config/*`, `backend/bootstrap/*`, `composer.*`, `backend/phpunit.xml`, `.github/workflows/*`, les tables de notification et `help_requests.help_intent` déjà introduit par B14 ne sont pas touchés. OpenAPI inchangé en BV201 (aucune route ajoutée) ; BV202 ouvrira les chemins verification-cases.
+
+Questions ouvertes :
+- Les deux règles « pas de super-admin » et « `help_requests.project_id` sans cascade » sont citées en `docs/architecture/ARCHITECTURE.md:324` et `docs/architecture/ARCHITECTURE.md:594` ; appliquées sans source nouvelle.
+- Le choix du digest sha256 d'un JSON canonique du corps calque l'approche `content_digest` de B25 ; décision du responsable du domaine à confirmer par un relecteur.
+- Événement de notification pour BV201/BV203 non livré ici — le type d'événement relève du socle, à spécifier côté `NotificationEvent` par le responsable 1.
+
 ## 12 octobre 2026 — Réception propre du registre sur B25
 
 Lot B33 isolé depuis le candidat historique `04385b6573f3c6d80a71dde6d4e1fce3fbe25449`, sur B25 `365e549b2be2d9f2fedb557e8309213b182bfbaa`. Ordre **B33 → B26 → B27**, aucun cycle de prérequis. Code de registre conservé, harness de test rendu indépendant du wrapper local.

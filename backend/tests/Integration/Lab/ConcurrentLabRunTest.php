@@ -18,6 +18,22 @@ final class ConcurrentLabRunTest extends PostgresTestCase
 {
     use DatabaseMigrations, RegistryFixtures;
 
+    protected function tearDown(): void
+    {
+        // Les processus de concurrence écrivent dans leur propre transaction
+        // non comprise dans la transaction de test ; le rollback B33 refuse
+        // tout retour si des lignes persistent. On nettoie dans l'ordre des
+        // FK avant que DatabaseMigrations ne joue le rollback.
+        foreach (['lab_results', 'lab_runs', 'lab_definitions', 'api_idempotency'] as $table) {
+            try {
+                DB::connection('pgsql')->table($table)->delete();
+            } catch (\Throwable) {
+                // Table absente : rien à nettoyer.
+            }
+        }
+        parent::tearDown();
+    }
+
     /** @return iterable<string, array{bool}> */
     public static function keyCases(): iterable
     {

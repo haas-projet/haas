@@ -1,5 +1,30 @@
 ﻿# Progression — capsules/laboratoire
 
+## 15 octobre 2026 — BV203, revue et intégration des cas préparées
+
+Branche `backend/capsules-laboratoire-bv203-revue-cas` ouverte depuis BV202 `14a9a7a`. Livré :
+- Route admin `POST /api/v1/admin/verification-cases/{id}/review` — relecteur modérateur/admin actif/vérifié, distinct de l'auteur ; décision `reviewed` ou `declined` (motif obligatoire). Idempotency-Key, transaction avec verrou, audit dans la même transaction.
+- Migration `2026_10_15_120200_bv203_create_case_scenario_links_table.php` — une table, CHECK sur `scenario_key IN (nominal_event, duplicate_event, distinct_events, invalid_event)` (valeurs de `App\Enums\Lab\LabScenario`, B33), aucune FK vers un enum ou un registre de scénarios ; `suite_digest` sha256 hex, `release_commit` sha1 hex 40 ; `case_revision_id` unique (clé par révision). RESTRICT vers `verification_case_revisions` et `users`. `DomainTables` et `CapsulesMigrationTest::test_down_rollback_removes_all_capsule_schema_tables` étendus (enfants d'abord, jamais CASCADE).
+- Commande interne `lab:bind-case <manifest>` + `BindCaseIntegrationService` — lit un manifeste JSON validé contre le gabarit `ops/templates/release-manifest.example.json` (clé `verification_cases.release_commit` + `verification_cases.bindings[]` {`case_revision_id`, `scenario_key`, `suite_digest`, `reviewer_id`}). Transaction, verrou, idempotence : refuse une révision non figée, un cas non `reviewed`, un digest incohérent, un scénario hors liste, un relecteur non vérifié ou auto-revue, un lien existant divergent. Ne touche jamais une révision déjà intégrée.
+- Resource/OpenAPI/types mis à jour (77 types API générés sans application frontend) ; `$ref` du chemin admin dans `docs/OPENAPI.yaml`.
+- Tests : `CaseScenarioLinksSchemaTest` (6 contraintes), `VerificationCaseReviewHttpTest` (7 scénarios HTTP incluant `test_no_public_route_writes_case_scenario_links_or_sets_integrated` qui inspecte la table des routes), `BindCaseIntegrationCommandTest` (7 scénarios : succès, idempotence, scénario inconnu, digest incohérent, manifeste hors gabarit, cas non revu, conservation de l'ancien lien après nouvelle soumission), `VerificationCaseReviewConcurrencyTest` (deux relecteurs concurrents avec barrière `pg_stat_activity` et vérification d'une seule décision + une seule ligne d'audit). Fixture `tests/Fixtures/review-verification-case-concurrently.php`.
+
+Tests locaux (PHP 8.4.15 Laragon) :
+- `composer lint` : passed. `composer analyse` : [OK] No errors.
+- `composer test` : OK (439 tests, 4469 assertions).
+- Integration `VerificationCases` : OK (59 tests, 195 assertions, 1 min 27).
+- Integration `VerificationCases|Capsules|Lab` hors Demo : OK (392 tests, 1897 assertions, 7 min 41).
+
+BV203 **préparé, PR en brouillon** ; jamais DONE sans revue humaine et CI exacte reçues. CI attendue : tests verts PHP 8.4/PHP 8.5, seule l'étape « Contrôler les dépendances » rouge pour `symfony/http-foundation` CVE-2026-108082 et `symfony/yaml` CVE-2026-109413 ; `composer.lock` à mettre à jour par le responsable du socle.
+
+Fichiers hors de mon domaine modifiés : `backend/routes/api/capsules-lab.php` (ajout du groupe `admin/verification-cases`), `docs/OPENAPI.yaml` (1 `$ref`), `docs/api/generated/haas-api.d.ts` (régénéré), `ops/templates/release-manifest.example.json` (ajout d'un bloc `verification_cases` placeholder). Les tables de notification, `backend/routes/api.php`, `backend/config/*`, `backend/bootstrap/*`, `backend/phpunit.xml`, `composer.*`, `.github/workflows/*` restent intacts.
+
+Questions ouvertes (comme Q12) :
+- Notification de BV203 non livrée : le type d'événement relève du socle (`NotificationEvent`, zone réservée). À spécifier par le responsable 1.
+- Format du manifeste de release non figé sur `main` ; `ops/templates/release-manifest.example.json` reste le gabarit de validation.
+- Borne de la file B34 non testée dans ce lot.
+- Visibilité du GET (§26 CAHIER:944) : à préciser avec le propriétaire du domaine.
+
 ## 15 octobre 2026 — BV202, création et soumission des cas préparées
 
 Branche `backend/capsules-laboratoire-bv202-cas-soumission` ouverte depuis BV201 `a660a47`. Six routes publiques :

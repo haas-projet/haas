@@ -82,6 +82,7 @@ final class CapsulesMigrationTest extends PostgresTestCase
             'migrations/2026_10_07_195000_b24_preserve_review_history.php',
             'migrations/2026_10_07_200000_b22_preserve_published_capsule_versions.php',
         ]);
+        // BV203 : case_scenario_links référence verification_case_revisions.
         // BV201 : verification_case_revisions référence verification_cases,
         // qui référence capsule_versions (restrictOnDelete). B33 :
         // lab_definitions.version_id et lab_runs.version_id référencent
@@ -90,7 +91,7 @@ final class CapsulesMigrationTest extends PostgresTestCase
         // appartiennent au laboratoire ou aux cas, pas au schéma capsules : on
         // les retire avant le rollback dans l'ordre des clés étrangères (enfants
         // d'abord), sans CASCADE et sans toucher aux migrations capsules.
-        foreach (['verification_case_revisions', 'verification_cases', 'lab_results', 'lab_runs', 'lab_definitions'] as $labTable) {
+        foreach (['case_scenario_links', 'verification_case_revisions', 'verification_cases', 'lab_results', 'lab_runs', 'lab_definitions'] as $labTable) {
             Schema::dropIfExists($labTable);
         }
         foreach (array_reverse($paths) as $path) {
@@ -100,6 +101,7 @@ final class CapsulesMigrationTest extends PostgresTestCase
             (new ReflectionMethod($migration, 'down'))->invoke($migration);
         }
 
+        $this->assertFalse(Schema::hasTable('case_scenario_links'));
         $this->assertFalse(Schema::hasTable('verification_case_revisions'));
         $this->assertFalse(Schema::hasTable('verification_cases'));
         $this->assertFalse(Schema::hasTable('lab_results'));

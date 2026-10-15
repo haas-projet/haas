@@ -25,5 +25,16 @@
   "approvals": {
     "reviewer": null,
     "GO_PRODUCTION": null
+  },
+  "verification_cases": {
+    "release_commit": null,
+    "bindings": [
+      {
+        "case_revision_id": null,
+        "scenario_key": null,
+        "suite_digest": null,
+        "reviewer_id": null
+      }
+    ]
   }
 }

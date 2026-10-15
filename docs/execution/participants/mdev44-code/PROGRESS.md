@@ -705,3 +705,34 @@ Downgrade commité en `eceb4bc`. Intention de publication propriétaire/version 
 
 Test `CapsulesMigrationTest::test_down_rollback_removes_all_capsule_schema_tables` étendu : dépose explicite de `lab_results`, `lab_runs`, `lab_definitions` (ordre des FK) avant la boucle de rollback des migrations capsules. Aucune migration ni logique de production modifiée, pas de CASCADE. Local : rollback seul OK (1,27), `tests/Integration/Capsules` OK (234,1178), `tests/Integration/Lab` OK (81,455), `composer lint` passed, `composer analyse` [OK]. Correctif à committer sur `backend/capsules-laboratoire-b33-release` (base distante 6951bb7).
 
+
+## 2026-10-15 — B34 : lancement et quotas (préparé, PR en brouillon)
+
+Branche `backend/capsules-laboratoire-b34-lancement-lab` depuis `origin/backend/capsules-laboratoire-b33-release` (b089da4), PR 42 verte au départ. B34 ajoute les routes `POST /api/v1/lab-runs` et `GET /api/v1/lab-runs/{id}` sans migration : la table `lab_runs` de B33 et `api_idempotency` de B13 suffisent (consommation horaire dérivée de `lab_runs.created_at` du membre dans la dernière heure, pas de nouvelle table).
+
+Service : `App\Services\Lab\StartLabRunService::handle()` enveloppe `IdempotencyService::execute()` (`route_target = 'POST /api/v1/lab-runs'`), pose `pg_advisory_xact_lock(554478)` dans la transaction d'idempotence, revérifie quota horaire glissant par membre (`lab.hourly_units` défaut 5, 1 unité par lancement simple), capacité globale (`lab.max_running` défaut 1, queued ET running comptent comme actifs — lecture restrictive consignée), borne de queue (`lab.queue_limit` défaut 20, consignée), puis insère un `lab_run` queued aligné sur `ApprovedLabRegistry::manifest()`. L'orchestration (worker, assertions) reste à B36 : aucun processus démarré, aucun résultat écrit.
+
+Idempotence : même clé + même charge → une seule ligne et le même rejeu (via contrainte unique `api_idempotency(user_id, route_target, key_hash)` + `(user_id, request_key)` sur `lab_runs`). Autre charge → 409 `IDEMPOTENCY_CONFLICT`. Un rejeu ne consomme ni place ni unité.
+
+Erreurs : exceptions dédiées `LabQuotaExceeded` et `LabCapacityReached` traduites en 429 par `ApiExceptionRenderer`, avec `Retry-After` calculé (quota = âge du créneau le plus ancien, capacité = 30 s). Scénario inconnu / champ `code`, `command`, `url`, `runner_key` ou tout champ inconnu → 422 sans écriture (ni ignorés silencieusement). Switch fermé ou définition absente/désalignée → 503 (via `LabDefinitionQuery::selection()` existante). Anonyme → 401 ; compte non vérifié ou suspendu → 403. GET réservé au propriétaire (404 pour les autres), aucun digest/manifeste/identifiant interne (definition_id, request_key) projeté dans la ressource.
+
+Fichiers hors de mon domaine modifiés : `backend/app/Support/Http/ApiExceptionRenderer.php` (ajout des deux exceptions 429 + Retry-After), `docs/OPENAPI.yaml` (2 lignes `$ref`), `docs/api/openapi/lab.yaml` (fragment B34 + schémas), `docs/api/generated/haas-api.d.ts` (régénéré par `php scripts/generate-api-types.php` → 66 types), `backend/routes/api/capsules-lab.php` (ajout des deux routes `lab-runs.store` et `lab-runs.show`). Zones réservées respectées : `config/*`, `phpunit.xml`, `bootstrap/*`, `routes/api.php`, `composer.*`, `.github/workflows/*` intacts.
+
+Pour le socle (responsable 1), à ajouter plus tard : `config/lab.php` → `max_running` (défaut 1), `hourly_units` (défaut 5), `queue_limit` (défaut 20) ; câblage `haas_lab` et observations réelles : B36.
+
+Tests ajoutés : `tests/Integration/Lab/StartLabRunHttpTest.php` (nominal 202, clé absente 422, idempotence stricte, 409 charge divergente, DataProvider des champs interdits, anonyme/non-vérifié/suspendu, switch fermé/définition absente 503, quota horaire 429 avec Retry-After, capacité globale 429, propriétaire-seul sur GET, GET refuse paramètres additionnels) et `tests/Integration/Lab/ConcurrentLabRunTest.php` (deux processus Symfony Process + barrière `pg_stat_activity` sur `application_name = 'haas_b34_worker'`, DataProvider : clés distinctes → ACCEPTED+CAPACITY, même clé → ACCEPTED+ACCEPTED avec une seule ligne). Fixture : `tests/Fixtures/start-lab-run-concurrently.php`.
+
+Contrôles exécutés localement (PHP 8.4.15 Laragon, PATH forcé) :
+- `vendor/bin/pint --test` : `passed`.
+- `vendor/bin/phpstan analyse --memory-limit=512M --no-progress` : `[OK] No errors`.
+- `vendor/bin/phpunit --testsuite Unit,Feature,Architecture` : **439 tests, 4263 assertions, 0 échec**.
+- `php scripts/generate-api-types.php` : 66 types régénérés, diff limité à B34.
+- Integration locale (`tests/Integration/Lab`, `tests/Integration/Capsules`) : **non exécutée localement**. Les bases dédiées (`haas_bootstrap_test` sur 127.0.0.1:5432 avec rôle `haas_test`) requièrent le mot de passe stocké dans `~/.haas-test.env`, dont la lecture est interdite par consigne. La CI distante exécutera ces suites. Aucune action sur PostgreSQL n'a été prise.
+
+Questions ouvertes consignées :
+- Visibilité du GET /lab-runs/{id} : §26:957 mentionne « preuve publique ou propre run » ; en l'absence de résultat public dans B34 (pas de table `lab_results` écrite), restreint au propriétaire. À relâcher par un lot ultérieur si une preuve publique est spécifiée.
+- Comptage « queued ET running comme actifs » : lecture restrictive volontaire. Avec `max_running=1`, interdit un second lancement tant que le premier n'est pas finalisé — accueille les deux enfants séquentiels d'une comparaison BV206 sans surprise.
+- `queue_limit` défaut 20 par membre global : à arbitrer. BV206 pourra en avoir besoin.
+- `UNITS_PER_SIMPLE_RUN=1` : paramètre de coût prévu pour BV206 (une comparaison peut coûter 2 unités).
+
+Non vérifié : exécution d'un `lab_run` queued (B36), reprise après panne (B37), charge réelle sous verrou avisé en production (hors scope local).

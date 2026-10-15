@@ -17,6 +17,10 @@ x-haas-domain-fragments:
 paths:
   '/api/v1/versions/{id}/lab-definition':
     $ref: './api/openapi/lab.yaml#/paths/~1api~1v1~1versions~1{id}~1lab-definition'
+  /api/v1/lab-runs:
+    $ref: './api/openapi/lab.yaml#/paths/~1api~1v1~1lab-runs'
+  '/api/v1/lab-runs/{id}':
+    $ref: './api/openapi/lab.yaml#/paths/~1api~1v1~1lab-runs~1{id}'
   '/api/v1/requests/{id}/comments':
     $ref: './api/openapi/community.yaml#/paths/~1api~1v1~1requests~1{id}~1comments'
   '/api/v1/comments/{id}':

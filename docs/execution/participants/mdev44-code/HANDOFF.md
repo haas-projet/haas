@@ -461,3 +461,56 @@ Q12 prête à réception : événement UUID de revue, owner sous verrou, cible p
 
 Test `CapsulesMigrationTest::test_down_rollback_removes_all_capsule_schema_tables` étendu aux tables du laboratoire. Avant la boucle de rollback, le test dépose `lab_results`, `lab_runs` et `lab_definitions` dans l'ordre des FK (restrictOnDelete depuis ces tables vers `capsule_versions`). Rollback seul OK (1,27), Capsules OK (234,1178), Lab OK (81,455), lint passed, analyse [OK]. Tête distante `backend/capsules-laboratoire-b33-release` à 6951bb7 au départ ; PR #42.
 
+
+## 2026-10-15 — B34 : lancement et quotas (préparé, PR en brouillon)
+
+Branche : `backend/capsules-laboratoire-b34-lancement-lab`, base `backend/capsules-laboratoire-b33-release` (b089da4). PR 42 (B33) verte au départ. B34 ne touche pas B33 ; mêmes règles. Status visé en fin de session : **PR en brouillon**, pas DONE.
+
+### Routes livrées
+
+- `POST /api/v1/lab-runs` (`lab-runs.store`) : header `Idempotency-Key` (UUID v4) obligatoire ; body `{capsule_version_id, scenario}` strictement ; **202** avec `data.{id,state:"queued",scenario,version_id,created_at,follow_url}` et header `Location`. Rejet silencieux impossible : tout champ supplémentaire (code/command/url/runner_key/…) → 422.
+- `GET /api/v1/lab-runs/{id}` (`lab-runs.show`) : propriétaire seul (404 pour les autres), aucun paramètre accepté. Pas de digest/manifeste/`definition_id`/`request_key` projetés.
+
+Middlewares : `auth:sanctum, verified, throttle:30,1` sur le POST ; `throttle:60,1` sur le GET. Anonyme → 401 ; non vérifié ou suspendu → 403.
+
+### Service livré
+
+- `App\Services\Lab\StartLabRunService::handle(User, StartLabRunData, string)` via `IdempotencyService::execute()` + `pg_advisory_xact_lock(554478)` dans la transaction, puis contrôles de quota horaire glissant / capacité globale / borne de queue, puis insertion `lab_runs` queued aligné sur `ApprovedLabRegistry::manifest()`. Aucun worker démarré (B36). Aucune écriture dans `lab_results`.
+
+### Fichiers hors domaine modifiés (consigner, pas prétendre)
+
+- `backend/app/Support/Http/ApiExceptionRenderer.php` : ajout des deux exceptions `LabQuotaExceeded`/`LabCapacityReached` → 429 + `Retry-After`. Discutable en revue : préfère-t-on exposer un header `X-RateLimit-Remaining` ? Non livré ici (pas demandé par le cahier).
+- `backend/routes/api/capsules-lab.php` : ajout des deux routes `lab-runs.*` ; `routes/api.php` intact.
+- `docs/OPENAPI.yaml` : deux lignes `$ref`. `docs/api/openapi/lab.yaml` : fragment B34 (POST/GET + schémas `StartLabRunBody`, `QueuedLabRun`). `docs/api/generated/haas-api.d.ts` régénéré (66 types).
+- `backend/tests/Integration/Capsules/CapsulesMigrationTest.php` : **non modifié par B34** (étendu plus tôt par le correctif rollback B33 du 2026-10-14). Les tables de B34 sont inchangées (`lab_runs` existe déjà), aucun ajout nécessaire à `DomainTables::dropAll()`.
+
+### Prochaines étapes pour la propriétaire
+
+1. Vérifier `git status -sb` propre et `git grep -n "CLAUDE" -- . ':!docs/execution/participants'` vide.
+2. Régénérer `SHA256SUMS` par le script temporaire décrit en HANDOFF.md:45 (hors dépôt, `git ls-files --cached -z` sans SHA256SUMS, SHA-256 des octets de l'index, ordre existant conservé, absents ajoutés à la fin par ordre alphabétique, format `<hex>␣␣<chemin>`, LF). Commit dédié : `chore(integration): régénérer les empreintes de B34`.
+3. `git push -u origin backend/capsules-laboratoire-b34-lancement-lab` (un seul push autorisé).
+4. `gh pr create --draft --base backend/capsules-laboratoire-b33-release --head backend/capsules-laboratoire-b34-lancement-lab`.
+5. `gh pr checks --watch` : attendre les deux jobs PHP 8.4 et PHP 8.5 avant tout `ready`.
+6. Revue humaine distincte de l'autrice (`ousseynoufayeisidk-sys` relecteur principal possible). Points d'arbitrage :
+   - Choix du `max_running=1` global (lecture restrictive partagée entre runs simples et comparateur).
+   - `queue_limit=20` par membre : défaut prudent, à préciser.
+   - `UNITS_PER_SIMPLE_RUN=1` : BV206 pourrait demander 2 unités par comparaison.
+   - Visibilité GET restreinte au propriétaire : §26:957 reste ambigu.
+7. Après revue, demander au responsable 1 d'ajouter dans `config/lab.php` : `'max_running' => env('LAB_MAX_RUNNING', 1), 'hourly_units' => env('LAB_HOURLY_UNITS', 5), 'queue_limit' => env('LAB_QUEUE_LIMIT', 20),`. Tant que ces clés sont absentes, le service lit via `config('lab.<clé>', <défaut>)` sans erreur.
+
+### Fichiers à ne pas toucher jusqu'à nouvel ordre
+
+- `backend/config/*`, `backend/bootstrap/app.php`, `backend/phpunit.xml`, `backend/composer.*`, `.github/workflows/*`.
+- `backend/routes/api.php` (point d'entrée du responsable 1).
+
+### Contrôles exécutés localement
+
+- `vendor/bin/pint --test` : `passed`.
+- `vendor/bin/phpstan analyse --memory-limit=512M --no-progress` : `[OK] No errors`.
+- `vendor/bin/phpunit --testsuite Unit,Feature,Architecture` : **439 / 4263 OK**.
+- `php scripts/generate-api-types.php` : 66 types, diff limité à B34.
+- Integration locale (`tests/Integration/Lab`, `tests/Integration/Capsules`) : **non exécutée** — le mot de passe de `haas_test` est stocké dans `~/.haas-test.env`, dont la lecture est interdite par consigne B34. CI distante responsable.
+
+### Preuves conservées
+
+- Commits locaux sur la branche (SHA réels transmis dans le bilan de session, jamais inscrits dans le commit).

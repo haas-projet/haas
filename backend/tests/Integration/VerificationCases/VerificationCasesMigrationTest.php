@@ -6,6 +6,7 @@ namespace Tests\Integration\VerificationCases;
 
 use App\Models\VerificationCases\VerificationCase;
 use App\Models\VerificationCases\VerificationCaseRevision;
+use Illuminate\Database\Eloquent\MassAssignmentException;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Support\Facades\Schema;
@@ -47,20 +48,19 @@ final class VerificationCasesMigrationTest extends PostgresTestCase
 
     public function test_incremental_up_down_up_restores_both_verification_tables(): void
     {
-        $paths = array_map(database_path(...), [
-            'migrations/2026_10_15_120000_bv201_create_verification_cases_table.php',
-            'migrations/2026_10_15_120100_bv201_create_verification_case_revisions_table.php',
-        ]);
+        // require d'un fichier retourne son `new class` à la première inclusion
+        // uniquement ; les requires suivants retournent `true`. On conserve les
+        // instances dans des variables pour les réutiliser lors des deux passes.
+        $casesMigration = require database_path('migrations/2026_10_15_120000_bv201_create_verification_cases_table.php');
+        $revisionsMigration = require database_path('migrations/2026_10_15_120100_bv201_create_verification_case_revisions_table.php');
 
-        foreach (array_reverse($paths) as $path) {
-            (new ReflectionMethod(require $path, 'down'))->invoke(require $path);
-        }
+        (new ReflectionMethod($revisionsMigration, 'down'))->invoke($revisionsMigration);
+        (new ReflectionMethod($casesMigration, 'down'))->invoke($casesMigration);
         $this->assertFalse(Schema::hasTable('verification_cases'));
         $this->assertFalse(Schema::hasTable('verification_case_revisions'));
 
-        foreach ($paths as $path) {
-            (new ReflectionMethod(require $path, 'up'))->invoke(require $path);
-        }
+        (new ReflectionMethod($casesMigration, 'up'))->invoke($casesMigration);
+        (new ReflectionMethod($revisionsMigration, 'up'))->invoke($revisionsMigration);
         $this->assertTrue(Schema::hasTable('verification_cases'));
         $this->assertTrue(Schema::hasTable('verification_case_revisions'));
     }
@@ -74,6 +74,11 @@ final class VerificationCasesMigrationTest extends PostgresTestCase
     public function test_protected_fields_are_not_mass_assignable_through_fill(): void
     {
         $case = new VerificationCase;
+
+        // $fillable = [] + $guarded = ['*'] (défaut) → totallyGuarded() : fill()
+        // lève MassAssignmentException au premier champ. Aucune voie publique
+        // d'affectation en masse n'est tolérée côté modèle.
+        $this->expectException(MassAssignmentException::class);
         $case->fill([
             'state' => 'integrated',
             'current_revision' => 42,
@@ -82,18 +87,13 @@ final class VerificationCasesMigrationTest extends PostgresTestCase
             'help_request_id' => '00000000-0000-4000-8000-000000000002',
             'capsule_version_id' => '00000000-0000-4000-8000-000000000003',
         ]);
-
-        $this->assertNull($case->getAttribute('state'));
-        $this->assertNull($case->getAttribute('current_revision'));
-        $this->assertNull($case->getAttribute('lock_version'));
-        $this->assertNull($case->getAttribute('author_id'));
-        $this->assertNull($case->getAttribute('help_request_id'));
-        $this->assertNull($case->getAttribute('capsule_version_id'));
     }
 
     public function test_revision_fields_are_not_mass_assignable_through_fill(): void
     {
         $revision = new VerificationCaseRevision;
+
+        $this->expectException(MassAssignmentException::class);
         $revision->fill([
             'case_id' => '00000000-0000-4000-8000-000000000001',
             'revision_no' => 7,
@@ -101,11 +101,5 @@ final class VerificationCasesMigrationTest extends PostgresTestCase
             'digest' => str_repeat('a', 64),
             'submitted_at' => now(),
         ]);
-
-        $this->assertNull($revision->getAttribute('case_id'));
-        $this->assertNull($revision->getAttribute('revision_no'));
-        $this->assertNull($revision->getAttribute('body'));
-        $this->assertNull($revision->getAttribute('digest'));
-        $this->assertNull($revision->getAttribute('submitted_at'));
     }
 }

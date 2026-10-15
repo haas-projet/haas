@@ -71,6 +71,9 @@ final class VerificationCasesSchemaTest extends PostgresTestCase
 
     public function test_state_values_outside_the_whitelist_are_rejected(): void
     {
+        // current_revision=1 pour que verification_cases_current_revision_consistent
+        // ne soit pas violée en premier : seule la vérification des valeurs
+        // d'état doit tomber.
         $this->expectException(QueryException::class);
         $this->expectExceptionMessageMatches('/verification_cases_state_values/i');
 
@@ -80,7 +83,7 @@ final class VerificationCasesSchemaTest extends PostgresTestCase
             'help_request_id' => HelpRequest::factory()->create()->id,
             'capsule_version_id' => null,
             'state' => 'invalid',
-            'current_revision' => 0,
+            'current_revision' => 1,
             'lock_version' => 1,
             'created_at' => now(),
             'updated_at' => now(),

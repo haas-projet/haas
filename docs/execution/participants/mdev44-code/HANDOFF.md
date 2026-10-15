@@ -1,5 +1,26 @@
 ﻿# Reprise — capsules/laboratoire
 
+## 15 octobre 2026 — BV201, schéma des cas, PR en brouillon
+
+Branche active : `backend/capsules-laboratoire-bv201-schema-cas` basée sur `backend/capsules-laboratoire-b34-lancement-lab` vert `0a5cb95`. BV201 **préparé, PR en brouillon**. Prochaine étape : réception CI verte avant de brancher BV202 depuis la tête de BV201.
+
+Fichiers livrés :
+- `backend/database/migrations/2026_10_15_120000_bv201_create_verification_cases_table.php`
+- `backend/database/migrations/2026_10_15_120100_bv201_create_verification_case_revisions_table.php`
+- `backend/app/Enums/VerificationCases/VerificationCaseState.php`
+- `backend/app/Models/VerificationCases/VerificationCase.php`
+- `backend/app/Models/VerificationCases/VerificationCaseRevision.php`
+- `backend/database/factories/VerificationCases/VerificationCaseFactory.php`
+- `backend/database/factories/VerificationCases/VerificationCaseRevisionFactory.php`
+- `backend/tests/Integration/VerificationCases/VerificationCasesSchemaTest.php`
+- `backend/tests/Integration/VerificationCases/VerificationCasesMigrationTest.php`
+- `backend/tests/Support/Mdev44/DomainTables.php` (étendu, enfants d'abord)
+- `backend/tests/Integration/Capsules/CapsulesMigrationTest.php` (rollback étendu)
+
+Non modifiés : `backend/routes/api.php`, `backend/config/*`, `backend/bootstrap/*`, `backend/phpunit.xml`, `composer.*`, `.github/workflows/*`, les contraintes des tables de notification. L'enum `HelpIntent` et `help_requests.help_intent` déjà introduits par B14 (`backend/database/migrations/2026_10_04_000014_b14_extend_help_request_content.php:18`, `backend/app/Enums/HelpRequests/HelpIntent.php:6`) ne sont pas touchés.
+
+Local non exécuté : PHP du PATH sans extensions ; aucune action sur PostgreSQL ni lecture de `~/.haas-test.env`. La CI backend-ci arbitre après push ; la relance s'opère via `gh pr checks --watch` sur la PR BV201.
+
 ## 12 octobre 2026 — Réception propre du registre sur B25
 
 Lot B33 isolé depuis le candidat historique `04385b6573f3c6d80a71dde6d4e1fce3fbe25449`, sur B25 `365e549b2be2d9f2fedb557e8309213b182bfbaa`. Ordre **B33 → B26 → B27**, aucun cycle de prérequis. Code de registre conservé, harness de test rendu indépendant du wrapper local.

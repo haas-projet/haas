@@ -16,6 +16,8 @@ final class DomainTables
 {
     /** @var list<string> */
     private const TABLES = [
+        'verification_case_revisions',
+        'verification_cases',
         'lab_results',
         'lab_runs',
         'lab_definitions',

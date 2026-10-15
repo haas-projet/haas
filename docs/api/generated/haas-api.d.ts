@@ -95,6 +95,12 @@ export type comparisons_ComparisonProfile = { readonly "id": string; readonly "f
 
 export type comparisons_ComparisonProfileList = { readonly "data": ReadonlyArray<comparisons_ComparisonProfile>; };
 
+export type comparisons_ComparisonRun = { readonly "id": string; readonly "profile_id": string; readonly "state": comparisons_ComparisonState; readonly "created_at": string; readonly "started_at": string | null; readonly "finished_at": string | null; readonly "follow_url": string; readonly "children_follow_urls": ReadonlyArray<string>; };
+
+export type comparisons_ComparisonRunEnvelope = { readonly "data": comparisons_ComparisonRun; };
+
+export type comparisons_ComparisonState = "queued" | "running" | "completed" | "error" | "timed_out";
+
 export type current_account_Me = { readonly "id": string; readonly "handle": identity_Handle; readonly "email": string; readonly "email_verified": boolean; readonly "role": identity_AccountRole; readonly "status": "active"; readonly "is_demo": boolean; readonly "can": { readonly "manage_account_mail": boolean; readonly "update_profile": boolean; readonly "participate": boolean; readonly "moderate": boolean; readonly "administer": boolean; }; };
 
 export type identity_AccountRole = "member" | "moderator" | "admin";

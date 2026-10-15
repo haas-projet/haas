@@ -22,6 +22,7 @@ final class DomainTables
         'lab_results',
         'lab_runs',
         'lab_definitions',
+        'comparison_profiles',
         'capsule_version_reviews',
         'capsule_version_technologies',
         'artifacts',

@@ -1,5 +1,40 @@
 ﻿# Progression — capsules/laboratoire
 
+## 15 octobre 2026 — BV204, profils de comparaison préparés
+
+Branche `backend/capsules-laboratoire-bv204-profils-comparaison` ouverte depuis BV203 `4c7d22c`. Livré :
+- Test(cases) prérequis : trois cas ajoutés à `VerificationCaseHttpTest` qui prouvent qu'une demande d'aide masquée après création rend introuvables la lecture, la soumission et le retrait du cas (404). Le re-contrôle de `VerificationCaseParentVisibility` sur Show/Submit/Withdraw était déjà en place ; ces tests le verrouillent par HTTP (manquait en BV202).
+- Migration `2026_10_15_120300_bv204_create_comparison_profiles_table.php` — une table, famille fixée à `b1.idempotent.v1` (CHECK), `baseline_manifest` JSONB non vide, `candidate_version_id` FK RESTRICT unique vers `capsule_versions`, `suite_digest` hex 64, `input_schema_version` semver, `enabled` bool. Aucune FK vers un enum ni un registre. `down()` fidèle et tolérant (table absente = no-op) ; jamais CASCADE.
+- Registre immuable `App\Infrastructure\Comparisons\ComparisonProfileRegistry` — famille `b1.idempotent.v1`, digests de la candidate figés via `ApprovedLabRegistry` (14 fichiers B33), `BASELINE_SOURCE_COMMIT` lu via `config('lab.comparison_baseline_source_commit')` (nul par défaut : HAAS n'invente aucune baseline).
+- Commande interne `lab:bind-comparison-profile <manifest>` + `BindComparisonProfileService` — valide un manifeste étendu d'`ops/templates/release-manifest.example.json` (section `comparison_profiles` ajoutée) ; refuse famille autre que `b1.idempotent.v1`, candidate non publiée / retirée / masquée, digest divergent, scénario hors `LabScenario`, baseline sans `test_only_fixture` tant qu'`expectedBaselineSourceCommit()` est null. Rejeu idempotent ; profil existant divergent refusé. Aucune route HTTP n'écrit, n'active ni ne retire un profil.
+- Route `GET /api/v1/versions/{id}/comparison-profiles` (membre vérifié, throttle:60,1) — version publiée + capsule visible seulement, sinon 404. `ComparisonProfileResource` sans `suite_digest`, `baseline_manifest`, `code_digest`, ni chemin ; champs : `id`, `family_key`, `candidate_version_id`, `input_schema_version`, `enabled`, `allowed_scenarios`. `Cache-Control: no-store, private`. `ListComparisonProfilesRequest` rejette toute entrée.
+- Fragment OpenAPI `docs/api/openapi/comparisons.yaml` + `$ref` dans `docs/OPENAPI.yaml` ; **80 types API générés sans application frontend**.
+- `DomainTables` et `CapsulesMigrationTest::test_down_rollback_removes_all_capsule_schema_tables` étendus (enfants avant parents, sans CASCADE).
+
+Tests locaux (PHP 8.4.15 Laragon, `C:\laragon\bin\php\php-8.4.15-Win32-vs17-x64\php.exe`, `openssl`+`pdo_pgsql` chargés ; `~/.haas-test.env` jamais lu) :
+- `vendor/bin/pint --test` : passed. `vendor/bin/phpstan analyse` : [OK] No errors.
+- `vendor/bin/phpunit --filter 'VerificationCaseHttpTest'` : OK (17 tests, 45 assertions).
+- `vendor/bin/phpunit --filter 'Comparisons'` : OK (31 tests, 74 assertions).
+- `vendor/bin/phpunit --testsuite Integration` filtré `VerificationCases|Capsules|Lab|Comparisons` hors Demo : **OK (424 tests, 1976 assertions, 8 min 53)**.
+- `node scripts/validate-pack.mjs` : `passed: 18, failed: 0`.
+- `node scripts/check-deployment-docs.mjs` : `passed: 7, failed: 0`.
+- `node scripts/check-manifest.mjs` : `877 empreintes vérifiées ; tous les fichiers suivis sont couverts.`.
+
+BV204 **préparé, PR en brouillon** ; jamais DONE sans revue humaine et CI exacte reçues. CI attendue : tests verts sur PHP 8.4 et PHP 8.5 ; seule « Contrôler les dépendances » (`composer audit --locked`) rouge pour `symfony/http-foundation` CVE-2026-108082 et `symfony/yaml` CVE-2026-109413 (détectés le 15 octobre, versions installées v8.0.15) ; `composer.lock` à mettre à jour par le responsable du socle.
+
+Fichiers hors de mon domaine modifiés : `backend/routes/api/capsules-lab.php` (ajout de la route `/versions/{id}/comparison-profiles`), `docs/OPENAPI.yaml` (1 `$ref` + fragment), `docs/api/generated/haas-api.d.ts` (régénéré), `ops/templates/release-manifest.example.json` (ajout de la section `comparison_profiles`), `SHA256SUMS` (régénéré via script hors dépôt). `backend/routes/api.php`, `backend/config/*`, `backend/bootstrap/*`, `backend/phpunit.xml`, `composer.*`, `.github/workflows/*`, les tables de notification restent intacts.
+
+Décisions du propriétaire du domaine (à consigner) :
+- BV204 : la commande `lab:bind-comparison-profile` est la **seule** porte d'écriture ; aucune route publique n'alimente `comparison_profiles`. Les tests utilisent des manifestes marqués `test_only_fixture`, acceptés uniquement sous `app.env === 'testing'`.
+
+Questions ouvertes :
+- Baseline réelle (« Exemple pédagogique incorrect » cité CAHIER_DES_CHARGES.md:1643) non livrée dans le dépôt : le registre `ApprovedLabRegistry` ne couvre que la candidate B1 (14 fichiers = 8 module + 6 suite). Aucune commande ne crée une baseline fictive en production.
+- Signature du manifeste de release non fixée (reste consignée depuis BV203).
+- Visibilité du GET §26:957 : voir décision précédente ; `ComparisonProfileQuery` renvoie 404 pour version inconnue/retirée/capsule masquée, cohérent avec `VerificationCaseParentVisibility`.
+- Notifications : zone réservée socle, aucune émission depuis BV204.
+
+worker non livré, les runs restent queued ; B36, B37, BV207 à BV210 non livrés
+
 ## 15 octobre 2026 — BV203, revue et intégration des cas préparées
 
 Branche `backend/capsules-laboratoire-bv203-revue-cas` ouverte depuis BV202 `14a9a7a`. Livré :

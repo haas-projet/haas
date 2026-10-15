@@ -111,6 +111,10 @@ export type lab_LabReleasedDefinition = { readonly "id": string; readonly "relea
 
 export type lab_LabScenario = { readonly "key": "nominal_event" | "duplicate_event" | "distinct_events" | "invalid_event"; readonly "label": string; };
 
+export type lab_QueuedLabRun = { readonly "id": string; readonly "state": "queued" | "running" | "passed" | "failed" | "error" | "timed_out"; readonly "scenario": "nominal_event" | "duplicate_event" | "distinct_events" | "invalid_event"; readonly "version_id": string; readonly "created_at": string; readonly "follow_url": string; };
+
+export type lab_StartLabRunBody = { readonly "capsule_version_id": string; readonly "scenario": "nominal_event" | "duplicate_event" | "distinct_events" | "invalid_event"; };
+
 export type moderation_Category = "secret_exposed" | "abuse" | "uncertain_rights" | "misleading_solution" | "other";
 
 export type moderation_ModerationReport = (moderation_ReportFields & { readonly "category": moderation_Category; readonly "detail": string; readonly "reporter_id": string | null; readonly "context": { readonly "bio": string; readonly "country": string | null; readonly "github_url": string | null; readonly "hidden": boolean; readonly "lock_version": number; } | null; [key: string]: unknown; });

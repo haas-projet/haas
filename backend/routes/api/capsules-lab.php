@@ -10,6 +10,8 @@ use App\Http\Controllers\Capsules\StoreCapsuleVersionDraftController;
 use App\Http\Controllers\Capsules\SubmitCapsuleVersionForReviewController;
 use App\Http\Controllers\Capsules\UpdateCapsuleVersionDraftController;
 use App\Http\Controllers\Lab\ShowLabDefinitionController;
+use App\Http\Controllers\Lab\ShowLabRunController;
+use App\Http\Controllers\Lab\StartLabRunController;
 use Illuminate\Support\Facades\Route;
 
 // Brouillons de capsule (lots B23/B24). Membre actif/vérifié requis par
@@ -38,3 +40,14 @@ Route::prefix('admin/capsules')->group(function (): void {
 });
 
 Route::get('/versions/{id}/lab-definition', ShowLabDefinitionController::class)->whereUuid('id')->name('versions.lab-definition');
+
+// Lancements B34. Membre vérifié actif seulement : pas de code arbitraire,
+// pas de scénario choisi par URL. L'écriture des états et résultats reste
+// interne (B35/B36). Le GET est réservé au propriétaire du run.
+Route::post('/lab-runs', StartLabRunController::class)
+    ->middleware(['auth:sanctum', 'verified', 'throttle:30,1'])
+    ->name('lab-runs.store');
+Route::get('/lab-runs/{id}', ShowLabRunController::class)
+    ->whereUuid('id')
+    ->middleware(['auth:sanctum', 'verified', 'throttle:60,1'])
+    ->name('lab-runs.show');

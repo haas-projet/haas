@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: HAAS — Registre du laboratoire
-  version: 0.1.0
+  version: 0.2.0
 paths:
   /api/v1/versions/{id}/lab-definition:
     get:
@@ -42,6 +42,90 @@ paths:
           description: Version ou parent inaccessible, non publié ou retiré
         '422':
           description: Corps ou paramètre de requête non accepté
+  /api/v1/lab-runs:
+    post:
+      operationId: startLabRun
+      summary: Lancer un scénario de laboratoire approuvé
+      description: >
+        Création d'un lab_run queued à partir d'un scénario fermé et d'une
+        version publiée. L'en-tête `Idempotency-Key` (UUID v4) est obligatoire.
+        Même clé et même charge donnent une seule ligne et la même réponse ;
+        une autre charge pour la même clé est refusée en 409. Les champs
+        `code`, `command`, `url` ou tout champ inconnu sont rejetés en 422,
+        sans exécution. Les quotas (unités horaires glissantes par membre,
+        capacité globale, borne de queue) sont posés sous verrou PostgreSQL.
+        B34 n'exécute aucun worker ; le run reste `queued` jusqu'à B36.
+      security:
+        - SessionCookie: []
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema: {type: string, format: uuid}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/StartLabRunBody'}
+      responses:
+        '202':
+          description: Lancement accepté et placé en file
+          headers:
+            Cache-Control:
+              schema: {type: string, pattern: '(^|,\s*)no-store(,|$)'}
+            Location:
+              schema: {type: string}
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [data]
+                properties:
+                  data: {$ref: '#/components/schemas/QueuedLabRun'}
+        '401': {description: Session absente}
+        '403': {description: Compte inactif ou non autorisé}
+        '409': {description: Clé d'idempotence connue avec une autre charge}
+        '419': {description: Session ou CSRF expiré}
+        '422': {description: Charge invalide ou champ interdit (code/command/url)}
+        '429':
+          description: Quota horaire ou capacité globale atteinte
+          headers:
+            Retry-After:
+              schema: {type: integer, minimum: 1}
+        '503': {description: Laboratoire désactivé ou capacité indisponible}
+  /api/v1/lab-runs/{id}:
+    get:
+      operationId: showLabRun
+      summary: Suivre l'état d'un lab_run de son propriétaire
+      description: >
+        Lecture restreinte au propriétaire du run. Aucun paramètre ni corps.
+        B34 ne diffuse ni digests, ni manifeste, ni identifiants internes
+        (definition_id, request_key).
+      security:
+        - SessionCookie: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: {type: string, format: uuid}
+      responses:
+        '200':
+          description: État courant du run
+          headers:
+            Cache-Control:
+              schema: {type: string, pattern: '(^|,\s*)no-store(,|$)'}
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [data]
+                properties:
+                  data: {$ref: '#/components/schemas/QueuedLabRun'}
+        '401': {description: Session absente}
+        '403': {description: Compte inactif ou non autorisé}
+        '404': {description: Run inconnu ou appartenant à un autre membre}
 components:
   schemas:
     LabDefinitionAvailability:
@@ -83,3 +167,21 @@ components:
       properties:
         key: {type: string, enum: [nominal_event, duplicate_event, distinct_events, invalid_event]}
         label: {type: string, minLength: 1, maxLength: 160}
+    StartLabRunBody:
+      type: object
+      additionalProperties: false
+      required: [capsule_version_id, scenario]
+      properties:
+        capsule_version_id: {type: string, format: uuid}
+        scenario: {type: string, enum: [nominal_event, duplicate_event, distinct_events, invalid_event]}
+    QueuedLabRun:
+      type: object
+      additionalProperties: false
+      required: [id, state, scenario, version_id, created_at, follow_url]
+      properties:
+        id: {type: string, format: uuid}
+        state: {type: string, enum: [queued, running, passed, failed, error, timed_out]}
+        scenario: {type: string, enum: [nominal_event, duplicate_event, distinct_events, invalid_event]}
+        version_id: {type: string, format: uuid}
+        created_at: {type: string, format: date-time}
+        follow_url: {type: string, minLength: 1}

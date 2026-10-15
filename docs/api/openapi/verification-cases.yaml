@@ -147,6 +147,44 @@ paths:
           description: lock_version périmé, état incompatible ou conflit d'idempotence
         '422':
           description: Validation
+  '/api/v1/admin/verification-cases/{verification_case}/review':
+    parameters:
+      - name: verification_case
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    post:
+      operationId: reviewVerificationCase
+      summary: Revue admin d'un cas soumis
+      description: >
+        Transition submitted → reviewed ou declined par un modérateur ou admin
+        actif/vérifié DISTINCT de l'auteur du cas (auto-revue refusée).
+        Motif obligatoire pour declined. L'intégration (integrated) n'est pas
+        atteignable depuis une route publique : voir la commande d'intégration.
+        L'en-tête `Idempotency-Key` est requis.
+      security:
+        - SessionCookie: []
+      parameters:
+        - $ref: '../../OPENAPI.yaml#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReviewVerificationCaseInput'
+      responses:
+        '200':
+          description: Décision enregistrée ; même code pour un rejeu idempotent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerificationCase'
+        '403':
+          description: Acteur sans rôle de relecture ou auto-revue tentée
+        '409':
+          description: lock_version périmé, état incompatible ou conflit d'idempotence
+        '422':
+          description: Décision inconnue ou motif manquant pour un refus
   '/api/v1/verification-cases/{verification_case}/withdraw':
     parameters:
       - name: verification_case
@@ -298,6 +336,19 @@ components:
       required: [lock_version]
       properties:
         lock_version: { type: integer, minimum: 1, maximum: 2147483646 }
+    ReviewVerificationCaseInput:
+      type: object
+      additionalProperties: false
+      required: [lock_version, decision]
+      properties:
+        lock_version: { type: integer, minimum: 1, maximum: 2147483646 }
+        decision:
+          type: string
+          enum: [reviewed, declined]
+        reason:
+          type: [string, 'null']
+          minLength: 10
+          maxLength: 1000
     WithdrawVerificationCaseInput:
       type: object
       additionalProperties: false

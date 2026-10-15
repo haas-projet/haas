@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Policies\VerificationCases;
 
+use App\Enums\Identity\Role;
 use App\Enums\VerificationCases\VerificationCaseState;
 use App\Models\User;
 use App\Models\VerificationCases\VerificationCase;
@@ -16,6 +17,15 @@ final class VerificationCasePolicy
     public function create(User $actor): bool
     {
         return $this->access->verified($actor);
+    }
+
+    public function review(User $actor, VerificationCase $case): bool
+    {
+        // Relecteur distinct de l'auteur (auto-revue interdite, y compris pour
+        // un admin). Rôle modérateur ou admin requis, actif et vérifié.
+        return $this->access->verified($actor)
+            && $actor->id !== $case->author_id
+            && in_array($actor->role, [Role::Moderator, Role::Admin], true);
     }
 
     public function view(?User $actor, VerificationCase $case): bool

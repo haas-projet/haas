@@ -13,6 +13,7 @@ use App\Http\Controllers\Lab\ShowLabDefinitionController;
 use App\Http\Controllers\Lab\ShowLabRunController;
 use App\Http\Controllers\Lab\StartLabRunController;
 use App\Http\Controllers\VerificationCases\IndexVerificationCaseController;
+use App\Http\Controllers\VerificationCases\ReviewVerificationCaseController;
 use App\Http\Controllers\VerificationCases\ShowVerificationCaseController;
 use App\Http\Controllers\VerificationCases\StoreVerificationCaseController;
 use App\Http\Controllers\VerificationCases\SubmitVerificationCaseController;
@@ -80,4 +81,16 @@ Route::prefix('verification-cases')
         Route::post('{verification_case}/withdraw', WithdrawVerificationCaseController::class)
             ->whereUuid('verification_case')
             ->name('verification-cases.withdraw');
+    });
+
+// BV203 — revue admin. Décision submitted → reviewed/declined par un
+// modérateur ou admin tiers (auto-revue refusée). L'intégration (integrated)
+// n'est jamais joignable depuis une route publique : voir la commande
+// d'intégration lab:bind-case.
+Route::prefix('admin/verification-cases')
+    ->middleware(['auth:sanctum', 'verified', 'throttle:30,1'])
+    ->group(function (): void {
+        Route::post('{verification_case}/review', ReviewVerificationCaseController::class)
+            ->whereUuid('verification_case')
+            ->name('admin.verification-cases.review');
     });

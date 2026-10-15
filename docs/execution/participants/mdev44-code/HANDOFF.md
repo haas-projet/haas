@@ -1,5 +1,23 @@
 ﻿# Reprise — capsules/laboratoire
 
+## 15 octobre 2026 — BV203, revue et intégration des cas, PR en brouillon
+
+Branche active : `backend/capsules-laboratoire-bv203-revue-cas` basée sur BV202 `14a9a7a`. BV203 **préparé, PR en brouillon**.
+
+Fichiers livrés (hors tests) :
+- Migration : `backend/database/migrations/2026_10_15_120200_bv203_create_case_scenario_links_table.php` + modèle `backend/app/Models/VerificationCases/CaseScenarioLink.php`.
+- Admin review : controller `backend/app/Http/Controllers/VerificationCases/ReviewVerificationCaseController.php`, FormRequest `backend/app/Http/Requests/VerificationCases/ReviewVerificationCaseRequest.php`, Service `backend/app/Services/VerificationCases/ReviewVerificationCaseService.php`, Data `backend/app/Data/VerificationCases/ReviewVerificationCaseData.php`, enum `backend/app/Enums/VerificationCases/ReviewDecision.php`. Policy étendue `backend/app/Policies/VerificationCases/VerificationCasePolicy.php` (`review` : propriété stricte + rôle Moderator/Admin + auto-revue refusée).
+- Commande d'intégration : `backend/app/Console/Commands/BindCaseIntegration.php` + `backend/app/Services/VerificationCases/BindCaseIntegrationService.php` + `backend/app/Exceptions/VerificationCases/VerificationCaseBindingRejected.php`. Signature `lab:bind-case <manifest>`.
+- Gabarit du manifeste : `ops/templates/release-manifest.example.json` étendu avec un bloc `verification_cases` placeholder.
+- OpenAPI : fragment `docs/api/openapi/verification-cases.yaml` complété (chemin admin + `ReviewVerificationCaseInput`), `$ref` ajouté dans `docs/OPENAPI.yaml`, types régénérés (`docs/api/generated/haas-api.d.ts`).
+- Routes : `backend/routes/api/capsules-lab.php` — groupe `admin/verification-cases` ajouté.
+
+Non modifiés : `backend/routes/api.php`, `backend/config/*`, `backend/bootstrap/*`, `backend/phpunit.xml`, `composer.*`, `.github/workflows/*`, les tables de notification. Les migrations BV201 ne sont pas modifiées ; les tests BV201 (`VerificationCasesMigrationTest`) sont étendus pour laisser place à `case_scenario_links` avant d'exercer le down() isolé.
+
+PHP de session : `C:\laragon\bin\php\php-8.4.15-Win32-vs17-x64\php.exe`. `~/.haas-test.env` jamais lu. Aucune action manuelle sur PostgreSQL.
+
+Tests locaux : `composer lint` passed ; `composer analyse` [OK] ; `composer test` OK (439/4469) ; Integration `VerificationCases` OK (59/195) ; Integration `VerificationCases|Capsules|Lab` hors Demo OK (392/1897). CI attendue : tests verts PHP 8.4/PHP 8.5, seule « Contrôler les dépendances » rouge pour les deux CVE externes.
+
 ## 15 octobre 2026 — BV202, création et soumission des cas, PR en brouillon
 
 Branche active : `backend/capsules-laboratoire-bv202-cas-soumission` basée sur BV201 `a660a47`. BV202 **préparé, PR en brouillon**. Prochaine étape : réception CI (règle d'arbitrage : tests verts PHP 8.4 et PHP 8.5, seule l'étape « Contrôler les dépendances » tolérée en rouge pour les deux CVE externes) avant de brancher BV203 depuis la tête BV202.

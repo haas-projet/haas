@@ -137,6 +137,8 @@ export type verification_cases_CreateVerificationCaseInput = { readonly "parent"
 
 export type verification_cases_LockVersionInput = { readonly "lock_version": number; };
 
+export type verification_cases_ReviewVerificationCaseInput = { readonly "lock_version": number; readonly "decision": "reviewed" | "declined"; readonly "reason"?: string | null; };
+
 export type verification_cases_UpdateVerificationCaseInput = { readonly "lock_version": number; readonly "body": verification_cases_VerificationCaseBodyInput; };
 
 export type verification_cases_VerificationCase = { readonly "data": { readonly "id": string; readonly "author_id": string; readonly "parent": { readonly "kind": "help_request" | "capsule_version"; readonly "help_request_id": string | null; readonly "capsule_version_id": string | null; }; readonly "state": "draft" | "submitted" | "reviewed" | "declined" | "integrated" | "withdrawn"; readonly "current_revision": number; readonly "lock_version": number; readonly "created_at": string | null; readonly "updated_at": string | null; readonly "revisions": ReadonlyArray<verification_cases_VerificationCaseRevisionPublic>; }; };

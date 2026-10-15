@@ -62,7 +62,7 @@ final class ComparisonProfileRegistry
      * réelle n'a été intégrée au registre ; un manifeste de release doit
      * déclarer le même commit, sans quoi la liaison est refusée en production.
      * La configuration lab.comparison_baseline_source_commit, non définie par
-     * défaut (CLAUDE.md : ne pas toucher config/lab.php), peut la fournir dans
+     * défaut (règle locale : ne pas toucher config/lab.php), peut la fournir dans
      * une release future sans modifier le code.
      */
     public function expectedBaselineSourceCommit(): ?string

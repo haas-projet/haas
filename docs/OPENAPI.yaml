@@ -63,6 +63,14 @@ paths:
     $ref: './api/openapi/capsules-lab.yaml#/paths/~1api~1v1~1admin~1capsules~1{capsule}~1versions~1{version}~1request-changes'
   /api/v1/admin/capsules/{capsule}/versions/{version}/publish:
     $ref: './api/openapi/capsules-lab.yaml#/paths/~1api~1v1~1admin~1capsules~1{capsule}~1versions~1{version}~1publish'
+  /api/v1/verification-cases:
+    $ref: './api/openapi/verification-cases.yaml#/paths/~1api~1v1~1verification-cases'
+  '/api/v1/verification-cases/{verification_case}':
+    $ref: './api/openapi/verification-cases.yaml#/paths/~1api~1v1~1verification-cases~1{verification_case}'
+  '/api/v1/verification-cases/{verification_case}/submit':
+    $ref: './api/openapi/verification-cases.yaml#/paths/~1api~1v1~1verification-cases~1{verification_case}~1submit'
+  '/api/v1/verification-cases/{verification_case}/withdraw':
+    $ref: './api/openapi/verification-cases.yaml#/paths/~1api~1v1~1verification-cases~1{verification_case}~1withdraw'
   /api/v1/members/{handle}:
     $ref: './api/openapi/identity.yaml#/paths/~1api~1v1~1members~1{handle}'
   /api/v1/me/profile:

@@ -1,5 +1,35 @@
 ﻿# Reprise — capsules/laboratoire
 
+## 15 octobre 2026 — BV202, création et soumission des cas, PR en brouillon
+
+Branche active : `backend/capsules-laboratoire-bv202-cas-soumission` basée sur BV201 `a660a47`. BV202 **préparé, PR en brouillon**. Prochaine étape : réception CI (règle d'arbitrage : tests verts PHP 8.4 et PHP 8.5, seule l'étape « Contrôler les dépendances » tolérée en rouge pour les deux CVE externes) avant de brancher BV203 depuis la tête BV202.
+
+Routes livrées (toutes alignées sur les noms de B23–B34, préfixe `verification-cases`) :
+- `GET` / `POST /verification-cases`
+- `GET` / `PATCH /verification-cases/{verification_case}` (lock_version + Idempotency-Key)
+- `POST /verification-cases/{verification_case}/submit`
+- `POST /verification-cases/{verification_case}/withdraw`
+
+Fichiers livrés (hors tests) :
+- Routes : `backend/routes/api/capsules-lab.php` (6 routes).
+- DTO/Enum : `backend/app/Data/VerificationCases/{CreateVerificationCaseData,ReviseVerificationCaseData,SubmitVerificationCaseData,WithdrawVerificationCaseData,VerificationCaseParent}.php`.
+- Controllers : `backend/app/Http/Controllers/VerificationCases/*.php` (6).
+- FormRequests : `backend/app/Http/Requests/VerificationCases/*.php` (4).
+- Services : `backend/app/Services/VerificationCases/{CreateVerificationCaseService,ReviseVerificationCaseService,SubmitVerificationCaseService,WithdrawVerificationCaseService,WriteVerificationCaseAudit}.php`.
+- Policy : `backend/app/Policies/VerificationCases/VerificationCasePolicy.php` (propriété seule ; état revérifié par les Services pour tolérer les rejeux).
+- Resource : `backend/app/Http/Resources/VerificationCases/VerificationCaseResource.php` (corps du brouillon réservé à l'auteur ; révisions figées visibles pour tout acteur habilité).
+- Query : `backend/app/Queries/VerificationCases/VisibleVerificationCasesQuery.php`.
+- Support : `backend/app/Support/VerificationCases/{VerificationCaseBody,VerificationCaseParentVisibility}.php`.
+- Exceptions : `backend/app/Exceptions/VerificationCases/{StaleVerificationCase,VerificationCaseNotFound}.php`.
+- OpenAPI : fragment `docs/api/openapi/verification-cases.yaml` + 4 `$ref` dans `docs/OPENAPI.yaml` + types régénérés `docs/api/generated/haas-api.d.ts`.
+- Tests : `backend/tests/Integration/VerificationCases/VerificationCaseHttpTest.php` (14 scénarios HTTP), `backend/tests/Integration/VerificationCases/VerificationCaseConcurrencyTest.php` (deux processus PATCH concurrents sur `lockForUpdate`, barrière `pg_stat_activity`), `backend/tests/Fixtures/revise-verification-case-concurrently.php`.
+
+Non modifiés : `backend/routes/api.php`, `backend/config/*`, `backend/bootstrap/*`, `backend/phpunit.xml`, `composer.*`, `.github/workflows/*`, les contraintes des tables de notification. Le fichier `backend/app/Services/Idempotency/IdempotencyService.php` est resté inchangé (débogage temporaire retiré).
+
+PHP de session utilisé pour toutes les commandes PHP : `C:\laragon\bin\php\php-8.4.15-Win32-vs17-x64\php.exe` (`openssl`, `pdo_pgsql` chargés). `~/.haas-test.env` jamais lu ; aucune action manuelle sur PostgreSQL.
+
+CI attendue : tests verts PHP 8.4/PHP 8.5 ; étape d'audit composer rouge pour avis externes `symfony/http-foundation` CVE-2026-108082 et `symfony/yaml` CVE-2026-109413 ; `composer.lock` à mettre à jour par le responsable du socle.
+
 ## 15 octobre 2026 — BV201, schéma des cas, PR en brouillon
 
 Branche active : `backend/capsules-laboratoire-bv201-schema-cas` basée sur `backend/capsules-laboratoire-b34-lancement-lab` vert `0a5cb95`. BV201 **préparé, PR en brouillon**. Prochaine étape : réception CI verte avant de brancher BV202 depuis la tête de BV201.

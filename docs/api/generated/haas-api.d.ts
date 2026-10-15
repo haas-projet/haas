@@ -132,3 +132,23 @@ export type profiles_ProfilePatch = { readonly "lock_version": number; readonly 
 export type profiles_PublicProfile = (profiles_ProfileFields);
 
 export type profiles_Technology = { readonly "id": string; readonly "slug": string; readonly "name": string; };
+
+export type verification_cases_CreateVerificationCaseInput = { readonly "parent": verification_cases_VerificationCaseParent; readonly "body": verification_cases_VerificationCaseBodyInput; };
+
+export type verification_cases_LockVersionInput = { readonly "lock_version": number; };
+
+export type verification_cases_UpdateVerificationCaseInput = { readonly "lock_version": number; readonly "body": verification_cases_VerificationCaseBodyInput; };
+
+export type verification_cases_VerificationCase = { readonly "data": { readonly "id": string; readonly "author_id": string; readonly "parent": { readonly "kind": "help_request" | "capsule_version"; readonly "help_request_id": string | null; readonly "capsule_version_id": string | null; }; readonly "state": "draft" | "submitted" | "reviewed" | "declined" | "integrated" | "withdrawn"; readonly "current_revision": number; readonly "lock_version": number; readonly "created_at": string | null; readonly "updated_at": string | null; readonly "revisions": ReadonlyArray<verification_cases_VerificationCaseRevisionPublic>; }; };
+
+export type verification_cases_VerificationCaseBodyInput = { readonly "title": string; readonly "context": string; readonly "steps": string; readonly "expected": string; readonly "observed"?: string | null; readonly "environment"?: string | null; };
+
+export type verification_cases_VerificationCaseBodyPublic = { readonly "title": string; readonly "context": string; readonly "steps": string; readonly "expected": string; readonly "observed": string | null; readonly "environment": string | null; };
+
+export type verification_cases_VerificationCaseList = { readonly "data": ReadonlyArray<verification_cases_VerificationCase_properties_data>; readonly "meta": OPENAPI_PaginationMeta; };
+
+export type verification_cases_VerificationCaseParent = { readonly "kind": "help_request" | "capsule_version"; readonly "help_request_id": string | null; readonly "capsule_version_id": string | null; };
+
+export type verification_cases_VerificationCaseRevisionPublic = { readonly "revision_no": number; readonly "digest": string; readonly "submitted_at": string | null; readonly "body": (verification_cases_VerificationCaseBodyPublic | null); };
+
+export type verification_cases_WithdrawVerificationCaseInput = { readonly "lock_version": number; readonly "reason": string; };

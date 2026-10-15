@@ -36,5 +36,28 @@
         "reviewer_id": null
       }
     ]
+  },
+  "comparison_profiles": {
+    "family_key": "b1.idempotent.v1",
+    "candidate": {
+      "version_id": null,
+      "release": null,
+      "source_commit": null,
+      "code_digest": null,
+      "suite_digest": null,
+      "content_digest": null
+    },
+    "baseline": {
+      "label": "Exemple pédagogique incorrect",
+      "source_commit": null,
+      "test_only_fixture": false
+    },
+    "allowed_scenarios": [
+      "nominal_event",
+      "duplicate_event",
+      "distinct_events",
+      "invalid_event"
+    ],
+    "enabled": false
   }
 }

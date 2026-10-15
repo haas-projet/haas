@@ -9,6 +9,7 @@ use App\Http\Controllers\Capsules\StoreCapsuleDraftController;
 use App\Http\Controllers\Capsules\StoreCapsuleVersionDraftController;
 use App\Http\Controllers\Capsules\SubmitCapsuleVersionForReviewController;
 use App\Http\Controllers\Capsules\UpdateCapsuleVersionDraftController;
+use App\Http\Controllers\Comparisons\ListComparisonProfilesController;
 use App\Http\Controllers\Lab\ShowLabDefinitionController;
 use App\Http\Controllers\Lab\ShowLabRunController;
 use App\Http\Controllers\Lab\StartLabRunController;
@@ -47,6 +48,14 @@ Route::prefix('admin/capsules')->group(function (): void {
 });
 
 Route::get('/versions/{id}/lab-definition', ShowLabDefinitionController::class)->whereUuid('id')->name('versions.lab-definition');
+
+// BV204 — profils de comparaison approuvés d'une version publiée visible.
+// Lecture seule ; aucun chemin public n'écrit, n'active ou ne retire un
+// profil : seule la commande interne lab:bind-comparison-profile le fait.
+Route::get('/versions/{id}/comparison-profiles', ListComparisonProfilesController::class)
+    ->whereUuid('id')
+    ->middleware(['auth:sanctum', 'verified', 'throttle:60,1'])
+    ->name('versions.comparison-profiles');
 
 // Lancements B34. Membre vérifié actif seulement : pas de code arbitraire,
 // pas de scénario choisi par URL. L'écriture des états et résultats reste

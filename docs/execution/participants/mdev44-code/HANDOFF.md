@@ -1,5 +1,27 @@
 ﻿# Reprise — capsules/laboratoire
 
+## 15 octobre 2026 — BV204, profils de comparaison, PR en brouillon
+
+Branche active : `backend/capsules-laboratoire-bv204-profils-comparaison` basée sur BV203 `4c7d22c`. BV204 **préparé, PR en brouillon**.
+
+Fichiers livrés (hors tests) :
+- Migration : `backend/database/migrations/2026_10_15_120300_bv204_create_comparison_profiles_table.php` + modèle `backend/app/Models/Comparisons/ComparisonProfile.php`.
+- Registre immuable : `backend/app/Infrastructure/Comparisons/ComparisonProfileRegistry.php` (famille `b1.idempotent.v1`, digests figés par `ApprovedLabRegistry`, `expectedBaselineSourceCommit()` lue via `config('lab.comparison_baseline_source_commit')` sans toucher `backend/config/lab.php`).
+- Commande : `backend/app/Console/Commands/BindComparisonProfile.php` + `backend/app/Services/Comparisons/BindComparisonProfileService.php` + `backend/app/Exceptions/Comparisons/ComparisonProfileBindingRejected.php`. Signature `lab:bind-comparison-profile <manifest>`.
+- Route lecture : `backend/app/Http/Controllers/Comparisons/ListComparisonProfilesController.php`, `backend/app/Http/Requests/Comparisons/ListComparisonProfilesRequest.php`, `backend/app/Http/Resources/Comparisons/ComparisonProfileResource.php`, `backend/app/Queries/Comparisons/ComparisonProfileQuery.php`.
+- Gabarit du manifeste : `ops/templates/release-manifest.example.json` étendu avec un bloc `comparison_profiles` placeholder (candidate + baseline + allowed_scenarios + enabled).
+- OpenAPI : fragment `docs/api/openapi/comparisons.yaml` + `$ref` dans `docs/OPENAPI.yaml`, types régénérés (`docs/api/generated/haas-api.d.ts` — 80 types).
+- Routes : `backend/routes/api/capsules-lab.php` — route `/versions/{id}/comparison-profiles` ajoutée (lecture seule, membre vérifié actif).
+- Tests : premier commit `test(cases): couvrir le parent non visible` ajoute 3 cas à `backend/tests/Integration/VerificationCases/VerificationCaseHttpTest.php` (parent masqué sur Show/Submit/Withdraw).
+
+Non modifiés : `backend/routes/api.php`, `backend/config/*`, `backend/bootstrap/*`, `backend/phpunit.xml`, `composer.*`, `.github/workflows/*`, les tables de notification. Les migrations BV201/BV203 ne sont pas modifiées ; les tests Capsules (`CapsulesMigrationTest`) et `DomainTables` sont étendus pour `comparison_profiles` enfant-avant-parent sans CASCADE.
+
+PHP de session : `C:\laragon\bin\php\php-8.4.15-Win32-vs17-x64\php.exe`. `~/.haas-test.env` jamais lu. Aucune action manuelle sur PostgreSQL.
+
+Tests locaux : `vendor/bin/pint --test` passed ; `vendor/bin/phpstan analyse` [OK] No errors ; `phpunit --filter Comparisons` OK (31/74) ; `phpunit --filter VerificationCaseHttpTest` OK (17/45) ; Integration `VerificationCases|Capsules|Lab|Comparisons` hors Demo OK (424/1976, 8 min 53). CI attendue : tests verts PHP 8.4/PHP 8.5, seule « Contrôler les dépendances » rouge pour les deux CVE externes (avis `symfony/http-foundation` CVE-2026-108082 et `symfony/yaml` CVE-2026-109413, détectés le 15 octobre).
+
+worker non livré, les runs restent queued ; B36, B37, BV207 à BV210 non livrés
+
 ## 15 octobre 2026 — BV203, revue et intégration des cas, PR en brouillon
 
 Branche active : `backend/capsules-laboratoire-bv203-revue-cas` basée sur BV202 `14a9a7a`. BV203 **préparé, PR en brouillon**.

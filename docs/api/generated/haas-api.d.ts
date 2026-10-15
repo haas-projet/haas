@@ -89,6 +89,12 @@ export type community_HelpRequestUpdateInput = (unknown | unknown | unknown | un
 
 export type community_RequestTechnologyInput = { readonly "id": string; readonly "version_label"?: string | null; };
 
+export type comparisons_ComparisonFamilyKey = "b1.idempotent.v1";
+
+export type comparisons_ComparisonProfile = { readonly "id": string; readonly "family_key": comparisons_ComparisonFamilyKey; readonly "candidate_version_id": string; readonly "input_schema_version": string; readonly "enabled": boolean; readonly "allowed_scenarios": ReadonlyArray<"nominal_event" | "duplicate_event" | "distinct_events" | "invalid_event">; };
+
+export type comparisons_ComparisonProfileList = { readonly "data": ReadonlyArray<comparisons_ComparisonProfile>; };
+
 export type current_account_Me = { readonly "id": string; readonly "handle": identity_Handle; readonly "email": string; readonly "email_verified": boolean; readonly "role": identity_AccountRole; readonly "status": "active"; readonly "is_demo": boolean; readonly "can": { readonly "manage_account_mail": boolean; readonly "update_profile": boolean; readonly "participate": boolean; readonly "moderate": boolean; readonly "administer": boolean; }; };
 
 export type identity_AccountRole = "member" | "moderator" | "admin";

@@ -1,0 +1,79 @@
+# Pilote : mdev44-code. Profils et comparaisons B1 (BV204 à BV206).
+openapi: 3.1.0
+info:
+  title: HAAS — Comparaisons B1
+  version: 0.1.0
+paths:
+  '/api/v1/versions/{id}/comparison-profiles':
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    get:
+      operationId: listComparisonProfilesForVersion
+      summary: Lister les profils de comparaison approuvés d'une version publiée
+      description: >
+        Liste des profils B1 approuvés attachés à la version publiée visible,
+        enabled uniquement. Aucun digest interne, aucun chemin, aucun manifeste
+        n'est exposé. Les profils sont déclarés par la commande interne
+        lab:bind-comparison-profile ; aucune route publique n'écrit, n'active
+        ni ne retire un profil. Réponse Cache-Control no-store, private.
+      security:
+        - SessionCookie: []
+      responses:
+        '200':
+          description: Liste (éventuellement vide) de profils compatibles
+          headers:
+            Cache-Control:
+              description: 'no-store, private'
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComparisonProfileList'
+        '401':
+          description: Session absente ou expirée
+        '403':
+          description: Compte non vérifié ou suspendu
+        '404':
+          description: Version inconnue, non publiée, retirée, ou capsule masquée
+components:
+  schemas:
+    ComparisonFamilyKey:
+      type: string
+      enum: ['b1.idempotent.v1']
+    ComparisonProfile:
+      type: object
+      additionalProperties: false
+      required: [id, family_key, candidate_version_id, input_schema_version, enabled, allowed_scenarios]
+      properties:
+        id:
+          type: string
+          format: uuid
+        family_key:
+          $ref: '#/components/schemas/ComparisonFamilyKey'
+        candidate_version_id:
+          type: string
+          format: uuid
+        input_schema_version:
+          type: string
+          pattern: '^[0-9]+\.[0-9]+\.[0-9]+$'
+        enabled:
+          type: boolean
+        allowed_scenarios:
+          type: array
+          minItems: 1
+          items:
+            type: string
+            enum: ['nominal_event', 'duplicate_event', 'distinct_events', 'invalid_event']
+    ComparisonProfileList:
+      type: object
+      additionalProperties: false
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ComparisonProfile'

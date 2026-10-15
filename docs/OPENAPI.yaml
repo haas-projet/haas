@@ -14,9 +14,13 @@ x-haas-domain-fragments:
     $ref: './api/openapi/community.yaml'
   capsules-lab:
     $ref: './api/openapi/capsules-lab.yaml'
+  comparisons:
+    $ref: './api/openapi/comparisons.yaml'
 paths:
   '/api/v1/versions/{id}/lab-definition':
     $ref: './api/openapi/lab.yaml#/paths/~1api~1v1~1versions~1{id}~1lab-definition'
+  '/api/v1/versions/{id}/comparison-profiles':
+    $ref: './api/openapi/comparisons.yaml#/paths/~1api~1v1~1versions~1{id}~1comparison-profiles'
   /api/v1/lab-runs:
     $ref: './api/openapi/lab.yaml#/paths/~1api~1v1~1lab-runs'
   '/api/v1/lab-runs/{id}':

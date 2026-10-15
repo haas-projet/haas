@@ -1,5 +1,32 @@
 ﻿# Progression — capsules/laboratoire
 
+## 15 octobre 2026 — BV202, création et soumission des cas préparées
+
+Branche `backend/capsules-laboratoire-bv202-cas-soumission` ouverte depuis BV201 `a660a47`. Six routes publiques :
+- `GET /api/v1/verification-cases` (lecture filtrée par visibilité)
+- `POST /api/v1/verification-cases` (création de brouillon + révision #1 editable)
+- `GET /api/v1/verification-cases/{id}` et `PATCH /api/v1/verification-cases/{id}` (lock_version + Idempotency-Key)
+- `POST /api/v1/verification-cases/{id}/submit` (fige la révision brouillon)
+- `POST /api/v1/verification-cases/{id}/withdraw` (motif obligatoire)
+
+Services dédiés (Create, Revise, Submit, Withdraw) traversant `IdempotencyService` ; Policy `VerificationCasePolicy` qui ne vérifie que la propriété (le service revérifie l'état pour tolérer les rejeux idempotents) ; `VerificationCaseParentVisibility` revérifie à chaque transition que le parent (demande non masquée + auteur actif/vérifié + état non `draft` sauf propriétaire ; version `published` + capsule `visible`) est accessible. Validation du corps dans `App\Support\VerificationCases\VerificationCaseBody` : longueurs CAHIER_DES_CHARGES.md:1631 (titre 15–140, contexte 20–2000, étapes 20–4000, attendu 10–2000, observé 4000 max, environnement 500 max), champs `code`/`command`/`url`/`path` + clés inconnues rejetés en 422. Fragment OpenAPI `docs/api/openapi/verification-cases.yaml` (+ `$ref` dans `docs/OPENAPI.yaml`) ; types régénérés par `php scripts/generate-api-types.php` (`76 types API générés`).
+
+Tests locaux (PHP 8.4.15 Laragon, `C:\laragon\bin\php\php-8.4.15-Win32-vs17-x64\php.exe`, `openssl`+`pdo_pgsql` chargés) :
+- `composer lint` : passed. `composer analyse` : [OK] No errors.
+- `composer test` : 439 tests, 4445 assertions, OK.
+- Integration filtrée `VerificationCases|Capsules|Lab` hors Demo : 370 tests, 1802 assertions, OK (7 min 19).
+- Concurrence : `VerificationCaseConcurrencyTest::test_two_concurrent_patches_with_the_same_lock_version_elect_a_single_winner` démarre deux processus `tests/Fixtures/revise-verification-case-concurrently.php`, barrière `lockForUpdate` + lecture `pg_stat_activity`, le gagnant obtient `lock_version+1`, le perdant renvoie `STALE` ; nettoyage via `DomainTables::dropAll()` comme B34 (`backend/tests/Integration/Lab/ConcurrentLabRunTest.php:32`).
+
+BV202 **préparé, PR en brouillon** ; jamais DONE sans revue humaine et CI exacte reçues. CI attendue : tests verts sur PHP 8.4 et PHP 8.5 ; étape « Contrôler les dépendances » (composer audit) rouge pour avis externes `symfony/http-foundation` CVE-2026-108082 et `symfony/yaml` CVE-2026-109413 ; correctif du lockfile demandé au responsable du socle.
+
+Fichiers hors de mon domaine modifiés : `backend/routes/api/capsules-lab.php` (ajout des 6 routes dans le fichier capsules/lab déjà pilote de mon domaine), `docs/OPENAPI.yaml` (4 `$ref`), `docs/api/generated/haas-api.d.ts` (régénéré). `backend/routes/api.php`, `backend/config/*`, `backend/bootstrap/*`, `backend/phpunit.xml`, `composer.*`, `.github/workflows/*`, les tables de notification restent intactes.
+
+Questions ouvertes (hors scope BV202) :
+- Événement de notification BV202/BV203 non livré ici — le type d'événement relève du socle `NotificationEvent` (zone réservée).
+- Format du manifeste de release de BV203 non spécifié sur `main` : la commande d'intégration validera un fichier contre `ops/templates/release-manifest.example.json` (gabarit à créer en BV203).
+- Visibilité du GET (§26 CAHIER_DES_CHARGES.md:944) : la liste filtre par visibilité du parent et exclut les brouillons/retraits d'autrui ; variantes de scope à préciser avec le propriétaire du domaine.
+- Borne de la file B34 non testée dans ce lot (resterait couverte dans BV205+).
+
 ## 15 octobre 2026 — BV201, schéma des cas préparé
 
 Branche `backend/capsules-laboratoire-bv201-schema-cas` ouverte depuis B34 vert `0a5cb95`. Deux migrations additives livrées : `2026_10_15_120000_bv201_create_verification_cases_table.php` et `2026_10_15_120100_bv201_create_verification_case_revisions_table.php`. CHECK sur l'état, XOR du parent (`help_request_id` ou `capsule_version_id` exactement un), unicité (`case_id`, `revision_no`), digest sha256 hex, body jsonb object. FK RESTRICT vers `users`, `help_requests`, `capsule_versions`, aucune cascade. Enum `App\Enums\VerificationCases\VerificationCaseState` (6 valeurs du cahier). Modèles `VerificationCase` et `VerificationCaseRevision` avec `$fillable = []` explicite. `Tests\Support\Mdev44\DomainTables` étendu enfants-avant-parents. `Tests\Integration\Capsules\CapsulesMigrationTest::test_down_rollback_removes_all_capsule_schema_tables` étendu pour déposer `verification_case_revisions` puis `verification_cases` sans CASCADE. Nouveaux tests schéma + migration + anti-affectation en masse ajoutés dans `tests/Integration/VerificationCases/`.

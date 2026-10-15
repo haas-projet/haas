@@ -12,6 +12,12 @@ use App\Http\Controllers\Capsules\UpdateCapsuleVersionDraftController;
 use App\Http\Controllers\Lab\ShowLabDefinitionController;
 use App\Http\Controllers\Lab\ShowLabRunController;
 use App\Http\Controllers\Lab\StartLabRunController;
+use App\Http\Controllers\VerificationCases\IndexVerificationCaseController;
+use App\Http\Controllers\VerificationCases\ShowVerificationCaseController;
+use App\Http\Controllers\VerificationCases\StoreVerificationCaseController;
+use App\Http\Controllers\VerificationCases\SubmitVerificationCaseController;
+use App\Http\Controllers\VerificationCases\UpdateVerificationCaseController;
+use App\Http\Controllers\VerificationCases\WithdrawVerificationCaseController;
 use Illuminate\Support\Facades\Route;
 
 // Brouillons de capsule (lots B23/B24). Membre actif/vérifié requis par
@@ -51,3 +57,27 @@ Route::get('/lab-runs/{id}', ShowLabRunController::class)
     ->whereUuid('id')
     ->middleware(['auth:sanctum', 'verified', 'throttle:60,1'])
     ->name('lab-runs.show');
+
+// BV202 — cas de vérification documentaires. Membre actif et vérifié requis
+// par le groupe + 'verified'. Aucune route publique ne passe le cas à
+// integrated : voir la commande d'intégration (BV203). L'auteur est fixé
+// côté serveur ; les parents sont contrôlés en visibilité à la lecture et
+// aux transitions.
+Route::prefix('verification-cases')
+    ->middleware(['auth:sanctum', 'verified', 'throttle:60,1'])
+    ->group(function (): void {
+        Route::get('/', IndexVerificationCaseController::class)->name('verification-cases.index');
+        Route::post('/', StoreVerificationCaseController::class)->name('verification-cases.store');
+        Route::get('{verification_case}', ShowVerificationCaseController::class)
+            ->whereUuid('verification_case')
+            ->name('verification-cases.show');
+        Route::patch('{verification_case}', UpdateVerificationCaseController::class)
+            ->whereUuid('verification_case')
+            ->name('verification-cases.update');
+        Route::post('{verification_case}/submit', SubmitVerificationCaseController::class)
+            ->whereUuid('verification_case')
+            ->name('verification-cases.submit');
+        Route::post('{verification_case}/withdraw', WithdrawVerificationCaseController::class)
+            ->whereUuid('verification_case')
+            ->name('verification-cases.withdraw');
+    });

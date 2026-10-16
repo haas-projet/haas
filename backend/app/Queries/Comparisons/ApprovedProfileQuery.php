@@ -15,13 +15,15 @@ use App\Models\Lab\LabDefinition;
 use App\Queries\HelpRequests\VisibleHelpRequestsQuery;
 use Illuminate\Database\Eloquent\Builder;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 
 /**
  * BV206 — récupère le profil B1 approuvé et sa définition B33 associée pour
  * un lancement. Le profil doit être enabled, sa candidate publiée + visible,
  * la définition B33 doit matcher le registre immuable, et le switch
- * `config('lab.enabled')` doit être true (sinon 503, voir
- * StartComparisonService).
+ * `config('lab.enabled')` doit être true (sinon 503). Le re-contrôle HTTP
+ * reste du ressort de cette Query (couche Queries, cf. architecture
+ * DomainBoundariesTest), jamais d'un Service.
  */
 final class ApprovedProfileQuery
 {
@@ -33,6 +35,9 @@ final class ApprovedProfileQuery
     /** @return array{profile: ComparisonProfile, version: CapsuleVersion, definition: LabDefinitionData} */
     public function get(string $profileId): array
     {
+        if (config('lab.enabled') !== true) {
+            throw new ServiceUnavailableHttpException(30, 'Laboratoire indisponible.');
+        }
         $profile = ComparisonProfile::query()
             ->whereKey($profileId)
             ->where('family_key', $this->registry->familyKey())

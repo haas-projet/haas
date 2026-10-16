@@ -20,7 +20,6 @@ use App\Services\Idempotency\IdempotencyService;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 
 /**
  * BV206 — Démarre une comparaison B1 en réservant atomiquement un emplacement
@@ -57,7 +56,9 @@ final class StartComparisonService
 
     public function handle(User $actor, StartComparisonData $data, string $idempotencyKey): ComparisonRunData
     {
-        $this->assertLabEnabled();
+        // Le re-contrôle du switch `config('lab.enabled')` est fait par
+        // ApprovedProfileQuery sous verrou (503 si fermé). Les Services
+        // restent indépendants de HTTP (Tests\Architecture\DomainBoundariesTest).
         $key = new IdempotencyKey($idempotencyKey);
         $idempotency = new IdempotencyData(self::ROUTE_TARGET, $key, $data->payload());
 
@@ -188,12 +189,5 @@ final class StartComparisonService
                 'candidate' => $candidateRunId,
             ],
         );
-    }
-
-    private function assertLabEnabled(): void
-    {
-        if (config('lab.enabled') !== true) {
-            throw new ServiceUnavailableHttpException(30, 'Laboratoire indisponible.');
-        }
     }
 }

@@ -107,11 +107,13 @@ export type community_RequestTechnologyInput = { readonly "id": string; readonly
 
 export type comparisons_ComparisonFamilyKey = "b1.idempotent.v1";
 
+export type comparisons_ComparisonOutcome = "improved" | "unchanged" | "regressed" | "mixed" | "inconclusive";
+
 export type comparisons_ComparisonProfile = { readonly "id": string; readonly "family_key": comparisons_ComparisonFamilyKey; readonly "candidate_version_id": string; readonly "input_schema_version": string; readonly "enabled": boolean; readonly "allowed_scenarios": ReadonlyArray<"nominal_event" | "duplicate_event" | "distinct_events" | "invalid_event">; };
 
 export type comparisons_ComparisonProfileList = { readonly "data": ReadonlyArray<comparisons_ComparisonProfile>; };
 
-export type comparisons_ComparisonRun = { readonly "id": string; readonly "profile_id": string; readonly "state": comparisons_ComparisonState; readonly "created_at": string; readonly "started_at": string | null; readonly "finished_at": string | null; readonly "follow_url": string; readonly "children_follow_urls": ReadonlyArray<string>; };
+export type comparisons_ComparisonRun = { readonly "id": string; readonly "profile_id": string; readonly "state": comparisons_ComparisonState; readonly "outcome": (null | comparisons_ComparisonOutcome); readonly "created_at": string; readonly "started_at": string | null; readonly "finished_at": string | null; readonly "follow_url": string; readonly "children_follow_urls": ReadonlyArray<string>; };
 
 export type comparisons_ComparisonRunEnvelope = { readonly "data": comparisons_ComparisonRun; };
 

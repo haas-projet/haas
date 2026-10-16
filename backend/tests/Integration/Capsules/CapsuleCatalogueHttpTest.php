@@ -10,6 +10,7 @@ use App\Enums\Capsules\ContributionRole;
 use App\Enums\HelpRequests\HelpRequestState;
 use App\Enums\Identity\AccountStatus;
 use App\Enums\Identity\Role;
+use App\Infrastructure\Lab\ApprovedLabRegistry;
 use App\Models\Capsules\Capsule;
 use App\Models\Capsules\CapsuleVersion;
 use App\Models\HelpRequest;
@@ -435,6 +436,106 @@ final class CapsuleCatalogueHttpTest extends PostgresTestCase
             ->assertJsonPath('meta.total', 1)->assertJsonCount(0, 'data');
     }
 
+    public function test_has_lab_filter_keeps_only_capsules_with_active_lab_on_latest_published(): void
+    {
+        [, , $withLabVersion] = $this->publishCapsule('capsule-avec-lab');
+        $this->seedLabDefinition($withLabVersion, true);
+        $this->publishCapsule('capsule-sans-lab');
+
+        $only = $this->browserRequest('GET', '/api/v1/capsules?has_lab=true');
+        $only->assertOk();
+        $slugs = array_column($only->json('data'), 'slug');
+        $this->assertSame(['capsule-avec-lab'], $slugs);
+
+        $without = $this->browserRequest('GET', '/api/v1/capsules?has_lab=false');
+        $without->assertOk();
+        $slugsWithout = array_column($without->json('data'), 'slug');
+        $this->assertSame(['capsule-sans-lab'], $slugsWithout);
+    }
+
+    public function test_has_lab_filter_ignores_disabled_definitions(): void
+    {
+        [, , $disabledVersion] = $this->publishCapsule('definition-desactivee');
+        $this->seedLabDefinition($disabledVersion, false);
+        [, , $activeVersion] = $this->publishCapsule('definition-active');
+        $this->seedLabDefinition($activeVersion, true);
+
+        $response = $this->browserRequest('GET', '/api/v1/capsules?has_lab=true');
+        $response->assertOk();
+        $slugs = array_column($response->json('data'), 'slug');
+        $this->assertSame(['definition-active'], $slugs);
+    }
+
+    public function test_has_lab_filter_ignores_definitions_of_withdrawn_versions(): void
+    {
+        [, , $withdrawnVersion] = $this->publishCapsule('version-retiree-avec-lab');
+        $this->seedLabDefinition($withdrawnVersion, true);
+        CapsuleVersion::whereKey($withdrawnVersion->id)->update(['state' => CapsuleVersionState::Withdrawn->value]);
+        [, , $publishedVersion] = $this->publishCapsule('version-active-avec-lab');
+        $this->seedLabDefinition($publishedVersion, true);
+
+        $response = $this->browserRequest('GET', '/api/v1/capsules?has_lab=true');
+        $response->assertOk();
+        $slugs = array_column($response->json('data'), 'slug');
+        $this->assertSame(['version-active-avec-lab'], $slugs);
+    }
+
+    public function test_has_lab_filter_hides_capsules_whose_visibility_is_hidden(): void
+    {
+        [, $hiddenCapsule, $hiddenVersion] = $this->publishCapsule('capsule-cachee-avec-lab');
+        $this->seedLabDefinition($hiddenVersion, true);
+        Capsule::whereKey($hiddenCapsule->id)->update(['visibility' => CapsuleVisibility::Hidden]);
+        [, , $visibleVersion] = $this->publishCapsule('capsule-visible-avec-lab');
+        $this->seedLabDefinition($visibleVersion, true);
+
+        $response = $this->browserRequest('GET', '/api/v1/capsules?has_lab=true');
+        $response->assertOk();
+        $slugs = array_column($response->json('data'), 'slug');
+        $this->assertSame(['capsule-visible-avec-lab'], $slugs);
+    }
+
+    public function test_has_lab_filter_combines_with_technology_filter(): void
+    {
+        $tech = Technology::factory()->create();
+        [$ownerA, $capsuleA] = $this->publishCapsule('capsule-tech-sans-lab');
+        $withTechVersion = $this->seedPublishedVersion($capsuleA, $ownerA, '1.0.1', ContributionRole::Fix, now()->utc(), [$tech]);
+        [$ownerB, $capsuleB] = $this->publishCapsule('capsule-tech-avec-lab');
+        $withTechAndLab = $this->seedPublishedVersion($capsuleB, $ownerB, '1.0.1', ContributionRole::Fix, now()->utc(), [$tech]);
+        $this->seedLabDefinition($withTechAndLab, true);
+        unset($withTechVersion);
+
+        $response = $this->browserRequest('GET', '/api/v1/capsules?technology='.$tech->id.'&has_lab=true');
+        $response->assertOk();
+        $slugs = array_column($response->json('data'), 'slug');
+        $this->assertSame(['capsule-tech-avec-lab'], $slugs);
+    }
+
+    public function test_has_lab_filter_keeps_pagination_stable(): void
+    {
+        for ($i = 1; $i <= 3; $i++) {
+            [, , $version] = $this->publishCapsule(sprintf('capsule-lab-%02d', $i));
+            $this->seedLabDefinition($version, true);
+        }
+        $this->publishCapsule('capsule-sans-lab-paginee');
+
+        $page1 = $this->browserRequest('GET', '/api/v1/capsules?has_lab=true&per_page=2&page=1');
+        $page1->assertOk()->assertJsonPath('meta.total', 3);
+        $this->assertCount(2, $page1->json('data'));
+        $page2 = $this->browserRequest('GET', '/api/v1/capsules?has_lab=true&per_page=2&page=2');
+        $page2->assertOk()->assertJsonPath('meta.total', 3);
+        $this->assertCount(1, $page2->json('data'));
+        $slugsPage1 = array_column($page1->json('data'), 'slug');
+        $slugsPage2 = array_column($page2->json('data'), 'slug');
+        $this->assertEmpty(array_intersect($slugsPage1, $slugsPage2));
+    }
+
+    public function test_has_lab_filter_refuses_invalid_values(): void
+    {
+        foreach (['has_lab=1', 'has_lab=0', 'has_lab=yes', 'has_lab=TRUE', 'has_lab[]=true'] as $query) {
+            $this->browserRequest('GET', '/api/v1/capsules?'.$query)->assertStatus(422);
+        }
+    }
+
     public function test_pagination_bounds_and_foreign_version_labels_are_refused(): void
     {
         foreach (['page=0', 'page=2147483648', 'page[]=1', 'per_page=0', 'per_page=51', 'technology[]=x'] as $query) {
@@ -598,5 +699,20 @@ final class CapsuleCatalogueHttpTest extends PostgresTestCase
         $this->browserCookies = [];
         $this->browserRequest('GET', '/sanctum/csrf-cookie');
         $this->browserRequest('POST', '/login', ['email' => $user->email, 'password' => 'mot-de-passe-de-test']);
+    }
+
+    private function seedLabDefinition(CapsuleVersion $version, bool $enabled): string
+    {
+        $id = (string) Str::uuid();
+        DB::connection('pgsql')->table('lab_definitions')->insert(array_replace([
+            'id' => $id,
+            'version_id' => $version->id,
+            ...(new ApprovedLabRegistry)->manifest(),
+            'version_digest' => $version->content_digest ?? hash('sha256', 'q16-fixture-'.$version->id),
+            'enabled' => $enabled,
+            'created_at' => now()->utc(),
+        ], []));
+
+        return $id;
     }
 }

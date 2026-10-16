@@ -19,7 +19,12 @@ paths:
         plus récente. Recherche `q` en ILIKE sécurisé sur `slug`,
         `editorial_origin` et le corps/limites des versions publiées
         (décision propriétaire : pas d'index FTS en P0 ; voir Q15).
-        Aucun en-tête personnalisé, aucune donnée privée dans les cartes.
+        Filtre `has_lab` (Q16) : `true` ne garde que les capsules dont la
+        dernière version publiée visible possède une `lab_definitions`
+        active (`enabled=true`) ; `false` fait l'inverse. Le switch
+        global du laboratoire n'est pas un critère : la liste reste
+        stable même si l'exécution est désactivée. Aucun en-tête
+        personnalisé, aucune donnée privée dans les cartes.
       parameters:
         - name: page
           in: query
@@ -41,6 +46,15 @@ paths:
           in: query
           required: false
           schema: { type: string, enum: [date, relevance] }
+        - name: has_lab
+          in: query
+          required: false
+          description: >
+            Q16 — ne garde que les capsules dont la dernière version publiée
+            possède une définition de laboratoire active. `true` filtre les
+            capsules avec laboratoire disponible ; `false` filtre celles
+            sans. Toute autre valeur est refusée en 422.
+          schema: { type: string, enum: ['true', 'false'] }
       responses:
         '200':
           description: Page du catalogue

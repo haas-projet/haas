@@ -2,7 +2,7 @@
 openapi: 3.1.0
 info:
   title: HAAS — Comparaisons B1
-  version: 0.2.0
+  version: 0.3.0
 paths:
   '/api/v1/versions/{id}/comparison-profiles':
     parameters:
@@ -39,6 +39,79 @@ paths:
           description: Compte non vérifié ou suspendu
         '404':
           description: Version inconnue, non publiée, retirée, ou capsule masquée
+  '/api/v1/comparisons':
+    post:
+      operationId: startComparison
+      summary: Démarrer une comparaison B1 (202 + suivi)
+      description: >
+        BV206 — réserve atomiquement un emplacement global (partagé avec le
+        lanceur simple) et deux unités du quota horaire du membre, puis crée
+        la comparaison et ses deux enfants lab_runs (baseline, candidate)
+        tous en state queued. En-tête `Idempotency-Key` obligatoire : même
+        clé + même charge = rejeu (202, même id) ; autre charge = 409. Aucun
+        champ exécutable (code, command, url, path, scénario dynamique) n'est
+        accepté. Switch laboratoire fermé = 503. Capacité pleine ou quota
+        horaire dépassé = 429 avec `Retry-After`. Aucune mutation publique
+        n'écrit outcome, input_digest, seed, env_snapshot ou digests des
+        enfants ; BV208 ouvrira la révélation contrôlée de l'outcome.
+      security:
+        - SessionCookie: []
+      parameters:
+        - $ref: '../../OPENAPI.yaml#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [comparison_profile_id, scenario_key]
+              properties:
+                comparison_profile_id:
+                  type: string
+                  format: uuid
+                scenario_key:
+                  type: string
+                  enum: ['nominal_event', 'duplicate_event', 'distinct_events', 'invalid_event']
+            examples:
+              nominal:
+                summary: Exemple fictif — Idempotency-Key requis en en-tête
+                value:
+                  comparison_profile_id: 'uuid-du-profil-approuve'
+                  scenario_key: 'duplicate_event'
+      responses:
+        '202':
+          description: Comparaison acceptée en queued ; deux enfants réservés
+          headers:
+            Cache-Control:
+              description: 'no-store, private'
+              schema:
+                type: string
+            Location:
+              description: URL de suivi de la comparaison
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComparisonRunEnvelope'
+        '401':
+          description: Session absente ou expirée
+        '403':
+          description: Compte non vérifié ou suspendu
+        '404':
+          description: Profil inconnu, disabled ou version candidate non publiée/retirée
+        '409':
+          description: Même Idempotency-Key avec une charge différente
+        '422':
+          description: Validation (clé manquante, UUID invalide, champ exécutable rejeté)
+        '429':
+          description: Capacité pleine ou quota horaire dépassé (Retry-After présent)
+          headers:
+            Retry-After:
+              $ref: '../../OPENAPI.yaml#/components/headers/RetryAfter'
+        '503':
+          description: Switch laboratoire fermé
   '/api/v1/comparisons/{id}':
     parameters:
       - name: id

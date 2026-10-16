@@ -21,6 +21,8 @@ paths:
     $ref: './api/openapi/lab.yaml#/paths/~1api~1v1~1versions~1{id}~1lab-definition'
   '/api/v1/versions/{id}/comparison-profiles':
     $ref: './api/openapi/comparisons.yaml#/paths/~1api~1v1~1versions~1{id}~1comparison-profiles'
+  '/api/v1/comparisons':
+    $ref: './api/openapi/comparisons.yaml#/paths/~1api~1v1~1comparisons'
   '/api/v1/comparisons/{id}':
     $ref: './api/openapi/comparisons.yaml#/paths/~1api~1v1~1comparisons~1{id}'
   /api/v1/lab-runs:

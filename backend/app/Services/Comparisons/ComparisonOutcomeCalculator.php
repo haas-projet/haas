@@ -121,7 +121,12 @@ final class ComparisonOutcomeCalculator
         };
     }
 
-    /** @param array<string, bool> $results */
+    /**
+     * Garde-fou défensif : les tests Unit poussent volontairement des
+     * clés et valeurs mal typées (voir test_non_boolean_value_is_inconclusive).
+     *
+     * @param  array<mixed, mixed>  $results
+     */
     private function isComplete(array $results): bool
     {
         if ($results === []) {

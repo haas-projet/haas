@@ -1,5 +1,28 @@
 ﻿# Reprise — capsules/laboratoire
 
+## 16 octobre 2026 — BV206, lancement idempotent de comparaison, PR en brouillon
+
+Branche active : `backend/capsules-laboratoire-bv206-lancement-comparaison` basée sur la tête locale BV205 (`8c0a4db`). BV206 **préparé, PR en brouillon**.
+
+Fichiers livrés (hors tests) :
+- Capacité partagée : `backend/app/Infrastructure/Lab/LabCapacityGuard.php` (`activeSlotCount()` compte « un emplacement par comparaison » via `COUNT(DISTINCT COALESCE(comparison_id::text, id::text))`).
+- Service : `backend/app/Services/Comparisons/StartComparisonService.php` (verrou avisé 554478, `UNITS_PER_COMPARISON = 2`, insertion atomique de `comparison_runs` + 2 lab_runs enfants baseline/candidate, `input_digest` canonique commun, switch fermé = 503).
+- Data/Request/Controller : `backend/app/Data/Comparisons/StartComparisonData.php`, `backend/app/Http/Requests/Comparisons/StartComparisonRequest.php` (clés `comparison_profile_id` + `scenario_key` ; Idempotency-Key UUID v4 obligatoire ; toute autre clé rejetée en 422), `backend/app/Http/Controllers/Comparisons/StartComparisonController.php` (202, Location, Cache-Control: no-store, private).
+- Query : `backend/app/Queries/Comparisons/ApprovedProfileQuery.php` (profil enabled, famille `b1.idempotent.v1`, version publiée + visible, définition B33 figée, intégrité du registre).
+- Routes : `backend/routes/api/capsules-lab.php` — ajout `POST /comparisons` (membre vérifié, throttle:30,1).
+- OpenAPI : fragment `docs/api/openapi/comparisons.yaml` étendu (POST /comparisons, exemple de charge, codes 202/401/403/404/409/422/429/503). `$ref` ajouté dans `docs/OPENAPI.yaml`. Types régénérés inchangés (83).
+- Tests : `backend/tests/Integration/Comparisons/StartComparisonHttpTest.php` (18 scénarios : nominal/idempotence/conflit/clés exécutables rejetées/key manquante/anonyme/non vérifié/suspendu/switch fermé/profil inconnu ou disabled/quota horaire 429/capacité pleine 429/comparaison bloque run isolé), `backend/tests/Integration/Comparisons/ConcurrentStartComparisonTest.php` (3 scénarios : deux comparaisons simultanées = une acceptation + une CAPACITY ; même clé = un seul enregistrement + rejeu idempotent ; run isolé et comparaison concurrents = un seul accepté). Fixture `backend/tests/Fixtures/start-comparison-concurrently.php`.
+
+Non modifiés : `backend/routes/api.php`, `backend/config/*`, `backend/bootstrap/*`, `backend/phpunit.xml`, `composer.*`, `.github/workflows/*`, les tables de notification. B33 et BV205 non remodifiés.
+
+PHP de session : `C:\laragon\bin\php\php-8.4.15-Win32-vs17-x64\php.exe`. `~/.haas-test.env` jamais lu. Aucune action manuelle sur PostgreSQL.
+
+Tests locaux : `vendor/bin/pint --test` passed ; `vendor/bin/phpstan analyse` [OK] ; `phpunit --filter 'StartComparisonHttpTest'` 18/47 ; `phpunit --filter 'ConcurrentStartComparisonTest|StartComparisonHttpTest'` 21/73. Integration élargie `VerificationCases|Capsules|Lab|Comparisons` hors Demo : en cours de validation locale ; sinon la CI arbitre. CI attendue : tests verts PHP 8.4/PHP 8.5, seule « Contrôler les dépendances » rouge pour les deux CVE externes.
+
+Incident CI PR #50 : `DomainBoundariesTest::test_data_and_services_do_not_depend_on_http` refusait l'import `ServiceUnavailableHttpException` dans `StartComparisonService.php`. Fix `fix(comparisons): préserver l'indépendance Services → HTTP` : check `config('lab.enabled')` déplacé vers `ApprovedProfileQuery` (couche Queries). Comportement observable 503 inchangé. Push effectué, nouvelle CI en vol.
+
+worker non livré, les runs restent queued ; B36, B37, BV207 à BV210 non livrés
+
 ## 16 octobre 2026 — BV205, données et contrat des comparaisons, PR en brouillon
 
 Branche active : `backend/capsules-laboratoire-bv205-donnees-comparaison` basée sur la tête locale BV204 (`ecc48e5`). BV205 **préparé, PR en brouillon**.

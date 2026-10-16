@@ -19,6 +19,8 @@ PHP de session : `C:\laragon\bin\php\php-8.4.15-Win32-vs17-x64\php.exe`. `~/.haa
 
 Tests locaux : `vendor/bin/pint --test` passed ; `vendor/bin/phpstan analyse` [OK] ; `phpunit --filter 'StartComparisonHttpTest'` 18/47 ; `phpunit --filter 'ConcurrentStartComparisonTest|StartComparisonHttpTest'` 21/73. Integration élargie `VerificationCases|Capsules|Lab|Comparisons` hors Demo : en cours de validation locale ; sinon la CI arbitre. CI attendue : tests verts PHP 8.4/PHP 8.5, seule « Contrôler les dépendances » rouge pour les deux CVE externes.
 
+Incident CI PR #50 : `DomainBoundariesTest::test_data_and_services_do_not_depend_on_http` refusait l'import `ServiceUnavailableHttpException` dans `StartComparisonService.php`. Fix `fix(comparisons): préserver l'indépendance Services → HTTP` : check `config('lab.enabled')` déplacé vers `ApprovedProfileQuery` (couche Queries). Comportement observable 503 inchangé. Push effectué, nouvelle CI en vol.
+
 worker non livré, les runs restent queued ; B36, B37, BV207 à BV210 non livrés
 
 ## 16 octobre 2026 — BV205, données et contrat des comparaisons, PR en brouillon

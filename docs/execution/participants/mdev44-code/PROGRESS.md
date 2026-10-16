@@ -30,6 +30,8 @@ Questions ouvertes (reprises de BV204/BV205) :
 - Visibilité du GET §26:957 : 404 appliqué pour acteur discordant (BV205).
 - Notifications : zone réservée socle, aucune émission.
 
+Incident CI PR #50 (gh run `38836596920`) : le test d'architecture `Tests\Architecture\DomainBoundariesTest::test_data_and_services_do_not_depend_on_http` a refusé l'import `Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException` dans `StartComparisonService`. Correction `fix(comparisons): préserver l'indépendance Services → HTTP` : la vérification `config('lab.enabled')` est désormais portée par `ApprovedProfileQuery` (couche Queries, autorisée) ; le comportement observable (503 si fermé) est inchangé. Re-run local Unit/Feature/Architecture : OK (439/4589) ; `StartComparisonHttpTest|ConcurrentStartComparisonTest` : OK (21/73). Re-push, nouvelle CI en attente.
+
 worker non livré, les runs restent queued ; B36, B37, BV207 à BV210 non livrés
 
 ## 16 octobre 2026 — BV205, données et contrat des comparaisons préparés

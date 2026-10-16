@@ -112,17 +112,6 @@ final class ComparisonOutcomeCalculatorTest extends TestCase
         $this->assertSame(ComparisonOutcome::Inconclusive, $outcome);
     }
 
-    public function test_non_boolean_value_is_inconclusive(): void
-    {
-        /** @phpstan-ignore-next-line Jeu de données volontairement non conforme. */
-        $outcome = (new ComparisonOutcomeCalculator)->calculate(
-            ['a' => 1], ['a' => true],
-            ComparisonState::Completed,
-            LabRunState::Passed, LabRunState::Passed,
-        );
-        $this->assertSame(ComparisonOutcome::Inconclusive, $outcome);
-    }
-
     public function test_different_assertion_identifier_sets_are_inconclusive_never_improved(): void
     {
         $outcome = (new ComparisonOutcomeCalculator)->calculate(

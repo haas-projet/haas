@@ -196,12 +196,15 @@ final class ReconcileComparisonsService
             if (! is_array($row)) {
                 return null;
             }
-            $id = $row['id'] ?? null;
+            // Le trigger B33 (`b33_guard_result`) impose la clé `key` dans
+            // chaque élément d'assertion (voir migration ligne 175). Les
+            // identifiants d'assertion traversent donc `key`, pas `id`.
+            $key = $row['key'] ?? null;
             $passed = $row['passed'] ?? null;
-            if (! is_string($id) || $id === '' || ! is_bool($passed)) {
+            if (! is_string($key) || $key === '' || ! is_bool($passed)) {
                 return null;
             }
-            $map[$id] = $passed;
+            $map[$key] = $passed;
         }
 
         return $map === [] ? null : $map;

@@ -33,6 +33,6 @@ final class CapsuleModelProtectionTest extends TestCase
         yield 'capsule' => [Capsule::class, ['id', 'owner_id', 'source_request_id', 'visibility', 'created_at', 'updated_at']];
         yield 'version' => [CapsuleVersion::class, ['id', 'capsule_id', 'state', 'reviewer_id', 'published_at', 'lock_version', 'created_at', 'updated_at']];
         yield 'contributor' => [CapsuleContributor::class, ['id', 'version_id', 'user_id', 'contribution_role', 'created_at', 'updated_at']];
-        yield 'artifact' => [Artifact::class, ['id', 'version_id', 'private_path', 'sha256', 'size', 'distribution_status', 'notices_path', 'created_at', 'updated_at']];
+        yield 'artifact' => [Artifact::class, ['id', 'version_id', 'private_path', 'sha256', 'size', 'distribution_status', 'notices_path', 'notices_sha256', 'notices_size', 'created_at', 'updated_at']];
     }
 }

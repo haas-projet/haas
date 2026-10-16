@@ -34,6 +34,10 @@ B25 reçu sur `77d4147d18d1b5fb4f4cc8ed38b09840f978c46c` : hors SQL 413/4129, In
 
 ## Reprise vérifiée le 11 octobre 2026
 
+B27 f0df4d7 reçoit normalement B26 3234738, B25 corrigée et le contrôle d'intégrité. Les historiques sont conservés et 67 types API composés sont générés. Recevoir les suites complètes sur la base B27 dédiée, puis les bilans documentaires finaux des parents avec contrôle d'identité backend avant publication. ARB05 reste inactive ; aucune revue humaine ou validation de gate n'est déclarée.
+
+B26 0632510 est synchronisée avec le code B25 77d4147 ; historiques conservés et types composés. L'intégrateur exécute maintenant ses suites complètes sur la seule base B26 dédiée. Propager ensuite le bilan final B25 et vérifier que les octets backend restent identiques. PR35 demeure en brouillon pour B33/badge/has_lab/Q16.
+
 B25 6a7d16c reçoit B24 2463e4b après handoff propre. Historique IA des deux branches conservé et manifeste complet régénéré, sans changement backend. Exécuter les suites Unit/Feature/Architecture puis Integration sur sa seule base dédiée via le runner, compléter la preuve B25 puis publier pour CI exacte avant passage en revue.
 
 B24 reçoit B23 c753017 sans changement backend. Recevoir la nouvelle CI de #33 après publication puis intégrer ce prérequis documentaire dans B25 après gel de ses corrections métier.
@@ -48,7 +52,7 @@ Le checkout principal modifié et le travail B18 existant sont conservés. Les �
 
 Inspecter le dépôt, préserver les fichiers/commits/saisies existants, lire ADR-006. Appliquer F18 : projets ouverts, offres consenties, décision propriétaire, fil et projection publique contrôlés. Nouvelle recette avant GO_FRONTEND ; ne pas prendre un ancien gate pour un accord sur ce périmètre. Systalink/Vercel inchangé.
 
-État courant : B01–B09, B11–B17, B32 et B38 DONE (18 lots backend intégrés). B38 #28 est réellement fusionnée dans main d0d47c5 le 8 octobre à12:52:52 UTC ; CI exacte 37690142490 réussie, 770 tests /7291 assertions par version PHP8.4/8.5, backend identique au head0ad5a99. B22–B25 IN_REVIEW ; B26 IN_PROGRESS/Draft pour B33/badge/has_lab/Q16 ; B27 IN_PROGRESS. Six PR ouvertes, aucun merge ou avis humain simulé. Les trois permanentes suivent main ; dix branches distantes conservées. B18 préexistant à reprendre après préparation des PR prioritaires. B35 et S01/S02 restent partiels ; aucun gate frontend/production. Voir les preuves du 11 octobre ; les bilans datés précédents sont historiques.
+État courant : B01–B09, B11–B17, B32 et B38 DONE (18 lots backend intégrés). B38 #28 réellement fusionnée dans main d0d47c5, CI 37690142490 reçue. B22–B25 et B27 IN_REVIEW ; B26 IN_PROGRESS pour B33/badge/has_lab/Q16. Six PR ouvertes et sans conflit constaté : #29/#30/#33/#34 prêtes à la revue humaine, #35/#36 brouillons. B27 reçu sur CI complète PHP 8.4/8.5 (1162/9379 par version) ; suite SQL Windows interrompue, non reçue. Trois permanentes suivant main et six temporaires de PR, dix branches distantes. B18 socle en cours dans son worktree préservé ; endpoints et réception métier non livrés. B35/S01/S02 partiels ; aucun gate frontend ou production. Les mentions des bilans datés précédents sont historiques.
 
 ## Reprise après préparation GitHub — 2026-10-01
 

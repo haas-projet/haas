@@ -791,6 +791,62 @@ Aucun autre fichier du socle n'a été touché.
 - Q12 (B24) — Notification « Revue de capsule terminée » reste ouverte pour la décision `approved`.
 - Q10, Q11 (B23) et Q2–Q7 (B22) restent ouvertes.
 
+## 2026-10-08 — Lot B26 · Catalogue de capsules
+
+Statut proposé : B26 **préparé, PR en brouillon**, aucun `DONE`. Branche `backend/capsules-laboratoire-b26-catalogue`, dérivée de `backend/capsules-laboratoire-b25-publication`.
+
+### Décisions clefs (propriétaire du domaine)
+
+- **Visibilité publique** (`VisibleCapsulesQuery`) : seules les capsules `visible` avec au moins une version `published` apparaissent. Les versions `draft`/`in_review`/`changes_requested`/`withdrawn` n'apparaissent jamais, ni dans la liste, ni dans la recherche, ni dans le détail par slug ou version précisée (AC15, AC25, RM06).
+- **Recherche `q`** (§14) : ILIKE sécurisée (ESCAPE `!`) sur `capsules.slug`, `capsules.editorial_origin`, `capsule_versions.body` et `capsule_versions.limits` des versions publiées. Pas d'index FTS en P0 — **Q15 ouverte** si un index `to_tsvector` ou `pg_trgm` doit être livré.
+- **Tri** en liste blanche stricte : `date` (défaut, dernière publication) ou `relevance` (nécessite `q`). Tout autre tri → 422. Le tri `relevance` ordonne : slug (0), editorial_origin (1), autre (2), puis date.
+- **Pagination** : défaut 20, max 50 (`PageData` existant). Page tri stable `last_published_at DESC, capsules.id ASC`.
+- **Filtre `technology`** (UUID) : rejoint `capsule_version_technologies` sur les versions publiées.
+- **Filtre « présence de laboratoire »** NON livré : `lab_definitions` arrivera en B33 (cahier §15). **Q16 ouverte** pour sa signature exacte.
+- **`source_request_id` NON exposé** (RM06). Seul `source.kind` ('help_request'/'editorial') et `editorial_origin` apparaissent — **Q17 ouverte** sur l'exposition éventuelle d'un `request_summary` masqué.
+- **Resources distinctes de l'édition** : `CapsuleCataloguePreview` (carte), `CapsuleCataloguePage` (collection paginée), `CapsuleCatalogueDetail` (détail + historique + contributeurs). Pas de `reviewer_id`, note, email, chemin privé d'artefact ni empreinte de notice.
+- **Hydratation `latestPublished`** : relation `hasOne` contrainte à `state=published`, hydratée explicitement par `ListVisibleCapsulesQuery::hydrateLatestPublished()`. Laravel `ofMany()` sur UUID échoue car PostgreSQL n'a pas `max(uuid)` pour le tie-break.
+- **Contraintes de route** : slug (`[a-z0-9][a-z0-9-]{1,118}[a-z0-9]`) et version (MAJOR.MINOR.PATCH) distinctes des routes UUID d'édition (POST/PATCH/submit-review/request-changes/publish).
+
+### Fichiers créés / modifiés
+
+- Data : `App\Data\Capsules\CapsuleCatalogueFilterData` (page/search/technology/sort, `relevance` → q requis).
+- Queries : `VisibleCapsulesQuery` (socle visibilité), `ListVisibleCapsulesQuery` (liste paginée + hydratation), `FindVisibleCapsuleQuery` (détail + historique).
+- FormRequest : `ListCapsulesCatalogueRequest` étend `PaginatedRequest`.
+- Resources : `CapsuleCataloguePreview`, `CapsuleCataloguePage`, `CapsuleCatalogueDetail`.
+- Controllers : `ListVisibleCapsulesController`, `ShowVisibleCapsuleController`.
+- Routes : `GET /api/v1/capsules`, `GET /api/v1/capsules/{slug}`, `GET /api/v1/capsules/{slug}/versions/{version}`.
+- Model : `Capsule::latestPublished()` (hasOne), `CapsuleVersion::contributors()` (hasMany).
+- Fragment OpenAPI : trois `paths`, quatre `schemas` (`CapsuleCataloguePage`, `CapsuleCataloguePreview`, `CapsuleCatalogueDetail`, `PaginationMeta`).
+- Tests : `CapsuleCatalogueHttpTest` (15 cas, 65 assertions locales).
+
+### Fichiers hors de mon domaine modifiés
+
+- `docs/OPENAPI.yaml` : **+4 lignes** (deux `$ref` : slug et slug+version).
+- `docs/api/generated/haas-api.d.ts` : **régénéré** (63 types, +4).
+
+Aucun autre fichier du socle n'a été touché.
+
+### Contrôles finaux (PHP 8.4.15 Laragon, base `haas_capsules_test`/`haas_test`, `COMPOSER_PROCESS_TIMEOUT=0`)
+
+| Commande | Résultat observé |
+|---|---|
+| `composer lint` | `{"tool":"pint","result":"passed"}` |
+| `composer analyse` | `[OK] No errors` |
+| `composer test` | `OK (350 tests, 3913 assertions)` |
+| `vendor/bin/phpunit --testsuite Integration --filter CapsuleCatalogueHttpTest` | `OK (15 tests, 65 assertions)` en 16,331 s |
+| `vendor/bin/phpunit --testsuite Integration` (suite complète) | `OK (566 tests, 4202 assertions)` en 16 min 50,310 s |
+
+### Questions ouvertes
+
+- **Q15** — Index FTS (to_tsvector / pg_trgm) : recherche `q` en ILIKE pour P0. Index à prévoir en revue.
+- **Q16** — Filtre « présence de laboratoire » : différé à B33 (table `lab_definitions`).
+- **Q17** — Exposer un `request_summary` masqué pour les capsules issues de demandes d'aide ? Pour l'instant seule `source.kind` et `editorial_origin` sortent.
+- Q13 (B25) — Format canonique du `content_digest` reste ouvert.
+- Q14 (B25) — « Procédure de vérification présente » reste ouvert.
+- Q12 (B24) — Notification `approved` reste ouverte.
+- Q10, Q11 (B23) et Q2–Q7 (B22) restent ouvertes.
+
 ## Historique de la branche B38 avant intégration
 
 # Progression — capsules/laboratoire (branche B38)
@@ -860,6 +916,87 @@ Dernier élément manquant du verify B38 (« Aucune session HAAS utilisée et do
 
 ## 2026-10-08 - B25 : reprise de B24 par merge local 83bd71a. Suite Integration (hors Demo) : OK 549 tests / 4127 assertions. Pint, PHPStan 8 et composer test (413 / 4129) verts.
 
+## 2026-10-08 - B26 : reprise de B25 par merge local 1c81ae4. Suite Integration (hors Demo) : OK 564 tests / 4192 assertions. Pint, PHPStan 8 et composer test (413 / 4203) verts.
+
+## 2026-10-08 — Lot B27 · Téléchargement contrôlé
+
+Statut proposé : B27 **préparé, PR en brouillon**, aucun DONE. Branche `backend/capsules-laboratoire-b27-telechargement`, dérivée de B26 (603f43d).
+
+### Décisions clefs (propriétaire du domaine)
+
+- **Deux routes** : `GET /api/v1/capsules/{capsule}/versions/{version}/artifact/{artifact}` (émission d'un lien signé) et `GET .../stream` (livraison du flux). Nommées suivant la convention B23-B26 nested (slug §26 `/versions/{id}/artifact` ouvert à l'interprétation ; nested conservé par cohérence avec B24/B25).
+- **Gates ré-évaluées à chaque requête** (émission ET stream) : actif+vérifié, visibility=visible, state=published, artefact `approved` avec `notices_path` renseigné. Un retrait ultérieur coupe les anciens liens (AC15, AC25).
+- **Jamais de `private_path` ni de chemin disque** dans Resource, logs ou erreur. Policy ou chemin suspect = 404 (RM06 : ne pas révéler l'existence des contenus masqués/retirés).
+- **Lien signé** : `URL::temporarySignedRoute` TTL 300 s + middleware `signed` sur la route de stream. `signed+verified` sur la stream.
+- **Audit** : `capsule.version.artifact.download_issued` dans `content_revisions`, sha256 et expires_at seulement.
+- **Services** : `IssueArtifactDownloadService` renvoie `{artifact, expires_at}` ; le Controller construit l'URL signée (séparation DomainBoundariesTest). `StreamArtifactService` renvoie `{disk, path, download_name}` ; le Controller appelle `Storage::disk('local')->download`.
+
+### Fichiers créés / modifiés
+
+- Policy : `App\Policies\ArtifactPolicy`.
+- Services : `IssueArtifactDownloadService`, `StreamArtifactService`.
+- Exception : `App\Exceptions\Capsules\ArtifactUnavailable` (404).
+- Controllers minces : `IssueArtifactDownloadController`, `StreamArtifactDownloadController`.
+- Resource : `ArtifactDownloadResource` (sans `private_path`).
+- Routes dans `routes/api/capsules-lab.php` (middleware `verified` sur émission ; `signed+verified` sur stream).
+- Fragment OpenAPI : deux paths + schéma `ArtifactDownload`.
+- Tests : `ArtifactDownloadHttpTest` (12 cas, 27 assertions).
+
+### Fichiers hors de mon domaine modifiés
+
+- `docs/OPENAPI.yaml` : **+4 lignes** (deux `$ref` : issue + stream).
+- `docs/api/generated/haas-api.d.ts` : régénéré (66 types, +3).
+
+Aucun autre fichier du socle n'a été touché.
+
+### Contrôles locaux
+
+- `composer lint` → `{"tool":"pint","result":"passed"}`.
+- `composer analyse` → `[OK] No errors`.
+- `composer test` → `OK (413 tests, 4233 assertions)`.
+- `vendor/bin/phpunit --testsuite Integration --filter ArtifactDownloadHttpTest` → `OK (12 tests, 27 assertions)` en 29,7 s.
+
+### Questions ouvertes
+
+- **Q18** — « Conditions d'évaluation approuvées » (§13:480, ARB05 §04:120) : pour P0 verified+actif suffit ; un drapeau explicite d'acceptation d'évaluation est consigné comme à venir (voir ARB05 non résolu).
+- **Q19** — Nommage §26 `/versions/{id}/artifact` : interprété comme nested `/capsules/{capsule}/versions/{version}/artifact/{artifact}` pour cohérence avec B23-B26. À confirmer.
+- Questions antérieures Q12–Q17 restent ouvertes.
+
+
+## 2026-10-11 - B27 : lecture de fichiers verifiee avant reception des acces
+
+Premiere tranche locale : ArtifactSnapshot et VerifiedArtifactFiles, registre serveur prive borne, fichiers canoniques reguliers, refus traversal/URL/liens, taille exacte et digest des octets copies, resources fermees. Unites reelles : 24 tests / 52 assertions OK sur PHP8.5.10 Windows, junctions reelles uniquement sous le storage de test de ce worktree. Linux/symlinks et CI restent a recevoir. Les incidents de fixtures et probes rouges sont conserves dans docs/quality/B27_ARTIFACT_READINESS.md. Les endpoints/audit/registreSQL puis les prerequis B24/B25/B26 attendent leur reception ; aucune readiness, approbation, fusion ou gate. Les anciennes entrees B27 sont historiques et ne valident pas cette reprise.
+
+## 11 octobre 2026 — B27 : accès et registre reçus en ciblage
+
+Bibliothèque initiale commitée localement en `13ae33e02f21b9a1a700647da50820ae88cd37b7`. Les services contrôlent maintenant les droits courants sous verrou, les rattachements, les octets du kit et des notices ; liens signés relatifs liés au membre et à la cible, notices accessibles sans chemin serveur, quota partagé, audit et génération des deux liens atomiques. Registre des notices additif et immutabilité après publication, désactivation conservée, rollback sans perte d'histoire. ARB05 reste sans approbation : aucune activation automatique et aucun vrai kit/licence de production ajouté.
+
+Ciblés PostgreSQL : **66 tests / 258 assertions OK**. Unités finales fichiers/liens : **33 / 69 OK**. Atomicité/API/frontières/modèles après validation finale de l'origine : **7 / 127 OK**. Pint et PHPStan 8 verts ; 66 types à jour, Composer validate/platform/audit réussis, documents 18/18 et déploiement 7/7. Probes rouges et incidents dans `docs/quality/B27_ARTIFACT_READINESS.md` ; totaux recouvrants, pas une suite complète. B27 reste partiel/en brouillon ; synchronisation normale B24/B25/B26 par l'intégrateur avant réception complète et CI exacte. Aucune approbation humaine, fusion, DONE ou gate.
+
+
+## 2026-10-11 — B26 : validation et attribution avant revue
+
+Reprise du head b568a511 dans un nouveau worktree, historiques conservés. Trois défauts corrigés : Unicode 200 caractères, q/sort tableaux refusés avant cast, pseudonyme public handle à la place du nom privé. Probes réellement rouges : 8 tests / 8 assertions, 1 erreur et 6 échecs ; ciblage vert incluant ces probes : 23 tests / 78 assertions. PHPStan 8 et Pint --test réussis. Base PostgreSQL dédiée haas_b26_review_test, runner explicite. Preuve : docs/quality/B26_CATALOGUE_READINESS.md. Sélection dernière publication, hydratation bornée et contrat data en cours ; parent B25 final puis réception complète et CI exacte encore attendus. has_lab/Q16 dépend de B33 absent : aucune déclaration DONE, gate ou approbation humaine.
+
+
+## 2026-10-11 — B26 : sélection et projection du catalogue
+
+Premier correctif local a56f0144fb104d07c52e51a5aa7c9019dc2f0e94. Sélection SQL déterministe de la dernière version publiée avant filtre technologie/tri/pagination ; une version par carte, sans corps ; détail limité au corps choisi et historique de métadonnées ; pseudonyme sélectionné sans champs privés ni owner inutile. Enveloppe data OpenAPI et limites communes décrites, 66 types API. Rouge réel : 3 tests / 6 assertions pour sélection/hydratation/enveloppe et 1 / 4 pour corps de l’historique. Ciblage final exact : 39 tests / 2620 assertions, PHPStan 8 sans erreur et Pint --test verts. Validation pack 18 et déploiement 7 contrôles documentaires verts. Relances non additionnées ; erreur de chemin dans le probe OpenAPI puis nullsafe redondant de fixture corrigés et consignés. Preuve : B26_CATALOGUE_READINESS.md. Parent B25 final, réception complète, CI exacte et revue humaine restent attendus. has_lab/Q16 dépend de B33 absent ; aucun DONE/gate, frontend, push, publication ou déploiement.
+
+Dernière relecture B26 : 2 probes de nullabilité 3.1 rouges (2 tests / 3 assertions), schémas catalogue en unions [T, null] et types régénérés (66), générateur inchangé. Les 39 tests / 2620 assertions finaux incluent les probes ; PHPStan 8 et Pint verts. PR35 reste Draft / B26 partiel pour badge, has_lab/Q16 et B33 absent. Aucun SQL global avant parent B25 final.
+
+## 2026-10-11 — B27 : composition de la fixture de publication
+
+Reprise exclusive au parent documentaire 8fe85fe après réception globale en erreur : 245 tests / 1323 assertions / 1 erreur. JUnit rouge original conservé et copié à hash identique, preuve B27_ARTIFACT_READINESS.md. Probe ciblé rouge réel 1 / 1 avec SQL23514 : insertion Artifact après publication. Fixture corrigée : registre créé pendant InReview puis publication réelle par modérateur indépendant et nouveau brouillon ; attributs anciens vérifiés intégralement. Probe vert 1 / 8, composition courante 74 tests / 436 assertions réussie sans erreur/échec/skip, PHPStan 8/Pint verts. Aucun changement production ni affaiblissement des gardes ; autres fixtures d'artefacts relues, insertion négative intentionnelle conservée. Lecture indépendante distincte des tests. L'intégrateur reprend la réception SQL complète et la CI exacte après commit propre ; aucune suite complète B27 passée ni approbation/DONE/gate/frontend annoncé.
+
+## 2026-10-11 — B27 : fonction de garde répétable après migrate:fresh
+
+Après synchronisation des parents au candidat 134ebe0, deux réceptions globales Integration ont été interrompues par l'intégrateur ; stack SQL42723 sur la fonction b27_guard_artifact déjà présente, sans succès complet. Correction minimale CREATE OR REPLACE, corps/locks/contraintes/down inchangés. Nouveau probe réellement rouge 1 test / 1 assertion / 1 erreur ; relance 1 / 11 verte avec deux migrate:fresh et deux refus d'altération d'empreinte publiée. Alertes de typage du nouveau test corrigées sans ignore/baseline après arrêt du ciblage incomplet. Ciblage final courant 69 tests / 285 assertions réussi, PHPStan 8/Pint verts et 67 types à jour. Preuve B27_ARTIFACT_READINESS.md ; lecture indépendante non comptée comme test. Aucun fichier B24/B26 modifié, aucune garde de production affaiblie. Réception globale et CI exacte à relancer par l'intégrateur ; ARB05 inactive, aucune approbation/DONE/gate/frontend.
+
+## 2026-10-11 — B26 : conserver l'absence d'empreinte historique
+
+Après les microcommits a56f0144 et fe8b4cda, l'intégrateur a relevé le contrat non nullable d'un content_digest historique réellement nul. Trois probes frais avant correction : 3 tests / 12 assertions, 2 échecs OpenAPI/types ; le probe HTTP réussissait déjà sur les deux routes, sans modification du digest en base. CatalogueDetail décrit maintenant string|null, pattern64 et absence historique sans recalcul/backfill ; 66 types régénérés. Ciblage courant terminé : 42 tests / 2635 assertions, PHPStan 8 sans erreur et Pint --test verts. Preuve B26_CATALOGUE_READINESS.md. Les nombres ciblés remplacent les précédents sans addition. Aucun SQL global avant parent B25 final ; CI exacte et revue humaine à recevoir. B33/badge/has_lab/Q16 absents : PR35 reste Draft, aucun B26 DONE/gate.
+
 ## 2026-10-11 — B25 : attribution avant publication
 
 Reprise isolée depuis PR34 `ce75045`, historiques préservés. Probe rouge réel : approbation de la révision 2 enregistrée à 3 (1 test / 2 assertions). Correction minimale du snapshot avant transition ; HTTP B25 vert 23 / 59 et Pint ciblé vert, sur base dédiée `haas_b25_review_test`. La publication Q12 et les protections de downgrade restent à corriger ; aucune réception globale ni approbation humaine déclarée. Preuve : `docs/quality/B25_RECEPTION_20261011.md`.
@@ -875,6 +1012,56 @@ Downgrade commité en `eceb4bc`. Intention de publication propriétaire/version 
 ## 2026-10-14 — Correctif rollback B33
 
 Test `CapsulesMigrationTest::test_down_rollback_removes_all_capsule_schema_tables` étendu : dépose explicite de `lab_results`, `lab_runs`, `lab_definitions` (ordre des FK) avant la boucle de rollback des migrations capsules. Aucune migration ni logique de production modifiée, pas de CASCADE. Local : rollback seul OK (1,27), `tests/Integration/Capsules` OK (234,1178), `tests/Integration/Lab` OK (81,455), `composer lint` passed, `composer analyse` [OK]. Correctif à committer sur `backend/capsules-laboratoire-b33-release` (base distante 6951bb7).
+
+
+## 2026-10-14 — Lot B28 · Favoris et retours de réutilisation
+
+Statut proposé : B28 **préparé, PR en brouillon**, aucun DONE. Branche `backend/capsules-laboratoire-b28-favoris-retours`, dérivée de B27 (524067b distant).
+
+### Décisions clefs
+
+- Trois tables (CAHIER_DES_CHARGES.md:875) : `favorites` (unique user_id+capsule_id), `reuse_reports` (unique user_id+version_id, environment/reported_at/outcome/observation/is_internal/revision), `reuse_report_revisions` (append-only, unique report_id+revision).
+- Enum `ReuseReportOutcome` reproduit littéralement les 3 états humains du §14 : `reproduced`, `partial`, `failed`.
+- Favoris strictement privés : aucune route de lecture n'est fournie (§26 ne la nomme pas). **Q20** ouverte si une route `GET /me/favorites` doit être livrée plus tard.
+- Retour de réutilisation : un actif par (membre, version). Second POST crée une révision archivée, incrémente `revision` ; aucun DELETE. `is_internal` calculé serveur (owner ou contributeur de la version) ; aucun client ne peut forcer sa valeur. Pas de score, pas de badge ; `kind=human_declaration` explicite dans la Resource (§14:502, §14:508).
+- Idempotence : `RecordReuseReportService` passe par `IdempotencyService` (verrou acteur). Même clé + même charge → rejeu identique sans révision. Clés distinctes → révision archivée.
+
+### Fichiers créés / modifiés
+
+- Migrations : `create_favorites_table`, `create_reuse_reports_table`, `create_reuse_report_revisions_table`.
+- Enum : `ReuseReportOutcome`.
+- Modèles : `Favorite`, `ReuseReport`, `ReuseReportRevision`.
+- Policies : `FavoritePolicy`, `ReuseReportPolicy`.
+- Data : `ReuseReportData`.
+- Services : `MarkFavoriteService`, `UnmarkFavoriteService`, `RecordReuseReportService`.
+- FormRequest : `RecordReuseReportRequest`.
+- Resource : `ReuseReportResource` (kind=human_declaration, pas de user_id).
+- Controllers : `PutFavoriteController`, `DeleteFavoriteController`, `RecordReuseReportController`.
+- Routes dans `routes/api/capsules-lab.php` (middleware `verified`).
+- Fragment OpenAPI, `$ref` racine, types régénérés.
+- DomainTables étendu à `favorites`, `reuse_reports`, `reuse_report_revisions`.
+- Tests : `FavoriteHttpTest` (7), `ReuseReportHttpTest` (6), `ReuseReportConcurrencyTest` (2). Fixture `record-reuse-report-concurrently.php`.
+
+### Fichiers hors de mon domaine modifiés
+
+- `docs/OPENAPI.yaml` : **+4 lignes** (`$ref` favori + reuse-reports).
+- `docs/api/generated/haas-api.d.ts` : régénéré (68 types, +2 vs B27).
+
+Aucun autre fichier du socle n'a été touché.
+
+### Contrôles locaux
+
+- `composer lint` → `{"tool":"pint","result":"passed"}`.
+- `composer analyse` → `[OK] No errors`.
+- `composer test` → `OK (413 tests, 4289 assertions)`.
+- `vendor/bin/phpunit --testsuite Integration --filter "FavoriteHttpTest|ReuseReportHttpTest|ReuseReportConcurrencyTest"` → `OK (15 tests, 61 assertions)` en 29,2 s.
+
+### Questions ouvertes
+
+- **Q20 (nouvelle)** — Pas de route de lecture de ses propres favoris (§26 muet). À décider si `GET /me/favorites` ou un `favorited` sur la Resource catalogue est désirable plus tard.
+- Q12-Q19 restent ouvertes.
+
+Reprise de b27 (524067b distant) dans B28 par merge `f3d8325` : lint `passed`, analyse `[OK]`, `composer test` 454/4407 verts, Integration ciblée Capsules 71 tests non exécutés localement (PostgreSQL non authentifié).
 
 
 ## 2026-10-15 — B34 : lancement et quotas (préparé, PR en brouillon)

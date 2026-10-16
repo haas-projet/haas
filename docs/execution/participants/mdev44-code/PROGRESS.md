@@ -1,5 +1,37 @@
 ﻿# Progression — capsules/laboratoire
 
+## 16 octobre 2026 — BV206, lancement idempotent et quotas partagés préparés
+
+Branche `backend/capsules-laboratoire-bv206-lancement-comparaison` ouverte depuis la tête locale BV205 (`8c0a4db`). Livré :
+
+- `LabCapacityGuard::activeSlotCount()` passe à `COUNT(DISTINCT COALESCE(comparison_id::text, id::text))`. Un run isolé compte toujours pour 1 ; une comparaison compte pour 1 emplacement partagé par ses deux enfants (CAHIER §44 ligne 1651 : « un seul run réellement actif au maximum globalement, les deux enfants sont séquentiels »).
+- `App\Services\Comparisons\StartComparisonService` sous verrou avisé partagé 554478 (via `LabCapacityGuard`). `UNITS_PER_COMPARISON = 2` ; les deux enfants `lab_runs` (baseline/candidate) sont insérés dans **la même transaction** avec le même `comparison_id`. `input_digest` canonique commun aux deux côtés (profil, scénario, release, module_version, source_commit, suite_digest, input_schema_version).
+- `StartComparisonData`, `StartComparisonRequest` (clés acceptées : `comparison_profile_id`, `scenario_key` ; Idempotency-Key UUID v4 obligatoire ; toute autre clé → 422), `StartComparisonController`, `ApprovedProfileQuery` (profil enabled, famille `b1.idempotent.v1`, version publiée + visible, définition B33 figée, intégrité du registre). Switch fermé = 503.
+- Route `POST /api/v1/comparisons` (membre vérifié, throttle:30,1). `Location` + `Cache-Control: no-store, private` ; réponse 202 avec `data.state=queued` et URL de suivi `/api/v1/comparisons/{id}` ; `children_follow_urls` ordonnés baseline puis candidate.
+- Fragment OpenAPI étendu (POST /comparisons avec Idempotency-Key, exemple de charge, 202/401/403/404/409/422/429/503). `$ref` ajouté dans `docs/OPENAPI.yaml`. **83 types API** régénérés (le path ajouté ne change pas le schéma types).
+
+Décisions du propriétaire du domaine (consignées, questions ouvertes) :
+- L'unité de capacité est un **EMPLACEMENT** ; une comparaison en occupe UN SEUL pour ses deux enfants, par `COUNT(DISTINCT COALESCE(comparison_id, id))`. Sans cela, le second enfant serait refusé pour « queued compte comme actif ».
+- Quota horaire : la comparaison coûte **2 unités** (deux lignes lab_runs enfants) sans changer `UNITS_PER_SIMPLE_RUN`.
+
+Tests locaux (PHP 8.4.15 Laragon, `C:\laragon\bin\php\php-8.4.15-Win32-vs17-x64\php.exe`, `openssl`+`pdo_pgsql` chargés ; `~/.haas-test.env` jamais lu) :
+- `vendor/bin/pint --test` : passed. `vendor/bin/phpstan analyse` : [OK] No errors.
+- `phpunit --filter 'StartComparisonHttpTest'` : OK (18 tests, 47 assertions).
+- `phpunit --filter 'ConcurrentStartComparisonTest|StartComparisonHttpTest'` : OK (21 tests, 73 assertions) — concurrence réelle via Symfony Process + barrière `pg_stat_activity`.
+
+BV206 **préparé, PR en brouillon** ; jamais DONE sans revue humaine et CI exacte reçues. CI attendue : tests verts PHP 8.4/PHP 8.5, seule « Contrôler les dépendances » rouge pour `symfony/http-foundation` CVE-2026-108082 et `symfony/yaml` CVE-2026-109413.
+
+Fichiers hors de mon domaine modifiés : `backend/routes/api/capsules-lab.php` (ajout POST /comparisons), `backend/app/Infrastructure/Lab/LabCapacityGuard.php` (comptage « un emplacement par comparaison »), `docs/OPENAPI.yaml` (1 `$ref`), `docs/api/generated/haas-api.d.ts` inchangé (types déjà couverts). `backend/routes/api.php`, `backend/config/*`, `backend/bootstrap/*`, `backend/phpunit.xml`, `composer.*`, `.github/workflows/*`, les tables de notification restent intacts.
+
+Questions ouvertes (reprises de BV204/BV205) :
+- Baseline réelle non livrée ; `test_only_fixture` dans les tests.
+- Signature du manifeste de release non fixée.
+- Borne de la file B34 non testée séparément (hors scope BV206, resterait couverte en B36+).
+- Visibilité du GET §26:957 : 404 appliqué pour acteur discordant (BV205).
+- Notifications : zone réservée socle, aucune émission.
+
+worker non livré, les runs restent queued ; B36, B37, BV207 à BV210 non livrés
+
 ## 16 octobre 2026 — BV205, données et contrat des comparaisons préparés
 
 Branche `backend/capsules-laboratoire-bv205-donnees-comparaison` ouverte depuis la tête locale BV204 (`ecc48e5`). Livré :

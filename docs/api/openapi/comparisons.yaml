@@ -2,7 +2,7 @@
 openapi: 3.1.0
 info:
   title: HAAS — Comparaisons B1
-  version: 0.1.0
+  version: 0.2.0
 paths:
   '/api/v1/versions/{id}/comparison-profiles':
     parameters:
@@ -39,6 +39,44 @@ paths:
           description: Compte non vérifié ou suspendu
         '404':
           description: Version inconnue, non publiée, retirée, ou capsule masquée
+  '/api/v1/comparisons/{id}':
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    get:
+      operationId: showComparisonRun
+      summary: Lire une comparaison appartenant à l'acteur authentifié
+      description: >
+        Projection publique BV205 : jamais l'outcome machine, le digest
+        d'entrée, le seed, l'env_snapshot ou les digests des enfants. Un
+        acteur ne lit que ses propres comparaisons ; toute autre id (y
+        compris celle d'autrui) renvoie 404. BV206 ouvrira POST
+        /comparisons avec Idempotency-Key ; BV208 fera la révélation
+        contrôlée de l'outcome.
+      security:
+        - SessionCookie: []
+      responses:
+        '200':
+          description: Projection de la comparaison et URLs de suivi des deux enfants
+          headers:
+            Cache-Control:
+              description: 'no-store, private'
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComparisonRunEnvelope'
+        '401':
+          description: Session absente ou expirée
+        '403':
+          description: Compte non vérifié ou suspendu
+        '404':
+          description: Comparaison inconnue ou appartenant à un autre acteur
+        '422':
+          description: Un paramètre de requête a été envoyé (la lecture n'en accepte aucun)
 components:
   schemas:
     ComparisonFamilyKey:
@@ -77,3 +115,45 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ComparisonProfile'
+    ComparisonState:
+      type: string
+      enum: ['queued', 'running', 'completed', 'error', 'timed_out']
+    ComparisonRun:
+      type: object
+      additionalProperties: false
+      required: [id, profile_id, state, created_at, started_at, finished_at, follow_url, children_follow_urls]
+      properties:
+        id:
+          type: string
+          format: uuid
+        profile_id:
+          type: string
+          format: uuid
+        state:
+          $ref: '#/components/schemas/ComparisonState'
+        created_at:
+          type: string
+          format: date-time
+        started_at:
+          type: [string, 'null']
+          format: date-time
+        finished_at:
+          type: [string, 'null']
+          format: date-time
+        follow_url:
+          type: string
+          pattern: '^/api/v1/comparisons/[0-9a-f-]{36}$'
+        children_follow_urls:
+          type: array
+          minItems: 0
+          maxItems: 2
+          items:
+            type: string
+            pattern: '^/api/v1/lab-runs/[0-9a-f-]{36}$'
+    ComparisonRunEnvelope:
+      type: object
+      additionalProperties: false
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/ComparisonRun'

@@ -1,5 +1,42 @@
 ﻿# Progression — capsules/laboratoire
 
+## 16 octobre 2026 — BV205, données et contrat des comparaisons préparés
+
+Branche `backend/capsules-laboratoire-bv205-donnees-comparaison` ouverte depuis la tête locale BV204 (`ecc48e5`). Livré :
+
+- **Refactor préalable** `refactor(lab): extraire le garde de capacité` : déplace de StartLabRunService (B34) vers `App\Infrastructure\Lab\LabCapacityGuard` la valeur du verrou avisé 554478, le comptage global queued+running, la fenêtre horaire glissante par membre et le calcul du Retry-After. Mêmes bornes `config('lab.hourly_units' / 'max_running' / 'queue_limit')` et mêmes exceptions `LabQuotaExceeded` / `LabCapacityReached` ; **les tests StartLabRunHttpTest + ConcurrentLabRunTest restent verts (20/72)**. BV206 réutilise ce garde pour réserver deux unités ; le comptage « un emplacement par comparaison » (COALESCE sur `comparison_id`) y sera appliqué sans modifier cette extraction.
+- Migration `2026_10_15_120400_bv205_create_comparison_runs_table.php` : famille fermée ComparisonState/ComparisonOutcome, outcome nullable autorisé seulement en state=completed, input_digest hex 64, env_snapshot JSONB object ≤ 20 Ko, CHECK dates par état, unique `(actor_id, request_key)`.
+- Migration `2026_10_15_120500_bv205_add_comparison_link_to_lab_runs_table.php` : ALTER lab_runs ajoute `comparison_id` nullable FK RESTRICT vers `comparison_runs` et `comparison_side` nullable. CHECK « les deux ensemble ou aucun » + unique partiel `(comparison_id, comparison_side)`. `down()` fidèle, tolérant à l'absence, et refusé si des lignes `lab_runs` référencent une comparaison (modèle B33).
+- Enum `App\Enums\Comparisons\ComparisonSide` (baseline/candidate).
+- Modèle `ComparisonRun`, Data `ComparisonRunData`, Resource `ComparisonRunResource` **sans** outcome, input_digest, seed, env_snapshot ni digests (BV208 ouvrira la révélation contrôlée). Query `ComparisonRunQuery` filtre strict par acteur ; autrui = 404.
+- Route `GET /api/v1/comparisons/{id}` (membre vérifié, throttle:60,1). `ShowComparisonRunRequest` rejette tout paramètre en 422 ; `Cache-Control: no-store, private`. Aucune autre route touche /comparisons en BV205.
+- Fragment OpenAPI `docs/api/openapi/comparisons.yaml` étendu (schémas ComparisonState, ComparisonRun, ComparisonRunEnvelope ; pattern des follow_url). `$ref` ajouté dans `docs/OPENAPI.yaml`. **83 types API** régénérés par `scripts/generate-api-types.php`.
+- `DomainTables` et `CapsulesMigrationTest::test_down_rollback_removes_all_capsule_schema_tables` étendus pour `comparison_runs` (enfants avant parents, sans CASCADE). `ComparisonProfilesMigrationTest` refactoré pour rollback BV205 avant BV204.
+
+Tests locaux (PHP 8.4.15 Laragon, `C:\laragon\bin\php\php-8.4.15-Win32-vs17-x64\php.exe`, `openssl`+`pdo_pgsql` chargés ; `~/.haas-test.env` jamais lu) :
+- `vendor/bin/pint --test` : passed. `vendor/bin/phpstan analyse` : [OK] No errors.
+- `phpunit --filter 'StartLabRunHttpTest|ConcurrentLabRunTest'` : OK (20 tests, 72 assertions) — B34 préservé après extraction.
+- `phpunit --filter Comparisons` : OK (53 tests, 125 assertions).
+- `phpunit --filter 'Comparisons|StartLabRunHttpTest|ConcurrentLabRunTest'` : OK (73 tests, 197 assertions).
+- `phpunit --testsuite Integration --filter '/^(?!.*Demo).*(VerificationCases|Capsules|Lab|Comparisons).*$/'` : **OK (446 tests, 2028 assertions, 8 min 57)**.
+- `node scripts/validate-pack.mjs` : `passed: 18, failed: 0`. `node scripts/check-deployment-docs.mjs` : `passed: 7, failed: 0`. `node scripts/check-manifest.mjs` : `892 empreintes vérifiées`.
+
+BV205 **préparé, PR en brouillon** ; jamais DONE sans revue humaine et CI exacte reçues. CI attendue : tests verts PHP 8.4/PHP 8.5, seule « Contrôler les dépendances » rouge pour `symfony/http-foundation` CVE-2026-108082 et `symfony/yaml` CVE-2026-109413 ; `composer.lock` à mettre à jour par le responsable du socle.
+
+Fichiers hors de mon domaine modifiés : `backend/routes/api/capsules-lab.php` (ajout GET /comparisons/{id}), `backend/app/Services/Lab/StartLabRunService.php` (extraction du garde, comportement inchangé), `backend/tests/Integration/Lab/ConcurrentLabRunTest.php` (commentaire actualisé), `docs/OPENAPI.yaml` (1 `$ref`), `docs/api/generated/haas-api.d.ts` (régénéré), `backend/tests/Integration/Capsules/CapsulesMigrationTest.php`, `backend/tests/Support/Mdev44/DomainTables.php` (enfants-avant-parents), `SHA256SUMS` (régénéré). `backend/routes/api.php`, `backend/config/*`, `backend/bootstrap/*`, `backend/phpunit.xml`, `composer.*`, `.github/workflows/*`, les tables de notification restent intacts.
+
+Décision du propriétaire du domaine (déjà consignée BV204 et à reconfirmer) :
+- La route POST /comparisons sera livrée en BV206 avec `Idempotency-Key` obligatoire ; aucune mutation publique n'écrit `outcome`, `input_digest`, `seed` ou `env_snapshot`. L'outcome machine reste du ressort du réconciliateur (BV208).
+
+Questions ouvertes (reprises de BV204) :
+- Baseline réelle non livrée dans le dépôt ; les tests passent via `test_only_fixture`. Signature du manifeste de release non fixée.
+- Visibilité du GET §26:957 : 404 appliqué pour acteur discordant, cohérent avec le re-contrôle de `VerificationCaseParentVisibility`.
+- Décision « un emplacement par comparaison » reportée en BV206 (comptage COALESCE sur comparison_id).
+- Borne de la file B34 : reste à couvrir.
+- Notifications : zone réservée socle, aucune émission.
+
+worker non livré, les runs restent queued ; B36, B37, BV207 à BV210 non livrés
+
 ## 15 octobre 2026 — BV204, profils de comparaison préparés
 
 Branche `backend/capsules-laboratoire-bv204-profils-comparaison` ouverte depuis BV203 `4c7d22c`. Livré :

@@ -1,5 +1,27 @@
 ﻿# Reprise — capsules/laboratoire
 
+## 16 octobre 2026 — BV205, données et contrat des comparaisons, PR en brouillon
+
+Branche active : `backend/capsules-laboratoire-bv205-donnees-comparaison` basée sur la tête locale BV204 (`ecc48e5`). BV205 **préparé, PR en brouillon**.
+
+Fichiers livrés (hors tests) :
+- Refactor : `backend/app/Infrastructure/Lab/LabCapacityGuard.php` (verrou avisé 554478, comptage global queued+running, fenêtre horaire glissante, Retry-After). `backend/app/Services/Lab/StartLabRunService.php` injecte le garde ; comportement observable inchangé (StartLabRunHttpTest + ConcurrentLabRunTest verts).
+- Migrations : `backend/database/migrations/2026_10_15_120400_bv205_create_comparison_runs_table.php` (une table, CHECK state/outcome/dates/input_digest/env_snapshot, unique request_key), `backend/database/migrations/2026_10_15_120500_bv205_add_comparison_link_to_lab_runs_table.php` (ALTER lab_runs : comparison_id FK RESTRICT, comparison_side, CHECK + unique partiel ; down tolérant mais refusé si des liens persistent).
+- Enum : `backend/app/Enums/Comparisons/ComparisonSide.php`.
+- Modèle, Data, Resource, Query, Request, Controller : `backend/app/Models/Comparisons/ComparisonRun.php`, `backend/app/Data/Comparisons/ComparisonRunData.php`, `backend/app/Http/Resources/Comparisons/ComparisonRunResource.php`, `backend/app/Queries/Comparisons/ComparisonRunQuery.php`, `backend/app/Http/Requests/Comparisons/ShowComparisonRunRequest.php`, `backend/app/Http/Controllers/Comparisons/ShowComparisonRunController.php` + exception `ComparisonRunNotFound`.
+- Routes : `backend/routes/api/capsules-lab.php` — ajout `GET /comparisons/{id}` (membre vérifié actif, throttle:60,1).
+- OpenAPI : `docs/api/openapi/comparisons.yaml` étendu (`ComparisonState`, `ComparisonRun`, `ComparisonRunEnvelope`, pattern follow_url). `$ref` ajouté dans `docs/OPENAPI.yaml`. Types régénérés (83 types).
+- Tests : `backend/tests/Integration/Comparisons/ComparisonRunsSchemaTest.php` (12 contraintes SQL), `backend/tests/Integration/Comparisons/ComparisonRunHttpTest.php` (6 scénarios HTTP incluant « aucune route d'écriture »), `backend/tests/Integration/Comparisons/ComparisonRunsMigrationTest.php` (fresh, down tolérant, down refusé si liens, cycle incrémental), `backend/tests/Support/Comparisons/ComparisonRunFixtures.php`.
+- Extensions : `backend/tests/Support/Mdev44/DomainTables.php`, `backend/tests/Integration/Capsules/CapsulesMigrationTest.php`, `backend/tests/Integration/Comparisons/ComparisonProfilesMigrationTest.php` (rollback BV205 avant BV204 dans les tests isolés).
+
+Non modifiés : `backend/routes/api.php`, `backend/config/*`, `backend/bootstrap/*`, `backend/phpunit.xml`, `composer.*`, `.github/workflows/*`, les tables de notification. B33 (migration `2026_10_11_230000`) n'est pas touchée.
+
+PHP de session : `C:\laragon\bin\php\php-8.4.15-Win32-vs17-x64\php.exe`. `~/.haas-test.env` jamais lu. Aucune action manuelle sur PostgreSQL.
+
+Tests locaux : `vendor/bin/pint --test` passed ; `vendor/bin/phpstan analyse` [OK] ; `phpunit --filter Comparisons` 53/125 ; `phpunit --filter 'Comparisons|StartLabRunHttpTest|ConcurrentLabRunTest'` 73/197 ; Integration `VerificationCases|Capsules|Lab|Comparisons` hors Demo 446/2028 (8 min 57). CI attendue : tests verts PHP 8.4/PHP 8.5, seule « Contrôler les dépendances » rouge pour les deux CVE externes.
+
+worker non livré, les runs restent queued ; B36, B37, BV207 à BV210 non livrés
+
 ## 15 octobre 2026 — BV204, profils de comparaison, PR en brouillon
 
 Branche active : `backend/capsules-laboratoire-bv204-profils-comparaison` basée sur BV203 `4c7d22c`. BV204 **préparé, PR en brouillon**.

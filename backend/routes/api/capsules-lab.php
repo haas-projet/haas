@@ -10,6 +10,7 @@ use App\Http\Controllers\Capsules\StoreCapsuleVersionDraftController;
 use App\Http\Controllers\Capsules\SubmitCapsuleVersionForReviewController;
 use App\Http\Controllers\Capsules\UpdateCapsuleVersionDraftController;
 use App\Http\Controllers\Comparisons\ListComparisonProfilesController;
+use App\Http\Controllers\Comparisons\ShowComparisonRunController;
 use App\Http\Controllers\Lab\ShowLabDefinitionController;
 use App\Http\Controllers\Lab\ShowLabRunController;
 use App\Http\Controllers\Lab\StartLabRunController;
@@ -56,6 +57,14 @@ Route::get('/versions/{id}/comparison-profiles', ListComparisonProfilesControlle
     ->whereUuid('id')
     ->middleware(['auth:sanctum', 'verified', 'throttle:60,1'])
     ->name('versions.comparison-profiles');
+
+// BV205 — lecture d'une comparaison par son acteur. BV206 ouvrira POST
+// /comparisons avec Idempotency-Key ; aucune mutation publique n'écrit
+// l'outcome machine ni les digests internes (CAHIER §45 ligne 1672).
+Route::get('/comparisons/{id}', ShowComparisonRunController::class)
+    ->whereUuid('id')
+    ->middleware(['auth:sanctum', 'verified', 'throttle:60,1'])
+    ->name('comparisons.show');
 
 // Lancements B34. Membre vérifié actif seulement : pas de code arbitraire,
 // pas de scénario choisi par URL. L'écriture des états et résultats reste

@@ -1,5 +1,37 @@
 ﻿# Progression — capsules/laboratoire
 
+## 16 octobre 2026 — BV208, conclusions et pannes de comparaison préparées
+
+Branche `backend/capsules-laboratoire-bv208-conclusions-comparaison` ouverte depuis la tête d'intégration (`6a1d2d7`). Livré :
+
+- `App\Services\Comparisons\ComparisonOutcomeCalculator` final, sans dépendance Laravel : `calculate(?array baseline, ?array candidate, ComparisonState state, ?LabRunState baselineState, ?LabRunState candidateState)` applique les règles CAHIER §44 (lignes 1639-1655) ; `expose(ComparisonState, ?ComparisonOutcome)` centralise la règle UNIQUE de dérivation à la lecture (completed → colonne, error|timed_out → `inconclusive` dérivé, queued|running → null). Deux méthodes partagées par `ReconcileComparisonsService` et `ComparisonRunResource`, aucune duplication.
+- `App\Services\Comparisons\ReconcileComparisonsService` + `ReconciliationReport` scellé : transaction + `SELECT ... FOR UPDATE` sur `comparison_runs`, finalisation UNIQUE (rejeu idempotent), aucune exception HTTP. Transitions : child_error → error, child_timed_out → timed_out, deux enfants `passed|failed` → completed (outcome via le calculateur), budget `config('lab.comparison_budget_seconds', 50)` dépassé → timed_out. `outcome` persistée UNIQUEMENT quand `state = 'completed'` (CHECK `comparison_runs_outcome_requires_terminal`). Jamais de retry automatique, jamais de seconde paire d'enfants, jamais une victoire par défaut.
+- `App\Console\Commands\ReconcileComparisons` (`comparisons:reconcile {id}`) : commande interne appelée par rien en production (aucune planification), modèle `lab:bind-definition`. Elle existe pour les tests Integration et pour un opérateur après livraison d'un vrai worker.
+- `ComparisonRunData` porte désormais `exposedOutcome` (nullable). `ComparisonRunResource` ajoute `outcome` dans l'enveloppe propriétaire (GET /comparisons/{id}, actor_id discordant toujours 404). Jamais assertions, runtime, digest brut, env_snapshot ni seed. `Cache-Control: no-store, private` conservé. `StartComparisonService` écrit `exposedOutcome=null` à l'insertion queued.
+- Tests Unit : `ComparisonOutcomeCalculatorTest` — 22 tests, 28 assertions. Couverture : improved, regressed, mixed, unchanged (deux échecs identiques), identifiants d'assertion différents, résultats absents/vides/non booléens, enfant en erreur/timed_out/queued/running, état global error/timed_out, ordre des clés indifférent, déterminisme, interdiction d'une victoire par défaut, et dérivation `expose` pour toutes les combinaisons state × colonne.
+- Fixtures `Tests\Support\Comparisons\LabResultFixtures` (jamais sous `app/`, étiquette « démonstration pédagogique ») : respect strict des triggers B33 (queued → running avec started_at ≥ created_at ; INSERT lab_result pendant running ; running → terminal avec finished_at). Les lab_results portent `key`, non `id` ; le service lit la même clé.
+- `Tests\Integration\Comparisons\ReconcileComparisonsServiceTest` (10/23) : improved, regressed, mixed, unchanged avec deux échecs identiques, enfant en erreur, enfant timed_out, résultat absent, budget dépassé, rejeu idempotent, UUID inconnu.
+- `Tests\Integration\Comparisons\ComparisonOutcomeExposureHttpTest` (5/23) : exposition improved sans assertions/runtime/digest, inconclusive dérivé pour timed_out alors que colonne NULL, invisibilité pour autrui (404), capsule parente masquée sans fuite de forme, absence de route mutante sur /comparisons/{id}.
+- `Tests\Integration\Comparisons\ConcurrentReconcileComparisonTest` (1/10) : deux processus Symfony\\Process (barrière `pg_stat_activity`, `application_name='haas_bv208_reconciler'`, pas de pcntl) convergent sur `finalized/already_finalized`, une seule ligne `completed/improved`. Teardown via `DomainTables::dropAll()` avant rollback, sans CASCADE.
+- Fragment OpenAPI `docs/api/openapi/comparisons.yaml` 0.3.0 → 0.4.0 : schéma `ComparisonOutcome` + propriété `outcome: null | ComparisonOutcome` sur `ComparisonRun`. Aucun nouveau chemin ; le `$ref` de `/api/v1/comparisons/{id}` reste valide dans `docs/OPENAPI.yaml`.
+- `php scripts/generate-api-types.php` : 92 types, diff additif (`comparisons_ComparisonOutcome`, `outcome: null | ComparisonOutcome` sur `comparisons_ComparisonRun`). Rien supprimé.
+- `backend/tests/Integration/Comparisons/ComparisonRunHttpTest::test_actor_reads_their_queued_comparison_without_outcome_or_digests` bascule : la clé `outcome` est présente et vaut null pour un queued (dérivation `expose`).
+
+Décision du propriétaire du domaine (consignée, question ouverte confirmée) : la colonne `comparison_runs.outcome` reste NULL pour error et timed_out (CHECK `comparison_runs_outcome_requires_terminal`) ; la conclusion `inconclusive` est **dérivée à la lecture** par la méthode unique `ComparisonOutcomeCalculator::expose`. Aucune migration ajoutée.
+
+BV208 **préparé, PR en brouillon** ; jamais DONE sans revue humaine et CI exacte reçues. CI attendue : tests verts PHP 8.4/PHP 8.5, seule « Contrôler les dépendances » rouge (avis détectés le 15 octobre, `composer.lock` à mettre à jour par le responsable du socle).
+
+worker non livré, les runs restent queued ; B36, B37, BV207 et BV210 non livrés ; AC40, AC48 et AC49 non couverts.
+
+Fichiers hors de mon domaine modifiés : `docs/OPENAPI.yaml` inchangé (aucun nouveau $ref), `docs/api/openapi/comparisons.yaml`, `docs/api/generated/haas-api.d.ts`, `SHA256SUMS`. Zones réservées intactes : `backend/config/*`, `backend/phpunit.xml`, `.github/workflows/*`, `backend/bootstrap/*`, `backend/routes/api.php`, `routes/console.php`, `composer.*`, les tables de notification. Aucune action manuelle sur PostgreSQL. `~/.haas-test.env` jamais lu.
+
+Questions ouvertes (BV208) :
+- Exposition de outcome à l'acteur : révéler explicitement la conclusion machine au propriétaire est une décision confirmée (CAHIER §45 ligne 1672 réserve la lecture d'un rapport autorisé) ; à relire en revue.
+- Commande de réconciliation : `comparisons:reconcile` n'est appelée par rien en production. Pas de planification ; destinée aux tests Integration et à l'opérateur après B36/B37.
+- CHECK `comparison_runs_outcome_requires_terminal` et dérivation : la colonne reste NULL pour error et timed_out ; la valeur `inconclusive` est dérivée à la lecture (option (a) retenue). À confirmer en revue.
+- Budget de comparaison : `config('lab.comparison_budget_seconds', 50)` par défaut dans le code ; `backend/config/*` reste intact (zone réservée). À confirmer avec le responsable du socle avant GO_PRODUCTION.
+- « Retrait sécurisé » (AC45) compris comme expurgation à la lecture : BV209 ouvrira la vue versionnée. En BV208, la Resource ne révèle jamais assertions/runtime/digest/env_snapshot/seed (test figé).
+
 ## Intégration capsules et laboratoire
 
 Branche `backend/capsules-laboratoire-integration-catalogue-lab` dérivée de la tête BV206 (`2fcb9e9`), merge `--no-ff --no-commit` de `origin/backend/capsules-laboratoire-b28-favoris-retours` (`aa05582`) : **préparé, PR en brouillon**, aucun DONE.

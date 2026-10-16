@@ -1,8 +1,8 @@
-# Pilote : mdev44-code. Profils et comparaisons B1 (BV204 à BV206).
+# Pilote : mdev44-code. Profils et comparaisons B1 (BV204 à BV208).
 openapi: 3.1.0
 info:
   title: HAAS — Comparaisons B1
-  version: 0.3.0
+  version: 0.4.0
 paths:
   '/api/v1/versions/{id}/comparison-profiles':
     parameters:
@@ -191,10 +191,13 @@ components:
     ComparisonState:
       type: string
       enum: ['queued', 'running', 'completed', 'error', 'timed_out']
+    ComparisonOutcome:
+      type: string
+      enum: ['improved', 'unchanged', 'regressed', 'mixed', 'inconclusive']
     ComparisonRun:
       type: object
       additionalProperties: false
-      required: [id, profile_id, state, created_at, started_at, finished_at, follow_url, children_follow_urls]
+      required: [id, profile_id, state, outcome, created_at, started_at, finished_at, follow_url, children_follow_urls]
       properties:
         id:
           type: string
@@ -204,6 +207,18 @@ components:
           format: uuid
         state:
           $ref: '#/components/schemas/ComparisonState'
+        outcome:
+          description: >
+            BV208 — Conclusion dérivée exposée à l'acteur propriétaire. Jamais
+            d'assertions, de runtime ou de digest brut. Null pour queued et
+            running ; completed renvoie la conclusion persistée (y compris
+            inconclusive si les identifiants d'assertion diffèrent) ; error
+            et timed_out renvoient inconclusive dérivé à la lecture alors
+            que la colonne reste NULL (CHECK
+            comparison_runs_outcome_requires_terminal).
+          oneOf:
+            - type: 'null'
+            - $ref: '#/components/schemas/ComparisonOutcome'
         created_at:
           type: string
           format: date-time

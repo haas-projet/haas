@@ -9,6 +9,7 @@ use App\Enums\Comparisons\ComparisonSide;
 use App\Models\Comparisons\ComparisonRun;
 use App\Models\Lab\LabRun;
 use App\Models\User;
+use App\Services\Comparisons\ComparisonOutcomeCalculator;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Collection;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -20,6 +21,8 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  */
 final class ComparisonRunQuery
 {
+    public function __construct(private readonly ComparisonOutcomeCalculator $calculator) {}
+
     public function get(User $actor, string $id): ComparisonRunData
     {
         $run = ComparisonRun::query()
@@ -35,10 +38,16 @@ final class ComparisonRunQuery
             ->get();
         $followUrls = $this->childrenFollowUrls($children);
 
+        // BV208 : dérivation unique via le calculateur. Pour error/timed_out
+        // la colonne `outcome` vaut NULL (CHECK ...outcome_requires_terminal)
+        // et expose() rend `inconclusive` ; pour queued/running on expose null.
+        $exposed = $this->calculator->expose($run->state, $run->outcome);
+
         return new ComparisonRunData(
             id: $run->id,
             profileId: $run->profile_id,
             state: $run->state,
+            exposedOutcome: $exposed,
             createdAt: $this->isoOrNull($run->created_at) ?? '',
             startedAt: $this->isoOrNull($run->started_at),
             finishedAt: $this->isoOrNull($run->finished_at),

@@ -43,6 +43,17 @@ final class ListVisibleCapsulesQuery
                 ->whereColumn('capsule_version_technologies.version_id', 'last_pub.latest_published_version_id')
                 ->where('capsule_version_technologies.technology_id', $filter->technology));
         }
+        if ($filter->hasLab === true) {
+            $query->whereExists(fn (QueryBuilder $lab) => $lab->selectRaw('1')
+                ->from('lab_definitions')
+                ->whereColumn('lab_definitions.version_id', 'last_pub.latest_published_version_id')
+                ->where('lab_definitions.enabled', true));
+        } elseif ($filter->hasLab === false) {
+            $query->whereNotExists(fn (QueryBuilder $lab) => $lab->selectRaw('1')
+                ->from('lab_definitions')
+                ->whereColumn('lab_definitions.version_id', 'last_pub.latest_published_version_id')
+                ->where('lab_definitions.enabled', true));
+        }
         if ($filter->search !== null && $filter->search !== '') {
             $pattern = '%'.str_replace(['!', '%', '_'], ['!!', '!%', '!_'], $filter->search).'%';
             $query->where(function (Builder $search) use ($pattern): void {

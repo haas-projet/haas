@@ -21,6 +21,7 @@ final readonly class CapsuleCatalogueFilterData
         public ?string $search = null,
         public ?string $technology = null,
         public string $sort = 'date',
+        public ?bool $hasLab = null,
     ) {
         if (! in_array($sort, self::SORTS, true)) {
             throw new InvalidArgumentException('Tri hors liste blanche.');

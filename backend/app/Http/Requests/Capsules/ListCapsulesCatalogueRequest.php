@@ -26,6 +26,7 @@ final class ListCapsulesCatalogueRequest extends PaginatedRequest
             'q' => ['nullable', 'string', 'max:200'],
             'technology' => ['sometimes', 'required', 'uuid'],
             'sort' => ['sometimes', 'required', Rule::in(CapsuleCatalogueFilterData::SORTS)],
+            'has_lab' => ['sometimes', 'required', 'string', Rule::in(['true', 'false'])],
         ]);
     }
 
@@ -36,6 +37,7 @@ final class ListCapsulesCatalogueRequest extends PaginatedRequest
             'q.*' => 'La recherche doit être un texte de 200 caractères maximum.',
             'technology.*' => 'La technologie doit être identifiée par un UUID valide.',
             'sort.*' => 'Choisissez un tri autorisé : date ou relevance.',
+            'has_lab.*' => 'Choisissez une valeur autorisée pour has_lab : true ou false.',
         ]);
     }
 
@@ -56,15 +58,20 @@ final class ListCapsulesCatalogueRequest extends PaginatedRequest
 
     public function filters(): CapsuleCatalogueFilterData
     {
-        /** @var array{q?: string, technology?: string, sort?: string} $data */
+        /** @var array{q?: string, technology?: string, sort?: string, has_lab?: string} $data */
         $data = $this->validated();
         $search = isset($data['q']) ? trim((string) $data['q']) : null;
+        $hasLab = null;
+        if (isset($data['has_lab'])) {
+            $hasLab = $data['has_lab'] === 'true';
+        }
 
         return new CapsuleCatalogueFilterData(
             page: $this->pageData(),
             search: $search === '' ? null : $search,
             technology: isset($data['technology']) ? strtolower($data['technology']) : null,
             sort: $data['sort'] ?? 'date',
+            hasLab: $hasLab,
         );
     }
 }

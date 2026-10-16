@@ -536,6 +536,24 @@ final class CapsuleCatalogueHttpTest extends PostgresTestCase
         }
     }
 
+    public function test_has_lab_filter_query_count_does_not_grow_with_catalogue_size(): void
+    {
+        $this->seedHasLabCatalogue(initial: 5);
+        $firstCountsByFilter = $this->measureHasLabQueryCounts(perPage: 30);
+        $this->seedHasLabCatalogue(initial: 25);
+        $secondCountsByFilter = $this->measureHasLabQueryCounts(perPage: 30);
+        $this->assertSame(
+            $firstCountsByFilter['true'],
+            $secondCountsByFilter['true'],
+            'Le filtre has_lab=true ne doit pas introduire de requêtes supplémentaires avec la taille du catalogue.'
+        );
+        $this->assertSame(
+            $firstCountsByFilter['false'],
+            $secondCountsByFilter['false'],
+            'Le filtre has_lab=false ne doit pas introduire de requêtes supplémentaires avec la taille du catalogue.'
+        );
+    }
+
     public function test_pagination_bounds_and_foreign_version_labels_are_refused(): void
     {
         foreach (['page=0', 'page=2147483648', 'page[]=1', 'per_page=0', 'per_page=51', 'technology[]=x'] as $query) {
@@ -714,5 +732,40 @@ final class CapsuleCatalogueHttpTest extends PostgresTestCase
         ], []));
 
         return $id;
+    }
+
+    private function seedHasLabCatalogue(int $initial): void
+    {
+        $existing = Capsule::query()->count();
+        for ($i = 1; $i <= $initial; $i++) {
+            $index = $existing + $i;
+            $slug = sprintf('nplus1-%04d', $index);
+            [, , $version] = $this->publishCapsule($slug);
+            if ($index % 2 === 0) {
+                $this->seedLabDefinition($version, true);
+            }
+        }
+    }
+
+    /** @return array{true: int, false: int} */
+    private function measureHasLabQueryCounts(int $perPage): array
+    {
+        DB::enableQueryLog();
+        try {
+            $counts = [];
+            foreach (['true', 'false'] as $value) {
+                DB::flushQueryLog();
+                $this->browserRequest('GET', '/api/v1/capsules?has_lab='.$value.'&per_page='.$perPage)->assertOk();
+                $counts[$value] = count(array_filter(
+                    DB::getQueryLog(),
+                    fn (array $query): bool => str_starts_with($query['query'], 'select') && ! str_contains($query['query'], '"sessions"'),
+                ));
+            }
+        } finally {
+            DB::disableQueryLog();
+        }
+
+        /** @var array{true: int, false: int} $counts */
+        return $counts;
     }
 }

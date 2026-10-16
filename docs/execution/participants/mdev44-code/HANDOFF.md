@@ -14,6 +14,8 @@ CI : tests verts ; étape d'audit composer rouge (avis détectés le 15 octobre)
 
 Fichiers hors de mon domaine modifiés : `backend/routes/api/capsules-lab.php`, `docs/OPENAPI.yaml`, `docs/AI_USAGE.md`, `docs/execution/HANDOFF.md`, `docs/execution/PROGRESS.md`, `SHA256SUMS`, `docs/api/openapi/capsules-lab.yaml`, `docs/api/generated/haas-api.d.ts`, `backend/tests/Integration/Capsules/CapsulesMigrationTest.php`, `backend/tests/Support/Mdev44/DomainTables.php`.
 
+Question ouverte supplémentaire : has_lab porte sur la DERNIÈRE version publiée de la capsule (test_has_lab_filter_keeps_only_capsules_with_active_lab_on_latest_published) : une capsule dont la v1 a un laboratoire actif et dont la v2 publiée n'en a pas disparaît du filtre ; lecture à confirmer (dernière version ou n'importe quelle version publiée).
+
 worker non livré, les runs restent queued ; B36, B37, BV207 à BV210 non livrés
 
 ## 16 octobre 2026 — BV206, lancement idempotent de comparaison, PR en brouillon

@@ -1,5 +1,21 @@
 ﻿# Reprise — capsules/laboratoire
 
+## Intégration capsules et laboratoire
+
+Branche active : `backend/capsules-laboratoire-integration-catalogue-lab`, créée depuis la tête distante BV206 `2fcb9e9` et fusionnant `origin/backend/capsules-laboratoire-b28-favoris-retours` `aa05582` par `git merge --no-ff --no-commit`. Statut : **préparé, PR en brouillon**, aucun DONE.
+
+Fichiers résolus à la main : routes capsules-lab, DomainTables, CapsulesMigrationTest, OPENAPI racine, AI_USAGE, HANDOFF/PROGRESS communs et participant. `SHA256SUMS` repris de BV206 puis régénéré hors dépôt (script temporaire, bytes de l'index), `node scripts/check-manifest.mjs` vert (957 empreintes). `node scripts/validate-pack.mjs` 18/18 et `node scripts/check-deployment-docs.mjs` 7/7 verts.
+
+Filtre Q16 `has_lab` ajouté au catalogue B26 : `whereExists` sur `lab_definitions.enabled=true` liée au `latest_published_version_id`. Tests HTTP dédiés dans `CapsuleCatalogueHttpTest`. Aucun autre comportement du catalogue modifié. OpenAPI `capsules-lab.yaml` documente le paramètre.
+
+PHP de session : `C:\laragon\bin\php\php-8.4.15-Win32-vs17-x64\php.exe`. `~/.haas-test.env` jamais lu. Aucune action manuelle sur PostgreSQL.
+
+CI : tests verts ; étape d'audit composer rouge (avis détectés le 15 octobre) ; composer.lock à mettre à jour par le responsable du socle.
+
+Fichiers hors de mon domaine modifiés : `backend/routes/api/capsules-lab.php`, `docs/OPENAPI.yaml`, `docs/AI_USAGE.md`, `docs/execution/HANDOFF.md`, `docs/execution/PROGRESS.md`, `SHA256SUMS`, `docs/api/openapi/capsules-lab.yaml`, `docs/api/generated/haas-api.d.ts`, `backend/tests/Integration/Capsules/CapsulesMigrationTest.php`, `backend/tests/Support/Mdev44/DomainTables.php`.
+
+worker non livré, les runs restent queued ; B36, B37, BV207 à BV210 non livrés
+
 ## 16 octobre 2026 — BV206, lancement idempotent de comparaison, PR en brouillon
 
 Branche active : `backend/capsules-laboratoire-bv206-lancement-comparaison` basée sur la tête locale BV205 (`8c0a4db`). BV206 **préparé, PR en brouillon**.

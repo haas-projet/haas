@@ -1,5 +1,28 @@
 ﻿# Progression — capsules/laboratoire
 
+## Intégration capsules et laboratoire
+
+Branche `backend/capsules-laboratoire-integration-catalogue-lab` dérivée de la tête BV206 (`2fcb9e9`), merge `--no-ff --no-commit` de `origin/backend/capsules-laboratoire-b28-favoris-retours` (`aa05582`) : **préparé, PR en brouillon**, aucun DONE.
+
+Fichiers résolus à la main : `backend/routes/api/capsules-lab.php` (union des routes, aucune collision de nom : B23 4 / B24 1 / B25 1 / B26 3 / B27 3 / B28 3 / B33 1 / B34 2 / BV202 6 / BV203 1 / BV204 1 / BV205 1 / BV206 1 — 28 routes), `backend/tests/Support/Mdev44/DomainTables.php` et `backend/tests/Integration/Capsules/CapsulesMigrationTest.php` (union des tables, enfants avant parents, aucun CASCADE), `docs/OPENAPI.yaml` (UNION des `$ref`, aucun doublon), `docs/AI_USAGE.md` + `docs/execution/HANDOFF.md` + `docs/execution/PROGRESS.md` + `docs/execution/participants/mdev44-code/HANDOFF.md` + `docs/execution/participants/mdev44-code/PROGRESS.md` (histoires chronologiques des deux côtés, aucune ligne d'un autre participant modifiée). `SHA256SUMS` tenu depuis BV206 puis régénéré par le script temporaire décrit en consigne (hors dépôt, bytes `git show :chemin`). `docs/execution/tasks.json` : valide en JSON. `docs/api/generated/haas-api.d.ts` : auto-mergé puis régénéré par `php scripts/generate-api-types.php` (91 types, aucun diff au-delà du merge trois voies).
+
+Filtre Q16 `has_lab` ajouté au catalogue (B26). Définition restrictive : une version PUBLIÉE dont une `lab_definitions.enabled=true` existe sur cette même version. Lecture limitative consignée ; une question ouverte est consignée (voir plus bas). Le switch global du laboratoire n'est pas un critère. Fichiers livrés : `backend/app/Data/Capsules/CapsuleCatalogueFilterData.php` (champ `hasLab: ?bool`), `backend/app/Http/Requests/Capsules/ListCapsulesCatalogueRequest.php` (liste blanche stricte `true`/`false`, 422 sinon), `backend/app/Queries/Capsules/ListVisibleCapsulesQuery.php` (whereExists/whereNotExists sur `last_pub.latest_published_version_id`, eager loading inchangé, aucun N+1 nouveau), `docs/api/openapi/capsules-lab.yaml` (`has_lab` documenté). Aucun autre comportement du catalogue n'est modifié. Tests HTTP dédiés ajoutés à `backend/tests/Integration/Capsules/CapsuleCatalogueHttpTest.php` : filtre actif, définition désactivée ignorée, version retirée ignorée, capsule masquée ignorée, combinaison avec `technology`, pagination stable sur `has_lab=true`, valeurs invalides refusées en 422.
+
+Fichiers hors de mon domaine modifiés : `backend/routes/api/capsules-lab.php`, `docs/OPENAPI.yaml`, `docs/AI_USAGE.md`, `docs/execution/HANDOFF.md`, `docs/execution/PROGRESS.md`, `SHA256SUMS`, `docs/api/openapi/capsules-lab.yaml`, `docs/api/generated/haas-api.d.ts`, `backend/tests/Integration/Capsules/CapsulesMigrationTest.php`, `backend/tests/Support/Mdev44/DomainTables.php`. Zones réservées respectées : `backend/config/*`, `backend/phpunit.xml`, `.github/workflows/*`, `backend/bootstrap/*`, `backend/routes/api.php`, `composer.*`, les tables de notification. Aucune action manuelle sur PostgreSQL. `~/.haas-test.env` jamais lu.
+
+worker non livré, les runs restent queued ; B36, B37, BV207 à BV210 non livrés
+
+Questions ouvertes cumulées :
+- Rejeu d'une comparaison avec le switch de laboratoire fermé : le contrôle est dans `ApprovedProfileQuery`, après la recherche du rejeu ; **lecture par défaut** « un rejeu renvoie la réponse stockée ; une première requête avec switch fermé reçoit 503 sans consommer d'emplacement ni d'unité », à vérifier par un test ciblé.
+- Baseline réelle absente : `test_only_fixture` sous `app.env=testing` seulement.
+- Forme et signature du manifeste de release non fixées.
+- Notifications : zone réservée du socle, aucune émission dans ce lot.
+- Borne de file B34 non testée séparément.
+- Visibilité du GET §26:957 : 404 pour acteur discordant (BV205) ; lecture restrictive consignée.
+- Format du manifeste de BV203 non fixé.
+- **Q16** (nouvelle) : le contrat exact du filtre `has_lab` est lu de manière restrictive — version publiée visible + `lab_definitions.enabled=true`. Pas de badge projeté dans la Resource à ce stade.
+- **Q20** reportée depuis B28 : aucune route de lecture `GET /me/favorites` fournie.
+
 ## 16 octobre 2026 — BV206, lancement idempotent et quotas partagés préparés
 
 Branche `backend/capsules-laboratoire-bv206-lancement-comparaison` ouverte depuis la tête locale BV205 (`8c0a4db`). Livré :

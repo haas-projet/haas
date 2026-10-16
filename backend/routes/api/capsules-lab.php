@@ -25,6 +25,7 @@ use App\Http\Controllers\Lab\StartLabRunController;
 use App\Http\Controllers\VerificationCases\IndexVerificationCaseController;
 use App\Http\Controllers\VerificationCases\ReviewVerificationCaseController;
 use App\Http\Controllers\VerificationCases\ShowVerificationCaseController;
+use App\Http\Controllers\VerificationCases\ShowVerificationSummaryController;
 use App\Http\Controllers\VerificationCases\StoreVerificationCaseController;
 use App\Http\Controllers\VerificationCases\SubmitVerificationCaseController;
 use App\Http\Controllers\VerificationCases\UpdateVerificationCaseController;
@@ -100,6 +101,15 @@ Route::prefix('capsules')->middleware(['verified'])->group(function (): void {
 });
 
 Route::get('/versions/{id}/lab-definition', ShowLabDefinitionController::class)->whereUuid('id')->name('versions.lab-definition');
+
+// BV209 — fiche de vérification versionnée. Publique (anonyme et membre
+// voient la même fiche d'une version publiée visible) ; versions brouillons,
+// en revue, retirées ou appartenant à une capsule masquée = 404. Aucun
+// paramètre de requête accepté (422). Cache-Control no-store, private.
+Route::get('/versions/{id}/verification-summary', ShowVerificationSummaryController::class)
+    ->whereUuid('id')
+    ->middleware(['throttle:60,1'])
+    ->name('versions.verification-summary');
 
 // BV204 — profils de comparaison approuvés d'une version publiée visible.
 // Lecture seule ; aucun chemin public n'écrit, n'active ou ne retire un

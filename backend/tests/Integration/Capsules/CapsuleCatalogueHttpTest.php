@@ -752,7 +752,7 @@ final class CapsuleCatalogueHttpTest extends PostgresTestCase
     {
         DB::enableQueryLog();
         try {
-            $counts = [];
+            $counts = ['true' => 0, 'false' => 0];
             foreach (['true', 'false'] as $value) {
                 DB::flushQueryLog();
                 $this->browserRequest('GET', '/api/v1/capsules?has_lab='.$value.'&per_page='.$perPage)->assertOk();
@@ -765,7 +765,6 @@ final class CapsuleCatalogueHttpTest extends PostgresTestCase
             DB::disableQueryLog();
         }
 
-        /** @var array{true: int, false: int} $counts */
         return $counts;
     }
 }

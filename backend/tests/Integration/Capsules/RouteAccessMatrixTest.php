@@ -27,12 +27,19 @@ final class RouteAccessMatrixTest extends PostgresTestCase
     use DatabaseMigrations, SpaHttpRequests;
 
     private const CAPSULE_UUID = '00000000-0000-0000-0000-000000000001';
+
     private const VERSION_UUID = '00000000-0000-0000-0000-000000000002';
+
     private const ARTIFACT_UUID = '00000000-0000-0000-0000-000000000003';
+
     private const CASE_UUID = '00000000-0000-0000-0000-000000000004';
+
     private const COMPARISON_UUID = '00000000-0000-0000-0000-000000000005';
+
     private const LAB_RUN_UUID = '00000000-0000-0000-0000-000000000006';
+
     private const PUBLIC_SLUG = 'exemple-capsule';
+
     private const PUBLIC_VERSION_LABEL = '1.0.0';
 
     protected function setUp(): void
@@ -154,7 +161,7 @@ final class RouteAccessMatrixTest extends PostgresTestCase
             'versions.lab-definition', 'versions.verification-summary', 'versions.comparison-profiles',
             'comparisons.', 'lab-runs.', 'verification-cases.',
         ];
-        foreach (Route::getRoutes()->getIterator() as $route) {
+        foreach (Route::getRoutes()->getRoutes() as $route) {
             $name = $route->getName();
             if ($name === null) {
                 continue;

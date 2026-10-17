@@ -32,9 +32,12 @@ use App\Http\Controllers\VerificationCases\UpdateVerificationCaseController;
 use App\Http\Controllers\VerificationCases\WithdrawVerificationCaseController;
 use Illuminate\Support\Facades\Route;
 
-// Catalogue public (B26) : accessible aux visiteurs, aucune carte ne porte
-// d'en-tête personnalisé et seules les versions publiées sont exposées.
-Route::prefix('capsules')->group(function (): void {
+// Catalogue public (B26) : accessible aux visiteurs. Le groupe api applique
+// AssignRequestId, EnsureFrontendRequestsAreStateful (statefulApi),
+// SubstituteBindings, EnsureAccountIsActive et ProtectSpaRequests ; aucun
+// quota ni authentification au niveau du groupe. On ajoute donc un throttle
+// local (60 req/min par IP ou user) pour borner la lecture publique.
+Route::prefix('capsules')->middleware(['throttle:60,1'])->group(function (): void {
     Route::get('/', ListVisibleCapsulesController::class)->name('capsules.catalogue.index');
     Route::get('{slug}', ShowVisibleCapsuleController::class)
         ->where('slug', '^[a-z0-9][a-z0-9-]{1,118}[a-z0-9]$')
@@ -44,9 +47,11 @@ Route::prefix('capsules')->group(function (): void {
         ->name('capsules.catalogue.show.version');
 });
 
-// Brouillons de capsule (lots B23/B24). Membre actif/vérifié requis par
-// ProtectSpaRequests + EnsureAccountIsActive définis au niveau du groupe api.
-Route::prefix('capsules')->group(function (): void {
+// Brouillons de capsule (lots B23/B24). ProtectSpaRequests + EnsureAccountIsActive
+// (groupe api) ne refusent pas l'anonyme : auth:sanctum doit intercepter en
+// premier (401 et non 403) ; verified rejette un compte non vérifié (403) et
+// un quota borne l'écriture de brouillons.
+Route::prefix('capsules')->middleware(['auth:sanctum', 'verified', 'throttle:30,1'])->group(function (): void {
     Route::post('/', StoreCapsuleDraftController::class)->name('capsules.drafts.store');
     Route::post('{capsule}/versions', StoreCapsuleVersionDraftController::class)
         ->whereUuid('capsule')
@@ -59,8 +64,10 @@ Route::prefix('capsules')->group(function (): void {
         ->name('capsules.versions.submit-review');
 });
 
-// Actions admin : demande de corrections (B24) et publication (B25).
-Route::prefix('admin/capsules')->group(function (): void {
+// Actions admin : demande de corrections (B24) et publication (B25). L'auth
+// doit refuser l'anonyme en 401 avant toute validation ; les Policies des
+// contrôleurs/services continuent d'enforcer le rôle modérateur/admin.
+Route::prefix('admin/capsules')->middleware(['auth:sanctum', 'verified', 'throttle:30,1'])->group(function (): void {
     Route::post('{capsule}/versions/{version}/request-changes', RequestChangesController::class)
         ->whereUuid(['capsule', 'version'])
         ->name('admin.capsules.versions.request-changes');
@@ -87,8 +94,10 @@ Route::prefix('capsules')->middleware(['auth:sanctum', 'verified', 'throttle:art
         ->name('capsules.versions.artifact.notices');
 });
 
-// Favoris privés et retours humains (B28). Membre actif/vérifié requis.
-Route::prefix('capsules')->middleware(['verified'])->group(function (): void {
+// Favoris privés et retours humains (B28). auth:sanctum doit refuser
+// l'anonyme en 401 avant verified (sinon le middleware verified répond 403
+// à un visiteur, cf. finding BV209) ; un quota borne les écritures.
+Route::prefix('capsules')->middleware(['auth:sanctum', 'verified', 'throttle:30,1'])->group(function (): void {
     Route::put('{capsule}/favorite', PutFavoriteController::class)
         ->whereUuid('capsule')
         ->name('capsules.favorite.put');
@@ -100,7 +109,13 @@ Route::prefix('capsules')->middleware(['verified'])->group(function (): void {
         ->name('capsules.versions.reuse-reports.store');
 });
 
-Route::get('/versions/{id}/lab-definition', ShowLabDefinitionController::class)->whereUuid('id')->name('versions.lab-definition');
+// Lecture publique de la définition laboratoire (B33) : accessible aux
+// visiteurs via le groupe api (aucune pile d'auth) ; on borne la lecture
+// par un throttle local.
+Route::get('/versions/{id}/lab-definition', ShowLabDefinitionController::class)
+    ->whereUuid('id')
+    ->middleware(['throttle:60,1'])
+    ->name('versions.lab-definition');
 
 // BV209 — fiche de vérification versionnée. Publique (anonyme et membre
 // voient la même fiche d'une version publiée visible) ; versions brouillons,

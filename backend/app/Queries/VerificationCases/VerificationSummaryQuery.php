@@ -56,7 +56,7 @@ final class VerificationSummaryQuery
         // AC45 : rien dans la fiche pour une version non publiée (brouillon,
         // en revue, changements demandés, retirée) ni pour une capsule masquée.
         if ($version->state !== CapsuleVersionState::Published
-            || $capsule->getAttribute('visibility') !== CapsuleVisibility::Visible->value
+            || $capsule->visibility !== CapsuleVisibility::Visible
         ) {
             throw new NotFoundHttpException;
         }

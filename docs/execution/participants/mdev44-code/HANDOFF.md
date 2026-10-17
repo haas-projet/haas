@@ -1,5 +1,47 @@
 ﻿# Reprise — capsules/laboratoire
 
+## 17 octobre 2026 — Durcissement des routes capsules/laboratoire, PR en brouillon
+
+Branche active : `backend/capsules-laboratoire-durcissement-routes`, base = tête de `backend/capsules-laboratoire-bv209-fiche-verification` (`ecc32c3`). Durcissement **préparé, PR en brouillon** ; aucun DONE sans revue humaine.
+
+Fichiers livrés :
+- `backend/routes/api/capsules-lab.php` — ajout de piles middleware RÉELLES sans toucher aux contrôleurs, Policies, Services, Resources, chemins ni noms de route :
+  - Catalogue public (B26, 3 routes) : `['throttle:60,1']`.
+  - Brouillons (B23/B24, 4 routes) : `['auth:sanctum', 'verified', 'throttle:30,1']`.
+  - `admin/capsules` (B24/B25, 2 routes) : `['auth:sanctum', 'verified', 'throttle:30,1']`.
+  - Favoris et retours (B28, 3 routes) : `['verified']` → `['auth:sanctum', 'verified', 'throttle:30,1']`.
+  - `GET /versions/{id}/lab-definition` (B33) : `['throttle:60,1']`.
+- `backend/tests/Integration/Capsules/RouteAccessMatrixTest.php` — matrice d'accès (29 routes) + 5 tests de quota (429 + Retry-After). 111 tests, 143 assertions.
+
+Zones réservées intactes : `backend/config/*`, `backend/phpunit.xml`, `.github/workflows/*`, `backend/bootstrap/*`, `backend/routes/api.php`, `backend/app/Providers/*`, `composer.*`. Aucun limiteur nommé ajouté dans `AppServiceProvider` ; tous les quotas sont en ligne `throttle:<n>,<minutes>`. Aucune migration ajoutée. `~/.haas-test.env` jamais lu ; aucune action sur PostgreSQL.
+
+Tests locaux (PHP 8.4.15 Laragon, `C:\laragon\bin\php\php-8.4.15-Win32-vs17-x64\php.exe`, `openssl`+`pdo_pgsql` chargés) :
+- `composer lint` passed, `composer analyse` [OK] No errors.
+- `composer test` (Unit+Feature+Architecture) : 501 tests, 5050 assertions, OK.
+- `phpunit --testsuite Integration tests/Integration/Capsules tests/Integration/Lab tests/Integration/VerificationCases tests/Integration/Comparisons` : 727 tests, 2901 assertions, OK en 16:37.880.
+- `phpunit tests/Integration/Capsules/RouteAccessMatrixTest.php` : 111 tests, 143 assertions, OK.
+- `node scripts/check-manifest.mjs` : 974 empreintes vérifiées. `scripts/validate-pack.mjs` : 18/18 PASS. `scripts/check-deployment-docs.mjs` : 7/7 PASS.
+
+Commits locaux (dans l'ordre) :
+1. `test(capsules): fixer la matrice d'accès des routes`.
+2. `fix(capsules): protéger les routes par auth, vérification et quota`.
+3. `test(capsules): couvrir les quotas 30 et 60 par minute`.
+4. `chore(capsules): respecter pint et phpstan dans la matrice d'accès`.
+5. `chore(integration): régénérer les empreintes du durcissement`.
+
+Questions ouvertes :
+- fiche de vérification publique : `suite_digest`, `release_commit` et `reviewer_handle` exposés à tout visiteur (à confirmer).
+- `lab-definition` publique avec digests (voulu par B33).
+- PATCH de brouillon de capsule sans `Idempotency-Key` (lock_version) alors que `PATCH /verification-cases/{id}` l'exige.
+- `author_id` et `digest` des révisions de cas exposés aux membres.
+- `sha256` des artefacts exposés.
+- `available=true` dès qu'un `lab_results` existe, même incomplet.
+- identifiants de run et de comparaison publics dans la fiche.
+- propriétaire ou contributeur suspendu non filtré dans la fiche.
+- commentaire de `VerificationSummaryQuery` annonçant trois SELECT alors qu'il y en a plus.
+
+Prochain lot possible : traiter l'une des questions ouvertes ci-dessus (fiche publique privée membre, idempotency sur PATCH de brouillon, filtrage suspendu dans la fiche, exposition d'identifiants internes), toujours en matrice et tests d'abord.
+
 ## 17 octobre 2026 — BV209, fiche de vérification versionnée, PR en brouillon
 
 Branche active : `backend/capsules-laboratoire-bv209-fiche-verification`, base = tête BV208 (`9a95804`). BV209 **préparé, PR en brouillon** ; aucun DONE sans revue humaine.

@@ -85,6 +85,8 @@ paths:
     $ref: './api/openapi/verification-cases.yaml#/paths/~1api~1v1~1verification-cases~1{verification_case}~1withdraw'
   '/api/v1/admin/verification-cases/{verification_case}/review':
     $ref: './api/openapi/verification-cases.yaml#/paths/~1api~1v1~1admin~1verification-cases~1{verification_case}~1review'
+  '/api/v1/versions/{id}/verification-summary':
+    $ref: './api/openapi/verification-cases.yaml#/paths/~1api~1v1~1versions~1{id}~1verification-summary'
   /api/v1/capsules/{capsule}/versions/{version}/artifact/{artifact}:
     $ref: './api/openapi/capsules-lab.yaml#/paths/~1api~1v1~1capsules~1{capsule}~1versions~1{version}~1artifact~1{artifact}'
   /api/v1/capsules/{capsule}/versions/{version}/artifact/{artifact}/stream:

@@ -1,8 +1,8 @@
-# Pilote : mdev44-code. Cas de vérification documentaires (BV202/BV203).
+# Pilote : mdev44-code. Cas de vérification documentaires (BV202/BV203) et fiche versionnée (BV209).
 openapi: 3.1.0
 info:
   title: HAAS — Cas de vérification
-  version: 0.1.0
+  version: 0.2.0
 paths:
   /api/v1/verification-cases:
     get:
@@ -221,6 +221,40 @@ paths:
           description: État interdit ou conflit d'idempotence
         '422':
           description: Motif manquant ou invalide
+  '/api/v1/versions/{id}/verification-summary':
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    get:
+      operationId: showVerificationSummary
+      summary: Lire la fiche de vérification d'une version publiée visible
+      description: >
+        BV209 — Fiche versionnée (CAHIER_DES_CHARGES.md:1665 et 1673).
+        Publique : anonyme et membre connecté voient la même projection.
+        Toute autre id (brouillon, en revue, retirée, capsule masquée, UUID
+        inconnu) renvoie 404 — aucun secret dans la réponse (AC45).
+        Les blocs sont DISTINCTS, jamais agrégés : aucun score, aucun badge,
+        aucune « fiabilité », aucune réussite héritée d'une autre version.
+        Jamais reviewer_id, note de revue, courriel, chemin privé d'artefact
+        ni empreinte de notice. Cache-Control no-store, private.
+      responses:
+        '200':
+          description: Fiche de vérification de la version publiée
+          headers:
+            Cache-Control:
+              description: 'no-store, private'
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerificationSummaryEnvelope'
+        '404':
+          description: Version inconnue, non publiée, retirée ou capsule masquée
+        '422':
+          description: Un paramètre de requête a été envoyé (la fiche n'en accepte aucun)
 components:
   schemas:
     VerificationCaseParent:
@@ -356,3 +390,160 @@ components:
       properties:
         lock_version: { type: integer, minimum: 1, maximum: 2147483646 }
         reason: { type: string, minLength: 10, maxLength: 500 }
+    EvidenceSource:
+      type: string
+      enum: ['ci', 'lab', 'human_declaration']
+    ContributionRole:
+      type: string
+      enum: ['diagnosis', 'fix', 'documentation', 'test', 'case']
+    ReuseReportOutcome:
+      type: string
+      enum: ['reproduced', 'partial', 'failed']
+    LabScenarioKey:
+      type: string
+      enum: ['nominal_event', 'duplicate_event', 'distinct_events', 'invalid_event']
+    VerificationSummaryContributor:
+      type: object
+      additionalProperties: false
+      required: [handle, role]
+      properties:
+        handle: { type: string, minLength: 1 }
+        role:
+          $ref: '#/components/schemas/ContributionRole'
+    VerificationSummaryCaseExamined:
+      type: object
+      additionalProperties: false
+      required: [scenario_key, suite_digest, release_commit, integrated_at, reviewer_handle, source]
+      properties:
+        scenario_key:
+          $ref: '#/components/schemas/LabScenarioKey'
+        suite_digest:
+          type: string
+          pattern: '^[0-9a-f]{64}$'
+        release_commit:
+          type: string
+          pattern: '^[0-9a-f]{40}$'
+        integrated_at:
+          type: string
+          format: date-time
+        reviewer_handle:
+          description: Pseudo public du relecteur ; jamais son identifiant interne ni la note de revue (AC46).
+          type: string
+          minLength: 1
+        source:
+          $ref: '#/components/schemas/EvidenceSource'
+    VerificationSummaryObservation:
+      type: object
+      additionalProperties: false
+      required: [handle, outcome, observation, environment, reported_at, is_internal, source]
+      properties:
+        handle: { type: string, minLength: 1 }
+        outcome:
+          $ref: '#/components/schemas/ReuseReportOutcome'
+        observation: { type: string }
+        environment: { type: string }
+        reported_at:
+          type: string
+          format: date
+        is_internal:
+          description: Déclaration faite par l'owner ou un contributeur de la version ; marquée mais toujours exposée.
+          type: boolean
+        source:
+          $ref: '#/components/schemas/EvidenceSource'
+    VerificationSummaryLabRun:
+      type: object
+      additionalProperties: false
+      required: [id, scenario_key, state, finished_at, source]
+      properties:
+        id: { type: string, format: uuid }
+        scenario_key:
+          $ref: '#/components/schemas/LabScenarioKey'
+        state:
+          type: string
+          enum: ['queued', 'running', 'passed', 'failed', 'error', 'timed_out']
+        finished_at:
+          type: [string, 'null']
+          format: date-time
+        source:
+          $ref: '#/components/schemas/EvidenceSource'
+    VerificationSummaryLabComparison:
+      type: object
+      additionalProperties: false
+      required: [id, state, outcome, finished_at, source]
+      properties:
+        id: { type: string, format: uuid }
+        state:
+          $ref: '../../api/openapi/comparisons.yaml#/components/schemas/ComparisonState'
+        outcome:
+          description: Dérivé par ComparisonOutcomeCalculator::expose (BV208).
+          oneOf:
+            - type: 'null'
+            - $ref: '../../api/openapi/comparisons.yaml#/components/schemas/ComparisonOutcome'
+        finished_at:
+          type: [string, 'null']
+          format: date-time
+        source:
+          $ref: '#/components/schemas/EvidenceSource'
+    VerificationSummaryLabEvidence:
+      type: object
+      additionalProperties: false
+      required: [available, message, runs, comparisons]
+      properties:
+        available:
+          description: Vrai uniquement si au moins un lab_result existe pour cette version.
+          type: boolean
+        message:
+          description: Texte littéral « Aucun test de laboratoire disponible pour cette version » lorsque available=false ; null sinon.
+          type: [string, 'null']
+        runs:
+          type: array
+          items:
+            $ref: '#/components/schemas/VerificationSummaryLabRun'
+        comparisons:
+          type: array
+          items:
+            $ref: '#/components/schemas/VerificationSummaryLabComparison'
+    VerificationSummaryVersion:
+      type: object
+      additionalProperties: false
+      required: [id, capsule_slug, version_label, state, published_at]
+      properties:
+        id: { type: string, format: uuid }
+        capsule_slug: { type: string }
+        version_label: { type: string }
+        state:
+          type: string
+          enum: ['published']
+        published_at:
+          type: string
+          format: date-time
+    VerificationSummary:
+      type: object
+      additionalProperties: false
+      required: [version, limits, contributors, cases_examined, observations_declared, lab_evidence]
+      properties:
+        version:
+          $ref: '#/components/schemas/VerificationSummaryVersion'
+        limits:
+          type: [string, 'null']
+        contributors:
+          type: array
+          items:
+            $ref: '#/components/schemas/VerificationSummaryContributor'
+        cases_examined:
+          type: array
+          items:
+            $ref: '#/components/schemas/VerificationSummaryCaseExamined'
+        observations_declared:
+          type: array
+          items:
+            $ref: '#/components/schemas/VerificationSummaryObservation'
+        lab_evidence:
+          $ref: '#/components/schemas/VerificationSummaryLabEvidence'
+    VerificationSummaryEnvelope:
+      type: object
+      additionalProperties: false
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/VerificationSummary'

@@ -1,5 +1,45 @@
 ﻿# Reprise — capsules/laboratoire
 
+## 17 octobre 2026 — BV209, fiche de vérification versionnée, PR en brouillon
+
+Branche active : `backend/capsules-laboratoire-bv209-fiche-verification`, base = tête BV208 (`9a95804`). BV209 **préparé, PR en brouillon** ; aucun DONE sans revue humaine.
+
+Fichiers livrés (hors tests) :
+- `backend/app/Http/Controllers/VerificationCases/ShowVerificationSummaryController.php` — route GET /api/v1/versions/{id}/verification-summary (throttle:60,1), 422 sur tout paramètre, 404 UUID mal formé, 404 sinon.
+- `backend/app/Queries/VerificationCases/VerificationSummaryQuery.php` — publication visible seule exposée (comparaison enum `visibility === CapsuleVisibility::Visible`), nombre de SELECTs stable (3 blocs + lab join).
+- `backend/app/Data/VerificationCases/VerificationSummaryData.php` + `VerificationSummaryLabEvidence.php` — projection scellée.
+- `backend/app/Http/Resources/VerificationCases/VerificationSummaryResource.php` — blocs DISTINCTS, aucun score/badge/fiabilité.
+- `backend/routes/api/capsules-lab.php` — ajout route avec `whereUuid` + `throttle:60,1`.
+
+Tests :
+- `backend/tests/Integration/VerificationCases/VerificationSummaryHttpTest.php` — 13 tests, 70 assertions (voir PROGRESS pour la liste).
+- Helper `publishedVersionWith()` dans le fichier de test pour contourner les triggers B22/B25 (draft → publication avec reviewer distinct, `content_digest` renseigné seulement au passage à `published`).
+
+API :
+- `docs/api/openapi/verification-cases.yaml` 0.1.0 → 0.2.0 : nouveau chemin + schémas (`VerificationSummary`, `VerificationSummaryEnvelope`, `VerificationSummaryLabEvidence`, `VerificationSummaryLabComparison`, `VerificationSummaryLabRun`, `VerificationSummaryContributor`, `VerificationSummaryCaseExamined`, `VerificationSummaryObservation`, `VerificationSummaryVersion`) et énumérations locales (`EvidenceSource`, `ContributionRole`, `ReuseReportOutcome`, `LabScenarioKey`).
+- `docs/OPENAPI.yaml` : UNE ligne `$ref` ajoutée.
+- `docs/api/generated/haas-api.d.ts` régénéré via `php scripts/generate-api-types.php` (105 types ; diff additif).
+
+Zones réservées intactes : `backend/config/*`, `backend/phpunit.xml`, `.github/workflows/*`, `backend/bootstrap/*`, `backend/routes/api.php`, `routes/console.php`, `composer.*`, les tables de notification. **Aucune migration ajoutée** (BV209 est en lecture seule). `backend/tests/Support/Mdev44/DomainTables.php` et `backend/tests/Integration/Capsules/CapsulesMigrationTest.php` inchangés.
+
+Tests locaux (PHP 8.4.15 Laragon, `C:\laragon\bin\php\php-8.4.15-Win32-vs17-x64\php.exe`, `openssl`+`pdo_pgsql` chargés ; `~/.haas-test.env` jamais lu) :
+- `composer lint` passed, `composer analyse` [OK] No errors.
+- `composer test` (Unit+Feature+Architecture) : 501 tests, 5050 assertions, OK.
+- `phpunit --filter 'VerificationSummaryHttpTest'` : 13/70.
+- Integration par dossiers `Comparisons|Lab|VerificationCases|Capsules` hors Demo : à joindre à la PR.
+
+CI attendue : tests verts PHP 8.4/PHP 8.5, seule « Contrôler les dépendances » rouge (avis détectés le 15 octobre, `composer.lock` à mettre à jour par le responsable du socle).
+
+Fichiers hors de mon domaine modifiés : `docs/OPENAPI.yaml`, `docs/api/openapi/verification-cases.yaml`, `docs/api/generated/haas-api.d.ts`, `backend/routes/api/capsules-lab.php`, `SHA256SUMS`.
+
+worker non livré, les runs restent queued ; B36, B37, BV207 et BV210 non livrés ; AC40, AC48 et AC49 non couverts.
+
+Questions ouvertes (BV209) :
+- Visibilité publique de la fiche (CAHIER:1665 cite la route sans la qualifier).
+- Pseudo du relecteur (AC46) : exposé via `reviewer_handle`, jamais `reviewer_id` ni note de revue.
+- `is_internal` conservé ; aucune agrégation (aucun score/badge/fiabilité) — à confirmer en revue comme interprétation de « auto-validation non comptée ».
+- « Retrait sécurisé » (AC45) : interprété comme 404 global sur toute version hors `published` + capsule `Hidden`, sans fuite de champ privé.
+
 ## 16 octobre 2026 — BV208, conclusions et pannes de comparaison, PR en brouillon
 
 Branche active : `backend/capsules-laboratoire-bv208-conclusions-comparaison`, base = tête d'intégration `6a1d2d7`. BV208 **préparé, PR en brouillon** ; aucun DONE sans revue humaine.

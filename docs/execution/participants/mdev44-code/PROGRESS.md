@@ -1,5 +1,40 @@
 ﻿# Progression — capsules/laboratoire
 
+## 17 octobre 2026 — BV209, fiche de vérification versionnée préparée
+
+Branche `backend/capsules-laboratoire-bv209-fiche-verification` ouverte depuis la tête BV208 (`9a95804`). Livré :
+
+- `App\Http\Controllers\VerificationCases\ShowVerificationSummaryController` + route `GET /api/v1/versions/{id}/verification-summary` (throttle:60,1, aucune route mutante). Publique : anonyme et membre connecté voient la même projection, en 200 Cache-Control no-store, private. UUID inconnu, version brouillon/en revue/retirée, capsule masquée = 404 (AC45). Tout paramètre de requête = 422.
+- `App\Queries\VerificationCases\VerificationSummaryQuery` lit la fiche en un nombre fixe de SELECTs (test figé : 5 vs 30 contributeurs/déclarations rendent le même compteur de requêtes). Comparaison explicite d'enum sur `capsule->visibility` pour que le filtre masqué fonctionne.
+- `App\Data\VerificationCases\VerificationSummaryData` + sous-objet `VerificationSummaryLabEvidence` (facteurs `unavailable()` / `withEvidence()`) et `App\Http\Resources\VerificationCases\VerificationSummaryResource` : blocs DISTINCTS (version, limits, contributors, cases_examined, observations_declared, lab_evidence) jamais agrégés, pas de score ni de badge ni de fiabilité.
+- Blocs : contributeurs (handle+rôle, aucun id ni courriel), cas intégrés (jointure `case_scenario_links` + `verification_case_revisions` + `verification_cases` + `users` relecteur ; `reviewer_handle` seulement, AC46 ; source=ci), observations déclarées (`reuse_reports` B28, is_internal préservé, source=human_declaration), lab_evidence (available=true si au moins un lab_result existe, sinon available=false + message « Aucun test de laboratoire disponible pour cette version »). Les comparaisons liées renvoient leur `outcome` via la règle UNIQUE `ComparisonOutcomeCalculator::expose` livrée en BV208.
+- Fragment OpenAPI `docs/api/openapi/verification-cases.yaml` 0.1.0 → 0.2.0 : nouveau chemin + schémas (`VerificationSummary`, `VerificationSummaryEnvelope`, `VerificationSummaryLabEvidence`, etc.) ; énumérations locales (`EvidenceSource`, `ContributionRole`, `ReuseReportOutcome`, `LabScenarioKey`). `VerificationSummaryLabComparison` référence `ComparisonState` et `ComparisonOutcome` du fragment `comparisons.yaml`.
+- `docs/OPENAPI.yaml` : UNE ligne `$ref` ajoutée pour `/api/v1/versions/{id}/verification-summary`.
+- `docs/api/generated/haas-api.d.ts` régénéré via `php scripts/generate-api-types.php` : 105 types, diff additif (nouveaux types BV209, aucun supprimé).
+
+Tests livrés (hors Demo) :
+- `Tests\Integration\VerificationCases\VerificationSummaryHttpTest` — 13 tests, 70 assertions : rejet 422 des paramètres, 404 sur UUID inconnu / brouillon / capsule masquée, anonyme = membre connecté, fiche complète sans champ privé, bloc lab « unavailable » puis « available » avec runs+comparisons, nouvelle version sans badge hérité, auto-validation marquée is_internal (aucun total agrégé), aucun champ privé (reviewer_id, review_note, notes, email, private_path, notices_path) dans le payload, compte de requêtes stable 5 vs 30, aucune route mutante.
+- Helper `publishedVersionWith()` respecte les triggers B22 : contributeurs attachés en état `draft` (CHECK `capsule_versions_content_digest_requires_published` → `content_digest` renseigné seulement au passage à `published`), puis bascule UPDATE vers `published` avec reviewer distinct de l'owner et des contributeurs (contrainte `capsule_versions_independent_reviewer`).
+- `countQueriesFor()` isole `enableQueryLog`/`getQueryLog` par appel et amorce le middleware pour éviter les parasites de première requête.
+
+Tests locaux (PHP 8.4.15 Laragon, `C:\laragon\bin\php\php-8.4.15-Win32-vs17-x64\php.exe`, `openssl`+`pdo_pgsql` chargés ; `~/.haas-test.env` jamais lu) :
+- `vendor/bin/pint --test` : passed.
+- `vendor/bin/phpstan analyse` : [OK] No errors.
+- `phpunit --testsuite Unit,Feature,Architecture` : 501 tests, 5050 assertions, OK.
+- `phpunit --filter 'VerificationSummaryHttpTest'` : 13/70.
+
+BV209 **préparé, PR en brouillon** ; jamais DONE sans revue humaine et CI exacte reçues. CI attendue : tests verts PHP 8.4/PHP 8.5, seule « Contrôler les dépendances » rouge (`composer.lock` à mettre à jour par le responsable du socle, avis détectés le 15 octobre).
+
+worker non livré, les runs restent queued ; B36, B37, BV207 et BV210 non livrés ; AC40, AC48 et AC49 non couverts.
+
+Fichiers hors de mon domaine modifiés : `docs/OPENAPI.yaml`, `docs/api/openapi/verification-cases.yaml`, `docs/api/generated/haas-api.d.ts`, `backend/routes/api/capsules-lab.php`, `SHA256SUMS`. Zones réservées intactes : `backend/config/*`, `backend/phpunit.xml`, `.github/workflows/*`, `backend/bootstrap/*`, `backend/routes/api.php`, `routes/console.php`, `composer.*`, les tables de notification. Aucune migration ajoutée. Aucune action manuelle sur PostgreSQL.
+
+Questions ouvertes (BV209) :
+- Exposition de la fiche en lecture publique sans paramètre : CAHIER_DES_CHARGES.md:1665 cite la route sans préciser la visibilité ; lecture retenue « publique pour une version publiée visible ». À confirmer en revue.
+- Pseudo du relecteur (AC46) : exposé via `reviewer_handle` ; aucune note de revue, aucun `reviewer_id`. B26 masquait déjà `reviewer_id` à la lecture ; à confirmer.
+- `is_internal` d'un `reuse_report` : conservé dans la fiche (observations marquées) ; l'« auto-validation non comptée » se traduit par l'absence totale d'agrégation côté serveur (aucun score, badge ou total exposé). À confirmer.
+- « Retrait sécurisé » (AC45) : interprété comme 404 global (version non publiée ou capsule masquée) + absence totale d'exposition des champs internes (reviewer_id, review_note, notes, email, private_path, notices_path) ; vérifié par assertion sur le payload entier. À confirmer.
+
 ## 16 octobre 2026 — BV208, conclusions et pannes de comparaison préparées
 
 Branche `backend/capsules-laboratoire-bv208-conclusions-comparaison` ouverte depuis la tête d'intégration (`6a1d2d7`). Livré :

@@ -302,6 +302,75 @@ final class RouteAccessMatrixTest extends PostgresTestCase
         );
     }
 
+    public function test_catalogue_public_rejects_beyond_sixty_requests_per_minute(): void
+    {
+        $this->browserRequest('GET', '/sanctum/csrf-cookie');
+        for ($i = 0; $i < 60; $i++) {
+            $this->browserRequest('GET', '/api/v1/capsules');
+        }
+        $response = $this->browserRequest('GET', '/api/v1/capsules');
+        $this->assertSame(429, $response->status(), 'La 61e requête anonyme doit être limitée');
+        $this->assertNotNull($response->headers->get('Retry-After'));
+        Cache::store('array')->flush();
+    }
+
+    public function test_lab_definition_rejects_beyond_sixty_requests_per_minute(): void
+    {
+        $uuid = self::VERSION_UUID;
+        $this->browserRequest('GET', '/sanctum/csrf-cookie');
+        for ($i = 0; $i < 60; $i++) {
+            $this->browserRequest('GET', "/api/v1/versions/{$uuid}/lab-definition");
+        }
+        $response = $this->browserRequest('GET', "/api/v1/versions/{$uuid}/lab-definition");
+        $this->assertSame(429, $response->status(), 'La 61e requête anonyme doit être limitée');
+        $this->assertNotNull($response->headers->get('Retry-After'));
+        Cache::store('array')->flush();
+    }
+
+    public function test_capsule_drafts_group_rejects_beyond_thirty_requests_per_minute(): void
+    {
+        $member = User::factory()->verified()->create();
+        $this->loginAs($member);
+        $capsule = self::CAPSULE_UUID;
+        $version = self::VERSION_UUID;
+        for ($i = 0; $i < 30; $i++) {
+            $this->browserRequest('POST', "/api/v1/capsules/{$capsule}/versions/{$version}/submit-review");
+        }
+        $response = $this->browserRequest('POST', "/api/v1/capsules/{$capsule}/versions/{$version}/submit-review");
+        $this->assertSame(429, $response->status(), 'La 31e requête d\'un membre doit être limitée');
+        $this->assertNotNull($response->headers->get('Retry-After'));
+        Cache::store('array')->flush();
+    }
+
+    public function test_admin_capsules_group_rejects_beyond_thirty_requests_per_minute(): void
+    {
+        $moderator = User::factory()->verified()->moderator()->create();
+        $this->loginAs($moderator);
+        $capsule = self::CAPSULE_UUID;
+        $version = self::VERSION_UUID;
+        for ($i = 0; $i < 30; $i++) {
+            $this->browserRequest('POST', "/api/v1/admin/capsules/{$capsule}/versions/{$version}/publish");
+        }
+        $response = $this->browserRequest('POST', "/api/v1/admin/capsules/{$capsule}/versions/{$version}/publish");
+        $this->assertSame(429, $response->status(), 'La 31e requête admin doit être limitée');
+        $this->assertNotNull($response->headers->get('Retry-After'));
+        Cache::store('array')->flush();
+    }
+
+    public function test_favorite_and_reuse_group_rejects_beyond_thirty_requests_per_minute(): void
+    {
+        $member = User::factory()->verified()->create();
+        $this->loginAs($member);
+        $capsule = Capsule::factory()->create(['slug' => 'cible-throttle']);
+        for ($i = 0; $i < 30; $i++) {
+            $this->browserRequest('PUT', "/api/v1/capsules/{$capsule->id}/favorite");
+        }
+        $response = $this->browserRequest('PUT', "/api/v1/capsules/{$capsule->id}/favorite");
+        $this->assertSame(429, $response->status(), 'La 31e requête favoris doit être limitée');
+        $this->assertNotNull($response->headers->get('Retry-After'));
+        Cache::store('array')->flush();
+    }
+
     private function loginAs(User $user): void
     {
         $this->browserCookies = [];

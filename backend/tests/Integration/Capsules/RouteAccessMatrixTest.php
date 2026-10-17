@@ -378,6 +378,46 @@ final class RouteAccessMatrixTest extends PostgresTestCase
         Cache::store('array')->flush();
     }
 
+    /**
+     * ThrottleRequests::handle (vendor) construit la clé comme
+     * `$prefix.resolveRequestSignature($request)` où la signature est l'id
+     * utilisateur (authentifié) ou `domaine|ip` : aucun nom ni chemin de route
+     * n'y figure. Deux groupes `throttle:max,minutes` sans 3e paramètre
+     * partagent donc leur compteur pour un même membre ou une même IP.
+     */
+    public function test_read_quota_counter_does_not_consume_write_group_budget(): void
+    {
+        $member = User::factory()->verified()->create();
+        $this->loginAs($member);
+        $labRun = self::LAB_RUN_UUID;
+        for ($i = 0; $i < 30; $i++) {
+            $this->browserRequest('GET', "/api/v1/lab-runs/{$labRun}");
+        }
+        $response = $this->browserRequest('POST', '/api/v1/lab-runs');
+        $this->assertNotSame(
+            429,
+            $response->status(),
+            'Les quotas de GET /lab-runs/{id} (60/min) et POST /lab-runs (30/min) doivent être indépendants',
+        );
+        Cache::store('array')->flush();
+    }
+
+    public function test_catalogue_counter_does_not_limit_lab_definition_group(): void
+    {
+        $this->browserRequest('GET', '/sanctum/csrf-cookie');
+        for ($i = 0; $i < 61; $i++) {
+            $this->browserRequest('GET', '/api/v1/capsules');
+        }
+        $uuid = self::VERSION_UUID;
+        $response = $this->browserRequest('GET', "/api/v1/versions/{$uuid}/lab-definition");
+        $this->assertNotSame(
+            429,
+            $response->status(),
+            'Le compteur épuisé du catalogue public ne doit pas limiter GET /versions/{id}/lab-definition',
+        );
+        Cache::store('array')->flush();
+    }
+
     private function loginAs(User $user): void
     {
         $this->browserCookies = [];

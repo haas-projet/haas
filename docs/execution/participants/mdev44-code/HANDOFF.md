@@ -1,5 +1,9 @@
 ﻿# Reprise — capsules/laboratoire
 
+## 17 octobre 2026 — Durcissement des routes : compteurs de quota isolés, PR en brouillon
+
+Les compteurs de quota en ligne partageaient une même clé par membre ou par IP ; ils sont désormais isolés par groupe de routes (préfixes) ; valeurs 30 et 60 par minute à confirmer en revue, notamment pour une IP partagée.
+
 ## 17 octobre 2026 — Durcissement des routes capsules/laboratoire, PR en brouillon
 
 Branche active : `backend/capsules-laboratoire-durcissement-routes`, base = tête de `backend/capsules-laboratoire-bv209-fiche-verification` (`ecc32c3`). Durcissement **préparé, PR en brouillon** ; aucun DONE sans revue humaine.

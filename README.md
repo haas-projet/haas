@@ -37,7 +37,7 @@ Preuves : [revue et fusions de Madina](docs/quality/MERGE_MADINA.md), [fusions d
 
 ## Démarrer le backend en local
 
-Prérequis : **PHP 8.4 minimum** avec `pdo_pgsql`, **Composer 2** et **PostgreSQL 17**. Node.js sert aux contrôles documentaires ; les versions observées sont consignées dans [VERSIONS.md](docs/VERSIONS.md).
+Prérequis : **PHP 8.4.1 minimum** avec `pdo_pgsql`, **Composer 2** et **PostgreSQL 17**. Node.js sert aux contrôles documentaires ; les versions observées sont consignées dans [VERSIONS.md](docs/VERSIONS.md).
 
 Depuis un nouveau clone, exemple PowerShell :
 

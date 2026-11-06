@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 
 /**
@@ -53,5 +54,11 @@ class CapsuleVersion extends Model
         return $this->belongsToMany(Technology::class, 'capsule_version_technologies', 'version_id', 'technology_id')
             ->withPivot('version_label')
             ->withTimestamps();
+    }
+
+    /** @return HasMany<CapsuleContributor, $this> */
+    public function contributors(): HasMany
+    {
+        return $this->hasMany(CapsuleContributor::class, 'version_id');
     }
 }

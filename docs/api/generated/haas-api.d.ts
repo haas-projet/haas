@@ -163,9 +163,17 @@ export type profiles_PublicProfile = (profiles_ProfileFields);
 
 export type profiles_Technology = { readonly "id": string; readonly "slug": string; readonly "name": string; };
 
+export type verification_cases_ContributionRole = "diagnosis" | "fix" | "documentation" | "test" | "case";
+
 export type verification_cases_CreateVerificationCaseInput = { readonly "parent": verification_cases_VerificationCaseParent; readonly "body": verification_cases_VerificationCaseBodyInput; };
 
+export type verification_cases_EvidenceSource = "ci" | "lab" | "human_declaration";
+
+export type verification_cases_LabScenarioKey = "nominal_event" | "duplicate_event" | "distinct_events" | "invalid_event";
+
 export type verification_cases_LockVersionInput = { readonly "lock_version": number; };
+
+export type verification_cases_ReuseReportOutcome = "reproduced" | "partial" | "failed";
 
 export type verification_cases_ReviewVerificationCaseInput = { readonly "lock_version": number; readonly "decision": "reviewed" | "declined"; readonly "reason"?: string | null; };
 
@@ -182,5 +190,23 @@ export type verification_cases_VerificationCaseList = { readonly "data": Readonl
 export type verification_cases_VerificationCaseParent = { readonly "kind": "help_request" | "capsule_version"; readonly "help_request_id": string | null; readonly "capsule_version_id": string | null; };
 
 export type verification_cases_VerificationCaseRevisionPublic = { readonly "revision_no": number; readonly "digest": string; readonly "submitted_at": string | null; readonly "body": (verification_cases_VerificationCaseBodyPublic | null); };
+
+export type verification_cases_VerificationSummary = { readonly "version": verification_cases_VerificationSummaryVersion; readonly "limits": string | null; readonly "contributors": ReadonlyArray<verification_cases_VerificationSummaryContributor>; readonly "cases_examined": ReadonlyArray<verification_cases_VerificationSummaryCaseExamined>; readonly "observations_declared": ReadonlyArray<verification_cases_VerificationSummaryObservation>; readonly "lab_evidence": verification_cases_VerificationSummaryLabEvidence; };
+
+export type verification_cases_VerificationSummaryCaseExamined = { readonly "scenario_key": verification_cases_LabScenarioKey; readonly "suite_digest": string; readonly "release_commit": string; readonly "integrated_at": string; readonly "reviewer_handle": string; readonly "source": verification_cases_EvidenceSource; };
+
+export type verification_cases_VerificationSummaryContributor = { readonly "handle": string; readonly "role": verification_cases_ContributionRole; };
+
+export type verification_cases_VerificationSummaryEnvelope = { readonly "data": verification_cases_VerificationSummary; };
+
+export type verification_cases_VerificationSummaryLabComparison = { readonly "id": string; readonly "state": comparisons_ComparisonState; readonly "outcome": (null | comparisons_ComparisonOutcome); readonly "finished_at": string | null; readonly "source": verification_cases_EvidenceSource; };
+
+export type verification_cases_VerificationSummaryLabEvidence = { readonly "available": boolean; readonly "message": string | null; readonly "runs": ReadonlyArray<verification_cases_VerificationSummaryLabRun>; readonly "comparisons": ReadonlyArray<verification_cases_VerificationSummaryLabComparison>; };
+
+export type verification_cases_VerificationSummaryLabRun = { readonly "id": string; readonly "scenario_key": verification_cases_LabScenarioKey; readonly "state": "queued" | "running" | "passed" | "failed" | "error" | "timed_out"; readonly "finished_at": string | null; readonly "source": verification_cases_EvidenceSource; };
+
+export type verification_cases_VerificationSummaryObservation = { readonly "handle": string; readonly "outcome": verification_cases_ReuseReportOutcome; readonly "observation": string; readonly "environment": string; readonly "reported_at": string; readonly "is_internal": boolean; readonly "source": verification_cases_EvidenceSource; };
+
+export type verification_cases_VerificationSummaryVersion = { readonly "id": string; readonly "capsule_slug": string; readonly "version_label": string; readonly "state": "published"; readonly "published_at": string; };
 
 export type verification_cases_WithdrawVerificationCaseInput = { readonly "lock_version": number; readonly "reason": string; };

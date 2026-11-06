@@ -86,10 +86,14 @@ final class StartComparisonService
                     throw new \RuntimeException('Comparaison introuvable au rejeu.');
                 }
 
+                // BV206 rend la comparaison au statut `queued` dès l'insertion :
+                // la colonne outcome est NULL et exposedOutcome vaut null (règle
+                // partagée de ComparisonOutcomeCalculator::expose, BV208).
                 return new ComparisonRunData(
                     id: $comparisonId,
                     profileId: (string) $run->profile_id,
                     state: ComparisonState::from((string) $run->state),
+                    exposedOutcome: null,
                     createdAt: CarbonImmutable::parse((string) $run->created_at)->utc()->toIso8601ZuluString(),
                     startedAt: $run->started_at === null ? null : CarbonImmutable::parse((string) $run->started_at)->utc()->toIso8601ZuluString(),
                     finishedAt: $run->finished_at === null ? null : CarbonImmutable::parse((string) $run->finished_at)->utc()->toIso8601ZuluString(),

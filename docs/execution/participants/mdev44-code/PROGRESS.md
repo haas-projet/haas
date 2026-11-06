@@ -1,5 +1,113 @@
 ﻿# Progression — capsules/laboratoire
 
+## 17 octobre 2026 — Durcissement des routes : compteurs de quota isolés
+
+Les compteurs de quota en ligne partageaient une même clé par membre ou par IP ; ils sont désormais isolés par groupe de routes (préfixes) ; valeurs 30 et 60 par minute à confirmer en revue, notamment pour une IP partagée.
+
+## 17 octobre 2026 — Durcissement des routes capsules/laboratoire préparé
+
+Branche `backend/capsules-laboratoire-durcissement-routes` ouverte depuis la tête de `backend/capsules-laboratoire-bv209-fiche-verification` (`ecc32c3`). Livré :
+
+- Matrice d'accès `Tests\Integration\Capsules\RouteAccessMatrixTest` : fournisseur unique énumérant les 29 routes de `backend/routes/api/capsules-lab.php`, test de couverture qui échoue si une route manque, assertions par anonyme (401 pour les routes à auth, succès ou 404/422 pour les routes publiques), membre non vérifié (401 ou 403), membre suspendu (401 ou 403), membre actif (passage de l'auth), simple membre refusé sur admin, modérateur accepté sur admin, et test d'en-tête 401-jamais-403 sur `PUT /capsules/{capsule}/favorite`.
+- Correctifs minimaux dans `backend/routes/api/capsules-lab.php` (zones réservées intactes) :
+  - Groupe brouillons (B23/B24, 4 routes) : ajout `['auth:sanctum', 'verified', 'throttle:30,1']`.
+  - Groupe `admin/capsules` (B24/B25, 2 routes) : ajout `['auth:sanctum', 'verified', 'throttle:30,1']` ; Policies/Services inchangés.
+  - Groupe favoris et retours (B28, 3 routes) : `['verified']` → `['auth:sanctum', 'verified', 'throttle:30,1']` (401 au lieu de 403 pour l'anonyme).
+  - Route `GET /versions/{id}/lab-definition` (B33) : ajout `['throttle:60,1']`.
+  - Groupe catalogue public (B26, 3 routes) : ajout `['throttle:60,1']`.
+  - Commentaires des cinq groupes réécrits pour décrire la pile RÉELLE confirmée par `php artisan route:list -v`. Aucun contrat de réponse, aucune Resource, aucun chemin ou nom de route touché ; aucun middleware de rôle introduit ; aucun limiteur nommé ajouté dans `AppServiceProvider` (zone réservée).
+- Tests de quota (un par groupe) prouvant 429 + `Retry-After` à la 61e requête (routes publiques, 60/min) et à la 31e (routes membre/admin, 30/min), avec `Cache::store('array')->flush()` pour ne pas gêner les autres tests.
+- Manifeste `SHA256SUMS` régénéré via script temporaire hors dépôt (974 empreintes, 1 ajout `backend/tests/Integration/Capsules/RouteAccessMatrixTest.php`, 973 conservées) ; `scripts/validate-pack.mjs` et `scripts/check-deployment-docs.mjs` : 18/18 et 7/7 PASS.
+
+Tests locaux (PHP 8.4.15 Laragon, `C:\laragon\bin\php\php-8.4.15-Win32-vs17-x64\php.exe`, `openssl`+`pdo_pgsql` chargés ; `~/.haas-test.env` jamais lu ; aucune action manuelle sur PostgreSQL) :
+- `vendor/bin/pint --test` : passed.
+- `vendor/bin/phpstan analyse` : [OK] No errors.
+- `phpunit --testsuite Unit,Feature,Architecture` : 501 tests, 5050 assertions, OK.
+- `phpunit --testsuite Integration tests/Integration/Capsules tests/Integration/Lab tests/Integration/VerificationCases tests/Integration/Comparisons` : 727 tests, 2901 assertions, OK en 16:37.880.
+- `phpunit tests/Integration/Capsules/RouteAccessMatrixTest.php` : 111 tests, 143 assertions, OK en 03:15.861.
+
+Durcissement **préparé, PR en brouillon** ; jamais DONE sans revue humaine et CI exacte reçues. CI attendue : tests verts PHP 8.4 et PHP 8.5, seule « Contrôler les dépendances » rouge (`composer.lock` à mettre à jour par le responsable du socle). Lots corrigés : B23 à B25 et B28 (routes de leur domaine passées sous auth/verified/throttle sans toucher aux contrôleurs). Aucune migration ajoutée.
+
+Fichiers hors de mon domaine modifiés : aucun. Zones réservées intactes : `backend/config/*`, `backend/phpunit.xml`, `.github/workflows/*`, `backend/bootstrap/*`, `backend/routes/api.php`, `backend/app/Providers/*`, `composer.*`.
+
+Questions ouvertes :
+- fiche de vérification publique : `suite_digest`, `release_commit` et `reviewer_handle` exposés à tout visiteur (à confirmer).
+- `lab-definition` publique avec digests (voulu par B33).
+- PATCH de brouillon de capsule sans `Idempotency-Key` (lock_version) alors que `PATCH /verification-cases/{id}` l'exige.
+- `author_id` et `digest` des révisions de cas exposés aux membres.
+- `sha256` des artefacts exposés.
+- `available=true` dès qu'un `lab_results` existe, même incomplet.
+- identifiants de run et de comparaison publics dans la fiche.
+- propriétaire ou contributeur suspendu non filtré dans la fiche.
+- commentaire de `VerificationSummaryQuery` annonçant trois SELECT alors qu'il y en a plus.
+
+## 17 octobre 2026 — BV209, fiche de vérification versionnée préparée
+
+Branche `backend/capsules-laboratoire-bv209-fiche-verification` ouverte depuis la tête BV208 (`9a95804`). Livré :
+
+- `App\Http\Controllers\VerificationCases\ShowVerificationSummaryController` + route `GET /api/v1/versions/{id}/verification-summary` (throttle:60,1, aucune route mutante). Publique : anonyme et membre connecté voient la même projection, en 200 Cache-Control no-store, private. UUID inconnu, version brouillon/en revue/retirée, capsule masquée = 404 (AC45). Tout paramètre de requête = 422.
+- `App\Queries\VerificationCases\VerificationSummaryQuery` lit la fiche en un nombre fixe de SELECTs (test figé : 5 vs 30 contributeurs/déclarations rendent le même compteur de requêtes). Comparaison explicite d'enum sur `capsule->visibility` pour que le filtre masqué fonctionne.
+- `App\Data\VerificationCases\VerificationSummaryData` + sous-objet `VerificationSummaryLabEvidence` (facteurs `unavailable()` / `withEvidence()`) et `App\Http\Resources\VerificationCases\VerificationSummaryResource` : blocs DISTINCTS (version, limits, contributors, cases_examined, observations_declared, lab_evidence) jamais agrégés, pas de score ni de badge ni de fiabilité.
+- Blocs : contributeurs (handle+rôle, aucun id ni courriel), cas intégrés (jointure `case_scenario_links` + `verification_case_revisions` + `verification_cases` + `users` relecteur ; `reviewer_handle` seulement, AC46 ; source=ci), observations déclarées (`reuse_reports` B28, is_internal préservé, source=human_declaration), lab_evidence (available=true si au moins un lab_result existe, sinon available=false + message « Aucun test de laboratoire disponible pour cette version »). Les comparaisons liées renvoient leur `outcome` via la règle UNIQUE `ComparisonOutcomeCalculator::expose` livrée en BV208.
+- Fragment OpenAPI `docs/api/openapi/verification-cases.yaml` 0.1.0 → 0.2.0 : nouveau chemin + schémas (`VerificationSummary`, `VerificationSummaryEnvelope`, `VerificationSummaryLabEvidence`, etc.) ; énumérations locales (`EvidenceSource`, `ContributionRole`, `ReuseReportOutcome`, `LabScenarioKey`). `VerificationSummaryLabComparison` référence `ComparisonState` et `ComparisonOutcome` du fragment `comparisons.yaml`.
+- `docs/OPENAPI.yaml` : UNE ligne `$ref` ajoutée pour `/api/v1/versions/{id}/verification-summary`.
+- `docs/api/generated/haas-api.d.ts` régénéré via `php scripts/generate-api-types.php` : 105 types, diff additif (nouveaux types BV209, aucun supprimé).
+
+Tests livrés (hors Demo) :
+- `Tests\Integration\VerificationCases\VerificationSummaryHttpTest` — 13 tests, 70 assertions : rejet 422 des paramètres, 404 sur UUID inconnu / brouillon / capsule masquée, anonyme = membre connecté, fiche complète sans champ privé, bloc lab « unavailable » puis « available » avec runs+comparisons, nouvelle version sans badge hérité, auto-validation marquée is_internal (aucun total agrégé), aucun champ privé (reviewer_id, review_note, notes, email, private_path, notices_path) dans le payload, compte de requêtes stable 5 vs 30, aucune route mutante.
+- Helper `publishedVersionWith()` respecte les triggers B22 : contributeurs attachés en état `draft` (CHECK `capsule_versions_content_digest_requires_published` → `content_digest` renseigné seulement au passage à `published`), puis bascule UPDATE vers `published` avec reviewer distinct de l'owner et des contributeurs (contrainte `capsule_versions_independent_reviewer`).
+- `countQueriesFor()` isole `enableQueryLog`/`getQueryLog` par appel et amorce le middleware pour éviter les parasites de première requête.
+
+Tests locaux (PHP 8.4.15 Laragon, `C:\laragon\bin\php\php-8.4.15-Win32-vs17-x64\php.exe`, `openssl`+`pdo_pgsql` chargés ; `~/.haas-test.env` jamais lu) :
+- `vendor/bin/pint --test` : passed.
+- `vendor/bin/phpstan analyse` : [OK] No errors.
+- `phpunit --testsuite Unit,Feature,Architecture` : 501 tests, 5050 assertions, OK.
+- `phpunit --filter 'VerificationSummaryHttpTest'` : 13/70.
+
+BV209 **préparé, PR en brouillon** ; jamais DONE sans revue humaine et CI exacte reçues. CI attendue : tests verts PHP 8.4/PHP 8.5, seule « Contrôler les dépendances » rouge (`composer.lock` à mettre à jour par le responsable du socle, avis détectés le 15 octobre).
+
+worker non livré, les runs restent queued ; B36, B37, BV207 et BV210 non livrés ; AC40, AC48 et AC49 non couverts.
+
+Fichiers hors de mon domaine modifiés : `docs/OPENAPI.yaml`, `docs/api/openapi/verification-cases.yaml`, `docs/api/generated/haas-api.d.ts`, `backend/routes/api/capsules-lab.php`, `SHA256SUMS`. Zones réservées intactes : `backend/config/*`, `backend/phpunit.xml`, `.github/workflows/*`, `backend/bootstrap/*`, `backend/routes/api.php`, `routes/console.php`, `composer.*`, les tables de notification. Aucune migration ajoutée. Aucune action manuelle sur PostgreSQL.
+
+Questions ouvertes (BV209) :
+- Exposition de la fiche en lecture publique sans paramètre : CAHIER_DES_CHARGES.md:1665 cite la route sans préciser la visibilité ; lecture retenue « publique pour une version publiée visible ». À confirmer en revue.
+- Pseudo du relecteur (AC46) : exposé via `reviewer_handle` ; aucune note de revue, aucun `reviewer_id`. B26 masquait déjà `reviewer_id` à la lecture ; à confirmer.
+- `is_internal` d'un `reuse_report` : conservé dans la fiche (observations marquées) ; l'« auto-validation non comptée » se traduit par l'absence totale d'agrégation côté serveur (aucun score, badge ou total exposé). À confirmer.
+- « Retrait sécurisé » (AC45) : interprété comme 404 global (version non publiée ou capsule masquée) + absence totale d'exposition des champs internes (reviewer_id, review_note, notes, email, private_path, notices_path) ; vérifié par assertion sur le payload entier. À confirmer.
+
+## 16 octobre 2026 — BV208, conclusions et pannes de comparaison préparées
+
+Branche `backend/capsules-laboratoire-bv208-conclusions-comparaison` ouverte depuis la tête d'intégration (`6a1d2d7`). Livré :
+
+- `App\Services\Comparisons\ComparisonOutcomeCalculator` final, sans dépendance Laravel : `calculate(?array baseline, ?array candidate, ComparisonState state, ?LabRunState baselineState, ?LabRunState candidateState)` applique les règles CAHIER §44 (lignes 1639-1655) ; `expose(ComparisonState, ?ComparisonOutcome)` centralise la règle UNIQUE de dérivation à la lecture (completed → colonne, error|timed_out → `inconclusive` dérivé, queued|running → null). Deux méthodes partagées par `ReconcileComparisonsService` et `ComparisonRunResource`, aucune duplication.
+- `App\Services\Comparisons\ReconcileComparisonsService` + `ReconciliationReport` scellé : transaction + `SELECT ... FOR UPDATE` sur `comparison_runs`, finalisation UNIQUE (rejeu idempotent), aucune exception HTTP. Transitions : child_error → error, child_timed_out → timed_out, deux enfants `passed|failed` → completed (outcome via le calculateur), budget `config('lab.comparison_budget_seconds', 50)` dépassé → timed_out. `outcome` persistée UNIQUEMENT quand `state = 'completed'` (CHECK `comparison_runs_outcome_requires_terminal`). Jamais de retry automatique, jamais de seconde paire d'enfants, jamais une victoire par défaut.
+- `App\Console\Commands\ReconcileComparisons` (`comparisons:reconcile {id}`) : commande interne appelée par rien en production (aucune planification), modèle `lab:bind-definition`. Elle existe pour les tests Integration et pour un opérateur après livraison d'un vrai worker.
+- `ComparisonRunData` porte désormais `exposedOutcome` (nullable). `ComparisonRunResource` ajoute `outcome` dans l'enveloppe propriétaire (GET /comparisons/{id}, actor_id discordant toujours 404). Jamais assertions, runtime, digest brut, env_snapshot ni seed. `Cache-Control: no-store, private` conservé. `StartComparisonService` écrit `exposedOutcome=null` à l'insertion queued.
+- Tests Unit : `ComparisonOutcomeCalculatorTest` — 22 tests, 28 assertions. Couverture : improved, regressed, mixed, unchanged (deux échecs identiques), identifiants d'assertion différents, résultats absents/vides/non booléens, enfant en erreur/timed_out/queued/running, état global error/timed_out, ordre des clés indifférent, déterminisme, interdiction d'une victoire par défaut, et dérivation `expose` pour toutes les combinaisons state × colonne.
+- Fixtures `Tests\Support\Comparisons\LabResultFixtures` (jamais sous `app/`, étiquette « démonstration pédagogique ») : respect strict des triggers B33 (queued → running avec started_at ≥ created_at ; INSERT lab_result pendant running ; running → terminal avec finished_at). Les lab_results portent `key`, non `id` ; le service lit la même clé.
+- `Tests\Integration\Comparisons\ReconcileComparisonsServiceTest` (10/23) : improved, regressed, mixed, unchanged avec deux échecs identiques, enfant en erreur, enfant timed_out, résultat absent, budget dépassé, rejeu idempotent, UUID inconnu.
+- `Tests\Integration\Comparisons\ComparisonOutcomeExposureHttpTest` (5/23) : exposition improved sans assertions/runtime/digest, inconclusive dérivé pour timed_out alors que colonne NULL, invisibilité pour autrui (404), capsule parente masquée sans fuite de forme, absence de route mutante sur /comparisons/{id}.
+- `Tests\Integration\Comparisons\ConcurrentReconcileComparisonTest` (1/10) : deux processus Symfony\\Process (barrière `pg_stat_activity`, `application_name='haas_bv208_reconciler'`, pas de pcntl) convergent sur `finalized/already_finalized`, une seule ligne `completed/improved`. Teardown via `DomainTables::dropAll()` avant rollback, sans CASCADE.
+- Fragment OpenAPI `docs/api/openapi/comparisons.yaml` 0.3.0 → 0.4.0 : schéma `ComparisonOutcome` + propriété `outcome: null | ComparisonOutcome` sur `ComparisonRun`. Aucun nouveau chemin ; le `$ref` de `/api/v1/comparisons/{id}` reste valide dans `docs/OPENAPI.yaml`.
+- `php scripts/generate-api-types.php` : 92 types, diff additif (`comparisons_ComparisonOutcome`, `outcome: null | ComparisonOutcome` sur `comparisons_ComparisonRun`). Rien supprimé.
+- `backend/tests/Integration/Comparisons/ComparisonRunHttpTest::test_actor_reads_their_queued_comparison_without_outcome_or_digests` bascule : la clé `outcome` est présente et vaut null pour un queued (dérivation `expose`).
+
+Décision du propriétaire du domaine (consignée, question ouverte confirmée) : la colonne `comparison_runs.outcome` reste NULL pour error et timed_out (CHECK `comparison_runs_outcome_requires_terminal`) ; la conclusion `inconclusive` est **dérivée à la lecture** par la méthode unique `ComparisonOutcomeCalculator::expose`. Aucune migration ajoutée.
+
+BV208 **préparé, PR en brouillon** ; jamais DONE sans revue humaine et CI exacte reçues. CI attendue : tests verts PHP 8.4/PHP 8.5, seule « Contrôler les dépendances » rouge (avis détectés le 15 octobre, `composer.lock` à mettre à jour par le responsable du socle).
+
+worker non livré, les runs restent queued ; B36, B37, BV207 et BV210 non livrés ; AC40, AC48 et AC49 non couverts.
+
+Fichiers hors de mon domaine modifiés : `docs/OPENAPI.yaml` inchangé (aucun nouveau $ref), `docs/api/openapi/comparisons.yaml`, `docs/api/generated/haas-api.d.ts`, `SHA256SUMS`. Zones réservées intactes : `backend/config/*`, `backend/phpunit.xml`, `.github/workflows/*`, `backend/bootstrap/*`, `backend/routes/api.php`, `routes/console.php`, `composer.*`, les tables de notification. Aucune action manuelle sur PostgreSQL. `~/.haas-test.env` jamais lu.
+
+Questions ouvertes (BV208) :
+- Exposition de outcome à l'acteur : révéler explicitement la conclusion machine au propriétaire est une décision confirmée (CAHIER §45 ligne 1672 réserve la lecture d'un rapport autorisé) ; à relire en revue.
+- Commande de réconciliation : `comparisons:reconcile` n'est appelée par rien en production. Pas de planification ; destinée aux tests Integration et à l'opérateur après B36/B37.
+- CHECK `comparison_runs_outcome_requires_terminal` et dérivation : la colonne reste NULL pour error et timed_out ; la valeur `inconclusive` est dérivée à la lecture (option (a) retenue). À confirmer en revue.
+- Budget de comparaison : `config('lab.comparison_budget_seconds', 50)` par défaut dans le code ; `backend/config/*` reste intact (zone réservée). À confirmer avec le responsable du socle avant GO_PRODUCTION.
+- « Retrait sécurisé » (AC45) compris comme expurgation à la lecture : BV209 ouvrira la vue versionnée. En BV208, la Resource ne révèle jamais assertions/runtime/digest/env_snapshot/seed (test figé).
+
 ## Intégration capsules et laboratoire
 
 Branche `backend/capsules-laboratoire-integration-catalogue-lab` dérivée de la tête BV206 (`2fcb9e9`), merge `--no-ff --no-commit` de `origin/backend/capsules-laboratoire-b28-favoris-retours` (`aa05582`) : **préparé, PR en brouillon**, aucun DONE.

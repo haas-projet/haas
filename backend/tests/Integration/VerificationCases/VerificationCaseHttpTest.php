@@ -232,6 +232,50 @@ final class VerificationCaseHttpTest extends PostgresTestCase
         $response->assertNotFound();
     }
 
+    public function test_show_returns_not_found_when_help_request_parent_becomes_hidden(): void
+    {
+        $author = User::factory()->verified()->create();
+        $this->loginAs($author);
+        $parent = $this->visibleHelpRequest();
+        $created = $this->browserRequest('POST', '/api/v1/verification-cases', $this->validPayload($parent->id), $this->keyHeader());
+        $created->assertCreated();
+        $caseId = (string) $created->json('data.id');
+        HelpRequest::whereKey($parent->id)->update(['hidden_at' => now()]);
+        $response = $this->browserRequest('GET', '/api/v1/verification-cases/'.$caseId, [], $this->keyHeader());
+        $response->assertNotFound();
+    }
+
+    public function test_submit_returns_not_found_when_help_request_parent_becomes_hidden(): void
+    {
+        $author = User::factory()->verified()->create();
+        $this->loginAs($author);
+        $parent = $this->visibleHelpRequest();
+        $created = $this->browserRequest('POST', '/api/v1/verification-cases', $this->validPayload($parent->id), $this->keyHeader());
+        $created->assertCreated();
+        $caseId = (string) $created->json('data.id');
+        $lock = (int) $created->json('data.lock_version');
+        HelpRequest::whereKey($parent->id)->update(['hidden_at' => now()]);
+        $response = $this->browserRequest('POST', '/api/v1/verification-cases/'.$caseId.'/submit', ['lock_version' => $lock], $this->keyHeader());
+        $response->assertNotFound();
+    }
+
+    public function test_withdraw_returns_not_found_when_help_request_parent_becomes_hidden(): void
+    {
+        $author = User::factory()->verified()->create();
+        $this->loginAs($author);
+        $parent = $this->visibleHelpRequest();
+        $created = $this->browserRequest('POST', '/api/v1/verification-cases', $this->validPayload($parent->id), $this->keyHeader());
+        $created->assertCreated();
+        $caseId = (string) $created->json('data.id');
+        $lock = (int) $created->json('data.lock_version');
+        HelpRequest::whereKey($parent->id)->update(['hidden_at' => now()]);
+        $response = $this->browserRequest('POST', '/api/v1/verification-cases/'.$caseId.'/withdraw', [
+            'lock_version' => $lock,
+            'reason' => 'Motif de retrait documentaire après masquage du parent.',
+        ], $this->keyHeader());
+        $response->assertNotFound();
+    }
+
     /** @param array<string, mixed> $overrides */
     private function visibleHelpRequest(array $overrides = []): HelpRequest
     {

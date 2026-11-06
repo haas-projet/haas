@@ -1,6 +1,8 @@
 # Commandes backend — B01/B02/B03
 
-Partir de `backend/`. PHP 8.4 minimum avec pdo_pgsql. B02 fournit les scripts qualité locaux ; B03 les exécute sur GitHub Actions avec PHP 8.4/8.5, résultats réels dans [B03_CI.md](quality/B03_CI.md). Composer 2.10.3 a été testé localement et en CI. L'ancien Composer 2.8.5 du poste émet des dépréciations sous PHP 8.5 : choisir une version actuelle depuis [le site officiel](https://getcomposer.org/download/). Aucune installation globale n'a été modifiée pendant B02.
+Partir de `backend/`. PHP 8.4.1 minimum avec pdo_pgsql. B02 fournit les scripts qualité locaux ; B03 les exécute sur GitHub Actions avec PHP 8.4/8.5, résultats réels dans [B03_CI.md](quality/B03_CI.md). Composer 2.10.3 a été testé localement et en CI. L'ancien Composer 2.8.5 du poste émet des dépréciations sous PHP 8.5 : choisir une version actuelle depuis [le site officiel](https://getcomposer.org/download/). Aucune installation globale n'a été modifiée pendant B02.
+
+Le minimum PHP déclaré et la plateforme simulée par Composer sont alignés sur **8.4.1**, nécessaire aux correctifs de sécurité Symfony 8.1. Utiliser une révision PHP maintenue et à jour ; `composer check-platform-reqs` contrôle le runtime réel, pas seulement cette plateforme simulée. Ne pas contourner l'audit ou les exigences de plateforme.
 
 Sur le poste de cette session, sélectionner PHP pour le terminal PowerShell seulement (adapter le chemin ailleurs) :
 

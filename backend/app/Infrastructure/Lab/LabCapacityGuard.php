@@ -69,16 +69,25 @@ final class LabCapacityGuard
     }
 
     /**
-     * Nombre d'emplacements actifs (queued + running). BV205 reprend le
-     * comportement de B34 : chaque ligne compte pour un emplacement. BV206
-     * déplacera ce décompte vers « une comparaison = un emplacement partagé
-     * par ses deux enfants ».
+     * Nombre d'emplacements actifs (queued + running). Un run isolé compte
+     * pour 1 emplacement (comparison_id est NULL donc COALESCE renvoie
+     * l'identifiant de la ligne, unique) ; une comparaison compte pour 1
+     * emplacement partagé par ses deux enfants (ils partagent le même
+     * comparison_id). Décision du propriétaire du domaine BV206 (CAHIER
+     * §44 ligne 1651 : « un seul run réellement actif au maximum
+     * globalement ; les deux enfants sont séquentiels »).
      */
     public function activeSlotCount(): int
     {
-        return (int) DB::connection('pgsql')->table('lab_runs')
-            ->whereIn('state', ['queued', 'running'])
-            ->count();
+        /** @var object{total:int} $row */
+        $row = DB::connection('pgsql')
+            ->select(<<<'SQL'
+                SELECT COUNT(DISTINCT COALESCE(comparison_id::text, id::text))::int AS total
+                FROM lab_runs
+                WHERE state IN ('queued','running')
+            SQL)[0];
+
+        return (int) $row->total;
     }
 
     public function hourlyUnits(): int

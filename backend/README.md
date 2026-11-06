@@ -2,7 +2,7 @@
 
 Le backend est un monolithe Laravel partagé par les trois développeurs. Les couches séparent validation HTTP, données typées, cas métier, droits et lectures. Les fichiers `.gitkeep` conservent les dossiers repères dans Git.
 
-Laravel 13.34.0, PHP 8.4 minimum, PostgreSQL, identifiants utilisateur UUID et fuseau UTC. L'authentification par session Sanctum, les [courriels de compte](../docs/api/ACCOUNT_MAIL.md), `/api/v1/me` et les permissions sont intégrés dans `main`. `/up` vérifie le démarrage sans accès SQL. SMTP réel et réception complète restent à valider.
+Laravel 13.34.0, PHP 8.4.1 minimum, PostgreSQL, identifiants utilisateur UUID et fuseau UTC. L'authentification par session Sanctum, les [courriels de compte](../docs/api/ACCOUNT_MAIL.md), `/api/v1/me` et les permissions sont intégrés dans `main`. `/up` vérifie le démarrage sans accès SQL. SMTP réel et réception complète restent à valider.
 
 Suivre [les commandes d'installation et de test](../docs/COMMANDS.md), [les versions observées](../docs/VERSIONS.md) et [l'état des livraisons](../README.md). Les résultats datés sont dans [les preuves de qualité](../docs/quality/) ; le [suivi d'exécution](../docs/execution/PROGRESS.md) indique les lots reçus, partiels et bloqués.
 

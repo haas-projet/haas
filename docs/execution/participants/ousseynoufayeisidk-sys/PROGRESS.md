@@ -205,6 +205,7 @@ Après le nettoyage 13 → 11, publication de B17 dans #32 : **12 références**
 Fusions externes #32/#26/#25 constatées ; B14–B17 consolidés dans #24 par `d9cba0b`, CI exacte `37666083469` verte PHP 8.4/8.5 et backend-ci, backend identique au code B17 validé 671 / 6805. Trois intermédiaires B15/B16/B17 supprimées après ascendance vers B14 publié et absence de PR ouverte dépendante ; références locales préservées. B24 créé extérieurement porte #33 ; dernier inventaire **10 branches : quatre permanentes et six temporaires**. #24 et #31 restent soumises à l'approbation humaine ; aucun nouveau lot déclaré DONE dans main. Voir BRANCH_CLEANUP_20261007.md. Prochain B18 après coordination ; aucun gate ni déploiement.
 
 
+
 ## 7 octobre 2026 — correction B38 avant revue
 
 Codex (GPT-6), intégration sur PR #28 : runtime B2 séparé, configuration/caches/routes/base/rôle/clé propres, rejet des cookies et de HAAS, JSON fictif strict, TTL24h/quota30/capacité 5000/purge bornée. Preuve : docs/quality/B38_ISOLATION_20261007.md. Ciblage local PHP8.5/PostgreSQL17 sur les deux bases dédiées : 64 tests / 348 assertions OK avant quatre assertions CORS complémentaires. Deux processus réellement bloqués simultanément en PostgreSQL ; refus réel de CONNECT à la base application. Revue humaine, CI exacte et restrictions OS/VPS restent à recevoir ; aucun frontend ou déploiement. Les suivis de l’autrice sont conservés comme historiques.
@@ -212,3 +213,11 @@ Codex (GPT-6), intégration sur PR #28 : runtime B2 séparé, configuration/cach
 ### B38 — correction terminée localement, revue à recevoir
 
 Runtime et données B2 séparés ; garde DNS/configuration et permissions PostgreSQL avant cache/écritures ; cache partagé obligatoire hors testing, bornes atomiques 1000 entrées / 100 verrous, TTL24h et purge complète. Synchronisation normale de main b76612d (B14–B17), historiques et statuts conservés. Suites finales : 391 / 3850 et 379 / 3438, soit 770 tests / 7288 assertions OK. PHPStan niveau 8, Pint, Composer et contrats/documents réussis ; preuve B38_ISOLATION_20261007.md. Statut local IN_REVIEW : CI du SHA exact et revue humaine restent nécessaires ; aucun DONE/gate ni frontend/déploiement. L’intégrateur publiera le commit réel après ce bilan.
+
+## 2026-10-29 — Correctif local des audits CI #139–153
+
+Proposition destinée au responsable du socle, isolée en HEAD détachée depuis le head de #54 `31c79b09a3f1e1e39f74511b7f5bc8a94a9e2a39`, dans `.worktrees/ci-security-20261029`. Aucun changement des branches existantes ni des worktrees communautaires ou d'intégration. Les erreurs de tests historiques #139/#145 sont déjà corrigées dans la pile ; #146 est annulé. Les derniers runs échouent sur l'audit, pas sur les tests des routes.
+
+Mise à jour ciblée de HTTP Foundation, MIME et YAML de 8.0.15 vers 8.1.10, licences MIT conservées ; minimum PHP déclaré et plateforme Composer alignés sur 8.4.1. Aucun autre paquet ni workflow modifié. Contrôles PHP 8.5.10 / Composer 2.10.3 : 501 tests / 5050 assertions ; Pint 710 fichiers et PHPStan niveau 8 réussis ; validation, exigences réelles et audit sans alerte ; 105 types API à jour, pack 18/18 et déploiement documentaire 7/7. Preuve : [CI_COMPOSER_SECURITY_20261029.md](../../../quality/CI_COMPOSER_SECURITY_20261029.md).
+
+Réserves : PostgreSQL complet et PHP 8.4 natif non exécutés sur le correctif ; CI distante non lancée, revue humaine manquante. Aucun push, merge ou nouveau lot DONE ; BACKEND_GATE non reçu. Prochaine action : publication autorisée et propagation coordonnée par l'intégrateur dans la pile #45–54, puis réception de chaque SHA modifié. Les résultats distants antérieurs ne valident pas les nouvelles dépendances.

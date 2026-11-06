@@ -47,7 +47,11 @@ final class ComparisonRunHttpTest extends PostgresTestCase
         $response->assertJsonPath('data.state', 'queued');
         $this->assertSame('no-store, private', $response->headers->get('Cache-Control'));
         $payload = $response->json('data');
-        $this->assertArrayNotHasKey('outcome', $payload);
+        // BV208 ouvre la clé `outcome` ; pour un queued elle est présente mais
+        // nulle (dérivation ComparisonOutcomeCalculator::expose). Les digests
+        // internes restent interdits à l'API publique (CAHIER §45 ligne 1672).
+        $this->assertArrayHasKey('outcome', $payload);
+        $this->assertNull($payload['outcome']);
         $this->assertArrayNotHasKey('input_digest', $payload);
         $this->assertArrayNotHasKey('env_snapshot', $payload);
         $this->assertArrayNotHasKey('seed', $payload);

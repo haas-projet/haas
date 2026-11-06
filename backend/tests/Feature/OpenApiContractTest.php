@@ -47,6 +47,51 @@ final class OpenApiContractTest extends TestCase
         $this->assertGreaterThanOrEqual(5, count($visited));
     }
 
+    public function test_catalogue_details_describe_the_data_response_envelope(): void
+    {
+        $contract = Yaml::parseFile(base_path('../docs/api/openapi/capsules-lab.yaml'));
+        foreach (['/api/v1/capsules/{slug}', '/api/v1/capsules/{slug}/versions/{version}'] as $path) {
+            $this->assertSame('#/components/schemas/CapsuleCatalogueDetailResponse', $contract['paths'][$path]['get']['responses']['200']['content']['application/json']['schema']['$ref']);
+        }
+        $wrapper = $contract['components']['schemas']['CapsuleCatalogueDetailResponse'];
+        $this->assertSame(['data'], $wrapper['required']);
+        $this->assertSame('#/components/schemas/CapsuleCatalogueDetail', $wrapper['properties']['data']['$ref']);
+    }
+
+    public function test_catalogue_pagination_matches_the_shared_limits_and_defaults(): void
+    {
+        $contract = Yaml::parseFile(base_path('../docs/api/openapi/capsules-lab.yaml'));
+        $parameters = array_column($contract['paths']['/api/v1/capsules']['get']['parameters'], 'schema', 'name');
+        $this->assertSame(PageData::MAX_PAGE, $parameters['page']['maximum']);
+        $this->assertSame(1, $parameters['page']['default']);
+        $this->assertSame(PageData::MAX_PER_PAGE, $parameters['per_page']['maximum']);
+        $this->assertSame(PageData::DEFAULT_PER_PAGE, $parameters['per_page']['default']);
+    }
+
+    public function test_catalogue_nullable_values_use_openapi_31_type_unions(): void
+    {
+        $contract = Yaml::parseFile(base_path('../docs/api/openapi/capsules-lab.yaml'));
+        $schemas = $contract['components']['schemas'];
+        $this->assertSame(['object', 'null'], $schemas['CapsuleCataloguePreview']['properties']['version']['type']);
+        $this->assertSame(['string', 'null'], $schemas['CapsuleCataloguePreview']['properties']['source']['properties']['editorial_origin']['type']);
+        $version = $schemas['CapsuleCatalogueDetail']['properties']['version']['properties'];
+        $this->assertSame(['string', 'null'], $version['limits']['type']);
+        $this->assertSame(['string', 'null'], $version['contributors']['items']['properties']['handle']['type']);
+        $this->assertSame(['integer', 'null'], $schemas['PaginationMeta']['properties']['from']['type']);
+        $this->assertSame(['integer', 'null'], $schemas['PaginationMeta']['properties']['to']['type']);
+    }
+
+    public function test_catalogue_content_digest_preserves_legacy_null_without_backfill(): void
+    {
+        $contract = Yaml::parseFile(base_path('../docs/api/openapi/capsules-lab.yaml'));
+        $digest = $contract['components']['schemas']['CapsuleCatalogueDetail']['properties']['version']['properties']['content_digest'];
+
+        $this->assertSame(['string', 'null'], $digest['type']);
+        $this->assertSame('^[0-9a-f]{64}$', $digest['pattern']);
+        $this->assertStringContainsString('B25', $digest['description']);
+        $this->assertStringContainsString('sans recalcul', $digest['description']);
+    }
+
     /** @param array<string, bool> $visited */
     private function checkReferences(mixed $node, string $path, array &$visited): void
     {

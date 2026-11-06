@@ -309,14 +309,20 @@ final class CapsulePublishHttpTest extends PostgresTestCase
 
     public function test_new_draft_after_publication_preserves_old_digest_and_proofs(): void
     {
-        [$owner, $capsule, $publishedVersion] = $this->publishedVersion();
-        $priorDigest = $publishedVersion->content_digest;
-        $priorBody = $publishedVersion->body;
-        Artifact::factory()->create([
+        [$owner, $capsule, $publishedVersion] = $this->seedInReview('brouillon-publie');
+        // Le registre du kit appartient à la version relue, avant son gel à la publication.
+        $artifact = Artifact::factory()->create([
             'version_id' => $publishedVersion->id,
             'distribution_status' => ArtifactDistributionStatus::Approved,
             'notices_path' => '/notices/kit.md',
         ]);
+        $this->loginAs(User::factory()->verified()->create(['role' => Role::Moderator]));
+        $this->publishRequest($capsule, $publishedVersion)->assertOk();
+        $this->logoutBrowser();
+        $publishedVersion->refresh();
+        $priorDigest = $publishedVersion->content_digest;
+        $priorBody = $publishedVersion->body;
+        $priorArtifact = $artifact->refresh()->getAttributes();
         $this->loginAs($owner);
         $response = $this->browserRequest('POST', "/api/v1/capsules/{$capsule->id}/versions", [
             'version_label' => '1.0.1',
@@ -328,6 +334,7 @@ final class CapsulePublishHttpTest extends PostgresTestCase
         $publishedVersion->refresh();
         $this->assertSame($priorDigest, $publishedVersion->content_digest);
         $this->assertSame($priorBody, $publishedVersion->body);
+        $this->assertSame($priorArtifact, $artifact->refresh()->getAttributes());
         // La nouvelle version n'hérite d'aucune preuve.
         $this->assertSame(1, DB::table('artifacts')->where('version_id', $publishedVersion->id)->count());
         $newVersionId = $response->json('data.id');

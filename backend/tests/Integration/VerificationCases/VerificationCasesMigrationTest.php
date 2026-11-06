@@ -30,6 +30,10 @@ final class VerificationCasesMigrationTest extends PostgresTestCase
 
     public function test_down_migrations_remove_both_verification_tables(): void
     {
+        // BV203 ajoute case_scenario_links référençant verification_case_revisions.
+        // Ce test porte sur le down() de BV201 isolé ; on retire d'abord l'enfant
+        // du domaine BV203 pour exercer les down() sans CASCADE.
+        Schema::dropIfExists('case_scenario_links');
         $paths = array_map(database_path(...), [
             'migrations/2026_10_15_120000_bv201_create_verification_cases_table.php',
             'migrations/2026_10_15_120100_bv201_create_verification_case_revisions_table.php',
@@ -51,6 +55,7 @@ final class VerificationCasesMigrationTest extends PostgresTestCase
         // require d'un fichier retourne son `new class` à la première inclusion
         // uniquement ; les requires suivants retournent `true`. On conserve les
         // instances dans des variables pour les réutiliser lors des deux passes.
+        Schema::dropIfExists('case_scenario_links');
         $casesMigration = require database_path('migrations/2026_10_15_120000_bv201_create_verification_cases_table.php');
         $revisionsMigration = require database_path('migrations/2026_10_15_120100_bv201_create_verification_case_revisions_table.php');
 

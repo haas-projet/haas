@@ -1,5 +1,295 @@
 ﻿# Progression — capsules/laboratoire
 
+## 17 octobre 2026 — Durcissement des routes : compteurs de quota isolés
+
+Les compteurs de quota en ligne partageaient une même clé par membre ou par IP ; ils sont désormais isolés par groupe de routes (préfixes) ; valeurs 30 et 60 par minute à confirmer en revue, notamment pour une IP partagée.
+
+## 17 octobre 2026 — Durcissement des routes capsules/laboratoire préparé
+
+Branche `backend/capsules-laboratoire-durcissement-routes` ouverte depuis la tête de `backend/capsules-laboratoire-bv209-fiche-verification` (`ecc32c3`). Livré :
+
+- Matrice d'accès `Tests\Integration\Capsules\RouteAccessMatrixTest` : fournisseur unique énumérant les 29 routes de `backend/routes/api/capsules-lab.php`, test de couverture qui échoue si une route manque, assertions par anonyme (401 pour les routes à auth, succès ou 404/422 pour les routes publiques), membre non vérifié (401 ou 403), membre suspendu (401 ou 403), membre actif (passage de l'auth), simple membre refusé sur admin, modérateur accepté sur admin, et test d'en-tête 401-jamais-403 sur `PUT /capsules/{capsule}/favorite`.
+- Correctifs minimaux dans `backend/routes/api/capsules-lab.php` (zones réservées intactes) :
+  - Groupe brouillons (B23/B24, 4 routes) : ajout `['auth:sanctum', 'verified', 'throttle:30,1']`.
+  - Groupe `admin/capsules` (B24/B25, 2 routes) : ajout `['auth:sanctum', 'verified', 'throttle:30,1']` ; Policies/Services inchangés.
+  - Groupe favoris et retours (B28, 3 routes) : `['verified']` → `['auth:sanctum', 'verified', 'throttle:30,1']` (401 au lieu de 403 pour l'anonyme).
+  - Route `GET /versions/{id}/lab-definition` (B33) : ajout `['throttle:60,1']`.
+  - Groupe catalogue public (B26, 3 routes) : ajout `['throttle:60,1']`.
+  - Commentaires des cinq groupes réécrits pour décrire la pile RÉELLE confirmée par `php artisan route:list -v`. Aucun contrat de réponse, aucune Resource, aucun chemin ou nom de route touché ; aucun middleware de rôle introduit ; aucun limiteur nommé ajouté dans `AppServiceProvider` (zone réservée).
+- Tests de quota (un par groupe) prouvant 429 + `Retry-After` à la 61e requête (routes publiques, 60/min) et à la 31e (routes membre/admin, 30/min), avec `Cache::store('array')->flush()` pour ne pas gêner les autres tests.
+- Manifeste `SHA256SUMS` régénéré via script temporaire hors dépôt (974 empreintes, 1 ajout `backend/tests/Integration/Capsules/RouteAccessMatrixTest.php`, 973 conservées) ; `scripts/validate-pack.mjs` et `scripts/check-deployment-docs.mjs` : 18/18 et 7/7 PASS.
+
+Tests locaux (PHP 8.4.15 Laragon, `C:\laragon\bin\php\php-8.4.15-Win32-vs17-x64\php.exe`, `openssl`+`pdo_pgsql` chargés ; `~/.haas-test.env` jamais lu ; aucune action manuelle sur PostgreSQL) :
+- `vendor/bin/pint --test` : passed.
+- `vendor/bin/phpstan analyse` : [OK] No errors.
+- `phpunit --testsuite Unit,Feature,Architecture` : 501 tests, 5050 assertions, OK.
+- `phpunit --testsuite Integration tests/Integration/Capsules tests/Integration/Lab tests/Integration/VerificationCases tests/Integration/Comparisons` : 727 tests, 2901 assertions, OK en 16:37.880.
+- `phpunit tests/Integration/Capsules/RouteAccessMatrixTest.php` : 111 tests, 143 assertions, OK en 03:15.861.
+
+Durcissement **préparé, PR en brouillon** ; jamais DONE sans revue humaine et CI exacte reçues. CI attendue : tests verts PHP 8.4 et PHP 8.5, seule « Contrôler les dépendances » rouge (`composer.lock` à mettre à jour par le responsable du socle). Lots corrigés : B23 à B25 et B28 (routes de leur domaine passées sous auth/verified/throttle sans toucher aux contrôleurs). Aucune migration ajoutée.
+
+Fichiers hors de mon domaine modifiés : aucun. Zones réservées intactes : `backend/config/*`, `backend/phpunit.xml`, `.github/workflows/*`, `backend/bootstrap/*`, `backend/routes/api.php`, `backend/app/Providers/*`, `composer.*`.
+
+Questions ouvertes :
+- fiche de vérification publique : `suite_digest`, `release_commit` et `reviewer_handle` exposés à tout visiteur (à confirmer).
+- `lab-definition` publique avec digests (voulu par B33).
+- PATCH de brouillon de capsule sans `Idempotency-Key` (lock_version) alors que `PATCH /verification-cases/{id}` l'exige.
+- `author_id` et `digest` des révisions de cas exposés aux membres.
+- `sha256` des artefacts exposés.
+- `available=true` dès qu'un `lab_results` existe, même incomplet.
+- identifiants de run et de comparaison publics dans la fiche.
+- propriétaire ou contributeur suspendu non filtré dans la fiche.
+- commentaire de `VerificationSummaryQuery` annonçant trois SELECT alors qu'il y en a plus.
+
+## 17 octobre 2026 — BV209, fiche de vérification versionnée préparée
+
+Branche `backend/capsules-laboratoire-bv209-fiche-verification` ouverte depuis la tête BV208 (`9a95804`). Livré :
+
+- `App\Http\Controllers\VerificationCases\ShowVerificationSummaryController` + route `GET /api/v1/versions/{id}/verification-summary` (throttle:60,1, aucune route mutante). Publique : anonyme et membre connecté voient la même projection, en 200 Cache-Control no-store, private. UUID inconnu, version brouillon/en revue/retirée, capsule masquée = 404 (AC45). Tout paramètre de requête = 422.
+- `App\Queries\VerificationCases\VerificationSummaryQuery` lit la fiche en un nombre fixe de SELECTs (test figé : 5 vs 30 contributeurs/déclarations rendent le même compteur de requêtes). Comparaison explicite d'enum sur `capsule->visibility` pour que le filtre masqué fonctionne.
+- `App\Data\VerificationCases\VerificationSummaryData` + sous-objet `VerificationSummaryLabEvidence` (facteurs `unavailable()` / `withEvidence()`) et `App\Http\Resources\VerificationCases\VerificationSummaryResource` : blocs DISTINCTS (version, limits, contributors, cases_examined, observations_declared, lab_evidence) jamais agrégés, pas de score ni de badge ni de fiabilité.
+- Blocs : contributeurs (handle+rôle, aucun id ni courriel), cas intégrés (jointure `case_scenario_links` + `verification_case_revisions` + `verification_cases` + `users` relecteur ; `reviewer_handle` seulement, AC46 ; source=ci), observations déclarées (`reuse_reports` B28, is_internal préservé, source=human_declaration), lab_evidence (available=true si au moins un lab_result existe, sinon available=false + message « Aucun test de laboratoire disponible pour cette version »). Les comparaisons liées renvoient leur `outcome` via la règle UNIQUE `ComparisonOutcomeCalculator::expose` livrée en BV208.
+- Fragment OpenAPI `docs/api/openapi/verification-cases.yaml` 0.1.0 → 0.2.0 : nouveau chemin + schémas (`VerificationSummary`, `VerificationSummaryEnvelope`, `VerificationSummaryLabEvidence`, etc.) ; énumérations locales (`EvidenceSource`, `ContributionRole`, `ReuseReportOutcome`, `LabScenarioKey`). `VerificationSummaryLabComparison` référence `ComparisonState` et `ComparisonOutcome` du fragment `comparisons.yaml`.
+- `docs/OPENAPI.yaml` : UNE ligne `$ref` ajoutée pour `/api/v1/versions/{id}/verification-summary`.
+- `docs/api/generated/haas-api.d.ts` régénéré via `php scripts/generate-api-types.php` : 105 types, diff additif (nouveaux types BV209, aucun supprimé).
+
+Tests livrés (hors Demo) :
+- `Tests\Integration\VerificationCases\VerificationSummaryHttpTest` — 13 tests, 70 assertions : rejet 422 des paramètres, 404 sur UUID inconnu / brouillon / capsule masquée, anonyme = membre connecté, fiche complète sans champ privé, bloc lab « unavailable » puis « available » avec runs+comparisons, nouvelle version sans badge hérité, auto-validation marquée is_internal (aucun total agrégé), aucun champ privé (reviewer_id, review_note, notes, email, private_path, notices_path) dans le payload, compte de requêtes stable 5 vs 30, aucune route mutante.
+- Helper `publishedVersionWith()` respecte les triggers B22 : contributeurs attachés en état `draft` (CHECK `capsule_versions_content_digest_requires_published` → `content_digest` renseigné seulement au passage à `published`), puis bascule UPDATE vers `published` avec reviewer distinct de l'owner et des contributeurs (contrainte `capsule_versions_independent_reviewer`).
+- `countQueriesFor()` isole `enableQueryLog`/`getQueryLog` par appel et amorce le middleware pour éviter les parasites de première requête.
+
+Tests locaux (PHP 8.4.15 Laragon, `C:\laragon\bin\php\php-8.4.15-Win32-vs17-x64\php.exe`, `openssl`+`pdo_pgsql` chargés ; `~/.haas-test.env` jamais lu) :
+- `vendor/bin/pint --test` : passed.
+- `vendor/bin/phpstan analyse` : [OK] No errors.
+- `phpunit --testsuite Unit,Feature,Architecture` : 501 tests, 5050 assertions, OK.
+- `phpunit --filter 'VerificationSummaryHttpTest'` : 13/70.
+
+BV209 **préparé, PR en brouillon** ; jamais DONE sans revue humaine et CI exacte reçues. CI attendue : tests verts PHP 8.4/PHP 8.5, seule « Contrôler les dépendances » rouge (`composer.lock` à mettre à jour par le responsable du socle, avis détectés le 15 octobre).
+
+worker non livré, les runs restent queued ; B36, B37, BV207 et BV210 non livrés ; AC40, AC48 et AC49 non couverts.
+
+Fichiers hors de mon domaine modifiés : `docs/OPENAPI.yaml`, `docs/api/openapi/verification-cases.yaml`, `docs/api/generated/haas-api.d.ts`, `backend/routes/api/capsules-lab.php`, `SHA256SUMS`. Zones réservées intactes : `backend/config/*`, `backend/phpunit.xml`, `.github/workflows/*`, `backend/bootstrap/*`, `backend/routes/api.php`, `routes/console.php`, `composer.*`, les tables de notification. Aucune migration ajoutée. Aucune action manuelle sur PostgreSQL.
+
+Questions ouvertes (BV209) :
+- Exposition de la fiche en lecture publique sans paramètre : CAHIER_DES_CHARGES.md:1665 cite la route sans préciser la visibilité ; lecture retenue « publique pour une version publiée visible ». À confirmer en revue.
+- Pseudo du relecteur (AC46) : exposé via `reviewer_handle` ; aucune note de revue, aucun `reviewer_id`. B26 masquait déjà `reviewer_id` à la lecture ; à confirmer.
+- `is_internal` d'un `reuse_report` : conservé dans la fiche (observations marquées) ; l'« auto-validation non comptée » se traduit par l'absence totale d'agrégation côté serveur (aucun score, badge ou total exposé). À confirmer.
+- « Retrait sécurisé » (AC45) : interprété comme 404 global (version non publiée ou capsule masquée) + absence totale d'exposition des champs internes (reviewer_id, review_note, notes, email, private_path, notices_path) ; vérifié par assertion sur le payload entier. À confirmer.
+
+## 16 octobre 2026 — BV208, conclusions et pannes de comparaison préparées
+
+Branche `backend/capsules-laboratoire-bv208-conclusions-comparaison` ouverte depuis la tête d'intégration (`6a1d2d7`). Livré :
+
+- `App\Services\Comparisons\ComparisonOutcomeCalculator` final, sans dépendance Laravel : `calculate(?array baseline, ?array candidate, ComparisonState state, ?LabRunState baselineState, ?LabRunState candidateState)` applique les règles CAHIER §44 (lignes 1639-1655) ; `expose(ComparisonState, ?ComparisonOutcome)` centralise la règle UNIQUE de dérivation à la lecture (completed → colonne, error|timed_out → `inconclusive` dérivé, queued|running → null). Deux méthodes partagées par `ReconcileComparisonsService` et `ComparisonRunResource`, aucune duplication.
+- `App\Services\Comparisons\ReconcileComparisonsService` + `ReconciliationReport` scellé : transaction + `SELECT ... FOR UPDATE` sur `comparison_runs`, finalisation UNIQUE (rejeu idempotent), aucune exception HTTP. Transitions : child_error → error, child_timed_out → timed_out, deux enfants `passed|failed` → completed (outcome via le calculateur), budget `config('lab.comparison_budget_seconds', 50)` dépassé → timed_out. `outcome` persistée UNIQUEMENT quand `state = 'completed'` (CHECK `comparison_runs_outcome_requires_terminal`). Jamais de retry automatique, jamais de seconde paire d'enfants, jamais une victoire par défaut.
+- `App\Console\Commands\ReconcileComparisons` (`comparisons:reconcile {id}`) : commande interne appelée par rien en production (aucune planification), modèle `lab:bind-definition`. Elle existe pour les tests Integration et pour un opérateur après livraison d'un vrai worker.
+- `ComparisonRunData` porte désormais `exposedOutcome` (nullable). `ComparisonRunResource` ajoute `outcome` dans l'enveloppe propriétaire (GET /comparisons/{id}, actor_id discordant toujours 404). Jamais assertions, runtime, digest brut, env_snapshot ni seed. `Cache-Control: no-store, private` conservé. `StartComparisonService` écrit `exposedOutcome=null` à l'insertion queued.
+- Tests Unit : `ComparisonOutcomeCalculatorTest` — 22 tests, 28 assertions. Couverture : improved, regressed, mixed, unchanged (deux échecs identiques), identifiants d'assertion différents, résultats absents/vides/non booléens, enfant en erreur/timed_out/queued/running, état global error/timed_out, ordre des clés indifférent, déterminisme, interdiction d'une victoire par défaut, et dérivation `expose` pour toutes les combinaisons state × colonne.
+- Fixtures `Tests\Support\Comparisons\LabResultFixtures` (jamais sous `app/`, étiquette « démonstration pédagogique ») : respect strict des triggers B33 (queued → running avec started_at ≥ created_at ; INSERT lab_result pendant running ; running → terminal avec finished_at). Les lab_results portent `key`, non `id` ; le service lit la même clé.
+- `Tests\Integration\Comparisons\ReconcileComparisonsServiceTest` (10/23) : improved, regressed, mixed, unchanged avec deux échecs identiques, enfant en erreur, enfant timed_out, résultat absent, budget dépassé, rejeu idempotent, UUID inconnu.
+- `Tests\Integration\Comparisons\ComparisonOutcomeExposureHttpTest` (5/23) : exposition improved sans assertions/runtime/digest, inconclusive dérivé pour timed_out alors que colonne NULL, invisibilité pour autrui (404), capsule parente masquée sans fuite de forme, absence de route mutante sur /comparisons/{id}.
+- `Tests\Integration\Comparisons\ConcurrentReconcileComparisonTest` (1/10) : deux processus Symfony\\Process (barrière `pg_stat_activity`, `application_name='haas_bv208_reconciler'`, pas de pcntl) convergent sur `finalized/already_finalized`, une seule ligne `completed/improved`. Teardown via `DomainTables::dropAll()` avant rollback, sans CASCADE.
+- Fragment OpenAPI `docs/api/openapi/comparisons.yaml` 0.3.0 → 0.4.0 : schéma `ComparisonOutcome` + propriété `outcome: null | ComparisonOutcome` sur `ComparisonRun`. Aucun nouveau chemin ; le `$ref` de `/api/v1/comparisons/{id}` reste valide dans `docs/OPENAPI.yaml`.
+- `php scripts/generate-api-types.php` : 92 types, diff additif (`comparisons_ComparisonOutcome`, `outcome: null | ComparisonOutcome` sur `comparisons_ComparisonRun`). Rien supprimé.
+- `backend/tests/Integration/Comparisons/ComparisonRunHttpTest::test_actor_reads_their_queued_comparison_without_outcome_or_digests` bascule : la clé `outcome` est présente et vaut null pour un queued (dérivation `expose`).
+
+Décision du propriétaire du domaine (consignée, question ouverte confirmée) : la colonne `comparison_runs.outcome` reste NULL pour error et timed_out (CHECK `comparison_runs_outcome_requires_terminal`) ; la conclusion `inconclusive` est **dérivée à la lecture** par la méthode unique `ComparisonOutcomeCalculator::expose`. Aucune migration ajoutée.
+
+BV208 **préparé, PR en brouillon** ; jamais DONE sans revue humaine et CI exacte reçues. CI attendue : tests verts PHP 8.4/PHP 8.5, seule « Contrôler les dépendances » rouge (avis détectés le 15 octobre, `composer.lock` à mettre à jour par le responsable du socle).
+
+worker non livré, les runs restent queued ; B36, B37, BV207 et BV210 non livrés ; AC40, AC48 et AC49 non couverts.
+
+Fichiers hors de mon domaine modifiés : `docs/OPENAPI.yaml` inchangé (aucun nouveau $ref), `docs/api/openapi/comparisons.yaml`, `docs/api/generated/haas-api.d.ts`, `SHA256SUMS`. Zones réservées intactes : `backend/config/*`, `backend/phpunit.xml`, `.github/workflows/*`, `backend/bootstrap/*`, `backend/routes/api.php`, `routes/console.php`, `composer.*`, les tables de notification. Aucune action manuelle sur PostgreSQL. `~/.haas-test.env` jamais lu.
+
+Questions ouvertes (BV208) :
+- Exposition de outcome à l'acteur : révéler explicitement la conclusion machine au propriétaire est une décision confirmée (CAHIER §45 ligne 1672 réserve la lecture d'un rapport autorisé) ; à relire en revue.
+- Commande de réconciliation : `comparisons:reconcile` n'est appelée par rien en production. Pas de planification ; destinée aux tests Integration et à l'opérateur après B36/B37.
+- CHECK `comparison_runs_outcome_requires_terminal` et dérivation : la colonne reste NULL pour error et timed_out ; la valeur `inconclusive` est dérivée à la lecture (option (a) retenue). À confirmer en revue.
+- Budget de comparaison : `config('lab.comparison_budget_seconds', 50)` par défaut dans le code ; `backend/config/*` reste intact (zone réservée). À confirmer avec le responsable du socle avant GO_PRODUCTION.
+- « Retrait sécurisé » (AC45) compris comme expurgation à la lecture : BV209 ouvrira la vue versionnée. En BV208, la Resource ne révèle jamais assertions/runtime/digest/env_snapshot/seed (test figé).
+
+## Intégration capsules et laboratoire
+
+Branche `backend/capsules-laboratoire-integration-catalogue-lab` dérivée de la tête BV206 (`2fcb9e9`), merge `--no-ff --no-commit` de `origin/backend/capsules-laboratoire-b28-favoris-retours` (`aa05582`) : **préparé, PR en brouillon**, aucun DONE.
+
+Fichiers résolus à la main : `backend/routes/api/capsules-lab.php` (union des routes, aucune collision de nom : B23 4 / B24 1 / B25 1 / B26 3 / B27 3 / B28 3 / B33 1 / B34 2 / BV202 6 / BV203 1 / BV204 1 / BV205 1 / BV206 1 — 28 routes), `backend/tests/Support/Mdev44/DomainTables.php` et `backend/tests/Integration/Capsules/CapsulesMigrationTest.php` (union des tables, enfants avant parents, aucun CASCADE), `docs/OPENAPI.yaml` (UNION des `$ref`, aucun doublon), `docs/AI_USAGE.md` + `docs/execution/HANDOFF.md` + `docs/execution/PROGRESS.md` + `docs/execution/participants/mdev44-code/HANDOFF.md` + `docs/execution/participants/mdev44-code/PROGRESS.md` (histoires chronologiques des deux côtés, aucune ligne d'un autre participant modifiée). `SHA256SUMS` tenu depuis BV206 puis régénéré par le script temporaire décrit en consigne (hors dépôt, bytes `git show :chemin`). `docs/execution/tasks.json` : valide en JSON. `docs/api/generated/haas-api.d.ts` : auto-mergé puis régénéré par `php scripts/generate-api-types.php` (91 types, aucun diff au-delà du merge trois voies).
+
+Filtre Q16 `has_lab` ajouté au catalogue (B26). Définition restrictive : la DERNIÈRE version publiée visible de la capsule a une `lab_definitions.enabled=true`. Lecture limitative consignée ; une question ouverte est consignée (voir plus bas). Le switch global du laboratoire n'est pas un critère. Fichiers livrés : `backend/app/Data/Capsules/CapsuleCatalogueFilterData.php` (champ `hasLab: ?bool`), `backend/app/Http/Requests/Capsules/ListCapsulesCatalogueRequest.php` (liste blanche stricte `true`/`false`, 422 sinon), `backend/app/Queries/Capsules/ListVisibleCapsulesQuery.php` (whereExists/whereNotExists sur `last_pub.latest_published_version_id`, eager loading inchangé, aucun N+1 nouveau), `docs/api/openapi/capsules-lab.yaml` (`has_lab` documenté). Aucun autre comportement du catalogue n'est modifié. Tests HTTP dédiés ajoutés à `backend/tests/Integration/Capsules/CapsuleCatalogueHttpTest.php` : filtre actif, définition désactivée ignorée, version retirée ignorée, capsule masquée ignorée, combinaison avec `technology`, pagination stable sur `has_lab=true`, valeurs invalides refusées en 422, et test de non-régression `test_has_lab_filter_query_count_does_not_grow_with_catalogue_size` (5 puis 30 capsules, mêmes nombres de requêtes SELECT hors sessions pour `has_lab=true` et `has_lab=false`).
+
+Fichiers hors de mon domaine modifiés : `backend/routes/api/capsules-lab.php`, `docs/OPENAPI.yaml`, `docs/AI_USAGE.md`, `docs/execution/HANDOFF.md`, `docs/execution/PROGRESS.md`, `SHA256SUMS`, `docs/api/openapi/capsules-lab.yaml`, `docs/api/generated/haas-api.d.ts`, `backend/tests/Integration/Capsules/CapsulesMigrationTest.php`, `backend/tests/Support/Mdev44/DomainTables.php`. Zones réservées respectées : `backend/config/*`, `backend/phpunit.xml`, `.github/workflows/*`, `backend/bootstrap/*`, `backend/routes/api.php`, `composer.*`, les tables de notification. Aucune action manuelle sur PostgreSQL. `~/.haas-test.env` jamais lu.
+
+worker non livré, les runs restent queued ; B36, B37, BV207 à BV210 non livrés
+
+Questions ouvertes cumulées :
+- Rejeu d'une comparaison avec le switch de laboratoire fermé : le contrôle est dans `ApprovedProfileQuery`, après la recherche du rejeu ; **lecture par défaut** « un rejeu renvoie la réponse stockée ; une première requête avec switch fermé reçoit 503 sans consommer d'emplacement ni d'unité », à vérifier par un test ciblé.
+- Baseline réelle absente : `test_only_fixture` sous `app.env=testing` seulement.
+- Forme et signature du manifeste de release non fixées.
+- Notifications : zone réservée du socle, aucune émission dans ce lot.
+- Borne de file B34 non testée séparément.
+- Visibilité du GET §26:957 : 404 pour acteur discordant (BV205) ; lecture restrictive consignée.
+- Format du manifeste de BV203 non fixé.
+- **Q16** (nouvelle) : le contrat exact du filtre `has_lab` est lu de manière restrictive — version publiée visible + `lab_definitions.enabled=true`. Pas de badge projeté dans la Resource à ce stade.
+- has_lab porte sur la DERNIÈRE version publiée de la capsule (test_has_lab_filter_keeps_only_capsules_with_active_lab_on_latest_published) : une capsule dont la v1 a un laboratoire actif et dont la v2 publiée n'en a pas disparaît du filtre ; lecture à confirmer (dernière version ou n'importe quelle version publiée)
+- **Q20** reportée depuis B28 : aucune route de lecture `GET /me/favorites` fournie.
+
+## 16 octobre 2026 — BV206, lancement idempotent et quotas partagés préparés
+
+Branche `backend/capsules-laboratoire-bv206-lancement-comparaison` ouverte depuis la tête locale BV205 (`8c0a4db`). Livré :
+
+- `LabCapacityGuard::activeSlotCount()` passe à `COUNT(DISTINCT COALESCE(comparison_id::text, id::text))`. Un run isolé compte toujours pour 1 ; une comparaison compte pour 1 emplacement partagé par ses deux enfants (CAHIER §44 ligne 1651 : « un seul run réellement actif au maximum globalement, les deux enfants sont séquentiels »).
+- `App\Services\Comparisons\StartComparisonService` sous verrou avisé partagé 554478 (via `LabCapacityGuard`). `UNITS_PER_COMPARISON = 2` ; les deux enfants `lab_runs` (baseline/candidate) sont insérés dans **la même transaction** avec le même `comparison_id`. `input_digest` canonique commun aux deux côtés (profil, scénario, release, module_version, source_commit, suite_digest, input_schema_version).
+- `StartComparisonData`, `StartComparisonRequest` (clés acceptées : `comparison_profile_id`, `scenario_key` ; Idempotency-Key UUID v4 obligatoire ; toute autre clé → 422), `StartComparisonController`, `ApprovedProfileQuery` (profil enabled, famille `b1.idempotent.v1`, version publiée + visible, définition B33 figée, intégrité du registre). Switch fermé = 503.
+- Route `POST /api/v1/comparisons` (membre vérifié, throttle:30,1). `Location` + `Cache-Control: no-store, private` ; réponse 202 avec `data.state=queued` et URL de suivi `/api/v1/comparisons/{id}` ; `children_follow_urls` ordonnés baseline puis candidate.
+- Fragment OpenAPI étendu (POST /comparisons avec Idempotency-Key, exemple de charge, 202/401/403/404/409/422/429/503). `$ref` ajouté dans `docs/OPENAPI.yaml`. **83 types API** régénérés (le path ajouté ne change pas le schéma types).
+
+Décisions du propriétaire du domaine (consignées, questions ouvertes) :
+- L'unité de capacité est un **EMPLACEMENT** ; une comparaison en occupe UN SEUL pour ses deux enfants, par `COUNT(DISTINCT COALESCE(comparison_id, id))`. Sans cela, le second enfant serait refusé pour « queued compte comme actif ».
+- Quota horaire : la comparaison coûte **2 unités** (deux lignes lab_runs enfants) sans changer `UNITS_PER_SIMPLE_RUN`.
+
+Tests locaux (PHP 8.4.15 Laragon, `C:\laragon\bin\php\php-8.4.15-Win32-vs17-x64\php.exe`, `openssl`+`pdo_pgsql` chargés ; `~/.haas-test.env` jamais lu) :
+- `vendor/bin/pint --test` : passed. `vendor/bin/phpstan analyse` : [OK] No errors.
+- `phpunit --filter 'StartComparisonHttpTest'` : OK (18 tests, 47 assertions).
+- `phpunit --filter 'ConcurrentStartComparisonTest|StartComparisonHttpTest'` : OK (21 tests, 73 assertions) — concurrence réelle via Symfony Process + barrière `pg_stat_activity`.
+
+BV206 **préparé, PR en brouillon** ; jamais DONE sans revue humaine et CI exacte reçues. CI attendue : tests verts PHP 8.4/PHP 8.5, seule « Contrôler les dépendances » rouge pour `symfony/http-foundation` CVE-2026-108082 et `symfony/yaml` CVE-2026-109413.
+
+Fichiers hors de mon domaine modifiés : `backend/routes/api/capsules-lab.php` (ajout POST /comparisons), `backend/app/Infrastructure/Lab/LabCapacityGuard.php` (comptage « un emplacement par comparaison »), `docs/OPENAPI.yaml` (1 `$ref`), `docs/api/generated/haas-api.d.ts` inchangé (types déjà couverts). `backend/routes/api.php`, `backend/config/*`, `backend/bootstrap/*`, `backend/phpunit.xml`, `composer.*`, `.github/workflows/*`, les tables de notification restent intacts.
+
+Questions ouvertes (reprises de BV204/BV205) :
+- Baseline réelle non livrée ; `test_only_fixture` dans les tests.
+- Signature du manifeste de release non fixée.
+- Borne de la file B34 non testée séparément (hors scope BV206, resterait couverte en B36+).
+- Visibilité du GET §26:957 : 404 appliqué pour acteur discordant (BV205).
+- Notifications : zone réservée socle, aucune émission.
+
+Incident CI PR #50 (gh run `38836596920`) : le test d'architecture `Tests\Architecture\DomainBoundariesTest::test_data_and_services_do_not_depend_on_http` a refusé l'import `Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException` dans `StartComparisonService`. Correction `fix(comparisons): préserver l'indépendance Services → HTTP` : la vérification `config('lab.enabled')` est désormais portée par `ApprovedProfileQuery` (couche Queries, autorisée) ; le comportement observable (503 si fermé) est inchangé. Re-run local Unit/Feature/Architecture : OK (439/4589) ; `StartComparisonHttpTest|ConcurrentStartComparisonTest` : OK (21/73). Re-push, nouvelle CI en attente.
+
+worker non livré, les runs restent queued ; B36, B37, BV207 à BV210 non livrés
+
+## 16 octobre 2026 — BV205, données et contrat des comparaisons préparés
+
+Branche `backend/capsules-laboratoire-bv205-donnees-comparaison` ouverte depuis la tête locale BV204 (`ecc48e5`). Livré :
+
+- **Refactor préalable** `refactor(lab): extraire le garde de capacité` : déplace de StartLabRunService (B34) vers `App\Infrastructure\Lab\LabCapacityGuard` la valeur du verrou avisé 554478, le comptage global queued+running, la fenêtre horaire glissante par membre et le calcul du Retry-After. Mêmes bornes `config('lab.hourly_units' / 'max_running' / 'queue_limit')` et mêmes exceptions `LabQuotaExceeded` / `LabCapacityReached` ; **les tests StartLabRunHttpTest + ConcurrentLabRunTest restent verts (20/72)**. BV206 réutilise ce garde pour réserver deux unités ; le comptage « un emplacement par comparaison » (COALESCE sur `comparison_id`) y sera appliqué sans modifier cette extraction.
+- Migration `2026_10_15_120400_bv205_create_comparison_runs_table.php` : famille fermée ComparisonState/ComparisonOutcome, outcome nullable autorisé seulement en state=completed, input_digest hex 64, env_snapshot JSONB object ≤ 20 Ko, CHECK dates par état, unique `(actor_id, request_key)`.
+- Migration `2026_10_15_120500_bv205_add_comparison_link_to_lab_runs_table.php` : ALTER lab_runs ajoute `comparison_id` nullable FK RESTRICT vers `comparison_runs` et `comparison_side` nullable. CHECK « les deux ensemble ou aucun » + unique partiel `(comparison_id, comparison_side)`. `down()` fidèle, tolérant à l'absence, et refusé si des lignes `lab_runs` référencent une comparaison (modèle B33).
+- Enum `App\Enums\Comparisons\ComparisonSide` (baseline/candidate).
+- Modèle `ComparisonRun`, Data `ComparisonRunData`, Resource `ComparisonRunResource` **sans** outcome, input_digest, seed, env_snapshot ni digests (BV208 ouvrira la révélation contrôlée). Query `ComparisonRunQuery` filtre strict par acteur ; autrui = 404.
+- Route `GET /api/v1/comparisons/{id}` (membre vérifié, throttle:60,1). `ShowComparisonRunRequest` rejette tout paramètre en 422 ; `Cache-Control: no-store, private`. Aucune autre route touche /comparisons en BV205.
+- Fragment OpenAPI `docs/api/openapi/comparisons.yaml` étendu (schémas ComparisonState, ComparisonRun, ComparisonRunEnvelope ; pattern des follow_url). `$ref` ajouté dans `docs/OPENAPI.yaml`. **83 types API** régénérés par `scripts/generate-api-types.php`.
+- `DomainTables` et `CapsulesMigrationTest::test_down_rollback_removes_all_capsule_schema_tables` étendus pour `comparison_runs` (enfants avant parents, sans CASCADE). `ComparisonProfilesMigrationTest` refactoré pour rollback BV205 avant BV204.
+
+Tests locaux (PHP 8.4.15 Laragon, `C:\laragon\bin\php\php-8.4.15-Win32-vs17-x64\php.exe`, `openssl`+`pdo_pgsql` chargés ; `~/.haas-test.env` jamais lu) :
+- `vendor/bin/pint --test` : passed. `vendor/bin/phpstan analyse` : [OK] No errors.
+- `phpunit --filter 'StartLabRunHttpTest|ConcurrentLabRunTest'` : OK (20 tests, 72 assertions) — B34 préservé après extraction.
+- `phpunit --filter Comparisons` : OK (53 tests, 125 assertions).
+- `phpunit --filter 'Comparisons|StartLabRunHttpTest|ConcurrentLabRunTest'` : OK (73 tests, 197 assertions).
+- `phpunit --testsuite Integration --filter '/^(?!.*Demo).*(VerificationCases|Capsules|Lab|Comparisons).*$/'` : **OK (446 tests, 2028 assertions, 8 min 57)**.
+- `node scripts/validate-pack.mjs` : `passed: 18, failed: 0`. `node scripts/check-deployment-docs.mjs` : `passed: 7, failed: 0`. `node scripts/check-manifest.mjs` : `892 empreintes vérifiées`.
+
+BV205 **préparé, PR en brouillon** ; jamais DONE sans revue humaine et CI exacte reçues. CI attendue : tests verts PHP 8.4/PHP 8.5, seule « Contrôler les dépendances » rouge pour `symfony/http-foundation` CVE-2026-108082 et `symfony/yaml` CVE-2026-109413 ; `composer.lock` à mettre à jour par le responsable du socle.
+
+Fichiers hors de mon domaine modifiés : `backend/routes/api/capsules-lab.php` (ajout GET /comparisons/{id}), `backend/app/Services/Lab/StartLabRunService.php` (extraction du garde, comportement inchangé), `backend/tests/Integration/Lab/ConcurrentLabRunTest.php` (commentaire actualisé), `docs/OPENAPI.yaml` (1 `$ref`), `docs/api/generated/haas-api.d.ts` (régénéré), `backend/tests/Integration/Capsules/CapsulesMigrationTest.php`, `backend/tests/Support/Mdev44/DomainTables.php` (enfants-avant-parents), `SHA256SUMS` (régénéré). `backend/routes/api.php`, `backend/config/*`, `backend/bootstrap/*`, `backend/phpunit.xml`, `composer.*`, `.github/workflows/*`, les tables de notification restent intacts.
+
+Décision du propriétaire du domaine (déjà consignée BV204 et à reconfirmer) :
+- La route POST /comparisons sera livrée en BV206 avec `Idempotency-Key` obligatoire ; aucune mutation publique n'écrit `outcome`, `input_digest`, `seed` ou `env_snapshot`. L'outcome machine reste du ressort du réconciliateur (BV208).
+
+Questions ouvertes (reprises de BV204) :
+- Baseline réelle non livrée dans le dépôt ; les tests passent via `test_only_fixture`. Signature du manifeste de release non fixée.
+- Visibilité du GET §26:957 : 404 appliqué pour acteur discordant, cohérent avec le re-contrôle de `VerificationCaseParentVisibility`.
+- Décision « un emplacement par comparaison » reportée en BV206 (comptage COALESCE sur comparison_id).
+- Borne de la file B34 : reste à couvrir.
+- Notifications : zone réservée socle, aucune émission.
+
+worker non livré, les runs restent queued ; B36, B37, BV207 à BV210 non livrés
+
+## 15 octobre 2026 — BV204, profils de comparaison préparés
+
+Branche `backend/capsules-laboratoire-bv204-profils-comparaison` ouverte depuis BV203 `4c7d22c`. Livré :
+- Test(cases) prérequis : trois cas ajoutés à `VerificationCaseHttpTest` qui prouvent qu'une demande d'aide masquée après création rend introuvables la lecture, la soumission et le retrait du cas (404). Le re-contrôle de `VerificationCaseParentVisibility` sur Show/Submit/Withdraw était déjà en place ; ces tests le verrouillent par HTTP (manquait en BV202).
+- Migration `2026_10_15_120300_bv204_create_comparison_profiles_table.php` — une table, famille fixée à `b1.idempotent.v1` (CHECK), `baseline_manifest` JSONB non vide, `candidate_version_id` FK RESTRICT unique vers `capsule_versions`, `suite_digest` hex 64, `input_schema_version` semver, `enabled` bool. Aucune FK vers un enum ni un registre. `down()` fidèle et tolérant (table absente = no-op) ; jamais CASCADE.
+- Registre immuable `App\Infrastructure\Comparisons\ComparisonProfileRegistry` — famille `b1.idempotent.v1`, digests de la candidate figés via `ApprovedLabRegistry` (14 fichiers B33), `BASELINE_SOURCE_COMMIT` lu via `config('lab.comparison_baseline_source_commit')` (nul par défaut : HAAS n'invente aucune baseline).
+- Commande interne `lab:bind-comparison-profile <manifest>` + `BindComparisonProfileService` — valide un manifeste étendu d'`ops/templates/release-manifest.example.json` (section `comparison_profiles` ajoutée) ; refuse famille autre que `b1.idempotent.v1`, candidate non publiée / retirée / masquée, digest divergent, scénario hors `LabScenario`, baseline sans `test_only_fixture` tant qu'`expectedBaselineSourceCommit()` est null. Rejeu idempotent ; profil existant divergent refusé. Aucune route HTTP n'écrit, n'active ni ne retire un profil.
+- Route `GET /api/v1/versions/{id}/comparison-profiles` (membre vérifié, throttle:60,1) — version publiée + capsule visible seulement, sinon 404. `ComparisonProfileResource` sans `suite_digest`, `baseline_manifest`, `code_digest`, ni chemin ; champs : `id`, `family_key`, `candidate_version_id`, `input_schema_version`, `enabled`, `allowed_scenarios`. `Cache-Control: no-store, private`. `ListComparisonProfilesRequest` rejette toute entrée.
+- Fragment OpenAPI `docs/api/openapi/comparisons.yaml` + `$ref` dans `docs/OPENAPI.yaml` ; **80 types API générés sans application frontend**.
+- `DomainTables` et `CapsulesMigrationTest::test_down_rollback_removes_all_capsule_schema_tables` étendus (enfants avant parents, sans CASCADE).
+
+Tests locaux (PHP 8.4.15 Laragon, `C:\laragon\bin\php\php-8.4.15-Win32-vs17-x64\php.exe`, `openssl`+`pdo_pgsql` chargés ; `~/.haas-test.env` jamais lu) :
+- `vendor/bin/pint --test` : passed. `vendor/bin/phpstan analyse` : [OK] No errors.
+- `vendor/bin/phpunit --filter 'VerificationCaseHttpTest'` : OK (17 tests, 45 assertions).
+- `vendor/bin/phpunit --filter 'Comparisons'` : OK (31 tests, 74 assertions).
+- `vendor/bin/phpunit --testsuite Integration` filtré `VerificationCases|Capsules|Lab|Comparisons` hors Demo : **OK (424 tests, 1976 assertions, 8 min 53)**.
+- `node scripts/validate-pack.mjs` : `passed: 18, failed: 0`.
+- `node scripts/check-deployment-docs.mjs` : `passed: 7, failed: 0`.
+- `node scripts/check-manifest.mjs` : `877 empreintes vérifiées ; tous les fichiers suivis sont couverts.`.
+
+BV204 **préparé, PR en brouillon** ; jamais DONE sans revue humaine et CI exacte reçues. CI attendue : tests verts sur PHP 8.4 et PHP 8.5 ; seule « Contrôler les dépendances » (`composer audit --locked`) rouge pour `symfony/http-foundation` CVE-2026-108082 et `symfony/yaml` CVE-2026-109413 (détectés le 15 octobre, versions installées v8.0.15) ; `composer.lock` à mettre à jour par le responsable du socle.
+
+Fichiers hors de mon domaine modifiés : `backend/routes/api/capsules-lab.php` (ajout de la route `/versions/{id}/comparison-profiles`), `docs/OPENAPI.yaml` (1 `$ref` + fragment), `docs/api/generated/haas-api.d.ts` (régénéré), `ops/templates/release-manifest.example.json` (ajout de la section `comparison_profiles`), `SHA256SUMS` (régénéré via script hors dépôt). `backend/routes/api.php`, `backend/config/*`, `backend/bootstrap/*`, `backend/phpunit.xml`, `composer.*`, `.github/workflows/*`, les tables de notification restent intacts.
+
+Décisions du propriétaire du domaine (à consigner) :
+- BV204 : la commande `lab:bind-comparison-profile` est la **seule** porte d'écriture ; aucune route publique n'alimente `comparison_profiles`. Les tests utilisent des manifestes marqués `test_only_fixture`, acceptés uniquement sous `app.env === 'testing'`.
+
+Questions ouvertes :
+- Baseline réelle (« Exemple pédagogique incorrect » cité CAHIER_DES_CHARGES.md:1643) non livrée dans le dépôt : le registre `ApprovedLabRegistry` ne couvre que la candidate B1 (14 fichiers = 8 module + 6 suite). Aucune commande ne crée une baseline fictive en production.
+- Signature du manifeste de release non fixée (reste consignée depuis BV203).
+- Visibilité du GET §26:957 : voir décision précédente ; `ComparisonProfileQuery` renvoie 404 pour version inconnue/retirée/capsule masquée, cohérent avec `VerificationCaseParentVisibility`.
+- Notifications : zone réservée socle, aucune émission depuis BV204.
+
+worker non livré, les runs restent queued ; B36, B37, BV207 à BV210 non livrés
+
+## 15 octobre 2026 — BV203, revue et intégration des cas préparées
+
+Branche `backend/capsules-laboratoire-bv203-revue-cas` ouverte depuis BV202 `14a9a7a`. Livré :
+- Route admin `POST /api/v1/admin/verification-cases/{id}/review` — relecteur modérateur/admin actif/vérifié, distinct de l'auteur ; décision `reviewed` ou `declined` (motif obligatoire). Idempotency-Key, transaction avec verrou, audit dans la même transaction.
+- Migration `2026_10_15_120200_bv203_create_case_scenario_links_table.php` — une table, CHECK sur `scenario_key IN (nominal_event, duplicate_event, distinct_events, invalid_event)` (valeurs de `App\Enums\Lab\LabScenario`, B33), aucune FK vers un enum ou un registre de scénarios ; `suite_digest` sha256 hex, `release_commit` sha1 hex 40 ; `case_revision_id` unique (clé par révision). RESTRICT vers `verification_case_revisions` et `users`. `DomainTables` et `CapsulesMigrationTest::test_down_rollback_removes_all_capsule_schema_tables` étendus (enfants d'abord, jamais CASCADE).
+- Commande interne `lab:bind-case <manifest>` + `BindCaseIntegrationService` — lit un manifeste JSON validé contre le gabarit `ops/templates/release-manifest.example.json` (clé `verification_cases.release_commit` + `verification_cases.bindings[]` {`case_revision_id`, `scenario_key`, `suite_digest`, `reviewer_id`}). Transaction, verrou, idempotence : refuse une révision non figée, un cas non `reviewed`, un digest incohérent, un scénario hors liste, un relecteur non vérifié ou auto-revue, un lien existant divergent. Ne touche jamais une révision déjà intégrée.
+- Resource/OpenAPI/types mis à jour (77 types API générés sans application frontend) ; `$ref` du chemin admin dans `docs/OPENAPI.yaml`.
+- Tests : `CaseScenarioLinksSchemaTest` (6 contraintes), `VerificationCaseReviewHttpTest` (7 scénarios HTTP incluant `test_no_public_route_writes_case_scenario_links_or_sets_integrated` qui inspecte la table des routes), `BindCaseIntegrationCommandTest` (7 scénarios : succès, idempotence, scénario inconnu, digest incohérent, manifeste hors gabarit, cas non revu, conservation de l'ancien lien après nouvelle soumission), `VerificationCaseReviewConcurrencyTest` (deux relecteurs concurrents avec barrière `pg_stat_activity` et vérification d'une seule décision + une seule ligne d'audit). Fixture `tests/Fixtures/review-verification-case-concurrently.php`.
+
+Tests locaux (PHP 8.4.15 Laragon) :
+- `composer lint` : passed. `composer analyse` : [OK] No errors.
+- `composer test` : OK (439 tests, 4469 assertions).
+- Integration `VerificationCases` : OK (59 tests, 195 assertions, 1 min 27).
+- Integration `VerificationCases|Capsules|Lab` hors Demo : OK (392 tests, 1897 assertions, 7 min 41).
+
+BV203 **préparé, PR en brouillon** ; jamais DONE sans revue humaine et CI exacte reçues. CI attendue : tests verts PHP 8.4/PHP 8.5, seule l'étape « Contrôler les dépendances » rouge pour `symfony/http-foundation` CVE-2026-108082 et `symfony/yaml` CVE-2026-109413 ; `composer.lock` à mettre à jour par le responsable du socle.
+
+Fichiers hors de mon domaine modifiés : `backend/routes/api/capsules-lab.php` (ajout du groupe `admin/verification-cases`), `docs/OPENAPI.yaml` (1 `$ref`), `docs/api/generated/haas-api.d.ts` (régénéré), `ops/templates/release-manifest.example.json` (ajout d'un bloc `verification_cases` placeholder). Les tables de notification, `backend/routes/api.php`, `backend/config/*`, `backend/bootstrap/*`, `backend/phpunit.xml`, `composer.*`, `.github/workflows/*` restent intacts.
+
+Questions ouvertes (comme Q12) :
+- Notification de BV203 non livrée : le type d'événement relève du socle (`NotificationEvent`, zone réservée). À spécifier par le responsable 1.
+- Format du manifeste de release non figé sur `main` ; `ops/templates/release-manifest.example.json` reste le gabarit de validation.
+- Borne de la file B34 non testée dans ce lot.
+- Visibilité du GET (§26 CAHIER:944) : à préciser avec le propriétaire du domaine.
+
+## 15 octobre 2026 — BV202, création et soumission des cas préparées
+
+Branche `backend/capsules-laboratoire-bv202-cas-soumission` ouverte depuis BV201 `a660a47`. Six routes publiques :
+- `GET /api/v1/verification-cases` (lecture filtrée par visibilité)
+- `POST /api/v1/verification-cases` (création de brouillon + révision #1 editable)
+- `GET /api/v1/verification-cases/{id}` et `PATCH /api/v1/verification-cases/{id}` (lock_version + Idempotency-Key)
+- `POST /api/v1/verification-cases/{id}/submit` (fige la révision brouillon)
+- `POST /api/v1/verification-cases/{id}/withdraw` (motif obligatoire)
+
+Services dédiés (Create, Revise, Submit, Withdraw) traversant `IdempotencyService` ; Policy `VerificationCasePolicy` qui ne vérifie que la propriété (le service revérifie l'état pour tolérer les rejeux idempotents) ; `VerificationCaseParentVisibility` revérifie à chaque transition que le parent (demande non masquée + auteur actif/vérifié + état non `draft` sauf propriétaire ; version `published` + capsule `visible`) est accessible. Validation du corps dans `App\Support\VerificationCases\VerificationCaseBody` : longueurs CAHIER_DES_CHARGES.md:1631 (titre 15–140, contexte 20–2000, étapes 20–4000, attendu 10–2000, observé 4000 max, environnement 500 max), champs `code`/`command`/`url`/`path` + clés inconnues rejetés en 422. Fragment OpenAPI `docs/api/openapi/verification-cases.yaml` (+ `$ref` dans `docs/OPENAPI.yaml`) ; types régénérés par `php scripts/generate-api-types.php` (`76 types API générés`).
+
+Tests locaux (PHP 8.4.15 Laragon, `C:\laragon\bin\php\php-8.4.15-Win32-vs17-x64\php.exe`, `openssl`+`pdo_pgsql` chargés) :
+- `composer lint` : passed. `composer analyse` : [OK] No errors.
+- `composer test` : 439 tests, 4445 assertions, OK.
+- Integration filtrée `VerificationCases|Capsules|Lab` hors Demo : 370 tests, 1802 assertions, OK (7 min 19).
+- Concurrence : `VerificationCaseConcurrencyTest::test_two_concurrent_patches_with_the_same_lock_version_elect_a_single_winner` démarre deux processus `tests/Fixtures/revise-verification-case-concurrently.php`, barrière `lockForUpdate` + lecture `pg_stat_activity`, le gagnant obtient `lock_version+1`, le perdant renvoie `STALE` ; nettoyage via `DomainTables::dropAll()` comme B34 (`backend/tests/Integration/Lab/ConcurrentLabRunTest.php:32`).
+
+BV202 **préparé, PR en brouillon** ; jamais DONE sans revue humaine et CI exacte reçues. CI attendue : tests verts sur PHP 8.4 et PHP 8.5 ; étape « Contrôler les dépendances » (composer audit) rouge pour avis externes `symfony/http-foundation` CVE-2026-108082 et `symfony/yaml` CVE-2026-109413 ; correctif du lockfile demandé au responsable du socle.
+
+Fichiers hors de mon domaine modifiés : `backend/routes/api/capsules-lab.php` (ajout des 6 routes dans le fichier capsules/lab déjà pilote de mon domaine), `docs/OPENAPI.yaml` (4 `$ref`), `docs/api/generated/haas-api.d.ts` (régénéré). `backend/routes/api.php`, `backend/config/*`, `backend/bootstrap/*`, `backend/phpunit.xml`, `composer.*`, `.github/workflows/*`, les tables de notification restent intactes.
+
+Questions ouvertes (hors scope BV202) :
+- Événement de notification BV202/BV203 non livré ici — le type d'événement relève du socle `NotificationEvent` (zone réservée).
+- Format du manifeste de release de BV203 non spécifié sur `main` : la commande d'intégration validera un fichier contre `ops/templates/release-manifest.example.json` (gabarit à créer en BV203).
+- Visibilité du GET (§26 CAHIER_DES_CHARGES.md:944) : la liste filtre par visibilité du parent et exclut les brouillons/retraits d'autrui ; variantes de scope à préciser avec le propriétaire du domaine.
+- Borne de la file B34 non testée dans ce lot (resterait couverte dans BV205+).
+
 ## 15 octobre 2026 — BV201, schéma des cas préparé
 
 Branche `backend/capsules-laboratoire-bv201-schema-cas` ouverte depuis B34 vert `0a5cb95`. Deux migrations additives livrées : `2026_10_15_120000_bv201_create_verification_cases_table.php` et `2026_10_15_120100_bv201_create_verification_case_revisions_table.php`. CHECK sur l'état, XOR du parent (`help_request_id` ou `capsule_version_id` exactement un), unicité (`case_id`, `revision_no`), digest sha256 hex, body jsonb object. FK RESTRICT vers `users`, `help_requests`, `capsule_versions`, aucune cascade. Enum `App\Enums\VerificationCases\VerificationCaseState` (6 valeurs du cahier). Modèles `VerificationCase` et `VerificationCaseRevision` avec `$fillable = []` explicite. `Tests\Support\Mdev44\DomainTables` étendu enfants-avant-parents. `Tests\Integration\Capsules\CapsulesMigrationTest::test_down_rollback_removes_all_capsule_schema_tables` étendu pour déposer `verification_case_revisions` puis `verification_cases` sans CASCADE. Nouveaux tests schéma + migration + anti-affectation en masse ajoutés dans `tests/Integration/VerificationCases/`.
@@ -633,6 +923,62 @@ Aucun autre fichier du socle n'a été touché.
 - Q12 (B24) — Notification « Revue de capsule terminée » reste ouverte pour la décision `approved`.
 - Q10, Q11 (B23) et Q2–Q7 (B22) restent ouvertes.
 
+## 2026-10-08 — Lot B26 · Catalogue de capsules
+
+Statut proposé : B26 **préparé, PR en brouillon**, aucun `DONE`. Branche `backend/capsules-laboratoire-b26-catalogue`, dérivée de `backend/capsules-laboratoire-b25-publication`.
+
+### Décisions clefs (propriétaire du domaine)
+
+- **Visibilité publique** (`VisibleCapsulesQuery`) : seules les capsules `visible` avec au moins une version `published` apparaissent. Les versions `draft`/`in_review`/`changes_requested`/`withdrawn` n'apparaissent jamais, ni dans la liste, ni dans la recherche, ni dans le détail par slug ou version précisée (AC15, AC25, RM06).
+- **Recherche `q`** (§14) : ILIKE sécurisée (ESCAPE `!`) sur `capsules.slug`, `capsules.editorial_origin`, `capsule_versions.body` et `capsule_versions.limits` des versions publiées. Pas d'index FTS en P0 — **Q15 ouverte** si un index `to_tsvector` ou `pg_trgm` doit être livré.
+- **Tri** en liste blanche stricte : `date` (défaut, dernière publication) ou `relevance` (nécessite `q`). Tout autre tri → 422. Le tri `relevance` ordonne : slug (0), editorial_origin (1), autre (2), puis date.
+- **Pagination** : défaut 20, max 50 (`PageData` existant). Page tri stable `last_published_at DESC, capsules.id ASC`.
+- **Filtre `technology`** (UUID) : rejoint `capsule_version_technologies` sur les versions publiées.
+- **Filtre « présence de laboratoire »** NON livré : `lab_definitions` arrivera en B33 (cahier §15). **Q16 ouverte** pour sa signature exacte.
+- **`source_request_id` NON exposé** (RM06). Seul `source.kind` ('help_request'/'editorial') et `editorial_origin` apparaissent — **Q17 ouverte** sur l'exposition éventuelle d'un `request_summary` masqué.
+- **Resources distinctes de l'édition** : `CapsuleCataloguePreview` (carte), `CapsuleCataloguePage` (collection paginée), `CapsuleCatalogueDetail` (détail + historique + contributeurs). Pas de `reviewer_id`, note, email, chemin privé d'artefact ni empreinte de notice.
+- **Hydratation `latestPublished`** : relation `hasOne` contrainte à `state=published`, hydratée explicitement par `ListVisibleCapsulesQuery::hydrateLatestPublished()`. Laravel `ofMany()` sur UUID échoue car PostgreSQL n'a pas `max(uuid)` pour le tie-break.
+- **Contraintes de route** : slug (`[a-z0-9][a-z0-9-]{1,118}[a-z0-9]`) et version (MAJOR.MINOR.PATCH) distinctes des routes UUID d'édition (POST/PATCH/submit-review/request-changes/publish).
+
+### Fichiers créés / modifiés
+
+- Data : `App\Data\Capsules\CapsuleCatalogueFilterData` (page/search/technology/sort, `relevance` → q requis).
+- Queries : `VisibleCapsulesQuery` (socle visibilité), `ListVisibleCapsulesQuery` (liste paginée + hydratation), `FindVisibleCapsuleQuery` (détail + historique).
+- FormRequest : `ListCapsulesCatalogueRequest` étend `PaginatedRequest`.
+- Resources : `CapsuleCataloguePreview`, `CapsuleCataloguePage`, `CapsuleCatalogueDetail`.
+- Controllers : `ListVisibleCapsulesController`, `ShowVisibleCapsuleController`.
+- Routes : `GET /api/v1/capsules`, `GET /api/v1/capsules/{slug}`, `GET /api/v1/capsules/{slug}/versions/{version}`.
+- Model : `Capsule::latestPublished()` (hasOne), `CapsuleVersion::contributors()` (hasMany).
+- Fragment OpenAPI : trois `paths`, quatre `schemas` (`CapsuleCataloguePage`, `CapsuleCataloguePreview`, `CapsuleCatalogueDetail`, `PaginationMeta`).
+- Tests : `CapsuleCatalogueHttpTest` (15 cas, 65 assertions locales).
+
+### Fichiers hors de mon domaine modifiés
+
+- `docs/OPENAPI.yaml` : **+4 lignes** (deux `$ref` : slug et slug+version).
+- `docs/api/generated/haas-api.d.ts` : **régénéré** (63 types, +4).
+
+Aucun autre fichier du socle n'a été touché.
+
+### Contrôles finaux (PHP 8.4.15 Laragon, base `haas_capsules_test`/`haas_test`, `COMPOSER_PROCESS_TIMEOUT=0`)
+
+| Commande | Résultat observé |
+|---|---|
+| `composer lint` | `{"tool":"pint","result":"passed"}` |
+| `composer analyse` | `[OK] No errors` |
+| `composer test` | `OK (350 tests, 3913 assertions)` |
+| `vendor/bin/phpunit --testsuite Integration --filter CapsuleCatalogueHttpTest` | `OK (15 tests, 65 assertions)` en 16,331 s |
+| `vendor/bin/phpunit --testsuite Integration` (suite complète) | `OK (566 tests, 4202 assertions)` en 16 min 50,310 s |
+
+### Questions ouvertes
+
+- **Q15** — Index FTS (to_tsvector / pg_trgm) : recherche `q` en ILIKE pour P0. Index à prévoir en revue.
+- **Q16** — Filtre « présence de laboratoire » : différé à B33 (table `lab_definitions`).
+- **Q17** — Exposer un `request_summary` masqué pour les capsules issues de demandes d'aide ? Pour l'instant seule `source.kind` et `editorial_origin` sortent.
+- Q13 (B25) — Format canonique du `content_digest` reste ouvert.
+- Q14 (B25) — « Procédure de vérification présente » reste ouvert.
+- Q12 (B24) — Notification `approved` reste ouverte.
+- Q10, Q11 (B23) et Q2–Q7 (B22) restent ouvertes.
+
 ## Historique de la branche B38 avant intégration
 
 # Progression — capsules/laboratoire (branche B38)
@@ -702,6 +1048,87 @@ Dernier élément manquant du verify B38 (« Aucune session HAAS utilisée et do
 
 ## 2026-10-08 - B25 : reprise de B24 par merge local 83bd71a. Suite Integration (hors Demo) : OK 549 tests / 4127 assertions. Pint, PHPStan 8 et composer test (413 / 4129) verts.
 
+## 2026-10-08 - B26 : reprise de B25 par merge local 1c81ae4. Suite Integration (hors Demo) : OK 564 tests / 4192 assertions. Pint, PHPStan 8 et composer test (413 / 4203) verts.
+
+## 2026-10-08 — Lot B27 · Téléchargement contrôlé
+
+Statut proposé : B27 **préparé, PR en brouillon**, aucun DONE. Branche `backend/capsules-laboratoire-b27-telechargement`, dérivée de B26 (603f43d).
+
+### Décisions clefs (propriétaire du domaine)
+
+- **Deux routes** : `GET /api/v1/capsules/{capsule}/versions/{version}/artifact/{artifact}` (émission d'un lien signé) et `GET .../stream` (livraison du flux). Nommées suivant la convention B23-B26 nested (slug §26 `/versions/{id}/artifact` ouvert à l'interprétation ; nested conservé par cohérence avec B24/B25).
+- **Gates ré-évaluées à chaque requête** (émission ET stream) : actif+vérifié, visibility=visible, state=published, artefact `approved` avec `notices_path` renseigné. Un retrait ultérieur coupe les anciens liens (AC15, AC25).
+- **Jamais de `private_path` ni de chemin disque** dans Resource, logs ou erreur. Policy ou chemin suspect = 404 (RM06 : ne pas révéler l'existence des contenus masqués/retirés).
+- **Lien signé** : `URL::temporarySignedRoute` TTL 300 s + middleware `signed` sur la route de stream. `signed+verified` sur la stream.
+- **Audit** : `capsule.version.artifact.download_issued` dans `content_revisions`, sha256 et expires_at seulement.
+- **Services** : `IssueArtifactDownloadService` renvoie `{artifact, expires_at}` ; le Controller construit l'URL signée (séparation DomainBoundariesTest). `StreamArtifactService` renvoie `{disk, path, download_name}` ; le Controller appelle `Storage::disk('local')->download`.
+
+### Fichiers créés / modifiés
+
+- Policy : `App\Policies\ArtifactPolicy`.
+- Services : `IssueArtifactDownloadService`, `StreamArtifactService`.
+- Exception : `App\Exceptions\Capsules\ArtifactUnavailable` (404).
+- Controllers minces : `IssueArtifactDownloadController`, `StreamArtifactDownloadController`.
+- Resource : `ArtifactDownloadResource` (sans `private_path`).
+- Routes dans `routes/api/capsules-lab.php` (middleware `verified` sur émission ; `signed+verified` sur stream).
+- Fragment OpenAPI : deux paths + schéma `ArtifactDownload`.
+- Tests : `ArtifactDownloadHttpTest` (12 cas, 27 assertions).
+
+### Fichiers hors de mon domaine modifiés
+
+- `docs/OPENAPI.yaml` : **+4 lignes** (deux `$ref` : issue + stream).
+- `docs/api/generated/haas-api.d.ts` : régénéré (66 types, +3).
+
+Aucun autre fichier du socle n'a été touché.
+
+### Contrôles locaux
+
+- `composer lint` → `{"tool":"pint","result":"passed"}`.
+- `composer analyse` → `[OK] No errors`.
+- `composer test` → `OK (413 tests, 4233 assertions)`.
+- `vendor/bin/phpunit --testsuite Integration --filter ArtifactDownloadHttpTest` → `OK (12 tests, 27 assertions)` en 29,7 s.
+
+### Questions ouvertes
+
+- **Q18** — « Conditions d'évaluation approuvées » (§13:480, ARB05 §04:120) : pour P0 verified+actif suffit ; un drapeau explicite d'acceptation d'évaluation est consigné comme à venir (voir ARB05 non résolu).
+- **Q19** — Nommage §26 `/versions/{id}/artifact` : interprété comme nested `/capsules/{capsule}/versions/{version}/artifact/{artifact}` pour cohérence avec B23-B26. À confirmer.
+- Questions antérieures Q12–Q17 restent ouvertes.
+
+
+## 2026-10-11 - B27 : lecture de fichiers verifiee avant reception des acces
+
+Premiere tranche locale : ArtifactSnapshot et VerifiedArtifactFiles, registre serveur prive borne, fichiers canoniques reguliers, refus traversal/URL/liens, taille exacte et digest des octets copies, resources fermees. Unites reelles : 24 tests / 52 assertions OK sur PHP8.5.10 Windows, junctions reelles uniquement sous le storage de test de ce worktree. Linux/symlinks et CI restent a recevoir. Les incidents de fixtures et probes rouges sont conserves dans docs/quality/B27_ARTIFACT_READINESS.md. Les endpoints/audit/registreSQL puis les prerequis B24/B25/B26 attendent leur reception ; aucune readiness, approbation, fusion ou gate. Les anciennes entrees B27 sont historiques et ne valident pas cette reprise.
+
+## 11 octobre 2026 — B27 : accès et registre reçus en ciblage
+
+Bibliothèque initiale commitée localement en `13ae33e02f21b9a1a700647da50820ae88cd37b7`. Les services contrôlent maintenant les droits courants sous verrou, les rattachements, les octets du kit et des notices ; liens signés relatifs liés au membre et à la cible, notices accessibles sans chemin serveur, quota partagé, audit et génération des deux liens atomiques. Registre des notices additif et immutabilité après publication, désactivation conservée, rollback sans perte d'histoire. ARB05 reste sans approbation : aucune activation automatique et aucun vrai kit/licence de production ajouté.
+
+Ciblés PostgreSQL : **66 tests / 258 assertions OK**. Unités finales fichiers/liens : **33 / 69 OK**. Atomicité/API/frontières/modèles après validation finale de l'origine : **7 / 127 OK**. Pint et PHPStan 8 verts ; 66 types à jour, Composer validate/platform/audit réussis, documents 18/18 et déploiement 7/7. Probes rouges et incidents dans `docs/quality/B27_ARTIFACT_READINESS.md` ; totaux recouvrants, pas une suite complète. B27 reste partiel/en brouillon ; synchronisation normale B24/B25/B26 par l'intégrateur avant réception complète et CI exacte. Aucune approbation humaine, fusion, DONE ou gate.
+
+
+## 2026-10-11 — B26 : validation et attribution avant revue
+
+Reprise du head b568a511 dans un nouveau worktree, historiques conservés. Trois défauts corrigés : Unicode 200 caractères, q/sort tableaux refusés avant cast, pseudonyme public handle à la place du nom privé. Probes réellement rouges : 8 tests / 8 assertions, 1 erreur et 6 échecs ; ciblage vert incluant ces probes : 23 tests / 78 assertions. PHPStan 8 et Pint --test réussis. Base PostgreSQL dédiée haas_b26_review_test, runner explicite. Preuve : docs/quality/B26_CATALOGUE_READINESS.md. Sélection dernière publication, hydratation bornée et contrat data en cours ; parent B25 final puis réception complète et CI exacte encore attendus. has_lab/Q16 dépend de B33 absent : aucune déclaration DONE, gate ou approbation humaine.
+
+
+## 2026-10-11 — B26 : sélection et projection du catalogue
+
+Premier correctif local a56f0144fb104d07c52e51a5aa7c9019dc2f0e94. Sélection SQL déterministe de la dernière version publiée avant filtre technologie/tri/pagination ; une version par carte, sans corps ; détail limité au corps choisi et historique de métadonnées ; pseudonyme sélectionné sans champs privés ni owner inutile. Enveloppe data OpenAPI et limites communes décrites, 66 types API. Rouge réel : 3 tests / 6 assertions pour sélection/hydratation/enveloppe et 1 / 4 pour corps de l’historique. Ciblage final exact : 39 tests / 2620 assertions, PHPStan 8 sans erreur et Pint --test verts. Validation pack 18 et déploiement 7 contrôles documentaires verts. Relances non additionnées ; erreur de chemin dans le probe OpenAPI puis nullsafe redondant de fixture corrigés et consignés. Preuve : B26_CATALOGUE_READINESS.md. Parent B25 final, réception complète, CI exacte et revue humaine restent attendus. has_lab/Q16 dépend de B33 absent ; aucun DONE/gate, frontend, push, publication ou déploiement.
+
+Dernière relecture B26 : 2 probes de nullabilité 3.1 rouges (2 tests / 3 assertions), schémas catalogue en unions [T, null] et types régénérés (66), générateur inchangé. Les 39 tests / 2620 assertions finaux incluent les probes ; PHPStan 8 et Pint verts. PR35 reste Draft / B26 partiel pour badge, has_lab/Q16 et B33 absent. Aucun SQL global avant parent B25 final.
+
+## 2026-10-11 — B27 : composition de la fixture de publication
+
+Reprise exclusive au parent documentaire 8fe85fe après réception globale en erreur : 245 tests / 1323 assertions / 1 erreur. JUnit rouge original conservé et copié à hash identique, preuve B27_ARTIFACT_READINESS.md. Probe ciblé rouge réel 1 / 1 avec SQL23514 : insertion Artifact après publication. Fixture corrigée : registre créé pendant InReview puis publication réelle par modérateur indépendant et nouveau brouillon ; attributs anciens vérifiés intégralement. Probe vert 1 / 8, composition courante 74 tests / 436 assertions réussie sans erreur/échec/skip, PHPStan 8/Pint verts. Aucun changement production ni affaiblissement des gardes ; autres fixtures d'artefacts relues, insertion négative intentionnelle conservée. Lecture indépendante distincte des tests. L'intégrateur reprend la réception SQL complète et la CI exacte après commit propre ; aucune suite complète B27 passée ni approbation/DONE/gate/frontend annoncé.
+
+## 2026-10-11 — B27 : fonction de garde répétable après migrate:fresh
+
+Après synchronisation des parents au candidat 134ebe0, deux réceptions globales Integration ont été interrompues par l'intégrateur ; stack SQL42723 sur la fonction b27_guard_artifact déjà présente, sans succès complet. Correction minimale CREATE OR REPLACE, corps/locks/contraintes/down inchangés. Nouveau probe réellement rouge 1 test / 1 assertion / 1 erreur ; relance 1 / 11 verte avec deux migrate:fresh et deux refus d'altération d'empreinte publiée. Alertes de typage du nouveau test corrigées sans ignore/baseline après arrêt du ciblage incomplet. Ciblage final courant 69 tests / 285 assertions réussi, PHPStan 8/Pint verts et 67 types à jour. Preuve B27_ARTIFACT_READINESS.md ; lecture indépendante non comptée comme test. Aucun fichier B24/B26 modifié, aucune garde de production affaiblie. Réception globale et CI exacte à relancer par l'intégrateur ; ARB05 inactive, aucune approbation/DONE/gate/frontend.
+
+## 2026-10-11 — B26 : conserver l'absence d'empreinte historique
+
+Après les microcommits a56f0144 et fe8b4cda, l'intégrateur a relevé le contrat non nullable d'un content_digest historique réellement nul. Trois probes frais avant correction : 3 tests / 12 assertions, 2 échecs OpenAPI/types ; le probe HTTP réussissait déjà sur les deux routes, sans modification du digest en base. CatalogueDetail décrit maintenant string|null, pattern64 et absence historique sans recalcul/backfill ; 66 types régénérés. Ciblage courant terminé : 42 tests / 2635 assertions, PHPStan 8 sans erreur et Pint --test verts. Preuve B26_CATALOGUE_READINESS.md. Les nombres ciblés remplacent les précédents sans addition. Aucun SQL global avant parent B25 final ; CI exacte et revue humaine à recevoir. B33/badge/has_lab/Q16 absents : PR35 reste Draft, aucun B26 DONE/gate.
+
 ## 2026-10-11 — B25 : attribution avant publication
 
 Reprise isolée depuis PR34 `ce75045`, historiques préservés. Probe rouge réel : approbation de la révision 2 enregistrée à 3 (1 test / 2 assertions). Correction minimale du snapshot avant transition ; HTTP B25 vert 23 / 59 et Pint ciblé vert, sur base dédiée `haas_b25_review_test`. La publication Q12 et les protections de downgrade restent à corriger ; aucune réception globale ni approbation humaine déclarée. Preuve : `docs/quality/B25_RECEPTION_20261011.md`.
@@ -717,6 +1144,56 @@ Downgrade commité en `eceb4bc`. Intention de publication propriétaire/version 
 ## 2026-10-14 — Correctif rollback B33
 
 Test `CapsulesMigrationTest::test_down_rollback_removes_all_capsule_schema_tables` étendu : dépose explicite de `lab_results`, `lab_runs`, `lab_definitions` (ordre des FK) avant la boucle de rollback des migrations capsules. Aucune migration ni logique de production modifiée, pas de CASCADE. Local : rollback seul OK (1,27), `tests/Integration/Capsules` OK (234,1178), `tests/Integration/Lab` OK (81,455), `composer lint` passed, `composer analyse` [OK]. Correctif à committer sur `backend/capsules-laboratoire-b33-release` (base distante 6951bb7).
+
+
+## 2026-10-14 — Lot B28 · Favoris et retours de réutilisation
+
+Statut proposé : B28 **préparé, PR en brouillon**, aucun DONE. Branche `backend/capsules-laboratoire-b28-favoris-retours`, dérivée de B27 (524067b distant).
+
+### Décisions clefs
+
+- Trois tables (CAHIER_DES_CHARGES.md:875) : `favorites` (unique user_id+capsule_id), `reuse_reports` (unique user_id+version_id, environment/reported_at/outcome/observation/is_internal/revision), `reuse_report_revisions` (append-only, unique report_id+revision).
+- Enum `ReuseReportOutcome` reproduit littéralement les 3 états humains du §14 : `reproduced`, `partial`, `failed`.
+- Favoris strictement privés : aucune route de lecture n'est fournie (§26 ne la nomme pas). **Q20** ouverte si une route `GET /me/favorites` doit être livrée plus tard.
+- Retour de réutilisation : un actif par (membre, version). Second POST crée une révision archivée, incrémente `revision` ; aucun DELETE. `is_internal` calculé serveur (owner ou contributeur de la version) ; aucun client ne peut forcer sa valeur. Pas de score, pas de badge ; `kind=human_declaration` explicite dans la Resource (§14:502, §14:508).
+- Idempotence : `RecordReuseReportService` passe par `IdempotencyService` (verrou acteur). Même clé + même charge → rejeu identique sans révision. Clés distinctes → révision archivée.
+
+### Fichiers créés / modifiés
+
+- Migrations : `create_favorites_table`, `create_reuse_reports_table`, `create_reuse_report_revisions_table`.
+- Enum : `ReuseReportOutcome`.
+- Modèles : `Favorite`, `ReuseReport`, `ReuseReportRevision`.
+- Policies : `FavoritePolicy`, `ReuseReportPolicy`.
+- Data : `ReuseReportData`.
+- Services : `MarkFavoriteService`, `UnmarkFavoriteService`, `RecordReuseReportService`.
+- FormRequest : `RecordReuseReportRequest`.
+- Resource : `ReuseReportResource` (kind=human_declaration, pas de user_id).
+- Controllers : `PutFavoriteController`, `DeleteFavoriteController`, `RecordReuseReportController`.
+- Routes dans `routes/api/capsules-lab.php` (middleware `verified`).
+- Fragment OpenAPI, `$ref` racine, types régénérés.
+- DomainTables étendu à `favorites`, `reuse_reports`, `reuse_report_revisions`.
+- Tests : `FavoriteHttpTest` (7), `ReuseReportHttpTest` (6), `ReuseReportConcurrencyTest` (2). Fixture `record-reuse-report-concurrently.php`.
+
+### Fichiers hors de mon domaine modifiés
+
+- `docs/OPENAPI.yaml` : **+4 lignes** (`$ref` favori + reuse-reports).
+- `docs/api/generated/haas-api.d.ts` : régénéré (68 types, +2 vs B27).
+
+Aucun autre fichier du socle n'a été touché.
+
+### Contrôles locaux
+
+- `composer lint` → `{"tool":"pint","result":"passed"}`.
+- `composer analyse` → `[OK] No errors`.
+- `composer test` → `OK (413 tests, 4289 assertions)`.
+- `vendor/bin/phpunit --testsuite Integration --filter "FavoriteHttpTest|ReuseReportHttpTest|ReuseReportConcurrencyTest"` → `OK (15 tests, 61 assertions)` en 29,2 s.
+
+### Questions ouvertes
+
+- **Q20 (nouvelle)** — Pas de route de lecture de ses propres favoris (§26 muet). À décider si `GET /me/favorites` ou un `favorited` sur la Resource catalogue est désirable plus tard.
+- Q12-Q19 restent ouvertes.
+
+Reprise de b27 (524067b distant) dans B28 par merge `f3d8325` : lint `passed`, analyse `[OK]`, `composer test` 454/4407 verts, Integration ciblée Capsules 71 tests non exécutés localement (PostgreSQL non authentifié).
 
 
 ## 2026-10-15 — B34 : lancement et quotas (préparé, PR en brouillon)

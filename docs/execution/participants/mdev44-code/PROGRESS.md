@@ -1,5 +1,46 @@
 ﻿# Progression — capsules/laboratoire
 
+## 17 octobre 2026 — Durcissement des routes : compteurs de quota isolés
+
+Les compteurs de quota en ligne partageaient une même clé par membre ou par IP ; ils sont désormais isolés par groupe de routes (préfixes) ; valeurs 30 et 60 par minute à confirmer en revue, notamment pour une IP partagée.
+
+## 17 octobre 2026 — Durcissement des routes capsules/laboratoire préparé
+
+Branche `backend/capsules-laboratoire-durcissement-routes` ouverte depuis la tête de `backend/capsules-laboratoire-bv209-fiche-verification` (`ecc32c3`). Livré :
+
+- Matrice d'accès `Tests\Integration\Capsules\RouteAccessMatrixTest` : fournisseur unique énumérant les 29 routes de `backend/routes/api/capsules-lab.php`, test de couverture qui échoue si une route manque, assertions par anonyme (401 pour les routes à auth, succès ou 404/422 pour les routes publiques), membre non vérifié (401 ou 403), membre suspendu (401 ou 403), membre actif (passage de l'auth), simple membre refusé sur admin, modérateur accepté sur admin, et test d'en-tête 401-jamais-403 sur `PUT /capsules/{capsule}/favorite`.
+- Correctifs minimaux dans `backend/routes/api/capsules-lab.php` (zones réservées intactes) :
+  - Groupe brouillons (B23/B24, 4 routes) : ajout `['auth:sanctum', 'verified', 'throttle:30,1']`.
+  - Groupe `admin/capsules` (B24/B25, 2 routes) : ajout `['auth:sanctum', 'verified', 'throttle:30,1']` ; Policies/Services inchangés.
+  - Groupe favoris et retours (B28, 3 routes) : `['verified']` → `['auth:sanctum', 'verified', 'throttle:30,1']` (401 au lieu de 403 pour l'anonyme).
+  - Route `GET /versions/{id}/lab-definition` (B33) : ajout `['throttle:60,1']`.
+  - Groupe catalogue public (B26, 3 routes) : ajout `['throttle:60,1']`.
+  - Commentaires des cinq groupes réécrits pour décrire la pile RÉELLE confirmée par `php artisan route:list -v`. Aucun contrat de réponse, aucune Resource, aucun chemin ou nom de route touché ; aucun middleware de rôle introduit ; aucun limiteur nommé ajouté dans `AppServiceProvider` (zone réservée).
+- Tests de quota (un par groupe) prouvant 429 + `Retry-After` à la 61e requête (routes publiques, 60/min) et à la 31e (routes membre/admin, 30/min), avec `Cache::store('array')->flush()` pour ne pas gêner les autres tests.
+- Manifeste `SHA256SUMS` régénéré via script temporaire hors dépôt (974 empreintes, 1 ajout `backend/tests/Integration/Capsules/RouteAccessMatrixTest.php`, 973 conservées) ; `scripts/validate-pack.mjs` et `scripts/check-deployment-docs.mjs` : 18/18 et 7/7 PASS.
+
+Tests locaux (PHP 8.4.15 Laragon, `C:\laragon\bin\php\php-8.4.15-Win32-vs17-x64\php.exe`, `openssl`+`pdo_pgsql` chargés ; `~/.haas-test.env` jamais lu ; aucune action manuelle sur PostgreSQL) :
+- `vendor/bin/pint --test` : passed.
+- `vendor/bin/phpstan analyse` : [OK] No errors.
+- `phpunit --testsuite Unit,Feature,Architecture` : 501 tests, 5050 assertions, OK.
+- `phpunit --testsuite Integration tests/Integration/Capsules tests/Integration/Lab tests/Integration/VerificationCases tests/Integration/Comparisons` : 727 tests, 2901 assertions, OK en 16:37.880.
+- `phpunit tests/Integration/Capsules/RouteAccessMatrixTest.php` : 111 tests, 143 assertions, OK en 03:15.861.
+
+Durcissement **préparé, PR en brouillon** ; jamais DONE sans revue humaine et CI exacte reçues. CI attendue : tests verts PHP 8.4 et PHP 8.5, seule « Contrôler les dépendances » rouge (`composer.lock` à mettre à jour par le responsable du socle). Lots corrigés : B23 à B25 et B28 (routes de leur domaine passées sous auth/verified/throttle sans toucher aux contrôleurs). Aucune migration ajoutée.
+
+Fichiers hors de mon domaine modifiés : aucun. Zones réservées intactes : `backend/config/*`, `backend/phpunit.xml`, `.github/workflows/*`, `backend/bootstrap/*`, `backend/routes/api.php`, `backend/app/Providers/*`, `composer.*`.
+
+Questions ouvertes :
+- fiche de vérification publique : `suite_digest`, `release_commit` et `reviewer_handle` exposés à tout visiteur (à confirmer).
+- `lab-definition` publique avec digests (voulu par B33).
+- PATCH de brouillon de capsule sans `Idempotency-Key` (lock_version) alors que `PATCH /verification-cases/{id}` l'exige.
+- `author_id` et `digest` des révisions de cas exposés aux membres.
+- `sha256` des artefacts exposés.
+- `available=true` dès qu'un `lab_results` existe, même incomplet.
+- identifiants de run et de comparaison publics dans la fiche.
+- propriétaire ou contributeur suspendu non filtré dans la fiche.
+- commentaire de `VerificationSummaryQuery` annonçant trois SELECT alors qu'il y en a plus.
+
 ## 17 octobre 2026 — BV209, fiche de vérification versionnée préparée
 
 Branche `backend/capsules-laboratoire-bv209-fiche-verification` ouverte depuis la tête BV208 (`9a95804`). Livré :

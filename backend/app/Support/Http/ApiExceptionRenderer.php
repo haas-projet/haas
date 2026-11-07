@@ -17,6 +17,8 @@ use App\Exceptions\Identity\ProfileUpdateRejected;
 use App\Exceptions\Identity\ProfileVersionConflict;
 use App\Exceptions\Identity\RegistrationRejected;
 use App\Exceptions\Identity\RegistrationUnavailable;
+use App\Exceptions\Lab\LabCapacityReached;
+use App\Exceptions\Lab\LabQuotaExceeded;
 use App\Exceptions\ModerationRejected;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\QueryException;
@@ -43,6 +45,7 @@ final class ApiExceptionRenderer
             $exception instanceof QueryException && ($exception->errorInfo[0] ?? null) === 'P0001'
                 && str_contains((string) ($exception->errorInfo[2] ?? ''), 'B2_CACHE_CAPACITY') => 429,
             $exception instanceof DemoCapacityReached => 429,
+            $exception instanceof LabQuotaExceeded, $exception instanceof LabCapacityReached => 429,
             $exception instanceof ValidationException, $exception instanceof RegistrationRejected => 422,
             $exception instanceof InvalidCredentials, $exception instanceof InvalidResetToken => 422,
             $exception instanceof ProfileUpdateRejected, $exception instanceof HelpRequestCreationRejected => 422,
@@ -91,6 +94,9 @@ final class ApiExceptionRenderer
         $headers = array_filter($headers, static fn (string $name): bool => in_array(
             strtolower($name), ['retry-after', 'www-authenticate', 'allow', 'x-ratelimit-limit', 'x-ratelimit-remaining'], true,
         ), ARRAY_FILTER_USE_KEY);
+        if ($exception instanceof LabQuotaExceeded || $exception instanceof LabCapacityReached) {
+            $headers['Retry-After'] = (string) $exception->retryAfterSeconds;
+        }
         $id = RequestId::get($request);
         $headers['X-Request-ID'] = $id;
         $headers['Cache-Control'] = 'no-store';

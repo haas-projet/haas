@@ -3,12 +3,17 @@
 namespace App\Queries\Notifications;
 
 use App\Data\Common\PageData;
+use App\Enums\Capsules\CapsuleVersionState;
+use App\Enums\Capsules\CapsuleVisibility;
+use App\Enums\Capsules\ReviewDecision;
+use App\Enums\Identity\AccountStatus;
 use App\Models\InternalNotification;
 use App\Models\User;
 use App\Queries\Collaboration\VisibleCommentsQuery;
 use App\Queries\Collaboration\VisibleProposalsQuery;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 
 final class NotificationQuery
@@ -33,10 +38,29 @@ final class NotificationQuery
         Gate::forUser($current)->authorize('view', $current);
 
         // Une notification de modération ne copie aucun contenu ni lien public retiré.
-        return InternalNotification::where('recipient_id', $current->id)->with(['comment:id,request_id', 'proposal:id,request_id'])->where(function (Builder $query) use ($current): void {
+        return InternalNotification::where('recipient_id', $current->id)->with(['comment:id,request_id', 'proposal:id,request_id', 'capsuleReview:id,version_id', 'capsuleReview.version:id,capsule_id'])->where(function (Builder $query) use ($current): void {
             $query->where('kind', 'profile.moderated')->orWhere(fn (Builder $comments) => $comments->where('kind', 'comment.created')->whereIn('event_id', $this->comments->forActor($current)->select('comments.id')));
             $query->orWhere(fn (Builder $proposals) => $proposals->where('kind', 'proposal.created')
                 ->whereIn('event_id', $this->proposals->forActor($current)->whereHas('request', fn (Builder $parent) => $parent->where('author_id', $current->id))->where('author_id', '!=', $current->id)->select('proposals.id')));
+        return InternalNotification::where('recipient_id', $current->id)->with(['comment:id,request_id', 'capsuleReview:id,version_id', 'capsuleReview.version:id,capsule_id'])->where(function (Builder $query) use ($current): void {
+            $query->where('kind', 'profile.moderated')
+                ->orWhere(fn (Builder $comments) => $comments->where('kind', 'comment.created')->whereIn('event_id', $this->comments->forActor($current)->select('comments.id')))
+                ->orWhere(fn (Builder $reviews) => $reviews->where('kind', 'capsule.review.changes_requested')->whereIn('event_id',
+                    DB::table('capsule_version_reviews')->join('capsule_versions', 'capsule_version_reviews.version_id', '=', 'capsule_versions.id')
+                        ->join('capsules', 'capsule_versions.capsule_id', '=', 'capsules.id')
+                        ->join('users AS capsule_owner', 'capsules.owner_id', '=', 'capsule_owner.id')
+                        ->where('capsules.owner_id', $current->id)->where('capsules.visibility', CapsuleVisibility::Visible->value)
+                        ->where('capsule_owner.status', AccountStatus::Active->value)->whereNotNull('capsule_owner.email_verified_at')
+                        ->select('capsule_version_reviews.id')))
+                ->orWhere(fn (Builder $publications) => $publications->where('kind', 'capsule.version.published')->whereIn('event_id',
+                    DB::table('capsule_version_reviews')->join('capsule_versions', 'capsule_version_reviews.version_id', '=', 'capsule_versions.id')
+                        ->join('capsules', 'capsule_versions.capsule_id', '=', 'capsules.id')
+                        ->join('users AS capsule_owner', 'capsules.owner_id', '=', 'capsule_owner.id')
+                        ->where('capsule_version_reviews.decision', ReviewDecision::Approved->value)
+                        ->where('capsule_versions.state', CapsuleVersionState::Published->value)
+                        ->where('capsules.owner_id', $current->id)->where('capsules.visibility', CapsuleVisibility::Visible->value)
+                        ->where('capsule_owner.status', AccountStatus::Active->value)->whereNotNull('capsule_owner.email_verified_at')
+                        ->select('capsule_version_reviews.id')));
         });
     }
 }

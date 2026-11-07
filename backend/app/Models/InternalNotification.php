@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Capsules\CapsuleVersionReview;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -31,6 +32,12 @@ final class InternalNotification extends Model
     public function proposal(): BelongsTo
     {
         return $this->belongsTo(Proposal::class, 'event_id');
+    }
+
+    /** @return BelongsTo<CapsuleVersionReview, $this> */
+    public function capsuleReview(): BelongsTo
+    {
+        return $this->belongsTo(CapsuleVersionReview::class, 'event_id');
     }
 
     /** @return array<string, string> */

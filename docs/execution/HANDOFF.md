@@ -2,6 +2,8 @@
 
 ## Reprise vérifiée le 11 octobre 2026
 
+B24 reçoit B23 c753017 sans changement backend. Recevoir la nouvelle CI de #33 après publication puis intégrer ce prérequis documentaire dans B25 après gel de ses corrections métier.
+
 B23 reçoit B22 6021968 sans changement backend. Vérifier la nouvelle CI de #30 après publication et transmettre ce prérequis documentaire à B24 par merge normal.
 
 Priorité utilisateur : terminer la préparation des six PR #29/#30/#33/#34/#35/#36 avant de reprendre B18. Les trois permanentes suivent main d0d47c5 ; la seule branche B38 déjà fusionnée est supprimée, sans supprimer les six branches de PR. #29 attend la revue humaine ; aucun merge des PR restantes n’est effectué. B25–B27 sont en correction métier ; B26 attend aussi Q16/B33. Aucun gate frontend/production.
@@ -220,3 +222,7 @@ Fusions distantes vérifiées : #12 33eafa0, #22 957029b dans B11, #23 17c6daa e
 Reprendre B22 #29 (retrait avec date de publication conservée, champs serveur, versions/technologies), puis B23 #30 (source vraiment résolue, validations, verrouillage/rejeu et tests HTTP). Les PR restent en brouillon. B38 #28 reste BLOCKED : probes Origin démonstration=403 et Origin HAAS=deux cookies ; appliquer le patch inerte docs/quality/probes/B38_ISOLATION.patch sur la branche B2 pour reproduire, avec base locale dédiée. Corriger origine/routage sans session et isolation réelle base/runtime/configuration, puis revalider la concurrence.
 
 B35 IN_PROGRESS : service transactionnel et concurrence reçus, câblage haas_lab/isolation et module défectueux pédagogique à compléter avant B36. Le cluster PostgreSQL temporaire de revue est arrêté. Travail local initial B14 préservé ; ne pas écraser sa modification de routes. Toutes les branches distantes sont conservées. Aucun BACKEND_GATE, GO_FRONTEND ou GO_PRODUCTION.
+
+## 11 octobre 2026 — Handoff du contrat Q12 nullable
+
+Correction isolée sur le parent documentaire B24 `2463e4b` : schéma réponse `CapsuleVersionReview.reviewed_lock_version` en integer/null, type généré number/null ; Request toujours stricte. Probe Node ignoré : deux assertions rouges puis deux vertes ; 59 types à jour, documents 18/18 et déploiement 7/7. Voir `docs/quality/B24_REVIEW_READINESS.md`. Aucun backend, tâche, NULL historique ou test PHP/SQL/HTTP modifié. L'intégrateur propage normalement le microcommit et reçoit sa CI exacte ; aucune publication ou approbation humaine par cet agent.

@@ -2,6 +2,8 @@
 
 ## État vérifié le 11 octobre 2026 — priorité aux PR
 
+- Propagation B24 : B23 c753017 reçu par merge normal avec le contrôle d’intégrité, couverture complète vérifiée et backend inchangé ; nouvelle CI du head publié à recevoir.
+
 - Propagation B23 : prérequis documentaire B22 6021968 reçu par merge normal, manifeste complet contrôlé et backend inchangé ; nouvelle CI à recevoir sur le head publié.
 
 B38 #28 est fusionnée dans main d0d47c5. Les trois branches permanentes sont alignées sur main ; 10 branches distantes restent nécessaires, dont les six PR ouvertes. #29/#30/#33 n’ont pas de conflit et ont une CI verte sur leurs heads contrôlés ; #29 attend une revue humaine. Leurs manifestes périmés sont corrigés et un contrôle CI dédié est ajouté. B25–B27 sont encore en correction ; B26 reste partiel sans Q16/B33. Les lots non fusionnés ne sont pas DONE. Aucun gate ni accord frontend/production. Voir [PR_MANIFEST_20261011.md](../quality/PR_MANIFEST_20261011.md). Le bilan ci-dessous du 7 octobre et les entrées antérieures sont historiques.
@@ -278,3 +280,7 @@ B11 DONE (13 lots backend entiers terminés). B35 IN_PROGRESS : isolation/connex
 ### B38 — correction terminée localement, revue à recevoir
 
 Runtime et données B2 séparés ; garde DNS/configuration et permissions PostgreSQL avant cache/écritures ; cache partagé obligatoire hors testing, bornes atomiques 1000 entrées / 100 verrous, TTL24h et purge complète. Synchronisation normale de main b76612d (B14–B17), historiques et statuts conservés. Suites finales : 391 / 3850 et 379 / 3438, soit 770 tests / 7288 assertions OK. PHPStan niveau 8, Pint, Composer et contrats/documents réussis ; preuve B38_ISOLATION_20261007.md. Statut local IN_REVIEW : CI du SHA exact et revue humaine restent nécessaires ; aucun DONE/gate ni frontend/déploiement. L’intégrateur publiera le commit réel après ce bilan.
+
+## 11 octobre 2026 — Contrat Q12 : snapshot historique nullable
+
+Micro-lot documentaire depuis B24 `2463e4b` : union OpenAPI integer/null et type `number | null` pour `CapsuleVersionReview.reviewed_lock_version`. Probe Node ignoré réel : deux assertions rouges sur le head initial, puis deux vertes ; 59 types à jour, documents 18/18 et déploiement 7/7. Backend et 122 tâches inchangés, aucun HTTP/SQL/PHPUnit nouveau. Preuve : `docs/quality/B24_REVIEW_READINESS.md`. Propagation normale et CI exacte par l'intégrateur ; aucun statut de lot ou gate changé.

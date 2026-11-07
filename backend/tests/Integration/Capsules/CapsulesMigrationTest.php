@@ -81,14 +81,26 @@ final class CapsulesMigrationTest extends PostgresTestCase
             'migrations/2026_10_07_174813_create_capsule_version_reviews_table.php',
             'migrations/2026_10_07_195000_b24_preserve_review_history.php',
             'migrations/2026_10_07_200000_b22_preserve_published_capsule_versions.php',
+            // B28 : les retours et favoris citent capsule_versions / capsules, donc
+            // leurs down() doivent passer avant la dépose des parents.
+            'migrations/2026_10_08_120000_create_favorites_table.php',
+            'migrations/2026_10_08_120500_create_reuse_reports_table.php',
+            'migrations/2026_10_08_121000_create_reuse_report_revisions_table.php',
         ]);
-        // B33 : lab_definitions.version_id et lab_runs.version_id référencent
+        // BV203 : case_scenario_links référence verification_case_revisions.
+        // BV201 : verification_case_revisions référence verification_cases,
+        // qui référence capsule_versions (restrictOnDelete). B33 :
+        // lab_definitions.version_id et lab_runs.version_id référencent
         // capsule_versions (restrictOnDelete), lab_runs.definition_id référence
-        // lab_definitions et lab_results.run_id référence lab_runs. Ces tables
-        // appartiennent au laboratoire, pas au schéma capsules : on les retire
-        // avant le rollback dans l'ordre des clés étrangères (enfants d'abord),
-        // sans CASCADE et sans toucher aux migrations capsules elles-mêmes.
-        foreach (['lab_results', 'lab_runs', 'lab_definitions'] as $labTable) {
+        // lab_definitions et lab_results.run_id référence lab_runs. BV204 :
+        // comparison_profiles.candidate_version_id référence capsule_versions
+        // (restrictOnDelete). BV205 : comparison_runs.profile_id référence
+        // comparison_profiles ; lab_runs.comparison_id référence comparison_runs
+        // (restrictOnDelete). Ces tables appartiennent au laboratoire, aux
+        // cas ou aux comparaisons, pas au schéma capsules : on les retire
+        // avant le rollback dans l'ordre des clés étrangères (enfants
+        // d'abord), sans CASCADE et sans toucher aux migrations capsules.
+        foreach (['case_scenario_links', 'verification_case_revisions', 'verification_cases', 'lab_results', 'lab_runs', 'lab_definitions', 'comparison_runs', 'comparison_profiles'] as $labTable) {
             Schema::dropIfExists($labTable);
         }
         foreach (array_reverse($paths) as $path) {
@@ -98,9 +110,17 @@ final class CapsulesMigrationTest extends PostgresTestCase
             (new ReflectionMethod($migration, 'down'))->invoke($migration);
         }
 
+        $this->assertFalse(Schema::hasTable('case_scenario_links'));
+        $this->assertFalse(Schema::hasTable('verification_case_revisions'));
+        $this->assertFalse(Schema::hasTable('verification_cases'));
         $this->assertFalse(Schema::hasTable('lab_results'));
         $this->assertFalse(Schema::hasTable('lab_runs'));
         $this->assertFalse(Schema::hasTable('lab_definitions'));
+        $this->assertFalse(Schema::hasTable('comparison_runs'));
+        $this->assertFalse(Schema::hasTable('comparison_profiles'));
+        $this->assertFalse(Schema::hasTable('reuse_report_revisions'));
+        $this->assertFalse(Schema::hasTable('reuse_reports'));
+        $this->assertFalse(Schema::hasTable('favorites'));
         $this->assertFalse(Schema::hasTable('capsule_version_reviews'));
         $this->assertFalse(Schema::hasTable('capsule_version_technologies'));
         $this->assertFalse(Schema::hasTable('artifacts'));

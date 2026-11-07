@@ -40,6 +40,8 @@ final class HelpRequestsMigrationTest extends PostgresTestCase
         $paths[] = database_path('migrations/2026_10_11_200000_b18_proposal_notification_events.php');
         $paths[] = database_path('migrations/2026_10_11_210000_b19_resolution_snapshots.php');
         $paths[] = database_path('migrations/2026_10_11_210100_b19_resolution_notification_events.php');
+        $paths[] = database_path('migrations/2026_10_12_000020_b20_request_reopenings.php');
+        $paths[] = database_path('migrations/2026_10_12_000021_b20_reopening_notification_events.php');
         $paths[] = database_path('migrations/2026_10_11_220000_bc01_projects_and_discovery.php');
         $migrations = array_map(function (string $path): Migration {
             $migration = require $path;
@@ -53,7 +55,7 @@ final class HelpRequestsMigrationTest extends PostgresTestCase
             (new ReflectionMethod($migration, 'down'))->invoke($migration);
         }
 
-        foreach (['help_requests', 'request_technologies', 'comments', 'proposals', 'resolutions', 'proposal_revisions'] as $table) {
+        foreach (['help_requests', 'request_technologies', 'comments', 'proposals', 'resolutions', 'proposal_revisions', 'request_reopenings'] as $table) {
             $this->assertFalse(Schema::hasTable($table));
         }
         $this->assertModelExists($author);
@@ -66,6 +68,7 @@ final class HelpRequestsMigrationTest extends PostgresTestCase
         $this->assertTrue(Schema::hasColumn('help_requests', 'help_intent'));
         $this->assertTrue(Schema::hasTable('help_request_revisions'));
         $this->assertTrue(Schema::hasTable('proposal_revisions'));
+        $this->assertTrue(Schema::hasTable('request_reopenings'));
         $this->assertTrue(Schema::hasColumn('proposals', 'code'));
         $this->assertTrue(Schema::hasColumn('help_requests', 'project_id'));
         $this->assertTrue(Schema::hasTable('projects'));

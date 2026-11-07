@@ -183,7 +183,7 @@ export type moderation_Receipt = (moderation_ReportFields);
 
 export type moderation_ReportFields = { readonly "id": string; readonly "resource_type": "profile"; readonly "resource_id": string; readonly "status": "new" | "in_review" | "resolved" | "dismissed"; readonly "lock_version": number; readonly "created_at": string; [key: string]: unknown; };
 
-export type notifications_Notification = { readonly "id": string; readonly "kind": "profile.moderated" | "comment.created" | "proposal.created" | "resolution.accepted"; readonly "message": string; readonly "target_path": string; readonly "read_at": string | null; readonly "created_at": string; };
+export type notifications_Notification = { readonly "id": string; readonly "kind": "profile.moderated" | "comment.created" | "proposal.created" | "resolution.accepted" | "request.reopened"; readonly "message": string; readonly "target_path": string; readonly "read_at": string | null; readonly "created_at": string; };
 
 export type profiles_ProfileFields = { readonly "id": string; readonly "handle": identity_Handle; readonly "avatar_initials": string; readonly "bio": string; readonly "country": string | null; readonly "primary_language": string; readonly "github_url": string | null; readonly "technologies": ReadonlyArray<profiles_Technology>; readonly "is_demo": boolean; readonly "contributions": null; [key: string]: unknown; };
 
@@ -198,6 +198,16 @@ export type projects_Project = { readonly "id": string; readonly "owner": { read
 export type projects_ProjectCreateInput = { readonly "name"?: string | null; readonly "summary"?: string | null; readonly "description"?: string | null; readonly "project_stage"?: "idea" | "prototype" | "in_development" | "launched"; readonly "help_sought"?: string | null; readonly "demo_url"?: string | null; readonly "repository_url"?: string | null; readonly "technology_ids"?: ReadonlyArray<string>; };
 
 export type projects_ProjectUpdateInput = { readonly "lock_version": number; readonly "name"?: string | null; readonly "summary"?: string | null; readonly "description"?: string | null; readonly "project_stage"?: "idea" | "prototype" | "in_development" | "launched"; readonly "help_sought"?: string | null; readonly "demo_url"?: string | null; readonly "repository_url"?: string | null; readonly "technology_ids"?: ReadonlyArray<string>; };
+
+export type reopenings_ReopeningInput = { readonly "lock_version": number; readonly "reason": community_ProposalDescriptionInput; };
+
+export type reopenings_RequestReopening = { readonly "id": string; readonly "request_id": string; readonly "resolution_id": string; readonly "reopened_by": { readonly "id": string; readonly "handle": string; }; readonly "reason": string; readonly "reason_html": community_ProposalRenderedDescription; readonly "reopened_at": string; readonly "request_version_before": number; readonly "request_version_after": number; };
+
+export type reopenings_RequestReopeningDetail = { readonly "data": reopenings_RequestReopening; };
+
+export type reopenings_ResolutionHistoryEntry = { readonly "id": string; readonly "request_id": string; readonly "proposal_id": string; readonly "proposal_version": number | null; readonly "environment": string | null; readonly "validation_note": string; readonly "validation_note_html": community_ProposalRenderedDescription; readonly "accepted_by": { readonly "id": string; readonly "handle": string; }; readonly "self_resolution": boolean; readonly "accepted_at": string; readonly "revoked_at": string | null; readonly "request_lock_version": number; readonly "reopening": (reopenings_RequestReopening | null); };
+
+export type reopenings_ResolutionHistoryPage = { readonly "data": ReadonlyArray<reopenings_ResolutionHistoryEntry>; readonly "meta": OPENAPI_PaginationMeta; };
 
 export type verification_cases_ContributionRole = "diagnosis" | "fix" | "documentation" | "test" | "case";
 

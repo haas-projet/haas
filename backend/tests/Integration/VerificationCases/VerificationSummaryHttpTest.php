@@ -18,6 +18,7 @@ use App\Models\VerificationCases\VerificationCase;
 use App\Services\Comparisons\ReconcileComparisonsService;
 use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Routing\Middleware\ThrottleRequests;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
@@ -292,6 +293,11 @@ final class VerificationSummaryHttpTest extends PostgresTestCase
 
     private function countQueriesFor(string $uri): int
     {
+        // Le quota de lecture utilise PostgreSQL et ajouterait un nombre
+        // variable de requêtes selon l'état du compteur entre les deux
+        // versions. Il est hors du périmètre du contrôle N+1.
+        $this->withoutMiddleware(ThrottleRequests::class);
+
         // Un premier appel « à vide » amorce le middleware/API (chargement
         // du schéma de session, résolution du routeur, warmup du connecteur
         // PDO), afin que le compteur ne mesure que les SELECTs métier.

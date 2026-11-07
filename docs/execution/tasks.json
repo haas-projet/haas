@@ -255,7 +255,8 @@
       "refs": "AC09/AC10 ; RM01/RM02",
       "phase": "B",
       "execution_order": 21,
-      "status": "TODO"
+      "status": "IN_REVIEW",
+      "evidence": ["docs/quality/B19_RESOLUTIONS_20261011.md"]
     },
     {
       "id": "B20",
@@ -482,8 +483,12 @@
       "verify": "Migrations montée/base neuve et données antérieures testées sur PostgreSQL ; uniques/FK valides ; opt-in false par défaut ; pas de données privées seedées.",
       "refs": "F16/F17 ; AC53/AC60",
       "phase": "B",
-      "status": "TODO",
-      "execution_order": 41
+      "status": "IN_REVIEW",
+      "execution_order": 41,
+      "evidence": [
+        "docs/api/BC01_PROJECT_SCHEMA.md",
+        "docs/quality/BC01_PROJECT_SCHEMA_20261011.md"
+      ]
     },
     {
       "id": "BC02",

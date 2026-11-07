@@ -1,8 +1,8 @@
 openapi: 3.1.0
 info:
   title: HAAS — Socle API
-  version: 0.16.0
-  description: Socle identité, profils, audit et idempotence ; création B14, lecture B15, édition/publication/historique B16 ; commentaires historisés et notifications internes B17 ; autres contributions à raccorder.
+  version: 0.19.0
+  description: Socle identité, profils, audit et idempotence ; demandes B14–B16, commentaires B17, propositions structurées historisées B18 et acceptation/résolution attribuée B19. Réouverture B20 et non-sélection/archivage B21 à raccorder.
 servers:
   - url: http://localhost:8000
 x-haas-domain-fragments:
@@ -29,6 +29,16 @@ paths:
     $ref: './api/openapi/lab.yaml#/paths/~1api~1v1~1lab-runs'
   '/api/v1/lab-runs/{id}':
     $ref: './api/openapi/lab.yaml#/paths/~1api~1v1~1lab-runs~1{id}'
+  '/api/v1/requests/{id}/resolve':
+    $ref: './api/openapi/community.yaml#/paths/~1api~1v1~1requests~1{id}~1resolve'
+  '/api/v1/requests/{id}/resolution':
+    $ref: './api/openapi/community.yaml#/paths/~1api~1v1~1requests~1{id}~1resolution'
+  '/api/v1/requests/{id}/proposals':
+    $ref: './api/openapi/community.yaml#/paths/~1api~1v1~1requests~1{id}~1proposals'
+  '/api/v1/proposals/{id}':
+    $ref: './api/openapi/community.yaml#/paths/~1api~1v1~1proposals~1{id}'
+  '/api/v1/proposals/{id}/revisions':
+    $ref: './api/openapi/community.yaml#/paths/~1api~1v1~1proposals~1{id}~1revisions'
   '/api/v1/requests/{id}/comments':
     $ref: './api/openapi/community.yaml#/paths/~1api~1v1~1requests~1{id}~1comments'
   '/api/v1/comments/{id}':
@@ -43,12 +53,6 @@ paths:
     $ref: './api/openapi/community.yaml#/paths/~1api~1v1~1requests'
   /api/v1/requests/{id}:
     $ref: './api/openapi/community.yaml#/paths/~1api~1v1~1requests~1{id}'
-  '/api/v1/requests/{id}/proposals':
-    $ref: './api/openapi/community.yaml#/paths/~1api~1v1~1requests~1{id}~1proposals'
-  '/api/v1/proposals/{id}':
-    $ref: './api/openapi/community.yaml#/paths/~1api~1v1~1proposals~1{id}'
-  '/api/v1/proposals/{id}/revisions':
-    $ref: './api/openapi/community.yaml#/paths/~1api~1v1~1proposals~1{id}~1revisions'
   /api/v1/reports:
     $ref: './api/openapi/moderation.yaml#/paths/~1api~1v1~1reports'
   /api/v1/admin/reports:

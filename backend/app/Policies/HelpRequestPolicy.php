@@ -26,4 +26,12 @@ final class HelpRequestPolicy
         return $request->hidden_at === null && $this->access->verified($request->author)
             && ($request->state !== HelpRequestState::Draft || $this->access->owns($actor, $request->author_id));
     }
+
+    public function resolve(User $actor, HelpRequest $request): bool
+    {
+        // Resolved is allowed here only so the same intention can be replayed.
+        // The command checks whether it is a new transition or an exact replay.
+        return $this->access->owns($actor, $request->author_id) && $request->hidden_at === null
+            && in_array($request->state, [HelpRequestState::Open, HelpRequestState::InProgress, HelpRequestState::Resolved], true);
+    }
 }

@@ -689,8 +689,184 @@ paths:
         '422': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
         '500': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
         '503': { $ref: '../../OPENAPI.yaml#/components/responses/RetryableFailure' }
+  /api/v1/requests/{id}/resolve:
+    post:
+      operationId: resolveHelpRequest
+      summary: Accepter une proposition dans son contexte et résoudre sa demande
+      description: >-
+        Auteur actif vérifié de la demande seulement, aucun bypass administrateur. Session SPA,
+        CSRF et Idempotency-Key UUID v4 requis ; quota 30 requêtes/minute. Objet JSON strict non vide,
+        sans paramètres de requête. Nouvelle acceptation sur parent public visible open/in_progress
+        et proposition visible proposed de cette même demande ; contributeur actif vérifié.
+        Versions parent et proposition entières JSON strictes, sans conversion des chaînes/décimaux/booléens.
+        Contexte déclaré environment de 1–255 caractères normalisés et note utile de 20–4000 caractères
+        après trim Unicode. UTF-8, contrôles bruts et motifs de secrets sont vérifiés avant normalisation.
+        Note composée de liens seuls refusée. Aucun texte, code, shell ou URL exécuté.
+        Verrous déterministes comptes, idempotence, parent, proposition ; relecture des droits et versions.
+        Proposition accepted sans édition de son contenu ni incrément de sa version ; parent resolved,
+        version +1. Une seule résolution active, attribution et audit minimal atomiques.
+        Auto-résolution admise et étiquetée par self_resolution=true ; aucune validation indépendante
+        ou preuve de laboratoire déduite. Les autres propositions restent inchangées.
+        Même intention dans les 24 h : même résolution/version sans nouvelle acceptation ni notification,
+        y compris sur parent désormais resolved, sous droits et visibilité courants.
+        Nouvelle clé sur résolution déjà active, version périmée ou état incompatible : 409.
+        Une autre charge avec la même clé donne IDEMPOTENCY_CONFLICT. Outbox resolution.accepted
+        au contributeur concerné sauf auto-envoi ; livraison séparée après commit, reprise et déduplication.
+        Réponse no-store. B20 réouverture et B21 non-sélection/archivage hors de cette opération.
+        Voir RESOLUTIONS.md.
+      security:
+        - SessionCookie: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - $ref: '../../OPENAPI.yaml#/components/parameters/IdempotencyKey'
+        - $ref: './identity.yaml#/components/parameters/XsrfToken'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResolutionInput'
+      responses:
+        '200':
+          description: Résolution active créée ou projection courante d'un rejeu autorisé, même UUID et version.
+          headers:
+            X-Request-ID: { $ref: '../../OPENAPI.yaml#/components/headers/RequestId' }
+            Cache-Control: { $ref: '../../OPENAPI.yaml#/components/headers/NoStore' }
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResolutionDetail'
+        '401': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '403': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '404':
+          $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure'
+          description: Parent ou proposition inaccessible ; proposition étrangère à la demande non révélée.
+        '409':
+          $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure'
+          description: RESOURCE_CONFLICT pour version périmée, résolution active, état incompatible ou résultat de rejeu devenu différent ; IDEMPOTENCY_CONFLICT pour autre charge avec la même clé. Aucune mutation.
+        '419': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '422': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '429': { $ref: '../../OPENAPI.yaml#/components/responses/RetryableFailure' }
+        '500': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '503': { $ref: '../../OPENAPI.yaml#/components/responses/RetryableFailure' }
+  /api/v1/requests/{id}/resolution:
+    get:
+      operationId: showActiveResolution
+      summary: Lire la résolution active et son attribution autorisée
+      description: >-
+        Lecture publique selon la visibilité courante de la demande, de la proposition sélectionnée
+        et de leurs auteurs. Parent brouillon/masqué, proposition masquée ou compte auteur
+        suspendu/non vérifié : 404. Aucune résolution active ou résolution révoquée : 404.
+        La demande doit être resolved, la proposition accepted et l'acceptant doit rester l'auteur
+        du parent ; si la version de proposition capturée est connue, elle doit correspondre à
+        la version courante de la proposition. Toute incohérence ferme la lecture avec 404.
+        Retour de la note et de son rendu Markdown restreint, contexte déclaré au moment de l'acceptation,
+        version de proposition sélectionnée et attribution id/handle seulement. self_resolution distingue
+        l'auto-résolution sans annoncer une validation indépendante ni un test machine.
+        environment/proposal_version legacy inconnus restent null ; aucune reconstruction inventée.
+        request_lock_version est la version courante du parent, pas un numéro historique inventé.
+        Aucun historique de résolutions ni parcours de réouverture ajouté. Cache-Control no-store.
+      security:
+        - {}
+        - SessionCookie: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Projection actuellement visible de la résolution active.
+          headers:
+            X-Request-ID: { $ref: '../../OPENAPI.yaml#/components/headers/RequestId' }
+            Cache-Control: { $ref: '../../OPENAPI.yaml#/components/headers/NoStore' }
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResolutionDetail'
+        '401': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '403': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '404': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '500': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '503': { $ref: '../../OPENAPI.yaml#/components/responses/RetryableFailure' }
 components:
   schemas:
+    ResolutionEnvironmentInput:
+      type: string
+      minLength: 1
+      x-haas-normalized-length: { minimum: 1, maximum: 255 }
+      description: Contexte déclaré par l'auteur au moment de l'acceptation, 1–255 caractères Unicode après trim ; blancs seuls, contrôles bruts et motifs de secrets refusés avant normalisation. Ce texte ne certifie pas l'environnement.
+    ResolutionInput:
+      type: object
+      additionalProperties: false
+      required: [proposal_id, lock_version, proposal_lock_version, environment, validation_note]
+      properties:
+        proposal_id:
+          type: string
+          format: uuid
+          description: Proposition visible appartenant à la demande ciblée ; un UUID valide ne suffit pas.
+        lock_version:
+          type: integer
+          minimum: 1
+          maximum: 2147483646
+          description: Version courante de la demande, entier JSON strict ; elle sera incrémentée une fois.
+        proposal_lock_version:
+          type: integer
+          minimum: 1
+          maximum: 2147483647
+          description: Version du contenu de la proposition sélectionnée, entier JSON strict ; l'acceptation ne l'incrémente pas.
+        environment: { $ref: '#/components/schemas/ResolutionEnvironmentInput' }
+        validation_note: { $ref: '#/components/schemas/ProposalDescriptionInput' }
+    Resolution:
+      type: object
+      additionalProperties: false
+      required: [id, request_id, proposal_id, proposal_version, environment, validation_note, validation_note_html, accepted_by, self_resolution, accepted_at, revoked_at, request_lock_version]
+      properties:
+        id: { type: string, format: uuid }
+        request_id: { type: string, format: uuid }
+        proposal_id: { type: string, format: uuid }
+        proposal_version:
+          type: [integer, 'null']
+          minimum: 1
+          maximum: 2147483647
+          description: Version sélectionnée figée lors d'une nouvelle acceptation ; null pour une résolution legacy sans capture fiable, jamais la version actuelle substituée.
+        environment:
+          type: [string, 'null']
+          maxLength: 255
+          description: Contexte déclaré et normalisé à l'acceptation ; null pour une résolution legacy sans cette information. Aucun contexte ancien reconstruit.
+        validation_note:
+          type: string
+          description: Explication de ce qui a fonctionné dans le contexte déclaré ; nouvelles notes utiles de 20–4000 caractères normalisés, anciennes notes conservées sans borne moderne fabriquée.
+        validation_note_html: { $ref: '#/components/schemas/ProposalRenderedDescription' }
+        accepted_by:
+          type: object
+          additionalProperties: false
+          required: [id, handle]
+          properties:
+            id: { type: string, format: uuid }
+            handle: { type: string }
+        self_resolution:
+          type: boolean
+          description: true si l'acceptant est aussi auteur de la proposition ; afficher auto-résolution, sans validation indépendante ni preuve de laboratoire.
+        accepted_at: { type: string, format: date-time }
+        revoked_at:
+          type: [string, 'null']
+          format: date-time
+          description: null pour cette projection active ; une résolution révoquée est absente de cette route.
+        request_lock_version:
+          type: integer
+          minimum: 1
+          maximum: 2147483647
+          description: Version courante du parent autorisé ; lors de la commande ou de son rejeu valide, version produite par l'acceptation.
+    ResolutionDetail:
+      type: object
+      additionalProperties: false
+      required: [data]
+      properties:
+        data: { $ref: '#/components/schemas/Resolution' }
     ProposalDescriptionInput:
       type: string
       minLength: 20

@@ -135,4 +135,15 @@ final class CapsulePolicy
             ->where('user_id', $actor->id)
             ->exists();
     }
+
+    /**
+     * Publier une version : mêmes exigences que la revue indépendante
+     * (B24 + AC12). CAHIER_DES_CHARGES.md:462 interdit à l'auteur de valider
+     * sa propre revue éditoriale, étend cette séparation aux administrateurs ;
+     * §955 ajoute « Réviseur distinct ; contrôle de droits et contenu ».
+     */
+    public function publishVersion(?User $actor, Capsule $capsule, string $versionId): bool
+    {
+        return $this->reviewVersion($actor, $capsule, $versionId);
+    }
 }

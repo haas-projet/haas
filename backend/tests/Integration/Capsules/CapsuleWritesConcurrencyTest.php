@@ -16,7 +16,7 @@ use Illuminate\Support\Str;
 use Symfony\Component\Process\InputStream;
 use Symfony\Component\Process\Process;
 use Tests\PostgresTestCase;
-use Tests\Support\CapsuleReviewNotificationFixtures;
+use Tests\Support\CapsulePublicationFixtures;
 
 /**
  * Concurrence réelle (deux processus PHP) sur les écritures de capsules
@@ -31,7 +31,7 @@ use Tests\Support\CapsuleReviewNotificationFixtures;
  */
 final class CapsuleWritesConcurrencyTest extends PostgresTestCase
 {
-    use CapsuleReviewNotificationFixtures, DatabaseMigrations;
+    use CapsulePublicationFixtures, DatabaseMigrations;
 
     public function test_two_posts_with_same_idempotency_key_write_only_one_capsule(): void
     {
@@ -140,6 +140,55 @@ final class CapsuleWritesConcurrencyTest extends PostgresTestCase
         );
     }
 
+    public function test_two_concurrent_publications_write_a_single_approved_decision(): void
+    {
+        $key = 'base64:'.base64_encode(random_bytes(32));
+        config(['app.key' => $key]);
+        $owner = User::factory()->verified()->create();
+        $reviewer = User::factory()->verified()->create(['role' => Role::Moderator]);
+        $capsule = Capsule::factory()->create(['owner_id' => $owner->id, 'slug' => 'publication-concurrente']);
+        $version = CapsuleVersion::factory()->create([
+            'capsule_id' => $capsule->id,
+            'version_label' => '1.0.0',
+            'body' => "## Procédure\n\nÉtape clairement décrite pour la publication.",
+            'limits' => 'Portée réduite au scénario cité.',
+            'state' => CapsuleVersionState::InReview,
+            'lock_version' => 2,
+        ]);
+        $env = $this->childEnv($key);
+        $payloads = [
+            [
+                'mode' => 'publish', 'actor_id' => $reviewer->id, 'capsule_id' => $capsule->id,
+                'version_id' => $version->id, 'lock_version' => 2,
+                'idempotency_key' => (string) Str::uuid(),
+            ],
+            [
+                'mode' => 'publish', 'actor_id' => $reviewer->id, 'capsule_id' => $capsule->id,
+                'version_id' => $version->id, 'lock_version' => 2,
+                'idempotency_key' => (string) Str::uuid(),
+            ],
+        ];
+        $this->raceOnLock(
+            $env,
+            $payloads,
+            fn () => User::whereKey($reviewer->id)->lockForUpdate()->firstOrFail(),
+            function (array $outcomes) use ($version): void {
+                $this->assertEqualsCanonicalizing(['UPDATED', 'CONFLICT'], $outcomes);
+                $version->refresh();
+                $this->assertSame(CapsuleVersionState::Published, $version->state);
+                $this->assertNotNull($version->published_at);
+                $this->assertMatchesRegularExpression('/^[0-9a-f]{64}$/', (string) $version->content_digest);
+                // Une seule ligne de revue `approved`, un seul `published_at`.
+                $this->assertSame(1, DB::table('capsule_version_reviews')->where('decision', ReviewDecision::Approved->value)->count());
+                $this->assertSame(1, DB::table('capsule_versions')->whereNotNull('published_at')->count());
+                $this->assertSame(2, DB::table('capsule_version_reviews')->sole()->reviewed_lock_version);
+                foreach (['notification_outbox', 'content_revisions', 'api_idempotency'] as $table) {
+                    $this->assertDatabaseCount($table, 1);
+                }
+            },
+        );
+    }
+
     public function test_two_concurrent_request_changes_write_a_single_decision(): void
     {
         $key = 'base64:'.base64_encode(random_bytes(32));
@@ -184,6 +233,47 @@ final class CapsuleWritesConcurrencyTest extends PostgresTestCase
                 $this->assertSame(ReviewDecision::RequestChanges->value, $decision->decision);
             },
         );
+    }
+
+    public function test_same_key_concurrent_publications_replay_one_decision_and_one_intention(): void
+    {
+        $this->publicationRace(true);
+    }
+
+    public function test_distinct_independent_publishers_share_the_capsule_lock_and_write_one_decision(): void
+    {
+        $this->publicationRace(false);
+    }
+
+    private function publicationRace(bool $sameKey): void
+    {
+        $appKey = 'base64:'.base64_encode(random_bytes(32));
+        config(['app.key' => $appKey]);
+        $owner = User::factory()->verified()->create();
+        $first = User::factory()->verified()->create(['role' => Role::Moderator]);
+        $second = $sameKey ? $first : User::factory()->verified()->create(['role' => Role::Admin]);
+        $capsule = Capsule::factory()->create(['owner_id' => $owner->id]);
+        $version = CapsuleVersion::factory()->create(['capsule_id' => $capsule->id, 'state' => CapsuleVersionState::InReview]);
+        $firstKey = (string) Str::uuid();
+        $payloads = [];
+        foreach ([$first, $second] as $index => $publisher) {
+            $payloads[] = ['mode' => 'publish', 'actor_id' => $publisher->id, 'capsule_id' => $capsule->id, 'version_id' => $version->id,
+                'lock_version' => 1, 'idempotency_key' => $sameKey || $index === 0 ? $firstKey : (string) Str::uuid()];
+        }
+        $this->raceOnLock($this->childEnv($appKey), $payloads,
+            fn () => $sameKey ? User::whereKey($first->id)->lockForUpdate()->firstOrFail() : Capsule::whereKey($capsule->id)->lockForUpdate()->firstOrFail(),
+            function (array $outcomes) use ($sameKey, $owner, $first, $second, $version): void {
+                $this->assertEqualsCanonicalizing($sameKey ? ['UPDATED', 'UPDATED'] : ['UPDATED', 'CONFLICT'], $outcomes);
+                foreach (['capsule_version_reviews', 'notification_outbox', 'content_revisions', 'api_idempotency'] as $table) {
+                    $this->assertDatabaseCount($table, 1);
+                }
+                $review = DB::table('capsule_version_reviews')->sole();
+                $this->assertSame(1, $review->reviewed_lock_version);
+                $this->assertContains($review->reviewer_id, [$first->id, $second->id]);
+                $this->assertSame(2, $version->refresh()->lock_version);
+                $this->assertSame(CapsuleVersionState::Published, $version->state);
+                $this->assertDatabaseHas('notification_outbox', ['event_id' => $review->id, 'recipient_id' => $owner->id, 'kind' => 'capsule.version.published']);
+            });
     }
 
     /** @return array<string, string> */

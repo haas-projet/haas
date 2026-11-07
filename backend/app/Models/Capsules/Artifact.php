@@ -25,6 +25,7 @@ class Artifact extends Model
     protected $casts = [
         'distribution_status' => ArtifactDistributionStatus::class,
         'size' => 'integer',
+        'notices_size' => 'integer',
     ];
 
     /** @return BelongsTo<CapsuleVersion, $this> */

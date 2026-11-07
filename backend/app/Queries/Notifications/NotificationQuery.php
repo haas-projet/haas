@@ -3,7 +3,9 @@
 namespace App\Queries\Notifications;
 
 use App\Data\Common\PageData;
+use App\Enums\Capsules\CapsuleVersionState;
 use App\Enums\Capsules\CapsuleVisibility;
+use App\Enums\Capsules\ReviewDecision;
 use App\Enums\Identity\AccountStatus;
 use App\Models\InternalNotification;
 use App\Models\User;
@@ -42,6 +44,15 @@ final class NotificationQuery
                     DB::table('capsule_version_reviews')->join('capsule_versions', 'capsule_version_reviews.version_id', '=', 'capsule_versions.id')
                         ->join('capsules', 'capsule_versions.capsule_id', '=', 'capsules.id')
                         ->join('users AS capsule_owner', 'capsules.owner_id', '=', 'capsule_owner.id')
+                        ->where('capsules.owner_id', $current->id)->where('capsules.visibility', CapsuleVisibility::Visible->value)
+                        ->where('capsule_owner.status', AccountStatus::Active->value)->whereNotNull('capsule_owner.email_verified_at')
+                        ->select('capsule_version_reviews.id')))
+                ->orWhere(fn (Builder $publications) => $publications->where('kind', 'capsule.version.published')->whereIn('event_id',
+                    DB::table('capsule_version_reviews')->join('capsule_versions', 'capsule_version_reviews.version_id', '=', 'capsule_versions.id')
+                        ->join('capsules', 'capsule_versions.capsule_id', '=', 'capsules.id')
+                        ->join('users AS capsule_owner', 'capsules.owner_id', '=', 'capsule_owner.id')
+                        ->where('capsule_version_reviews.decision', ReviewDecision::Approved->value)
+                        ->where('capsule_versions.state', CapsuleVersionState::Published->value)
                         ->where('capsules.owner_id', $current->id)->where('capsules.visibility', CapsuleVisibility::Visible->value)
                         ->where('capsule_owner.status', AccountStatus::Active->value)->whereNotNull('capsule_owner.email_verified_at')
                         ->select('capsule_version_reviews.id')));

@@ -87,11 +87,11 @@ final class CapsulesMigrationTest extends PostgresTestCase
             (new ReflectionMethod($migration, 'down'))->invoke($migration);
         }
 
+        $this->assertFalse(Schema::hasTable('capsule_version_technologies'));
         $this->assertFalse(Schema::hasTable('artifacts'));
         $this->assertFalse(Schema::hasTable('capsule_contributors'));
         $this->assertFalse(Schema::hasTable('capsule_versions'));
         $this->assertFalse(Schema::hasTable('capsules'));
-        $this->assertFalse(Schema::hasTable('capsule_version_technologies'));
     }
 
     public function test_schema_includes_help_requests_table_as_the_source_target(): void

@@ -24,6 +24,10 @@ Le même contrôle et la correction sont propagés vers B23 puis B24 par merges 
 
 ## Branches et limites
 
+### Propagation B23
+
+B23 eb685501 reçoit le prérequis documentaire B22 6021968 par merge normal. Le manifeste est régénéré pour ses propres fichiers suivis ; le contrôle complet, pack 18/18, déploiement documentaire 7/7 et diff sont réussis. `git diff --quiet eb685501 -- backend` confirme que son backend est identique. Nouvelle CI du merge à recevoir après publication ; aucun nouveau résultat applicatif local n’est inventé.
+
 La PR #28 / B38 a été fusionnée dans main d0d47c5dd62887fcf18361f499a33a800538b2b1 le 8 octobre à 12:52:52 UTC. Le 11 octobre, les trois branches permanentes ont avancé normalement de b76612d vers ce main. La branche temporaire B38 0ad5a992d108b7d840fe19fca99da3a78366012c a été supprimée après vérification de son ascendance et de l’absence de PR ouverte dépendante. Restent 10 branches distantes : main, trois permanentes et six temporaires nécessaires aux PR ouvertes.
 
 B25–B27 font l’objet de corrections métier séparées avec tests de régression. B26 reste partiel sans le contrat `has_lab`/Q16, dépendant de B33. Les PR non fusionnées ne sont pas déclarées DONE. B35 reste partiel ; aucun BACKEND_GATE, GO_FRONTEND, GO_PRODUCTION ou déploiement n’est validé.

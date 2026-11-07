@@ -2,6 +2,8 @@
 
 ## Reprise vérifiée le 11 octobre 2026
 
+B23 reçoit B22 6021968 sans changement backend. Vérifier la nouvelle CI de #30 après publication et transmettre ce prérequis documentaire à B24 par merge normal.
+
 Priorité utilisateur : terminer la préparation des six PR #29/#30/#33/#34/#35/#36 avant de reprendre B18. Les trois permanentes suivent main d0d47c5 ; la seule branche B38 déjà fusionnée est supprimée, sans supprimer les six branches de PR. #29 attend la revue humaine ; aucun merge des PR restantes n’est effectué. B25–B27 sont en correction métier ; B26 attend aussi Q16/B33. Aucun gate frontend/production.
 
 Lire [PR_MANIFEST_20261011.md](../quality/PR_MANIFEST_20261011.md). Après chaque édition, ajouter explicitement les nouvelles sources à l’index, régénérer SHA256SUMS et exécuter `node scripts/check-manifest.mjs` ; la CI contrôle désormais la couverture entière et les octets. Correction documentaire B22 testée sans changement backend, à propager vers B23/B24 par merges normaux puis recevoir leurs nouvelles CI. Les résultats et SHA réels vont dans la PR et le bilan après commit.

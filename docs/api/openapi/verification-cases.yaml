@@ -1,0 +1,549 @@
+# Pilote : mdev44-code. Cas de vérification documentaires (BV202/BV203) et fiche versionnée (BV209).
+openapi: 3.1.0
+info:
+  title: HAAS — Cas de vérification
+  version: 0.2.0
+paths:
+  /api/v1/verification-cases:
+    get:
+      operationId: listVerificationCases
+      summary: Lister les cas visibles pour le membre vérifié
+      description: >
+        Liste paginée filtrée par visibilité : brouillon et retrait réservés à
+        l'auteur ; parent (demande ou version publiée) toujours recontrôlé.
+        Aucun contenu interne, aucune donnée privée. Session SPA et compte
+        vérifié requis.
+      security:
+        - SessionCookie: []
+      parameters:
+        - $ref: '../../OPENAPI.yaml#/components/parameters/Page'
+        - $ref: '../../OPENAPI.yaml#/components/parameters/PerPage'
+      responses:
+        '200':
+          description: Liste des cas visibles
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerificationCaseList'
+    post:
+      operationId: storeVerificationCase
+      summary: Créer un cas en brouillon
+      description: >
+        Crée un cas documentaire en brouillon avec sa première révision éditable
+        (submitted_at null). Exactement un parent : demande visible XOR version
+        publiée. Aucun champ exécutable (code, command, url, path) accepté.
+        Auteur fixé côté serveur. L'en-tête `Idempotency-Key` est requis.
+      security:
+        - SessionCookie: []
+      parameters:
+        - $ref: '../../OPENAPI.yaml#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateVerificationCaseInput'
+      responses:
+        '201':
+          description: Cas et première révision créés ; même code pour un rejeu idempotent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerificationCase'
+        '404':
+          description: Parent masqué, retiré ou version non publiée (visibilité recontrôlée côté serveur)
+        '409':
+          description: Conflit d'idempotence (autre charge pour la même clé)
+        '422':
+          description: Validation du corps (longueurs, champs exécutables rejetés) ou parent XOR invalide
+  '/api/v1/verification-cases/{verification_case}':
+    parameters:
+      - name: verification_case
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    get:
+      operationId: showVerificationCase
+      summary: Lire un cas visible
+      description: >
+        Renvoie le cas et ses révisions dans l'ordre croissant. Les brouillons
+        ne sont lisibles que par leur auteur ; les révisions figées sont
+        exposées à tout acteur habilité. Parent revérifié.
+      security:
+        - SessionCookie: []
+      responses:
+        '200':
+          description: Cas lisible
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerificationCase'
+        '404':
+          description: Cas invisible, parent masqué ou cas inexistant
+    patch:
+      operationId: updateVerificationCase
+      summary: Réviser un cas ouvert
+      description: >
+        Édite la révision brouillon en cours quand le cas est draft ; crée une
+        nouvelle révision et remet le cas en draft quand il est submitted. Les
+        révisions soumises précédentes et leurs digests restent intacts.
+        `lock_version` obligatoire ; en-tête `Idempotency-Key` requis.
+      security:
+        - SessionCookie: []
+      parameters:
+        - $ref: '../../OPENAPI.yaml#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateVerificationCaseInput'
+      responses:
+        '200':
+          description: Cas mis à jour ; même code pour un rejeu idempotent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerificationCase'
+        '404':
+          description: Cas invisible ou parent masqué
+        '409':
+          description: lock_version périmé, conflit d'idempotence ou transition interdite
+        '422':
+          description: Validation du corps ou champ exécutable
+  '/api/v1/verification-cases/{verification_case}/submit':
+    parameters:
+      - name: verification_case
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    post:
+      operationId: submitVerificationCase
+      summary: Soumettre une révision brouillon
+      description: >
+        Fige la révision brouillon courante (submitted_at = now) et porte le
+        cas en submitted. L'auteur seul peut soumettre son brouillon.
+        L'en-tête `Idempotency-Key` est requis.
+      security:
+        - SessionCookie: []
+      parameters:
+        - $ref: '../../OPENAPI.yaml#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LockVersionInput'
+      responses:
+        '200':
+          description: Cas soumis ; même code pour un rejeu idempotent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerificationCase'
+        '404':
+          description: Cas invisible, parent masqué ou cas inexistant
+        '409':
+          description: lock_version périmé, état incompatible ou conflit d'idempotence
+        '422':
+          description: Validation
+  '/api/v1/admin/verification-cases/{verification_case}/review':
+    parameters:
+      - name: verification_case
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    post:
+      operationId: reviewVerificationCase
+      summary: Revue admin d'un cas soumis
+      description: >
+        Transition submitted → reviewed ou declined par un modérateur ou admin
+        actif/vérifié DISTINCT de l'auteur du cas (auto-revue refusée).
+        Motif obligatoire pour declined. L'intégration (integrated) n'est pas
+        atteignable depuis une route publique : voir la commande d'intégration.
+        L'en-tête `Idempotency-Key` est requis.
+      security:
+        - SessionCookie: []
+      parameters:
+        - $ref: '../../OPENAPI.yaml#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReviewVerificationCaseInput'
+      responses:
+        '200':
+          description: Décision enregistrée ; même code pour un rejeu idempotent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerificationCase'
+        '403':
+          description: Acteur sans rôle de relecture ou auto-revue tentée
+        '409':
+          description: lock_version périmé, état incompatible ou conflit d'idempotence
+        '422':
+          description: Décision inconnue ou motif manquant pour un refus
+  '/api/v1/verification-cases/{verification_case}/withdraw':
+    parameters:
+      - name: verification_case
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    post:
+      operationId: withdrawVerificationCase
+      summary: Retirer un cas depuis draft ou submitted
+      description: >
+        Retrait par l'auteur avec motif obligatoire. Les révisions existantes
+        restent en table ; seule la ligne d'état change. L'en-tête
+        `Idempotency-Key` est requis.
+      security:
+        - SessionCookie: []
+      parameters:
+        - $ref: '../../OPENAPI.yaml#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WithdrawVerificationCaseInput'
+      responses:
+        '200':
+          description: Cas retiré ; même code pour un rejeu idempotent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerificationCase'
+        '404':
+          description: Cas invisible, parent masqué ou cas inexistant
+        '409':
+          description: État interdit ou conflit d'idempotence
+        '422':
+          description: Motif manquant ou invalide
+  '/api/v1/versions/{id}/verification-summary':
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    get:
+      operationId: showVerificationSummary
+      summary: Lire la fiche de vérification d'une version publiée visible
+      description: >
+        BV209 — Fiche versionnée (CAHIER_DES_CHARGES.md:1665 et 1673).
+        Publique : anonyme et membre connecté voient la même projection.
+        Toute autre id (brouillon, en revue, retirée, capsule masquée, UUID
+        inconnu) renvoie 404 — aucun secret dans la réponse (AC45).
+        Les blocs sont DISTINCTS, jamais agrégés : aucun score, aucun badge,
+        aucune « fiabilité », aucune réussite héritée d'une autre version.
+        Jamais reviewer_id, note de revue, courriel, chemin privé d'artefact
+        ni empreinte de notice. Cache-Control no-store, private.
+      responses:
+        '200':
+          description: Fiche de vérification de la version publiée
+          headers:
+            Cache-Control:
+              description: 'no-store, private'
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerificationSummaryEnvelope'
+        '404':
+          description: Version inconnue, non publiée, retirée ou capsule masquée
+        '422':
+          description: Un paramètre de requête a été envoyé (la fiche n'en accepte aucun)
+components:
+  schemas:
+    VerificationCaseParent:
+      type: object
+      additionalProperties: false
+      required: [kind, help_request_id, capsule_version_id]
+      properties:
+        kind:
+          type: string
+          enum: [help_request, capsule_version]
+        help_request_id:
+          type: [string, 'null']
+          format: uuid
+        capsule_version_id:
+          type: [string, 'null']
+          format: uuid
+    VerificationCaseBodyInput:
+      type: object
+      additionalProperties: false
+      required: [title, context, steps, expected]
+      properties:
+        title: { type: string, minLength: 15, maxLength: 140 }
+        context: { type: string, minLength: 20, maxLength: 2000 }
+        steps: { type: string, minLength: 20, maxLength: 4000 }
+        expected: { type: string, minLength: 10, maxLength: 2000 }
+        observed: { type: [string, 'null'], maxLength: 4000 }
+        environment: { type: [string, 'null'], maxLength: 500 }
+    VerificationCaseBodyPublic:
+      type: object
+      additionalProperties: false
+      required: [title, context, steps, expected, observed, environment]
+      properties:
+        title: { type: string }
+        context: { type: string }
+        steps: { type: string }
+        expected: { type: string }
+        observed: { type: [string, 'null'] }
+        environment: { type: [string, 'null'] }
+    VerificationCaseRevisionPublic:
+      type: object
+      additionalProperties: false
+      required: [revision_no, digest, submitted_at, body]
+      properties:
+        revision_no: { type: integer, minimum: 1 }
+        digest: { type: string, pattern: '^[0-9a-f]{64}$' }
+        submitted_at: { type: [string, 'null'], format: date-time }
+        body:
+          anyOf:
+            - $ref: '#/components/schemas/VerificationCaseBodyPublic'
+            - type: 'null'
+    VerificationCase:
+      type: object
+      additionalProperties: false
+      required: [data]
+      properties:
+        data:
+          type: object
+          additionalProperties: false
+          required: [id, author_id, parent, state, current_revision, lock_version, created_at, updated_at, revisions]
+          properties:
+            id: { type: string, format: uuid }
+            author_id: { type: string, format: uuid }
+            parent:
+              type: object
+              additionalProperties: false
+              required: [kind, help_request_id, capsule_version_id]
+              properties:
+                kind: { type: string, enum: [help_request, capsule_version] }
+                help_request_id: { type: [string, 'null'], format: uuid }
+                capsule_version_id: { type: [string, 'null'], format: uuid }
+            state:
+              type: string
+              enum: [draft, submitted, reviewed, declined, integrated, withdrawn]
+            current_revision: { type: integer, minimum: 0 }
+            lock_version: { type: integer, minimum: 1 }
+            created_at: { type: [string, 'null'], format: date-time }
+            updated_at: { type: [string, 'null'], format: date-time }
+            revisions:
+              type: array
+              items:
+                $ref: '#/components/schemas/VerificationCaseRevisionPublic'
+    VerificationCaseList:
+      type: object
+      additionalProperties: false
+      required: [data, meta]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/VerificationCase/properties/data'
+        meta:
+          $ref: '../../OPENAPI.yaml#/components/schemas/PaginationMeta'
+    CreateVerificationCaseInput:
+      type: object
+      additionalProperties: false
+      required: [parent, body]
+      properties:
+        parent:
+          $ref: '#/components/schemas/VerificationCaseParent'
+        body:
+          $ref: '#/components/schemas/VerificationCaseBodyInput'
+    UpdateVerificationCaseInput:
+      type: object
+      additionalProperties: false
+      required: [lock_version, body]
+      properties:
+        lock_version: { type: integer, minimum: 1, maximum: 2147483646 }
+        body:
+          $ref: '#/components/schemas/VerificationCaseBodyInput'
+    LockVersionInput:
+      type: object
+      additionalProperties: false
+      required: [lock_version]
+      properties:
+        lock_version: { type: integer, minimum: 1, maximum: 2147483646 }
+    ReviewVerificationCaseInput:
+      type: object
+      additionalProperties: false
+      required: [lock_version, decision]
+      properties:
+        lock_version: { type: integer, minimum: 1, maximum: 2147483646 }
+        decision:
+          type: string
+          enum: [reviewed, declined]
+        reason:
+          type: [string, 'null']
+          minLength: 10
+          maxLength: 1000
+    WithdrawVerificationCaseInput:
+      type: object
+      additionalProperties: false
+      required: [lock_version, reason]
+      properties:
+        lock_version: { type: integer, minimum: 1, maximum: 2147483646 }
+        reason: { type: string, minLength: 10, maxLength: 500 }
+    EvidenceSource:
+      type: string
+      enum: ['ci', 'lab', 'human_declaration']
+    ContributionRole:
+      type: string
+      enum: ['diagnosis', 'fix', 'documentation', 'test', 'case']
+    ReuseReportOutcome:
+      type: string
+      enum: ['reproduced', 'partial', 'failed']
+    LabScenarioKey:
+      type: string
+      enum: ['nominal_event', 'duplicate_event', 'distinct_events', 'invalid_event']
+    VerificationSummaryContributor:
+      type: object
+      additionalProperties: false
+      required: [handle, role]
+      properties:
+        handle: { type: string, minLength: 1 }
+        role:
+          $ref: '#/components/schemas/ContributionRole'
+    VerificationSummaryCaseExamined:
+      type: object
+      additionalProperties: false
+      required: [scenario_key, suite_digest, release_commit, integrated_at, reviewer_handle, source]
+      properties:
+        scenario_key:
+          $ref: '#/components/schemas/LabScenarioKey'
+        suite_digest:
+          type: string
+          pattern: '^[0-9a-f]{64}$'
+        release_commit:
+          type: string
+          pattern: '^[0-9a-f]{40}$'
+        integrated_at:
+          type: string
+          format: date-time
+        reviewer_handle:
+          description: Pseudo public du relecteur ; jamais son identifiant interne ni la note de revue (AC46).
+          type: string
+          minLength: 1
+        source:
+          $ref: '#/components/schemas/EvidenceSource'
+    VerificationSummaryObservation:
+      type: object
+      additionalProperties: false
+      required: [handle, outcome, observation, environment, reported_at, is_internal, source]
+      properties:
+        handle: { type: string, minLength: 1 }
+        outcome:
+          $ref: '#/components/schemas/ReuseReportOutcome'
+        observation: { type: string }
+        environment: { type: string }
+        reported_at:
+          type: string
+          format: date
+        is_internal:
+          description: Déclaration faite par l'owner ou un contributeur de la version ; marquée mais toujours exposée.
+          type: boolean
+        source:
+          $ref: '#/components/schemas/EvidenceSource'
+    VerificationSummaryLabRun:
+      type: object
+      additionalProperties: false
+      required: [id, scenario_key, state, finished_at, source]
+      properties:
+        id: { type: string, format: uuid }
+        scenario_key:
+          $ref: '#/components/schemas/LabScenarioKey'
+        state:
+          type: string
+          enum: ['queued', 'running', 'passed', 'failed', 'error', 'timed_out']
+        finished_at:
+          type: [string, 'null']
+          format: date-time
+        source:
+          $ref: '#/components/schemas/EvidenceSource'
+    VerificationSummaryLabComparison:
+      type: object
+      additionalProperties: false
+      required: [id, state, outcome, finished_at, source]
+      properties:
+        id: { type: string, format: uuid }
+        state:
+          $ref: '../../api/openapi/comparisons.yaml#/components/schemas/ComparisonState'
+        outcome:
+          description: Dérivé par ComparisonOutcomeCalculator::expose (BV208).
+          oneOf:
+            - type: 'null'
+            - $ref: '../../api/openapi/comparisons.yaml#/components/schemas/ComparisonOutcome'
+        finished_at:
+          type: [string, 'null']
+          format: date-time
+        source:
+          $ref: '#/components/schemas/EvidenceSource'
+    VerificationSummaryLabEvidence:
+      type: object
+      additionalProperties: false
+      required: [available, message, runs, comparisons]
+      properties:
+        available:
+          description: Vrai uniquement si au moins un lab_result existe pour cette version.
+          type: boolean
+        message:
+          description: Texte littéral « Aucun test de laboratoire disponible pour cette version » lorsque available=false ; null sinon.
+          type: [string, 'null']
+        runs:
+          type: array
+          items:
+            $ref: '#/components/schemas/VerificationSummaryLabRun'
+        comparisons:
+          type: array
+          items:
+            $ref: '#/components/schemas/VerificationSummaryLabComparison'
+    VerificationSummaryVersion:
+      type: object
+      additionalProperties: false
+      required: [id, capsule_slug, version_label, state, published_at]
+      properties:
+        id: { type: string, format: uuid }
+        capsule_slug: { type: string }
+        version_label: { type: string }
+        state:
+          type: string
+          enum: ['published']
+        published_at:
+          type: string
+          format: date-time
+    VerificationSummary:
+      type: object
+      additionalProperties: false
+      required: [version, limits, contributors, cases_examined, observations_declared, lab_evidence]
+      properties:
+        version:
+          $ref: '#/components/schemas/VerificationSummaryVersion'
+        limits:
+          type: [string, 'null']
+        contributors:
+          type: array
+          items:
+            $ref: '#/components/schemas/VerificationSummaryContributor'
+        cases_examined:
+          type: array
+          items:
+            $ref: '#/components/schemas/VerificationSummaryCaseExamined'
+        observations_declared:
+          type: array
+          items:
+            $ref: '#/components/schemas/VerificationSummaryObservation'
+        lab_evidence:
+          $ref: '#/components/schemas/VerificationSummaryLabEvidence'
+    VerificationSummaryEnvelope:
+      type: object
+      additionalProperties: false
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/VerificationSummary'

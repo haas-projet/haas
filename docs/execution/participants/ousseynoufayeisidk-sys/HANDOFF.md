@@ -1,5 +1,13 @@
 # Reprise — socle/auth
 
+## Reprise locale — 29 octobre 2026, audits Composer
+
+Correctif préparé pour le responsable du socle dans `.worktrees/ci-security-20261029`, en HEAD détachée depuis #54 `31c79b09a3f1e1e39f74511b7f5bc8a94a9e2a39`. Aucune branche existante modifiée, aucun push/merge ni relancement distant. Lire [CI_COMPOSER_SECURITY_20261029.md](../../../quality/CI_COMPOSER_SECURITY_20261029.md) pour distinguer les anciennes erreurs #139/#145, le run #146 annulé et les audits récurrents.
+
+HTTP Foundation/MIME/YAML 8.1.10 ; minimum PHP 8.4.1 et plateforme Composer alignés. Sous PHP 8.5.10 avec Composer 2.10.3 : 501 tests / 5050 assertions, Pint 710 fichiers, PHPStan niveau 8, validation/prérequis/audit réussis ; 105 types API à jour, pack 18/18 et déploiement documentaire 7/7. Aucune règle métier ni exigence CI assouplie.
+
+**À recevoir encore :** suite PostgreSQL complète et matrice PHP 8.4/8.5 sur ce correctif, publication autorisée, revue humaine. Coordonner la propagation du commit local dans les PR empilées #45–54 sans écraser leurs branches. Ne pas transférer les résultats SQL de l'ancien #153 au nouveau lock. Référence réelle du commit dans le bilan de session ; aucun SHA autoréférent dans ce fichier. Aucun gate ni frontend autorisé. Les états suivants sont historiques et non une réception de ce correctif.
+
 ## Dernier état — 7 octobre 2026, 19:27 UTC
 
 **10 branches distantes** : les trois permanentes et main à `f1f6238`, six temporaires portant les PR ouvertes #24/#28/#29/#30/#31/#33. Après les fusions externes #32/#26/#25 vers leurs bases, B14–B17 ont été consolidés dans #24 par `d9cba0b`, CI `37666083469` verte sous PHP 8.4/8.5 et backend-ci. Backend identique à B17 `8234470`, validé 671 / 6805. B15/B16/B17 supprimées après ascendance vers B14 publié et contrôle d'absence de PR dépendante ; code et branches locales préservés. B14–B17 restent hors main, #24/#31 requièrent une approbation humaine. README publiés dans #31, bilan [BRANCH_CLEANUP_20261007.md](../../../quality/BRANCH_CLEANUP_20261007.md). Prochain B18 après coordination ; aucun gate, frontend ni déploiement. Les états précédents ci-dessous sont historiques.

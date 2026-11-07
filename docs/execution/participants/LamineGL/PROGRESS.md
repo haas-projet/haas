@@ -1,5 +1,9 @@
 # Suivi — communauté et entraide / LamineGL
 
+## 7 octobre 2026 — Fusion réelle de B14–B17 dans main
+
+GitHub constate #24 MERGED à 20:24:58 UTC, commit main `b76612d1b6587119127fd364244f5248f05f1ff2`, head `2addb4d82b0c4a8671dd9d1f7e440756d3c5f3b1`. CI du head `37681430317` et CI de main `37681824151` entièrement vertes PHP 8.4/8.5/backend-ci, chacune 671 tests / 6805 assertions. Diff backend entre ces deux arbres vide. B14–B17 DONE dans le dépôt ; les cartes Systalink n’ont pas été modifiées par cette constatation. La réponse GitHub contient `reviews: []` ; aucune revue d’un collègue ni approbation n’est inventée. Prochain lot de Lamine B18 après préparation des PR restantes. Aucun gate, frontend ou déploiement.
+
 ## 7 octobre 2026 — Synchronisation de #24 avant approbation
 
 Main `e3bd34c` reçu après fusion documentaire #31. Merge normal dans la proposition consolidée B14–B17 #24, cinq conflits documentaires résolus avec historiques et 122 lots conservés ; aucune modification applicative. Backend README actualisé depuis main. Code correspondant aux 671 / 6805 déjà validés et CI `37666083469` verte ; contrôles documentaires relancés et CI du nouveau head à observer. Les PR #29/#30/#33/#28 reçoivent une revue et des corrections séparées ; aucune approbation humaine, intégration main de B14–B17 ni gate ajouté.

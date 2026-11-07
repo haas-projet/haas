@@ -1,5 +1,9 @@
 # Reprise — communauté et entraide
 
+## 7 octobre 2026 — Fusion réelle de B14–B17 dans main
+
+GitHub constate #24 MERGED à 20:24:58 UTC, commit main `b76612d1b6587119127fd364244f5248f05f1ff2`, head `2addb4d82b0c4a8671dd9d1f7e440756d3c5f3b1`. CI du head `37681430317` et CI de main `37681824151` entièrement vertes PHP 8.4/8.5/backend-ci, chacune 671 tests / 6805 assertions. Diff backend entre ces deux arbres vide. B14–B17 DONE dans le dépôt ; les cartes Systalink n’ont pas été modifiées par cette constatation. La réponse GitHub contient `reviews: []` ; aucune revue d’un collègue ni approbation n’est inventée. Prochain lot de Lamine B18 après préparation des PR restantes. Aucun gate, frontend ou déploiement.
+
 ## Préparation de l'approbation — 7 octobre 2026
 
 À la demande de gérer les PR restantes avant approbation : main `e3bd34c` contient désormais la fusion réelle de #31 (README et bilan). Intégration par merge normal dans #24 ; conflits seulement dans AI_USAGE, suivi racine, preuve B11 du catalogue et empreintes. Les histoires des deux domaines et les 122 lots sont préservés. Aucun code applicatif ne change par cette synchronisation ; seule la documentation backend README rejoint main. Les tests 671 / 6805 et la CI `37666083469` portent sur le même code ; la CI du nouveau head doit encore être constatée. Revue humaine de #24 toujours requise, aucun avis simulé. Les corrections des cinq PR ouvertes sont coordonnées séparément ; aucun gate, frontend ni déploiement.

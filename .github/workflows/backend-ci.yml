@@ -141,6 +141,7 @@ jobs:
           php ../scripts/generate-api-types.php --check
           node ../scripts/validate-pack.mjs
           node ../scripts/check-deployment-docs.mjs
+          node ../scripts/check-manifest.mjs
 
   backend-ci:
     name: backend-ci

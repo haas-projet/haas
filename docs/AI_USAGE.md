@@ -112,9 +112,19 @@ Addendum de publication : synchronisation B14/B15/B16 par merges normaux et CI v
 
 Second nettoyage après fusions externes : #32/#26/#25 constatées vers leurs bases ; consolidation normale B14–B17 dans #24 `d9cba0b`, CI `37666083469` verte. Backend identique au code B17 validé 671 / 6805 ; contrôles documentaires et 49 types relancés. Suppression des trois références intermédiaires B15/B16/B17 après ascendance vers B14 publié et contrôle frais d'absence de PR ouverte dépendante, sans supprimer les branches locales. État constaté 19:27 UTC : 10 branches, quatre permanentes et six temporaires. Aucun nouveau lot intégré dans main ni revue humaine simulée ; les références externes B23/B24 sont conservées.
 
+
+## B22 — préparation des PR restantes à la revue humaine, 7 octobre 2026
+
+Codex (GPT-6), sur demande de l’utilisateur : revue du schéma B22 conservant le travail mdev44-code, main intégré normalement, régression du retrait reproduite puis corrigée par migration additive, contraintes d’historique/version/relecteur, technologies et champs serveur protégés. Reprise coordonnée des migrations B23 et du correctif de navigateur de tests B17 ; aucune nouvelle dépendance ni route. Contrôles et incidents réels : `docs/quality/B22_CAPSULE_SCHEMA.md`. 551 tests / 4157 assertions uniques réussis (319 / 2570 hors SQL et 232 / 1587 SQL), Pint, PHPStan 8, Composer, pack 18/18, docs déploiement 7/7 et 28 types API à jour. Aucune revue humaine simulée, publication distante confiée à l’intégrateur, aucun gate ou déploiement.
 ## Préparation des PR avant approbation — 7 octobre 2026
 
 Codex, demande de l'utilisateur : réception de main e3bd34c après fusion réelle de #31 ; résolution des cinq conflits documentaires de #24 en conservant les historiques et les 122 lots. Aucun changement applicatif : seul backend/README.md rejoint main. Code identique à d9cba0b testé 671 / 6805 et CI verte ; contrôles documentaires relancés, nouveau head CI à observer. Revues parallèles et corrections séparées des PR B22/B23/B24 et B38, bases PostgreSQL locales distinctes ; aucun contrôle absent compté réussi et aucune approbation humaine inventée. Travail local initial, migrations et contributions préexistantes préservés.
+
+## Constat de fusion et consolidation B22 — 7 octobre 2026
+
+À la demande de préparer les PR avant approbation, Codex constate la fusion externe de #24 dans main b76612d, sa CI verte et l’absence de revue enregistrée. Consolidation des statuts B14–B17 et des preuves, sans modifier les cartes externes ni inventer une approbation. Merge normal de main dans B22 : historiques conservés ; conflit du test de migration identité résolu en déposant enfants capsules puis révisions des demandes/commentaires avant les parents. Les suites combinées sont exécutées sur la base B22 dédiée avant publication. Aucun gate, frontend ou déploiement.
+
+B22 après intégration de main b76612d : suites effectivement terminées sur haas_b22_review_test, 335 tests / 3595 assertions hors SQL et 399 / 3390 PostgreSQL, soit 734 / 6985 uniques. Pint et PHPStan niveau 8 réussis. Les journaux/JUnit locaux de la suite SQL sont ignorés sous backend/storage/logs. Pack 18/18, déploiement 7/7 et 49 types relancés par l’intégrateur ; aucune CI du nouveau head n’est présumée avant publication et lecture des checks.
 
 ## Historique de la branche B38 avant intégration
 
@@ -132,3 +142,7 @@ Codex (GPT-6), intégration sur PR #28 : runtime B2 séparé, configuration/cach
 Codex (GPT-6) : synchronisation normale de main b76612d (B14–B17), résolution conservant les deux historiques, puis quatre défauts de la seconde revue corrigés (cache partagé obligatoire, expiration/capacité atomique, normalisation des domaines, permissions PostgreSQL réellement fermées avant écritures). Une lecture indépendante du vendor Laravel/PostgreSQL a identifié la traduction des erreurs dans Pipeline, les vieux snapshots et l’arrondi fractionnel ; corrections et tests réels consignés dans B38_ISOLATION_20261007.md. Aucune dépendance/baseline, identité Git inventée, session HAAS, donnée métier ou frontend ; pas de push ni approbation humaine par cet agent.
 
 Contrôles définitifs B38 synchronisé : 391 tests / 3850 assertions hors SQL et 379 / 3438 en intégration, total disjoint 770 / 7288 OK ; la lecture des JUnit isole 99 cas Demo / 432 assertions inclus dans le total. PHPStan, Pint, Composer, contrats et contrôles documentaires réussis. Les relances interrompues sont conservées comme NON TERMINÉES, la lecture indépendante n’est pas un test.
+
+## 2026-10-11 — Intégrité des PR capsules
+
+À la demande de vérifier Git et poursuivre les PR prioritaires, Codex contrôle les six PR distantes et les blobs des trois premiers heads. Les manifestes périmés/incomplets sont corrigés ; un contrôle Node sans dépendance compare les octets et la couverture des fichiers suivis dans les deux jobs CI. Aucun backend ni identifiant de tâche n’est réécrit dans ce lot. Les résultats et limites figurent dans docs/quality/PR_MANIFEST_20261011.md ; aucune approbation humaine n’est simulée. La modification locale préexistante et le travail B18 sont préservés.

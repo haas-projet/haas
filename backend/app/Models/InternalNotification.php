@@ -28,6 +28,12 @@ final class InternalNotification extends Model
         return $this->belongsTo(Comment::class, 'event_id');
     }
 
+    /** @return BelongsTo<Proposal, $this> */
+    public function proposal(): BelongsTo
+    {
+        return $this->belongsTo(Proposal::class, 'event_id');
+    }
+
     /** @return BelongsTo<CapsuleVersionReview, $this> */
     public function capsuleReview(): BelongsTo
     {

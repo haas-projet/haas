@@ -10,6 +10,7 @@ use App\Enums\Identity\AccountStatus;
 use App\Models\InternalNotification;
 use App\Models\User;
 use App\Queries\Collaboration\VisibleCommentsQuery;
+use App\Queries\Collaboration\VisibleProposalsQuery;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
@@ -17,7 +18,7 @@ use Illuminate\Support\Facades\Gate;
 
 final class NotificationQuery
 {
-    public function __construct(private readonly VisibleCommentsQuery $comments) {}
+    public function __construct(private readonly VisibleCommentsQuery $comments, private readonly VisibleProposalsQuery $proposals) {}
 
     /** @return LengthAwarePaginator<int, InternalNotification> */
     public function page(User $actor, PageData $page): LengthAwarePaginator
@@ -37,9 +38,11 @@ final class NotificationQuery
         Gate::forUser($current)->authorize('view', $current);
 
         // Une notification de modération ne copie aucun contenu ni lien public retiré.
-        return InternalNotification::where('recipient_id', $current->id)->with(['comment:id,request_id', 'capsuleReview:id,version_id', 'capsuleReview.version:id,capsule_id'])->where(function (Builder $query) use ($current): void {
+        return InternalNotification::where('recipient_id', $current->id)->with(['comment:id,request_id', 'proposal:id,request_id', 'capsuleReview:id,version_id', 'capsuleReview.version:id,capsule_id'])->where(function (Builder $query) use ($current): void {
             $query->where('kind', 'profile.moderated')
                 ->orWhere(fn (Builder $comments) => $comments->where('kind', 'comment.created')->whereIn('event_id', $this->comments->forActor($current)->select('comments.id')))
+                ->orWhere(fn (Builder $proposals) => $proposals->where('kind', 'proposal.created')
+                    ->whereIn('event_id', $this->proposals->forActor($current)->whereHas('request', fn (Builder $parent) => $parent->where('author_id', $current->id))->where('author_id', '!=', $current->id)->select('proposals.id')))
                 ->orWhere(fn (Builder $reviews) => $reviews->where('kind', 'capsule.review.changes_requested')->whereIn('event_id',
                     DB::table('capsule_version_reviews')->join('capsule_versions', 'capsule_version_reviews.version_id', '=', 'capsule_versions.id')
                         ->join('capsules', 'capsule_versions.capsule_id', '=', 'capsules.id')

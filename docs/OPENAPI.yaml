@@ -43,6 +43,12 @@ paths:
     $ref: './api/openapi/community.yaml#/paths/~1api~1v1~1requests'
   /api/v1/requests/{id}:
     $ref: './api/openapi/community.yaml#/paths/~1api~1v1~1requests~1{id}'
+  '/api/v1/requests/{id}/proposals':
+    $ref: './api/openapi/community.yaml#/paths/~1api~1v1~1requests~1{id}~1proposals'
+  '/api/v1/proposals/{id}':
+    $ref: './api/openapi/community.yaml#/paths/~1api~1v1~1proposals~1{id}'
+  '/api/v1/proposals/{id}/revisions':
+    $ref: './api/openapi/community.yaml#/paths/~1api~1v1~1proposals~1{id}~1revisions'
   /api/v1/reports:
     $ref: './api/openapi/moderation.yaml#/paths/~1api~1v1~1reports'
   /api/v1/admin/reports:
@@ -159,6 +165,11 @@ components:
       description: Délai en secondes ou date HTTP si le serveur dispose de cette information. Aucune mutation rejouée automatiquement.
       schema:
         type: string
+    NoStore:
+      description: La réponse ne doit pas être conservée dans un cache partagé ou privé.
+      schema:
+        type: string
+        const: no-store
   parameters:
     IdempotencyKey:
       name: Idempotency-Key

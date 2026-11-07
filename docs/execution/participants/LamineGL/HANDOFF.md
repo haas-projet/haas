@@ -1,8 +1,16 @@
 # Reprise — communauté et entraide
 
-## 7 octobre 2026 — Fusion réelle de B14–B17 dans main
+## 11 octobre 2026 — B18, CI complète reçue pour revue
 
-GitHub constate #24 MERGED à 20:24:58 UTC, commit main `b76612d1b6587119127fd364244f5248f05f1ff2`, head `2addb4d82b0c4a8671dd9d1f7e440756d3c5f3b1`. CI du head `37681430317` et CI de main `37681824151` entièrement vertes PHP 8.4/8.5/backend-ci, chacune 671 tests / 6805 assertions. Diff backend entre ces deux arbres vide. B14–B17 DONE dans le dépôt ; les cartes Systalink n’ont pas été modifiées par cette constatation. La réponse GitHub contient `reviews: []` ; aucune revue d’un collègue ni approbation n’est inventée. Prochain lot de Lamine B18 après préparation des PR restantes. Aucun gate, frontend ou déploiement.
+B18 **IN_REVIEW**, [PR #37](https://github.com/haas-projet/haas/pull/37) vers main d0d47c5. Commits préservés : socle 865ba827e732f3bfb15b2a86b3f1972e1296d3d6, API 122bf5665b91561c92cbdf85f0a0b36ae3fcc0ed. CI 38167657147 complète reçue sous PHP 8.4/8.5 : **991 tests / 9968 assertions par version**, dont 515 / 5117 PostgreSQL. PHPStan/Pint/Composer, 62 types et 689 empreintes réussis. Preuves exactes et incidents conservés dans [B18_PROPOSALS_20261011.md](../../../quality/B18_PROPOSALS_20261011.md). La CI du commit documentaire final reste à recevoir avant passage de la PR à ready. Revue humaine et intégration requises ; assistance Codex, aucune identité ou signature de Lamine inventée. Prochain B19 après intégration. Aucun gate, frontend ou déploiement.
+
+## 11 octobre 2026 — API B18 reçue localement
+
+Socle local `865ba827e732f3bfb15b2a86b3f1972e1296d3d6` conservé. Les cinq routes, création/édition idempotentes, première transition sous verrou, révisions/audits/outbox atomiques et notification privée sont reçus localement. **B18 IN_PROGRESS** jusqu’à la CI publiée. Tests finaux : 476 / 4851 hors SQL et 188 / 2325 PostgreSQL ciblés élargis, soit 664 / 7176 distincts ; PHPStan 8/Pint/Composer et 62 types réussis. Concurrence réelle à deux processus et corrections DTO/legacy documentées dans [B18_PROPOSALS_20261011.md](../../../quality/B18_PROPOSALS_20261011.md). Suite SQL complète locale non exécutée ; CI PHP 8.4/8.5 à recevoir. Assistance Codex, aucune signature de Lamine ni revue humaine inventée. Prochain : publication distincte et réception CI, puis B19 après intégration. Aucun gate, frontend ou déploiement.
+
+## 11 octobre 2026 — B18, premier socle reçu localement
+
+Branche isolée `backend/communaute-entraide-b18-propositions` depuis main `d0d47c5`. Les neuf fichiers de préparation préexistants sont complétés ; DTO, validation Unicode/liens/code, Policy, Queries et migration avec conservation historique reçus. **B18 IN_PROGRESS**, aucun endpoint ni transition/idempotence de proposition encore livré. Tests réels : 472 / 4164 hors SQL et 51 / 308 PostgreSQL ciblés, soit 523 / 4472 distincts ; PHPStan 8/Pint/Composer/types 51 et documents 18/18 + 7/7 réussis. Suite SQL complète et CI B18 non exécutées sur ce premier socle. Voir [B18_FOUNDATION_20261011.md](../../../quality/B18_FOUNDATION_20261011.md). Assistance Codex, sans signature de Lamine inventée. Prochaine tranche : commandes idempotentes et première transition sous verrou, HTTP/contrat/concurrence ; aucun B19, gate, frontend ou déploiement.
 
 ## Préparation de l'approbation — 7 octobre 2026
 

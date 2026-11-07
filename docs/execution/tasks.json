@@ -190,7 +190,7 @@
       "phase": "B",
       "execution_order": 16,
       "status": "DONE",
-      "evidence": ["docs/quality/B14_CREATION.md","docs/quality/PR_READINESS_20261007.md"]
+      "evidence": ["docs/quality/B14_CREATION.md"]
     },
     {
       "id": "B15",
@@ -202,7 +202,9 @@
       "phase": "B",
       "execution_order": 17,
       "status": "DONE",
-      "evidence": ["docs/quality/B15_READING.md","docs/quality/PR_READINESS_20261007.md"]
+      "evidence": [
+        "docs/quality/B15_READING.md"
+      ]
     },
     {
       "id": "B16",
@@ -214,7 +216,9 @@
       "phase": "B",
       "execution_order": 18,
       "status": "DONE",
-      "evidence": ["docs/quality/B16_EDITING.md","docs/quality/PR_READINESS_20261007.md"]
+      "evidence": [
+        "docs/quality/B16_EDITING.md"
+      ]
     },
     {
       "id": "B17",
@@ -226,7 +230,9 @@
       "phase": "B",
       "execution_order": 19,
       "status": "DONE",
-      "evidence": ["docs/quality/B17_COMMENTS.md","docs/quality/PR_READINESS_20261007.md"]
+      "evidence": [
+        "docs/quality/B17_COMMENTS.md"
+      ]
     },
     {
       "id": "B18",
@@ -237,7 +243,8 @@
       "refs": "AC08 ; F03/F04",
       "phase": "B",
       "execution_order": 20,
-      "status": "TODO"
+      "status": "IN_REVIEW",
+      "evidence": ["docs/quality/B18_FOUNDATION_20261011.md", "docs/quality/B18_PROPOSALS_20261011.md"]
     },
     {
       "id": "B19",
@@ -281,8 +288,8 @@
       "refs": "F05/F06 ; AC13",
       "phase": "B",
       "execution_order": 24,
-      "status": "IN_REVIEW",
-      "evidence": ["docs/quality/MERGE_MADINA.md","docs/quality/PR_MANIFEST_20261011.md"]
+      "status": "IN_PROGRESS",
+      "evidence": ["docs/quality/MERGE_MADINA.md"]
     },
     {
       "id": "B23",
@@ -293,8 +300,8 @@
       "refs": "F05 ; AC03/AC12",
       "phase": "B",
       "execution_order": 25,
-      "status": "IN_REVIEW",
-      "evidence": ["docs/quality/MERGE_MADINA.md","docs/quality/PR_MANIFEST_20261011.md"]
+      "status": "IN_PROGRESS",
+      "evidence": ["docs/quality/MERGE_MADINA.md"]
     },
     {
       "id": "B24",
@@ -305,8 +312,7 @@
       "refs": "AC12 ; F06",
       "phase": "B",
       "execution_order": 26,
-      "status": "IN_REVIEW",
-      "evidence": ["docs/quality/B24_REVIEW_READINESS.md"]
+      "status": "TODO"
     },
     {
       "id": "B25",
@@ -317,8 +323,7 @@
       "refs": "AC12/AC13 ; RM03",
       "phase": "B",
       "execution_order": 27,
-      "status": "IN_REVIEW",
-      "evidence": ["docs/quality/B25_RECEPTION_20261011.md"]
+      "status": "TODO"
     },
     {
       "id": "B26",
@@ -329,8 +334,7 @@
       "refs": "AC15/AC25 ; F12",
       "phase": "B",
       "execution_order": 28,
-      "status": "IN_PROGRESS",
-      "evidence": ["docs/quality/B26_CATALOGUE_READINESS.md", "docs/quality/PR_MANIFEST_20261011.md"]
+      "status": "TODO"
     },
     {
       "id": "B27",
@@ -341,8 +345,7 @@
       "refs": "AC15/AC25 ; ARB05",
       "phase": "B",
       "execution_order": 29,
-      "status": "IN_REVIEW",
-      "evidence": ["docs/quality/PR_MANIFEST_20261011.md","docs/quality/B27_ARTIFACT_READINESS.md"]
+      "status": "TODO"
     },
     {
       "id": "B28",
@@ -412,11 +415,7 @@
       "refs": "AC16/AC18 ; F08",
       "phase": "B",
       "execution_order": 35,
-      "status": "IN_PROGRESS",
-      "evidence": [
-        "docs/api/LAB_REGISTRY.md",
-        "docs/quality/B33_LAB_REGISTRY_20261012.md"
-      ]
+      "status": "TODO"
     },
     {
       "id": "B34",

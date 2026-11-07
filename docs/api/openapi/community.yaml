@@ -473,8 +473,351 @@ paths:
         '422': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
         '500': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
         '503': { $ref: '../../OPENAPI.yaml#/components/responses/RetryableFailure' }
+  /api/v1/requests/{id}/proposals:
+    get:
+      operationId: listProposals
+      summary: Lire les propositions accessibles d'une demande
+      description: >-
+        Lecture publique suivant la visibilité du parent et de chaque contributeur.
+        Parent masqué, brouillon tiers ou auteur du parent suspendu/non vérifié : 404.
+        Les propositions d'un brouillon sont exclues même pour son propriétaire.
+        Propositions masquées et contributeurs suspendus/non vérifiés exclus avant pagination et total.
+        Archives et demandes résolues restent lisibles ; ordre created_at puis UUID croissant.
+        Pagination 20 par page, maximum 50 ; paramètres inconnus refusés. Cache-Control no-store.
+        Les sources legacy peuvent être plus courtes ou longues que les nouvelles descriptions. Voir PROPOSALS.md.
+      security:
+        - {}
+        - SessionCookie: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - $ref: '../../OPENAPI.yaml#/components/parameters/Page'
+        - $ref: '../../OPENAPI.yaml#/components/parameters/PerPage'
+      responses:
+        '200':
+          description: Propositions visibles et total filtré, sans identité privée du contributeur.
+          headers:
+            X-Request-ID: { $ref: '../../OPENAPI.yaml#/components/headers/RequestId' }
+            Cache-Control: { $ref: '../../OPENAPI.yaml#/components/headers/NoStore' }
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProposalPage'
+        '401': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '403': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '404': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '422': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '500': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '503': { $ref: '../../OPENAPI.yaml#/components/responses/RetryableFailure' }
+    post:
+      operationId: createProposal
+      summary: Proposer une solution structurée et ouvrir le travail en cours
+      description: >-
+        Membre actif vérifié, session SPA et CSRF requis ; quota 30 requêtes/minute.
+        Parent public visible en open/in_progress seulement. Objet JSON non vide sans paramètres de requête ;
+        diagnostic, correctif, vérification et limites obligatoires, chacun 20–4000 caractères après trim Unicode.
+        Les seuls liens, blancs, caractères de contrôle et motifs de secrets connus sont refusés.
+        Code facultatif nullable, maximum 12000 caractères Unicode ; sa valeur validée conserve exactement
+        les espaces, retours de ligne et octets UTF-8, avec chaîne vide distincte de null.
+        Auteur, parent, état proposed, version 1 et dates viennent du serveur.
+        Si le parent était open, transition in_progress, version du parent +1 et audit help_request.started
+        distinct d'une édition du propriétaire, exactement une fois ;
+        une nouvelle proposition sur in_progress et un rejeu ne répètent pas cette transition.
+        Transaction commune proposition/historique/audit minimal/outbox/idempotence 24 h.
+        Même acteur/route-cible/clé/charge : même proposition/version sans duplication ;
+        droits actuels avant rejeu, ancienne version après autre édition en conflit.
+        proposal.created prépare une notification interne au propriétaire courant, sans auto-envoi ni extrait ;
+        livraison séparée après commit. Aucun code, shell, URL ou requête réseau exécuté.
+        Cache-Control no-store. B19 acceptation/résolution hors de cette opération. Voir PROPOSALS.md.
+      security:
+        - SessionCookie: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - $ref: '../../OPENAPI.yaml#/components/parameters/IdempotencyKey'
+        - $ref: './identity.yaml#/components/parameters/XsrfToken'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProposalCreateInput'
+      responses:
+        '201':
+          description: Proposition créée ou projection courante d'un rejeu autorisé.
+          headers:
+            X-Request-ID: { $ref: '../../OPENAPI.yaml#/components/headers/RequestId' }
+            Cache-Control: { $ref: '../../OPENAPI.yaml#/components/headers/NoStore' }
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProposalDetail'
+        '401': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '403': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '404': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '409':
+          $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure'
+          description: IDEMPOTENCY_CONFLICT si la charge diffère ; RESOURCE_CONFLICT si la version mémorisée a changé ou si une version entière ne peut plus être incrémentée. Aucune mutation.
+        '419': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '422': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '429': { $ref: '../../OPENAPI.yaml#/components/responses/RetryableFailure' }
+        '500': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '503': { $ref: '../../OPENAPI.yaml#/components/responses/RetryableFailure' }
+  /api/v1/proposals/{id}:
+    get:
+      operationId: showProposal
+      summary: Lire une proposition visible sans exécuter son contenu
+      description: >-
+        Même visibilité que la liste ; proposition ou parent masqué, brouillon ou compte auteur
+        suspendu/non vérifié : 404. Archives et demandes résolues restent lisibles.
+        Quatre sources textuelles et leurs rendus Markdown restreints ; code brut inerte,
+        auteur id/handle seulement. Les sources legacy ne sont pas réécrites. Cache-Control no-store.
+      security:
+        - {}
+        - SessionCookie: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Projection actuellement autorisée de la proposition.
+          headers:
+            X-Request-ID: { $ref: '../../OPENAPI.yaml#/components/headers/RequestId' }
+            Cache-Control: { $ref: '../../OPENAPI.yaml#/components/headers/NoStore' }
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProposalDetail'
+        '401': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '403': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '404': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '500': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '503': { $ref: '../../OPENAPI.yaml#/components/responses/RetryableFailure' }
+    patch:
+      operationId: updateProposal
+      summary: Modifier sa proposition sous version et conserver l'historique connu
+      description: >-
+        Auteur actif vérifié seulement, aucun bypass administrateur ; proposition visible proposed
+        et parent public visible en open/in_progress. accepted/not_selected, archives, demandes résolues
+        et brouillons non modifiables. Session SPA, CSRF, Idempotency-Key UUID v4 et quota 30/minute.
+        Objet JSON strict et partiel avec au moins un champ de contenu et lock_version entier JSON
+        1–2147483646 : chaînes numériques, nombres décimaux et booléens refusés sans conversion.
+        Champs absents conservés ; code null retire le code, chaîne vide reste une chaîne vide.
+        Contenu final revalidé sous verrou ; version +1 et edited_at serveur, historique/audit/intention atomiques.
+        Aucune notification nouvelle ni transition du parent lors d'une édition ou d'un rejeu.
+        Version périmée ou résultat déjà modifié : 409 ; charge différente avec même clé : 409.
+        Première édition d'une proposition B11 sans historique : capture before_edit de la version connue,
+        datée de la capture, sans inventer les éditions précédentes ni expurger fictivement un contenu.
+        Si ce snapshot contient un motif de secret connu, refus 409 PROPOSAL_HISTORY_REQUIRES_REVIEW
+        sans édition ni capture ; ce lot ne livre pas la procédure de revue/expurgation. Cache-Control no-store.
+      security:
+        - SessionCookie: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - $ref: '../../OPENAPI.yaml#/components/parameters/IdempotencyKey'
+        - $ref: './identity.yaml#/components/parameters/XsrfToken'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProposalUpdateInput'
+      responses:
+        '200':
+          description: Proposition courante après édition ou rejeu autorisé, même identifiant/version.
+          headers:
+            X-Request-ID: { $ref: '../../OPENAPI.yaml#/components/headers/RequestId' }
+            Cache-Control: { $ref: '../../OPENAPI.yaml#/components/headers/NoStore' }
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProposalDetail'
+        '401': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '403': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '404': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '409':
+          $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure'
+          description: RESOURCE_CONFLICT pour version fournie/mémorisée différente ; IDEMPOTENCY_CONFLICT pour autre charge ; PROPOSAL_HISTORY_REQUIRES_REVIEW pour snapshot legacy contenant un motif de secret connu. Aucune mutation.
+        '419': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '422': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '429': { $ref: '../../OPENAPI.yaml#/components/responses/RetryableFailure' }
+        '500': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '503': { $ref: '../../OPENAPI.yaml#/components/responses/RetryableFailure' }
+  /api/v1/proposals/{id}/revisions:
+    get:
+      operationId: listProposalRevisions
+      summary: Lire les versions connues d'une proposition accessible
+      description: >-
+        Même visibilité courante que la proposition et son parent ; aucun historique d'une proposition
+        masquée ou d'un auteur inéligible. Versions en ordre décroissant, pagination 20 par page,
+        maximum 50 ; paramètres inconnus refusés. before_edit désigne seulement la version legacy
+        connue et la date de sa capture ; aucune édition antérieure inventée. Les textes legacy
+        peuvent dépasser les bornes modernes ou être plus courts. Rendu Markdown restreint et code brut
+        inerte, aucune exécution ni requête réseau. Cache-Control no-store. Voir PROPOSALS.md.
+      security:
+        - {}
+        - SessionCookie: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - $ref: '../../OPENAPI.yaml#/components/parameters/Page'
+        - $ref: '../../OPENAPI.yaml#/components/parameters/PerPage'
+      responses:
+        '200':
+          description: Historique métier accessible et identifié, sans versions absentes inventées.
+          headers:
+            X-Request-ID: { $ref: '../../OPENAPI.yaml#/components/headers/RequestId' }
+            Cache-Control: { $ref: '../../OPENAPI.yaml#/components/headers/NoStore' }
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProposalRevisionPage'
+        '401': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '403': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '404': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '422': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '500': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '503': { $ref: '../../OPENAPI.yaml#/components/responses/RetryableFailure' }
 components:
   schemas:
+    ProposalDescriptionInput:
+      type: string
+      minLength: 20
+      x-haas-normalized-length: { minimum: 20, maximum: 4000 }
+      description: >-
+        Description normalisée par trim Unicode, puis contrôlée à 20–4000 caractères utiles.
+        Les espaces périphériques de la chaîne JSON brute sont supprimés avant la mesure.
+        Blancs et liens seuls, contrôles et motifs de secrets connus refusés.
+    ProposalCodeInput:
+      type: [string, 'null']
+      maxLength: 12000
+      description: Code facultatif inerte, maximum 12000 caractères Unicode ; UTF-8 valide, contrôles et motifs de secrets connus refusés. Valeur validée préservée octet par octet, y compris espaces/retours de ligne ; chaîne vide distincte de null.
+    ProposalCreateInput:
+      type: object
+      additionalProperties: false
+      required: [diagnosis, fix, verification, limits]
+      properties:
+        diagnosis: { $ref: '#/components/schemas/ProposalDescriptionInput' }
+        fix: { $ref: '#/components/schemas/ProposalDescriptionInput' }
+        verification: { $ref: '#/components/schemas/ProposalDescriptionInput' }
+        limits: { $ref: '#/components/schemas/ProposalDescriptionInput' }
+        code: { $ref: '#/components/schemas/ProposalCodeInput' }
+    ProposalUpdateInput:
+      type: object
+      additionalProperties: false
+      required: [lock_version]
+      minProperties: 2
+      description: PATCH partiel ; lock_version seul et objet vide refusés. Au moins un champ de contenu, dont code null ou chaîne vide est un changement explicite.
+      properties:
+        diagnosis: { $ref: '#/components/schemas/ProposalDescriptionInput' }
+        fix: { $ref: '#/components/schemas/ProposalDescriptionInput' }
+        verification: { $ref: '#/components/schemas/ProposalDescriptionInput' }
+        limits: { $ref: '#/components/schemas/ProposalDescriptionInput' }
+        code: { $ref: '#/components/schemas/ProposalCodeInput' }
+        lock_version:
+          type: integer
+          minimum: 1
+          maximum: 2147483646
+          description: Entier JSON strict ; aucune conversion de chaîne numérique, décimal ou booléen.
+    ProposalSource:
+      type: string
+      description: Source textuelle inerte. Les nouvelles descriptions validées comportent 20–4000 caractères normalisés ; les textes legacy conservés peuvent être plus courts ou longs.
+    ProposalRenderedDescription:
+      type: string
+      description: >-
+        Rendu CommonMark serveur partagé avec B17 : HTML brut échappé, code inerte, liens HTTPS sans
+        identifiants avec rel nofollow/noopener/noreferrer, images réduites au libellé sans appel réseau ;
+        profondeur 20 et 100 délimiteurs par ligne.
+    Proposal:
+      type: object
+      additionalProperties: false
+      required: [id, request_id, author, diagnosis, diagnosis_html, fix, fix_html, verification, verification_html, limits, limits_html, code, state, lock_version, created_at, edited_at]
+      properties:
+        id: { type: string, format: uuid }
+        request_id: { type: string, format: uuid }
+        author:
+          type: object
+          additionalProperties: false
+          required: [id, handle]
+          properties:
+            id: { type: string, format: uuid }
+            handle: { type: string }
+        diagnosis: { $ref: '#/components/schemas/ProposalSource' }
+        diagnosis_html: { $ref: '#/components/schemas/ProposalRenderedDescription' }
+        fix: { $ref: '#/components/schemas/ProposalSource' }
+        fix_html: { $ref: '#/components/schemas/ProposalRenderedDescription' }
+        verification: { $ref: '#/components/schemas/ProposalSource' }
+        verification_html: { $ref: '#/components/schemas/ProposalRenderedDescription' }
+        limits: { $ref: '#/components/schemas/ProposalSource' }
+        limits_html: { $ref: '#/components/schemas/ProposalRenderedDescription' }
+        code:
+          type: [string, 'null']
+          maxLength: 12000
+          description: Valeur UTF-8 validée conservée sans trim ni rendu HTML, chaîne vide distincte de null ; aucun code exécuté.
+        state: { type: string, enum: [proposed, accepted, not_selected] }
+        lock_version: { type: integer, minimum: 1, maximum: 2147483647 }
+        created_at: { type: [string, 'null'], format: date-time }
+        edited_at: { type: [string, 'null'], format: date-time }
+    ProposalDetail:
+      type: object
+      additionalProperties: false
+      required: [data]
+      properties:
+        data: { $ref: '#/components/schemas/Proposal' }
+    ProposalPage:
+      type: object
+      additionalProperties: false
+      required: [data, meta]
+      properties:
+        data:
+          type: array
+          maxItems: 50
+          items: { $ref: '#/components/schemas/Proposal' }
+        meta: { $ref: '../../OPENAPI.yaml#/components/schemas/PaginationMeta' }
+    ProposalRevision:
+      type: object
+      additionalProperties: false
+      required: [id, proposal_version, action, diagnosis, diagnosis_html, fix, fix_html, verification, verification_html, limits, limits_html, code, occurred_at]
+      properties:
+        id: { type: string, format: uuid }
+        proposal_version: { type: integer, minimum: 1, maximum: 2147483647 }
+        action: { type: string, enum: [created, updated, before_edit] }
+        diagnosis: { $ref: '#/components/schemas/ProposalSource' }
+        diagnosis_html: { $ref: '#/components/schemas/ProposalRenderedDescription' }
+        fix: { $ref: '#/components/schemas/ProposalSource' }
+        fix_html: { $ref: '#/components/schemas/ProposalRenderedDescription' }
+        verification: { $ref: '#/components/schemas/ProposalSource' }
+        verification_html: { $ref: '#/components/schemas/ProposalRenderedDescription' }
+        limits: { $ref: '#/components/schemas/ProposalSource' }
+        limits_html: { $ref: '#/components/schemas/ProposalRenderedDescription' }
+        code:
+          type: [string, 'null']
+          description: Source inerte conservée ; les captures before_edit legacy ne reçoivent pas de borne moderne inventée.
+        occurred_at:
+          type: string
+          format: date-time
+          description: Date serveur de création/édition ou, pour before_edit, date de capture de la version connue ; aucune date d'édition précédente inventée.
+    ProposalRevisionPage:
+      type: object
+      additionalProperties: false
+      required: [data, meta]
+      properties:
+        data:
+          type: array
+          maxItems: 50
+          items: { $ref: '#/components/schemas/ProposalRevision' }
+        meta: { $ref: '../../OPENAPI.yaml#/components/schemas/PaginationMeta' }
     CommentCreateInput:
       type: object
       additionalProperties: false

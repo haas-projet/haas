@@ -17,6 +17,8 @@ final class NotificationResource extends JsonResource
             'proposal.created' => 'Une proposition a été ajoutée à votre demande.',
             'resolution.accepted' => 'L’auteur a accepté votre proposition dans son contexte.',
             'request.reopened' => 'L’auteur a rouvert la demande liée à votre proposition.',
+            'capsule.review.changes_requested' => 'Des corrections ont été demandées sur votre brouillon de capsule.',
+            'capsule.version.published' => 'Une version de votre capsule a été publiée.',
             default => 'Une décision de modération concerne votre profil.',
         },
             'target_path' => match ($this->kind) {
@@ -24,6 +26,8 @@ final class NotificationResource extends JsonResource
                 'proposal.created' => '/requests/'.$this->proposal?->request_id,
                 'resolution.accepted' => '/requests/'.$this->resolution?->request_id,
                 'request.reopened' => '/requests/'.$this->reopening?->request_id,
+                'capsule.review.changes_requested' => '/capsules/'.$this->capsuleReview?->version?->capsule_id.'/versions/'.$this->capsuleReview?->version_id.'/edition',
+                'capsule.version.published' => '/capsules/'.$this->capsuleReview?->version?->capsule_id.'/versions/'.$this->capsuleReview?->version_id.'/edition',
                 default => '/me/profile',
             }, 'read_at' => $this->read_at?->toIso8601String(), 'created_at' => $this->created_at->toIso8601String()];
     }

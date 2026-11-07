@@ -28,6 +28,10 @@ class AppServiceProvider extends ServiceProvider
         Model::preventSilentlyDiscardingAttributes();
         Sanctum::getAccessTokenFromRequestUsing(static fn (): string => '');
         $this->callAfterResolving(RateLimiter::class, static function (RateLimiter $limiter): void {
+            $limiter->for('artifact-downloads', static fn (Request $request): array => [
+                Limit::perMinute(30)->by('artifact:member:'.$request->user()?->getAuthIdentifier()),
+                Limit::perMinute(60)->by('artifact:ip:'.$request->ip()),
+            ]);
             foreach (['password-link', 'password-reset'] as $name) {
                 $limiter->for($name, static function (Request $request) use ($name): array {
                     $email = $request->input('email');

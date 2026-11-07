@@ -1,24 +1,34 @@
 openapi: 3.1.0
 info:
   title: HAAS — Socle API
-  version: 0.18.0
-  description: Socle identité, profils, audit et idempotence ; demandes B14–B16, commentaires B17 et propositions structurées historisées B18 ; acceptation et résolution B19 à raccorder.
+  version: 0.16.0
+  description: Socle identité, profils, audit et idempotence ; création B14, lecture B15, édition/publication/historique B16 ; commentaires historisés et notifications internes B17 ; autres contributions à raccorder.
 servers:
   - url: http://localhost:8000
 x-haas-domain-fragments:
+  lab:
+    $ref: './api/openapi/lab.yaml'
   identity:
     $ref: './api/openapi/identity.yaml'
   community:
     $ref: './api/openapi/community.yaml'
   capsules-lab:
     $ref: './api/openapi/capsules-lab.yaml'
+  comparisons:
+    $ref: './api/openapi/comparisons.yaml'
 paths:
-  '/api/v1/requests/{id}/proposals':
-    $ref: './api/openapi/community.yaml#/paths/~1api~1v1~1requests~1{id}~1proposals'
-  '/api/v1/proposals/{id}':
-    $ref: './api/openapi/community.yaml#/paths/~1api~1v1~1proposals~1{id}'
-  '/api/v1/proposals/{id}/revisions':
-    $ref: './api/openapi/community.yaml#/paths/~1api~1v1~1proposals~1{id}~1revisions'
+  '/api/v1/versions/{id}/lab-definition':
+    $ref: './api/openapi/lab.yaml#/paths/~1api~1v1~1versions~1{id}~1lab-definition'
+  '/api/v1/versions/{id}/comparison-profiles':
+    $ref: './api/openapi/comparisons.yaml#/paths/~1api~1v1~1versions~1{id}~1comparison-profiles'
+  '/api/v1/comparisons':
+    $ref: './api/openapi/comparisons.yaml#/paths/~1api~1v1~1comparisons'
+  '/api/v1/comparisons/{id}':
+    $ref: './api/openapi/comparisons.yaml#/paths/~1api~1v1~1comparisons~1{id}'
+  /api/v1/lab-runs:
+    $ref: './api/openapi/lab.yaml#/paths/~1api~1v1~1lab-runs'
+  '/api/v1/lab-runs/{id}':
+    $ref: './api/openapi/lab.yaml#/paths/~1api~1v1~1lab-runs~1{id}'
   '/api/v1/requests/{id}/comments':
     $ref: './api/openapi/community.yaml#/paths/~1api~1v1~1requests~1{id}~1comments'
   '/api/v1/comments/{id}':
@@ -33,6 +43,12 @@ paths:
     $ref: './api/openapi/community.yaml#/paths/~1api~1v1~1requests'
   /api/v1/requests/{id}:
     $ref: './api/openapi/community.yaml#/paths/~1api~1v1~1requests~1{id}'
+  '/api/v1/requests/{id}/proposals':
+    $ref: './api/openapi/community.yaml#/paths/~1api~1v1~1requests~1{id}~1proposals'
+  '/api/v1/proposals/{id}':
+    $ref: './api/openapi/community.yaml#/paths/~1api~1v1~1proposals~1{id}'
+  '/api/v1/proposals/{id}/revisions':
+    $ref: './api/openapi/community.yaml#/paths/~1api~1v1~1proposals~1{id}~1revisions'
   /api/v1/reports:
     $ref: './api/openapi/moderation.yaml#/paths/~1api~1v1~1reports'
   /api/v1/admin/reports:
@@ -49,6 +65,44 @@ paths:
     $ref: './api/openapi/administration.yaml#/paths/~1api~1v1~1admin~1members'
   /api/v1/admin/members/{id}:
     $ref: './api/openapi/administration.yaml#/paths/~1api~1v1~1admin~1members~1{id}'
+  /api/v1/capsules:
+    $ref: './api/openapi/capsules-lab.yaml#/paths/~1api~1v1~1capsules'
+  /api/v1/capsules/{slug}:
+    $ref: './api/openapi/capsules-lab.yaml#/paths/~1api~1v1~1capsules~1{slug}'
+  /api/v1/capsules/{slug}/versions/{version}:
+    $ref: './api/openapi/capsules-lab.yaml#/paths/~1api~1v1~1capsules~1{slug}~1versions~1{version}'
+  /api/v1/capsules/{capsule}/versions:
+    $ref: './api/openapi/capsules-lab.yaml#/paths/~1api~1v1~1capsules~1{capsule}~1versions'
+  /api/v1/capsules/{capsule}/versions/{version}:
+    $ref: './api/openapi/capsules-lab.yaml#/paths/~1api~1v1~1capsules~1{capsule}~1versions~1{version}'
+  /api/v1/capsules/{capsule}/versions/{version}/submit-review:
+    $ref: './api/openapi/capsules-lab.yaml#/paths/~1api~1v1~1capsules~1{capsule}~1versions~1{version}~1submit-review'
+  /api/v1/admin/capsules/{capsule}/versions/{version}/request-changes:
+    $ref: './api/openapi/capsules-lab.yaml#/paths/~1api~1v1~1admin~1capsules~1{capsule}~1versions~1{version}~1request-changes'
+  /api/v1/admin/capsules/{capsule}/versions/{version}/publish:
+    $ref: './api/openapi/capsules-lab.yaml#/paths/~1api~1v1~1admin~1capsules~1{capsule}~1versions~1{version}~1publish'
+  /api/v1/verification-cases:
+    $ref: './api/openapi/verification-cases.yaml#/paths/~1api~1v1~1verification-cases'
+  '/api/v1/verification-cases/{verification_case}':
+    $ref: './api/openapi/verification-cases.yaml#/paths/~1api~1v1~1verification-cases~1{verification_case}'
+  '/api/v1/verification-cases/{verification_case}/submit':
+    $ref: './api/openapi/verification-cases.yaml#/paths/~1api~1v1~1verification-cases~1{verification_case}~1submit'
+  '/api/v1/verification-cases/{verification_case}/withdraw':
+    $ref: './api/openapi/verification-cases.yaml#/paths/~1api~1v1~1verification-cases~1{verification_case}~1withdraw'
+  '/api/v1/admin/verification-cases/{verification_case}/review':
+    $ref: './api/openapi/verification-cases.yaml#/paths/~1api~1v1~1admin~1verification-cases~1{verification_case}~1review'
+  '/api/v1/versions/{id}/verification-summary':
+    $ref: './api/openapi/verification-cases.yaml#/paths/~1api~1v1~1versions~1{id}~1verification-summary'
+  /api/v1/capsules/{capsule}/versions/{version}/artifact/{artifact}:
+    $ref: './api/openapi/capsules-lab.yaml#/paths/~1api~1v1~1capsules~1{capsule}~1versions~1{version}~1artifact~1{artifact}'
+  /api/v1/capsules/{capsule}/versions/{version}/artifact/{artifact}/stream:
+    $ref: './api/openapi/capsules-lab.yaml#/paths/~1api~1v1~1capsules~1{capsule}~1versions~1{version}~1artifact~1{artifact}~1stream'
+  /api/v1/capsules/{capsule}/versions/{version}/artifact/{artifact}/notices:
+    $ref: './api/openapi/capsules-lab.yaml#/paths/~1api~1v1~1capsules~1{capsule}~1versions~1{version}~1artifact~1{artifact}~1notices'
+  /api/v1/capsules/{capsule}/favorite:
+    $ref: './api/openapi/capsules-lab.yaml#/paths/~1api~1v1~1capsules~1{capsule}~1favorite'
+  /api/v1/capsules/{capsule}/versions/{version}/reuse-reports:
+    $ref: './api/openapi/capsules-lab.yaml#/paths/~1api~1v1~1capsules~1{capsule}~1versions~1{version}~1reuse-reports'
   /api/v1/members/{handle}:
     $ref: './api/openapi/identity.yaml#/paths/~1api~1v1~1members~1{handle}'
   /api/v1/me/profile:
@@ -102,11 +156,6 @@ components:
     SessionCookie:
       $ref: './api/openapi/identity.yaml#/components/securitySchemes/SessionCookie'
   headers:
-    NoStore:
-      description: La réponse contient la directive no-store ; le transport peut également ajouter private.
-      schema:
-        type: string
-      example: no-store, private
     RequestId:
       description: UUID généré par le serveur pour chaque requête ; un identifiant fourni par le client est ignoré.
       schema:
@@ -228,8 +277,6 @@ components:
     ApiFailure:
       description: Erreur HAAS. Voir le tableau de codes communs dans HTTP_CONTRACT.md.
       headers:
-        Cache-Control:
-          $ref: '#/components/headers/NoStore'
         X-Request-ID:
           $ref: '#/components/headers/RequestId'
       content:
@@ -239,8 +286,6 @@ components:
     RetryableFailure:
       description: Erreur 429 ou 503 ; Retry-After conservé lorsqu'il est disponible.
       headers:
-        Cache-Control:
-          $ref: '#/components/headers/NoStore'
         X-Request-ID:
           $ref: '#/components/headers/RequestId'
         Retry-After:

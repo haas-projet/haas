@@ -21,6 +21,7 @@ final class NotificationResource extends JsonResource
         };
         $target = match ($this->kind) {
             'comment.created' => '/requests/'.$this->comment?->request_id,
+            'proposal.created' => '/requests/'.$this->proposal?->request_id,
             'capsule.review.changes_requested' => '/capsules/'.$this->capsuleReview?->version?->capsule_id.'/versions/'.$this->capsuleReview?->version_id.'/edition',
             'capsule.version.published' => '/capsules/'.$this->capsuleReview?->version?->capsule_id.'/versions/'.$this->capsuleReview?->version_id.'/edition',
             default => '/me/profile',

@@ -42,6 +42,7 @@ final class HelpRequestsMigrationTest extends PostgresTestCase
         $paths[] = database_path('migrations/2026_10_11_210100_b19_resolution_notification_events.php');
         $paths[] = database_path('migrations/2026_10_12_000020_b20_request_reopenings.php');
         $paths[] = database_path('migrations/2026_10_12_000021_b20_reopening_notification_events.php');
+        $paths[] = database_path('migrations/2026_10_11_220000_bc01_projects_and_discovery.php');
         $migrations = array_map(function (string $path): Migration {
             $migration = require $path;
             $this->assertInstanceOf(Migration::class, $migration);
@@ -69,6 +70,10 @@ final class HelpRequestsMigrationTest extends PostgresTestCase
         $this->assertTrue(Schema::hasTable('proposal_revisions'));
         $this->assertTrue(Schema::hasTable('request_reopenings'));
         $this->assertTrue(Schema::hasColumn('proposals', 'code'));
+        $this->assertTrue(Schema::hasColumn('help_requests', 'project_id'));
+        $this->assertTrue(Schema::hasTable('projects'));
+        $this->assertTrue(Schema::hasTable('project_technologies'));
+        $this->assertTrue(Schema::hasColumn('profiles', 'directory_visible'));
         $resolution = Resolution::factory()->create();
         $this->assertModelExists($resolution);
         $this->assertSame($resolution->request()->firstOrFail()->author_id, $resolution->accepted_by);

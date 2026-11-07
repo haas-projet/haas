@@ -33,6 +33,8 @@ final class IdentityMigrationTest extends PostgresTestCase
                 }
             }
             foreach (['request_reopenings', 'comment_revisions', 'proposal_revisions', 'help_request_revisions', 'resolutions', 'comments', 'proposals', 'request_technologies', 'help_requests'] as $dependent) {
+            DomainTables::dropAll();
+            foreach (['comment_revisions', 'proposal_revisions', 'help_request_revisions', 'resolutions', 'comments', 'proposals', 'request_technologies', 'help_requests', 'project_technologies', 'projects'] as $dependent) {
                 Schema::dropIfExists($dependent);
             }
         }

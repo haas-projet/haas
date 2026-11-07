@@ -19,6 +19,44 @@ x-haas-domain-fragments:
   comparisons:
     $ref: './api/openapi/comparisons.yaml'
 paths:
+  /api/v1/capsules:
+    $ref: './api/openapi/capsules-lab.yaml#/paths/~1api~1v1~1capsules'
+  /api/v1/capsules/{capsule}/versions:
+    $ref: './api/openapi/capsules-lab.yaml#/paths/~1api~1v1~1capsules~1{capsule}~1versions'
+  /api/v1/capsules/{capsule}/versions/{version}:
+    $ref: './api/openapi/capsules-lab.yaml#/paths/~1api~1v1~1capsules~1{capsule}~1versions~1{version}'
+  /api/v1/capsules/{capsule}/versions/{version}/submit-review:
+    $ref: './api/openapi/capsules-lab.yaml#/paths/~1api~1v1~1capsules~1{capsule}~1versions~1{version}~1submit-review'
+  /api/v1/admin/capsules/{capsule}/versions/{version}/request-changes:
+    $ref: './api/openapi/capsules-lab.yaml#/paths/~1api~1v1~1admin~1capsules~1{capsule}~1versions~1{version}~1request-changes'
+  /api/v1/admin/capsules/{capsule}/versions/{version}/publish:
+    $ref: './api/openapi/capsules-lab.yaml#/paths/~1api~1v1~1admin~1capsules~1{capsule}~1versions~1{version}~1publish'
+  /api/v1/capsules/{slug}:
+    $ref: './api/openapi/capsules-lab.yaml#/paths/~1api~1v1~1capsules~1{slug}'
+  /api/v1/capsules/{slug}/versions/{version}:
+    $ref: './api/openapi/capsules-lab.yaml#/paths/~1api~1v1~1capsules~1{slug}~1versions~1{version}'
+  /api/v1/capsules/{capsule}/versions/{version}/artifact/{artifact}:
+    $ref: './api/openapi/capsules-lab.yaml#/paths/~1api~1v1~1capsules~1{capsule}~1versions~1{version}~1artifact~1{artifact}'
+  /api/v1/capsules/{capsule}/versions/{version}/artifact/{artifact}/stream:
+    $ref: './api/openapi/capsules-lab.yaml#/paths/~1api~1v1~1capsules~1{capsule}~1versions~1{version}~1artifact~1{artifact}~1stream'
+  /api/v1/capsules/{capsule}/versions/{version}/artifact/{artifact}/notices:
+    $ref: './api/openapi/capsules-lab.yaml#/paths/~1api~1v1~1capsules~1{capsule}~1versions~1{version}~1artifact~1{artifact}~1notices'
+  /api/v1/capsules/{capsule}/favorite:
+    $ref: './api/openapi/capsules-lab.yaml#/paths/~1api~1v1~1capsules~1{capsule}~1favorite'
+  /api/v1/capsules/{capsule}/versions/{version}/reuse-reports:
+    $ref: './api/openapi/capsules-lab.yaml#/paths/~1api~1v1~1capsules~1{capsule}~1versions~1{version}~1reuse-reports'
+  /api/v1/verification-cases:
+    $ref: './api/openapi/verification-cases.yaml#/paths/~1api~1v1~1verification-cases'
+  /api/v1/verification-cases/{verification_case}:
+    $ref: './api/openapi/verification-cases.yaml#/paths/~1api~1v1~1verification-cases~1{verification_case}'
+  /api/v1/verification-cases/{verification_case}/submit:
+    $ref: './api/openapi/verification-cases.yaml#/paths/~1api~1v1~1verification-cases~1{verification_case}~1submit'
+  /api/v1/admin/verification-cases/{verification_case}/review:
+    $ref: './api/openapi/verification-cases.yaml#/paths/~1api~1v1~1admin~1verification-cases~1{verification_case}~1review'
+  /api/v1/verification-cases/{verification_case}/withdraw:
+    $ref: './api/openapi/verification-cases.yaml#/paths/~1api~1v1~1verification-cases~1{verification_case}~1withdraw'
+  /api/v1/versions/{id}/verification-summary:
+    $ref: './api/openapi/verification-cases.yaml#/paths/~1api~1v1~1versions~1{id}~1verification-summary'
   '/api/v1/versions/{id}/lab-definition':
     $ref: './api/openapi/lab.yaml#/paths/~1api~1v1~1versions~1{id}~1lab-definition'
   '/api/v1/versions/{id}/comparison-profiles':

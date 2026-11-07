@@ -18,8 +18,6 @@ x-haas-domain-fragments:
     $ref: './api/openapi/reopenings.yaml'
   capsules-lab:
     $ref: './api/openapi/capsules-lab.yaml'
-  lab:
-    $ref: './api/openapi/lab.yaml'
   comparisons:
     $ref: './api/openapi/comparisons.yaml'
 paths:

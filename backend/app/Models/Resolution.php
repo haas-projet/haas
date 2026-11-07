@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 // Une résolution référence une proposition appartenant à la même demande.
 // FK composite posée en base (voir migration create_resolutions_table) :
@@ -48,6 +49,12 @@ class Resolution extends Model
     public function acceptor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'accepted_by');
+    }
+
+    /** @return HasOne<RequestReopening, $this> */
+    public function reopening(): HasOne
+    {
+        return $this->hasOne(RequestReopening::class, 'resolution_id');
     }
 
     /**

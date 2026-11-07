@@ -40,6 +40,12 @@ final class InternalNotification extends Model
         return $this->belongsTo(Resolution::class, 'event_id');
     }
 
+    /** @return BelongsTo<RequestReopening, $this> */
+    public function reopening(): BelongsTo
+    {
+        return $this->belongsTo(RequestReopening::class, 'event_id');
+    }
+
     /** @return BelongsTo<CapsuleVersionReview, $this> */
     public function capsuleReview(): BelongsTo
     {

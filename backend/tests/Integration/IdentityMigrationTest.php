@@ -11,7 +11,6 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use ReflectionMethod;
 use RuntimeException;
 use Tests\PostgresTestCase;
-use Tests\Support\Mdev44\DomainTables;
 
 final class IdentityMigrationTest extends PostgresTestCase
 {
@@ -22,8 +21,18 @@ final class IdentityMigrationTest extends PostgresTestCase
         if ($method === 'down') {
             // Les tables des domaines consommateurs référencent `technologies` et `users` ;
             // les retirer avant le down() de B05 pour que PostgreSQL puisse déposer la table parente.
-            DomainTables::dropAll();
-            foreach (['comment_revisions', 'proposal_revisions', 'help_request_revisions', 'resolutions', 'comments', 'proposals', 'request_technologies', 'help_requests'] as $dependent) {
+            foreach ([
+                ['capsules', 'capsules_source_request_id_foreign'],
+                ['verification_cases', 'verification_cases_help_request_id_foreign'],
+                ['capsule_version_technologies', 'capsule_version_technologies_technology_id_foreign'],
+                ['request_technologies', 'request_technologies_technology_id_foreign'],
+                ['user_technologies', 'user_technologies_technology_id_foreign'],
+            ] as [$table, $constraint]) {
+                if (Schema::hasTable($table)) {
+                    DB::statement("ALTER TABLE {$table} DROP CONSTRAINT IF EXISTS {$constraint}");
+                }
+            }
+            foreach (['request_reopenings', 'comment_revisions', 'proposal_revisions', 'help_request_revisions', 'resolutions', 'comments', 'proposals', 'request_technologies', 'help_requests'] as $dependent) {
                 Schema::dropIfExists($dependent);
             }
         }

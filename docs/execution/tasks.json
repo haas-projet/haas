@@ -255,7 +255,8 @@
       "refs": "AC09/AC10 ; RM01/RM02",
       "phase": "B",
       "execution_order": 21,
-      "status": "TODO"
+      "status": "IN_REVIEW",
+      "evidence": ["docs/quality/B19_RESOLUTIONS_20261011.md"]
     },
     {
       "id": "B20",

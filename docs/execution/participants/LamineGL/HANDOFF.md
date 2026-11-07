@@ -1,5 +1,15 @@
 # Reprise — communauté et entraide
 
+
+
+## 11 octobre 2026 — B19, CI complète reçue pour revue
+
+B19 **IN_REVIEW**, [PR #38](https://github.com/haas-projet/haas/pull/38) sur base temporaire [B18 #37](https://github.com/haas-projet/haas/pull/37). Commit applicatif `d5bb2a580e6b21e8230b84f8f85479997bbb69ec`, CI `38174008525` reçue dans les deux journaux individuels : **1155 tests / 12198 assertions par PHP 8.4/8.5, dont 632 / 7091 PostgreSQL complet**. PHPStan/Pint/Composer, 66 types, 710 empreintes et backend-ci réussis. [Preuves, commandes et incidents](../../../quality/B19_RESOLUTIONS_20261011.md). Le commit documentaire suivant doit recevoir sa CI exacte avant ready. B18 est ready, non intégré ; intégrer #37 avant #38. Revue humaine requise, aucune identité de Lamine inventée. Prochain B20 après coordination des prérequis ; aucun gate, frontend ou déploiement.
+
+## 11 octobre 2026 — B19, acceptation reçue localement
+
+B19 **IN_PROGRESS**, branche isolée `backend/communaute-entraide-b19-resolution` depuis B18 d4db146 (#37, ready après CI finale 38169301011, 991 / 9968 par PHP). Acceptation propriétaire/versionnée, résolution active unique, contexte déclaré, audit/outbox atomiques et notification après commit reçus. Tests finaux 831 / 9415 distincts : 523 / 5107 sans SQL et 308 / 4308 PostgreSQL ciblés B17–B19. Concurrence réelle et erreurs corrigées dans [B19_RESOLUTIONS_20261011.md](../../../quality/B19_RESOLUTIONS_20261011.md). PHPStan/Pint/Composer/66 types et documents reçus ; suite SQL complète locale non exécutée, CI publiée à recevoir. Publication distincte sur base temporaire B18 avant revue humaine ; aucune intégration, identité de Lamine ou validation humaine inventée. Prochain : recevoir CI B19, puis B20 après coordination des prérequis. Aucun gate, frontend ou déploiement.
+
 ## 11 octobre 2026 — B18, CI complète reçue pour revue
 
 B18 **IN_REVIEW**, [PR #37](https://github.com/haas-projet/haas/pull/37) vers main d0d47c5. Commits préservés : socle 865ba827e732f3bfb15b2a86b3f1972e1296d3d6, API 122bf5665b91561c92cbdf85f0a0b36ae3fcc0ed. CI 38167657147 complète reçue sous PHP 8.4/8.5 : **991 tests / 9968 assertions par version**, dont 515 / 5117 PostgreSQL. PHPStan/Pint/Composer, 62 types et 689 empreintes réussis. Preuves exactes et incidents conservés dans [B18_PROPOSALS_20261011.md](../../../quality/B18_PROPOSALS_20261011.md). La CI du commit documentaire final reste à recevoir avant passage de la PR à ready. Revue humaine et intégration requises ; assistance Codex, aucune identité ou signature de Lamine inventée. Prochain B19 après intégration. Aucun gate, frontend ou déploiement.

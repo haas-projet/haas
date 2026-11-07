@@ -198,6 +198,7 @@ export type projects_Project = { readonly "id": string; readonly "owner": { read
 export type projects_ProjectCreateInput = { readonly "name"?: string | null; readonly "summary"?: string | null; readonly "description"?: string | null; readonly "project_stage"?: "idea" | "prototype" | "in_development" | "launched"; readonly "help_sought"?: string | null; readonly "demo_url"?: string | null; readonly "repository_url"?: string | null; readonly "technology_ids"?: ReadonlyArray<string>; };
 
 export type projects_ProjectUpdateInput = { readonly "lock_version": number; readonly "name"?: string | null; readonly "summary"?: string | null; readonly "description"?: string | null; readonly "project_stage"?: "idea" | "prototype" | "in_development" | "launched"; readonly "help_sought"?: string | null; readonly "demo_url"?: string | null; readonly "repository_url"?: string | null; readonly "technology_ids"?: ReadonlyArray<string>; };
+
 export type verification_cases_ContributionRole = "diagnosis" | "fix" | "documentation" | "test" | "case";
 
 export type verification_cases_CreateVerificationCaseInput = { readonly "parent": verification_cases_VerificationCaseParent; readonly "body": verification_cases_VerificationCaseBodyInput; };

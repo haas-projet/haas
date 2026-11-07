@@ -81,7 +81,7 @@ final class ConcurrentLabRunTest extends PostgresTestCase
             // Barrière : pose un verrou avisé transactionnel que les deux
             // processus devront prendre après leur SELECT pg_advisory_xact_lock
             // via leur transaction d'idempotence. Même valeur de verrou que
-            // StartLabRunService::ADVISORY_LOCK.
+            // LabCapacityGuard::ADVISORY_LOCK (extrait de StartLabRunService en BV205).
             DB::beginTransaction();
             DB::select('SELECT pg_advisory_xact_lock(554478)');
             foreach ($streams as $index => $stream) {

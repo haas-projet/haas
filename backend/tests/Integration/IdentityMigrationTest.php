@@ -24,7 +24,7 @@ final class IdentityMigrationTest extends PostgresTestCase
             foreach ([
                 ['capsules', 'capsules_source_request_id_foreign'],
                 ['verification_cases', 'verification_cases_help_request_id_foreign'],
-            ] as [$table, $constraint            ]) {
+            ] as [$table, $constraint]) {
                 if (Schema::hasTable($table)) {
                     DB::statement("ALTER TABLE {$table} DROP CONSTRAINT IF EXISTS {$constraint}");
                 }

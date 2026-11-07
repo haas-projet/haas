@@ -52,6 +52,7 @@ final class ApiExceptionRenderer
             $exception instanceof InvalidCredentials, $exception instanceof InvalidResetToken => 422,
             $exception instanceof ProfileUpdateRejected, $exception instanceof HelpRequestCreationRejected => 422,
             $exception instanceof HelpRequestVersionConflict, $exception instanceof ResolutionConflict, $exception instanceof CommentVersionConflict, $exception instanceof ProposalVersionConflict, $exception instanceof ProposalHistoryRejected, $exception instanceof ProjectVersionConflict => 409,
+            $exception instanceof HelpRequestVersionConflict, $exception instanceof ResolutionConflict, $exception instanceof CommentVersionConflict, $exception instanceof ProposalVersionConflict, $exception instanceof ProposalHistoryRejected => 409,
             $exception instanceof ProfileVersionConflict, $exception instanceof IdempotencyConflict, $exception instanceof AccountVersionConflict, $exception instanceof ModerationRejected => 409,
             $exception instanceof InactiveAccount => 403,
             $exception instanceof RegistrationUnavailable => 503,

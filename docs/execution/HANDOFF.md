@@ -31,6 +31,7 @@ BC01 **IN_PROGRESS** sur la branche isolée `backend/communaute-entraide-bc01-sc
 Inspecter le dépôt, préserver les fichiers/commits/saisies existants, lire ADR-006. Appliquer F18 : projets ouverts, offres consenties, décision propriétaire, fil et projection publique contrôlés. Nouvelle recette avant GO_FRONTEND ; ne pas prendre un ancien gate pour un accord sur ce périmètre. Systalink/Vercel inchangé.
 
 État historique : réception initiale ci-dessous.
+État courant : B01–B09, B11–B17, B32 et B38 intégrés dans main d0d47c5 (18 lots entiers). B18 IN_REVIEW, PR #37 ready : head d4db146 et CI finale 38169301011 reçue, 991 / 9968 par PHP 8.4/8.5. B19 IN_REVIEW, PR #38 sur base temporaire B18 : applicatif d5bb2a5, CI 38174008525 complète reçue, 1155 tests / 12198 assertions par PHP 8.4/8.5, dont 632 / 7091 PostgreSQL complet, 66 types et 710 empreintes. CI documentaire finale à recevoir avant ready. Huit PR sans conflit au dernier constat ; #29 → #30 → #33 → #34 et #37 → #38 dans leur ordre de prérequis. #35/#36 restent Draft (B26 partiel sans B33). Aucun avis humain ou merge simulé ; 122 lots et historiques conservés. Aucun gate, frontend ou déploiement. Voir B19_RESOLUTIONS_20261011.md et le suivi de Lamine ; entrées suivantes historiques.
 
 ## Reprise après préparation GitHub — 2026-10-01
 

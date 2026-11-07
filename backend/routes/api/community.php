@@ -13,7 +13,9 @@ use App\Http\Controllers\Collaboration\UpdateProposalController;
 use App\Http\Controllers\HelpRequests\CreateHelpRequestController;
 use App\Http\Controllers\HelpRequests\ListHelpRequestRevisionsController;
 use App\Http\Controllers\HelpRequests\ListHelpRequestsController;
+use App\Http\Controllers\HelpRequests\ListResolutionsController;
 use App\Http\Controllers\HelpRequests\PublishHelpRequestController;
+use App\Http\Controllers\HelpRequests\ReopenHelpRequestController;
 use App\Http\Controllers\HelpRequests\ResolveHelpRequestController;
 use App\Http\Controllers\HelpRequests\ShowHelpRequestController;
 use App\Http\Controllers\HelpRequests\ShowResolutionController;
@@ -30,6 +32,8 @@ Route::post('/requests/{id}/publish', PublishHelpRequestController::class)->wher
 Route::get('/requests/{id}/revisions', ListHelpRequestRevisionsController::class)->whereUuid('id')->name('requests.revisions');
 Route::post('/requests/{id}/resolve', ResolveHelpRequestController::class)->whereUuid('id')->middleware(['auth:sanctum', 'verified', 'throttle:30,1'])->name('requests.resolve');
 Route::get('/requests/{id}/resolution', ShowResolutionController::class)->whereUuid('id')->name('requests.resolution');
+Route::post('/requests/{id}/reopen', ReopenHelpRequestController::class)->whereUuid('id')->middleware(['auth:sanctum', 'verified', 'throttle:30,1'])->name('requests.reopen');
+Route::get('/requests/{id}/resolutions', ListResolutionsController::class)->whereUuid('id')->name('requests.resolutions');
 
 Route::get('/requests/{id}/comments', ListCommentsController::class)->whereUuid('id')->name('comments.index');
 Route::post('/requests/{id}/comments', CreateCommentController::class)->whereUuid('id')->middleware(['auth:sanctum', 'verified', 'throttle:30,1'])->name('comments.store');

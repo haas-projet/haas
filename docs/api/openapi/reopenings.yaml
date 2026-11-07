@@ -1,0 +1,188 @@
+paths:
+  /api/v1/requests/{id}/reopen:
+    post:
+      operationId: reopenHelpRequest
+      summary: Rouvrir sa demande résolue sans effacer son acceptation
+      description: >-
+        Auteur actuel actif vérifié seulement, aucun remplacement par un administrateur.
+        Session SPA, CSRF, clé UUID v4 et quota 30 requêtes/minute. JSON objet non vide,
+        champs et paramètres de requête inconnus refusés. lock_version entier JSON strict,
+        motif utile normalisé après contrôle du JSON brut (contrôles et secrets probables refusés).
+        Resolved vers Open, version parent +1 ; résolution active révoquée, attribution, contexte,
+        note et proposition Accepted conservés, sans édition ni incrément du contenu de proposition.
+        Les autres propositions restent inchangées. L'ancien contributeur masqué ou suspendu
+        ne retire pas le droit du propriétaire de rouvrir. Verrous comptes triés puis parent,
+        proposition et résolution ; relecture des droits, états, versions et appartenance.
+        Journal externe immuable, deux audits minimaux, intention et outbox dans la même transaction.
+        Même intention dans les 24 h, parent toujours Open à la version produite : même journal
+        sans doublon. Autre mutation du parent ou nouvelle clé sur état incompatible : 409.
+        Notification request.reopened au contributeur précédent sauf soi, livrée après commit,
+        générique, sans motif ou contenu. Aucun code, URL ou shell exécuté. Réponse no-store.
+        Le signal de provenance des capsules est un raccord distinct, absent de cette base B19.
+      security: [{ SessionCookie: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - $ref: '../../OPENAPI.yaml#/components/parameters/IdempotencyKey'
+        - $ref: './identity.yaml#/components/parameters/XsrfToken'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ReopeningInput' }
+      responses:
+        '200':
+          description: Fait de réouverture créé ou rejeu courant autorisé.
+          headers:
+            X-Request-ID: { $ref: '../../OPENAPI.yaml#/components/headers/RequestId' }
+            Cache-Control: { $ref: '../../OPENAPI.yaml#/components/headers/NoStore' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RequestReopeningDetail' }
+        '401': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '403': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '404': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '409':
+          $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure'
+          description: RESOURCE_CONFLICT pour état/version/binding incompatible ou rejeu après mutation ; IDEMPOTENCY_CONFLICT pour une autre charge avec la même clé.
+        '419': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '422': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '429': { $ref: '../../OPENAPI.yaml#/components/responses/RetryableFailure' }
+        '500': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '503': { $ref: '../../OPENAPI.yaml#/components/responses/RetryableFailure' }
+  /api/v1/requests/{id}/resolutions:
+    get:
+      operationId: listResolutionHistory
+      summary: Lire les acceptations passées et leurs réouvertures attribuées
+      description: >-
+        Demande actuellement visible, y compris depuis sa réouverture. Filtre chaque résolution
+        par visibilité courante de sa proposition, du contributeur et de l'acceptant avant total
+        et pagination. Proposition accepted liée au même parent, acceptant auteur courant du parent,
+        snapshot connu égal à la version de proposition ; NULL legacy conservé sans backfill.
+        Journal éventuel cohérent avec parent, résolution, acteur et date de révocation.
+        Conserve les résolutions révoquées valides et leur motif via le journal externe.
+        Ordre accepted_at puis UUID décroissant ; 20 éléments par page, maximum 50.
+        Une résolution legacy sans journal expose reopening=null ; contexte/version inconnus
+        restent null. request_lock_version est la version actuelle, alors que les versions avant
+        et après de reopening sont historiques. Rendu Markdown restreint, aucun contenu exécuté.
+        Cache-Control no-store. GET resolution reste la lecture active distincte, 404 après révocation.
+      security: [{}, { SessionCookie: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - $ref: '../../OPENAPI.yaml#/components/parameters/Page'
+        - $ref: '../../OPENAPI.yaml#/components/parameters/PerPage'
+      responses:
+        '200':
+          description: Historique autorisé ; une liste vide n'invente pas de résolution.
+          headers:
+            X-Request-ID: { $ref: '../../OPENAPI.yaml#/components/headers/RequestId' }
+            Cache-Control: { $ref: '../../OPENAPI.yaml#/components/headers/NoStore' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ResolutionHistoryPage' }
+        '401': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '403': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '404': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '422': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '500': { $ref: '../../OPENAPI.yaml#/components/responses/ApiFailure' }
+        '503': { $ref: '../../OPENAPI.yaml#/components/responses/RetryableFailure' }
+components:
+  schemas:
+    ReopeningInput:
+      type: object
+      additionalProperties: false
+      required: [lock_version, reason]
+      properties:
+        lock_version:
+          type: integer
+          minimum: 1
+          maximum: 2147483646
+          description: Version courante du parent, entier JSON strict, sans coercition.
+        reason:
+          $ref: './community.yaml#/components/schemas/ProposalDescriptionInput'
+          description: Motif utile de 20–4000 caractères Unicode après trim ; contrôles bruts, liens seuls et secrets probables refusés.
+    RequestReopening:
+      type: object
+      additionalProperties: false
+      required: [id, request_id, resolution_id, reopened_by, reason, reason_html, reopened_at, request_version_before, request_version_after]
+      properties:
+        id: { type: string, format: uuid }
+        request_id: { type: string, format: uuid }
+        resolution_id: { type: string, format: uuid }
+        reopened_by:
+          type: object
+          additionalProperties: false
+          required: [id, handle]
+          properties:
+            id: { type: string, format: uuid }
+            handle: { type: string }
+        reason: { type: string, minLength: 20, maxLength: 4000 }
+        reason_html: { $ref: './community.yaml#/components/schemas/ProposalRenderedDescription' }
+        reopened_at: { type: string, format: date-time }
+        request_version_before: { type: integer, minimum: 1, maximum: 2147483646 }
+        request_version_after:
+          type: integer
+          minimum: 2
+          maximum: 2147483647
+          description: Version historique produite par cette réouverture, pas la version actuelle substituée.
+    RequestReopeningDetail:
+      type: object
+      additionalProperties: false
+      required: [data]
+      properties:
+        data: { $ref: '#/components/schemas/RequestReopening' }
+    ResolutionHistoryEntry:
+      type: object
+      additionalProperties: false
+      required: [id, request_id, proposal_id, proposal_version, environment, validation_note, validation_note_html, accepted_by, self_resolution, accepted_at, revoked_at, request_lock_version, reopening]
+      properties:
+        id: { type: string, format: uuid }
+        request_id: { type: string, format: uuid }
+        proposal_id: { type: string, format: uuid }
+        proposal_version:
+          type: [integer, 'null']
+          minimum: 1
+          maximum: 2147483647
+          description: Snapshot historique capturé ; null si inconnu, sans substitution de la version actuelle.
+        environment: { type: [string, 'null'], maxLength: 255 }
+        validation_note:
+          type: string
+          description: Note historique conservée, sans imposer les bornes modernes aux données anciennes.
+        validation_note_html: { $ref: './community.yaml#/components/schemas/ProposalRenderedDescription' }
+        accepted_by:
+          type: object
+          additionalProperties: false
+          required: [id, handle]
+          properties:
+            id: { type: string, format: uuid }
+            handle: { type: string }
+        self_resolution: { type: boolean }
+        accepted_at: { type: string, format: date-time }
+        revoked_at:
+          type: [string, 'null']
+          format: date-time
+          description: Date de révocation conservée, null si cette acceptation est encore active.
+        request_lock_version:
+          type: integer
+          minimum: 1
+          maximum: 2147483647
+          description: Version actuelle du parent, distincte des versions historiques du journal.
+        reopening:
+          oneOf:
+            - { $ref: '#/components/schemas/RequestReopening' }
+            - { type: 'null' }
+          description: Journal B20 si capturé ; null pour une révocation ancienne sans fait enregistré.
+    ResolutionHistoryPage:
+      type: object
+      additionalProperties: false
+      required: [data, meta]
+      properties:
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/ResolutionHistoryEntry' }
+        meta: { $ref: '../../OPENAPI.yaml#/components/schemas/PaginationMeta' }

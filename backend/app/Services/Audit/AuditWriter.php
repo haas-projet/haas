@@ -4,12 +4,14 @@ namespace App\Services\Audit;
 
 use App\Data\Audit\HelpRequestRevisionData;
 use App\Data\Audit\ProfileRevisionData;
+use App\Enums\Collaboration\ProposalState;
 use App\Enums\HelpRequests\HelpRequestState;
 use App\Exceptions\Audit\AuditStorageFailed;
 use App\Models\Comment;
 use App\Models\HelpRequest;
 use App\Models\Profile;
 use App\Models\Proposal;
+use App\Models\Resolution;
 use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\Model;
@@ -110,6 +112,34 @@ final class AuditWriter
                 'revision' => $revision, 'action' => 'help_request.started',
                 'metadata' => json_encode(['request_version' => $request->lock_version, 'proposal_id' => $proposal->id], JSON_THROW_ON_ERROR), 'occurred_at' => now()->utc(),
             ]);
+        } catch (QueryException) {
+            throw new AuditStorageFailed('Échec du stockage de la révision.');
+        }
+    }
+
+    public function helpRequestResolved(User $actor, HelpRequest $request, Proposal $proposal, Resolution $resolution): void
+    {
+        $this->requireTransaction($actor, $request);
+        $this->requireTransaction($actor, $proposal);
+        $this->requireTransaction($actor, $resolution);
+        Gate::forUser($actor)->authorize('resolve', $request);
+        if ($request->author_id !== $actor->id || $request->state !== HelpRequestState::Resolved
+            || $proposal->request_id !== $request->id || $proposal->state !== ProposalState::Accepted
+            || $resolution->request_id !== $request->id || $resolution->proposal_id !== $proposal->id
+            || $resolution->accepted_by !== $actor->id || $resolution->revoked_at !== null
+            || $resolution->proposal_version !== $proposal->lock_version) {
+            throw new AuthorizationException;
+        }
+        try {
+            $metadata = json_encode(['resolution_id' => $resolution->id, 'proposal_id' => $proposal->id,
+                'proposal_version' => $proposal->lock_version, 'request_version' => $request->lock_version,
+                'self_resolution' => $proposal->author_id === $actor->id], JSON_THROW_ON_ERROR);
+            $revision = (int) DB::table('content_revisions')->where('resource_type', 'help_request')->where('resource_id', $request->id)->max('revision') + 1;
+            foreach ([['help_request', $request->id, $revision, 'help_request.resolved'], ['resolution', $resolution->id, 1, 'resolution.accepted']] as [$type, $id, $version, $action]) {
+                DB::table('content_revisions')->insert(['id' => (string) Str::uuid(), 'actor_id' => $actor->id,
+                    'resource_type' => $type, 'resource_id' => $id, 'revision' => $version, 'action' => $action,
+                    'metadata' => $metadata, 'occurred_at' => now()->utc()]);
+            }
         } catch (QueryException) {
             throw new AuditStorageFailed('Échec du stockage de la révision.');
         }

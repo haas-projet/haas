@@ -3,7 +3,6 @@
 namespace Tests\Integration;
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -25,11 +24,9 @@ final class IdentityMigrationTest extends PostgresTestCase
             foreach ([
                 ['capsules', 'capsules_source_request_id_foreign'],
                 ['verification_cases', 'verification_cases_help_request_id_foreign'],
-            ] as [$table, $constraint]) {
+            ] as [$table, $constraint            ]) {
                 if (Schema::hasTable($table)) {
-                    Schema::table($table, static function (Blueprint $blueprint) use ($constraint): void {
-                        $blueprint->dropForeign($constraint);
-                    });
+                    DB::statement("ALTER TABLE {$table} DROP CONSTRAINT IF EXISTS {$constraint}");
                 }
             }
             foreach (['request_reopenings', 'comment_revisions', 'proposal_revisions', 'help_request_revisions', 'resolutions', 'comments', 'proposals', 'request_technologies', 'help_requests'] as $dependent) {

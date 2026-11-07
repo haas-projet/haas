@@ -6,6 +6,8 @@ info:
 servers:
   - url: http://localhost:8000
 x-haas-domain-fragments:
+  projects:
+    $ref: './api/openapi/projects.yaml'
   lab:
     $ref: './api/openapi/lab.yaml'
   identity:
@@ -17,6 +19,10 @@ x-haas-domain-fragments:
   comparisons:
     $ref: './api/openapi/comparisons.yaml'
 paths:
+  '/api/v1/projects':
+    $ref: './api/openapi/projects.yaml#/paths/~1api~1v1~1projects'
+  '/api/v1/projects/{id}':
+    $ref: './api/openapi/projects.yaml#/paths/~1api~1v1~1projects~1{id}'
   '/api/v1/versions/{id}/lab-definition':
     $ref: './api/openapi/lab.yaml#/paths/~1api~1v1~1versions~1{id}~1lab-definition'
   '/api/v1/versions/{id}/comparison-profiles':

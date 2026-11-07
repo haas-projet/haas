@@ -32,6 +32,12 @@ class HelpRequest extends Model
         return $this->belongsTo(User::class, 'author_id');
     }
 
+    /** @return BelongsTo<Project, $this> */
+    public function project(): BelongsTo
+    {
+        return $this->belongsTo(Project::class, 'project_id');
+    }
+
     /** @return BelongsToMany<Technology, $this> */
     public function technologies(): BelongsToMany
     {

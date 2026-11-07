@@ -1,0 +1,482 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "HAAS — Projets",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/api/v1/projects": {
+      "post": {
+        "operationId": "createProjectDraft",
+        "summary": "Créer son brouillon de projet",
+        "description": "Membre actif et vérifié, session/CSRF. Auteur, UUID, version1 et état draft fixés par le serveur. Un brouillon peut rester incomplet, sans texte ni publication inventés. Seuls les champs documentés dans un objet JSON sont acceptés ; aucun filtre query. Technologie du référentiel, zéro à cinq UUID distincts insensibles à la casse. Les textes sont validés avant trim Unicode ; les liens ne sont pas ouverts. Projet, pivot, audit minimal et intention atomiques. Rejeu : droits, visibilité et version actuels recontrôlés ; aucune ancienne copie privée retournée. Cache-Control no-store.",
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "UUID v4 conservé pour relancer la même intention."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectCreateInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Projet de son propriétaire, sans champ privé de modération",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Project"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Session requise"
+          },
+          "403": {
+            "description": "Compte inéligible ou action non autorisée"
+          },
+          "404": {
+            "description": "Projet inaccessible"
+          },
+          "409": {
+            "description": "Version obsolète ou clé utilisée pour une autre intention"
+          },
+          "419": {
+            "description": "CSRF invalide"
+          },
+          "422": {
+            "description": "Champ, lien, technologie, forme JSON ou clé invalide"
+          },
+          "429": {
+            "description": "Limite de commandes atteinte"
+          },
+          "500": {
+            "description": "Erreur interne sans données ni bindings privés"
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{id}": {
+      "patch": {
+        "operationId": "updateOwnProject",
+        "summary": "Modifier sa fiche projet",
+        "description": "Propriétaire actif/vérifié seul, aucun remplacement par un admin. Projet masqué inaccessible, archivé non modifiable. lock_version entier JSON1..2147483646 et au moins un champ fourni. Omission conserve le champ, null efface un texte facultatif, technology_ids=[] retire la sélection du brouillon. Phase déclarée et publication distinctes : PATCH ne publie jamais. La fiche publiée composée reste complète et conserve au moins une technologie. Verrous acteur puis projet, référentiel partagé ; conflit409 sans écriture. Audit privé sans contenus ni URLs, intention idempotente et pivot atomiques. Les textes JSON sont à afficher comme texte, jamais comme HTML.",
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "UUID v4 conservé pour relancer la même intention."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectUpdateInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Projet de son propriétaire, sans champ privé de modération",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Project"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Session requise"
+          },
+          "403": {
+            "description": "Compte inéligible ou action non autorisée"
+          },
+          "404": {
+            "description": "Projet inaccessible"
+          },
+          "409": {
+            "description": "Version obsolète ou clé utilisée pour une autre intention"
+          },
+          "419": {
+            "description": "CSRF invalide"
+          },
+          "422": {
+            "description": "Champ, lien, technologie, forme JSON ou clé invalide"
+          },
+          "429": {
+            "description": "Limite de commandes atteinte"
+          },
+          "500": {
+            "description": "Erreur interne sans données ni bindings privés"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "SessionCookie": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "haas_session"
+      }
+    },
+    "schemas": {
+      "ProjectCreateInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 3,
+            "maxLength": 80
+          },
+          "summary": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 30,
+            "maxLength": 240
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 80,
+            "maxLength": 4000
+          },
+          "project_stage": {
+            "type": "string",
+            "enum": [
+              "idea",
+              "prototype",
+              "in_development",
+              "launched"
+            ]
+          },
+          "help_sought": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "demo_url": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uri",
+            "maxLength": 2048,
+            "description": "HTTPS valide, sans identifiants ni contrôles ; lien inerte."
+          },
+          "repository_url": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uri",
+            "maxLength": 2048,
+            "description": "HTTPS valide, sans identifiants ni contrôles ; aucun clone ou fetch serveur."
+          },
+          "technology_ids": {
+            "type": "array",
+            "maxItems": 5,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        }
+      },
+      "ProjectUpdateInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "lock_version"
+        ],
+        "minProperties": 2,
+        "properties": {
+          "lock_version": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483646
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 3,
+            "maxLength": 80
+          },
+          "summary": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 30,
+            "maxLength": 240
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 80,
+            "maxLength": 4000
+          },
+          "project_stage": {
+            "type": "string",
+            "enum": [
+              "idea",
+              "prototype",
+              "in_development",
+              "launched"
+            ]
+          },
+          "help_sought": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "demo_url": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uri",
+            "maxLength": 2048,
+            "description": "HTTPS valide, sans identifiants ni contrôles ; lien inerte."
+          },
+          "repository_url": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uri",
+            "maxLength": 2048,
+            "description": "HTTPS valide, sans identifiants ni contrôles ; aucun clone ou fetch serveur."
+          },
+          "technology_ids": {
+            "type": "array",
+            "maxItems": 5,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        }
+      },
+      "Project": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "owner",
+          "name",
+          "summary",
+          "description",
+          "project_stage",
+          "publication_state",
+          "help_sought",
+          "demo_url",
+          "repository_url",
+          "lock_version",
+          "published_at",
+          "technologies",
+          "created_at",
+          "updated_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "owner": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "handle"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "handle": {
+                "$ref": "./identity.yaml#/components/schemas/Handle"
+              }
+            }
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 3,
+            "maxLength": 80
+          },
+          "summary": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 30,
+            "maxLength": 240
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 80,
+            "maxLength": 4000
+          },
+          "project_stage": {
+            "type": "string",
+            "enum": [
+              "idea",
+              "prototype",
+              "in_development",
+              "launched"
+            ]
+          },
+          "publication_state": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "published",
+              "archived"
+            ]
+          },
+          "help_sought": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "demo_url": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uri",
+            "maxLength": 2048,
+            "description": "HTTPS valide, sans identifiants ni contrôles ; lien inerte."
+          },
+          "repository_url": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uri",
+            "maxLength": 2048,
+            "description": "HTTPS valide, sans identifiants ni contrôles ; aucun clone ou fetch serveur."
+          },
+          "lock_version": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "published_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "technologies": {
+            "type": "array",
+            "maxItems": 5,
+            "items": {
+              "$ref": "./profiles.yaml#/components/schemas/Technology"
+            }
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    }
+  }
+}

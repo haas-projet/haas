@@ -162,3 +162,13 @@ Codex a préparé le schéma additive dans un worktree isolé ; un agent a impl�
 Code `f2af47377bfc54e0c4bd35be5d6ae3ebd306d8f2`, [CI 38177740506](https://github.com/haas-projet/haas/actions/runs/38177740506) reçue dans chacun des deux journaux PHP 8.4/8.5 : **530/5167 hors SQL + 691/7493 Integration = 1221 tests / 12660 assertions par PHP**, 66 types et 722 empreintes, trois jobs réussis. PostgreSQL local complet reçu au même code, 691/7493, zéro erreur/échec/skip. Les anciens ciblés ne sont pas additionnés à la suite complète.
 
 Codex a lu les deux jobs individuels, vérifié le JUnit local et consolidé les preuves sans modifier le code backend testé. BC01 **IN_REVIEW** pour son seul schéma ; PR #39 sur base temporaire B19 #38 après B18 #37. Les commandes projets, l’annuaire et les offres restent des lots distincts. Revue humaine et intégration encore nécessaires. Le commit documentaire suivant doit recevoir sa CI exacte avant toute qualification de ce nouveau SHA ou passage de la PR à ready. Aucun BACKEND_GATE, GO_FRONTEND ou GO_PRODUCTION.
+
+## 12 octobre 2026 — BC02, commandes projets
+
+Codex a implémenté et contrôlé les deux commandes dans un worktree isolé. [Commandes, contre-épreuves et incidents](quality/BC02_PROJECT_COMMANDS_20261012.md). Tests ciblés, suites générales et statiques réellement reçus ; suite SQL complète et CI encore attendues. Aucun avis humain attribué à Lamine ni dépendance ajoutée. Frontend et déploiement non livrés par ce lot.
+
+## 12 octobre 2026 — Réception complète BC02
+
+Code `7d0d569cb0f5f13ac1962949957b096cf1405df7`, [CI 38195772198](https://github.com/haas-projet/haas/actions/runs/38195772198) reçue dans chacun des deux journaux PHP 8.4/8.5 : **558/5276 hors SQL + 733/7848 Integration = 1291 tests / 13124 assertions par PHP**, 69 types et 747 empreintes, trois jobs réussis. PostgreSQL local complet reçu au même code, 733/7848, zéro erreur/échec/skip. Les anciens ciblés ne sont pas additionnés à la suite complète.
+
+Codex a lu les deux jobs individuels, vérifié le JUnit local et consolidé les preuves sans modifier le code backend testé. BC02 **IN_REVIEW**, PR #40 sur base temporaire BC01 #39, après B18 #37 et B19 #38. Création et édition des projets reçues ; publication, historique public, catalogue, archivage et liens de demandes restent BC03/BC04. Revue humaine et intégration nécessaires. Le commit documentaire suivant doit recevoir sa CI exacte avant toute qualification de ce nouveau SHA ou passage de la PR à ready. Aucun BACKEND_GATE, GO_FRONTEND ou GO_PRODUCTION.

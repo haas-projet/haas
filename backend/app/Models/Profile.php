@@ -15,7 +15,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property HelpAvailability $help_availability
  * @property string|null $contribution_interests
  * @property CarbonImmutable|null $availability_updated_at
- * @property array<int, string>|null $preferred_help_categories
  */
 #[Fillable(['bio', 'country', 'primary_language', 'github_url'])]
 class Profile extends Model
@@ -37,8 +36,7 @@ class Profile extends Model
     protected function casts(): array
     {
         return ['lock_version' => 'integer', 'hidden_at' => 'immutable_datetime', 'directory_visible' => 'boolean',
-            'help_availability' => HelpAvailability::class, 'preferred_help_categories' => 'array',
-            'availability_updated_at' => 'immutable_datetime'];
+            'help_availability' => HelpAvailability::class, 'availability_updated_at' => 'immutable_datetime'];
     }
 
     /** @return BelongsTo<User, $this> */

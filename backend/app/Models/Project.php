@@ -24,8 +24,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string|null $help_sought
  * @property string|null $demo_url
  * @property string|null $repository_url
- * @property bool $help_open
- * @property array<int, string>|null $help_categories
  * @property string|null $moderation_reason
  * @property CarbonImmutable|null $published_at
  * @property CarbonImmutable|null $hidden_at
@@ -58,17 +56,10 @@ class Project extends Model
         return $this->hasMany(HelpRequest::class, 'project_id');
     }
 
-    /** @return HasMany<HelpOffer, $this> */
-    public function helpOffers(): HasMany
-    {
-        return $this->hasMany(HelpOffer::class);
-    }
-
     /** @return array<string, string> */
     protected function casts(): array
     {
         return ['project_stage' => ProjectStage::class, 'publication_state' => ProjectPublicationState::class,
-            'lock_version' => 'integer', 'help_open' => 'boolean', 'help_categories' => 'array',
-            'published_at' => 'immutable_datetime', 'hidden_at' => 'immutable_datetime'];
+            'lock_version' => 'integer', 'published_at' => 'immutable_datetime', 'hidden_at' => 'immutable_datetime'];
     }
 }

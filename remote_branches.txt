@@ -1,0 +1,5 @@
+  origin/backend/capsules-laboratoire
+  origin/backend/communaute-entraide
+  origin/backend/integration-p0-20261011
+  origin/backend/socle-auth
+  origin/main

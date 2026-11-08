@@ -1,11 +1,5 @@
 # Reprise de session
 
-## 7 novembre 2026 — Prochain lot BH01
-
-Nettoyage distant effectué après fusion de toutes les PR : seules les branches permanentes et les branches de travail non fusionnées restent sur GitHub. Ne pas supprimer les worktrees locaux sans vérifier leur contenu ; `ci-pr-stack-repair` contient des conflits non résolus.
-
-Branche active : `backend/help-offers-bh01-schema`, dérivée de `origin/main` `7c3b445`. Fichiers BH01 : enums `HelpOfferState`/`HelpContributionCategory`, modèle `HelpOffer`, migration additive des projets/profils/offres et test de schéma PostgreSQL. `php -l` et Pint passent. Le test ciblé PHPUnit est bloqué par `TestDatabaseGuard` faute de base/rôle local dédiés ; il n’est pas compté comme réussi. Prochaine action : lancer le test sur PostgreSQL autorisé, corriger les erreurs réelles, puis poursuivre BH02.
-
 ## 12 octobre 2026 — Réception complète B20
 
 Code `11bf46a53d7e3faaac1615edc957c0daaaaafbd4`, [CI 38252341878](https://github.com/haas-projet/haas/actions/runs/38252341878) reçue dans chacun des deux journaux PHP 8.4/8.5 : **542/5375 hors SQL + 719/8121 Integration = 1261 tests / 13496 assertions par PHP**, 71 types et 738 empreintes, trois jobs réussis. PostgreSQL local complet reçu au même code, 719/8121, zéro erreur/échec/skip. Les anciens ciblés ne sont pas additionnés à la suite complète.

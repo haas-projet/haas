@@ -1,5 +1,11 @@
 # Suivi du dépôt HAAS
 
+## 7 novembre 2026 — BH01 amorcé après fusion des PR
+
+Les PR ouvertes sont toutes fusionnées ; les six branches distantes de têtes de PR fusionnées ont été supprimées. Les worktrees locaux sont conservés, notamment celui contenant encore des conflits non résolus. Une nouvelle branche `backend/help-offers-bh01-schema` part de `origin/main` (`7c3b445`).
+
+BH01 ajoute le socle des coups de main : états/catégories typés, ouverture volontaire d’un projet, préférences facultatives, table `help_offers`, index pending unique et contraintes de cohérence. Les tests PostgreSQL ciblés sont écrits mais **NON EXÉCUTÉS avec résultat** : l’environnement local ne fournit pas une base dédiée `haas_*_test` avec le rôle `haas_test`. Syntaxe PHP et Pint sont exécutés ; aucune réception, revue humaine, BACKEND_GATE ou frontend n’est déclaré.
+
 ## 12 octobre 2026 — Réception complète B20
 
 Code `11bf46a53d7e3faaac1615edc957c0daaaaafbd4`, [CI 38252341878](https://github.com/haas-projet/haas/actions/runs/38252341878) reçue dans chacun des deux journaux PHP 8.4/8.5 : **542/5375 hors SQL + 719/8121 Integration = 1261 tests / 13496 assertions par PHP**, 71 types et 738 empreintes, trois jobs réussis. PostgreSQL local complet reçu au même code, 719/8121, zéro erreur/échec/skip. Les anciens ciblés ne sont pas additionnés à la suite complète.
